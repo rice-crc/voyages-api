@@ -1,0 +1,47 @@
+---
+version: "3.7"
+
+services:
+  voyagesapi-mysql:
+    image: "mariadb:latest"
+    container_name: "voyagesapi-mysql"
+    hostname: "voyagesapi-mysql"
+    restart: "on-failure"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "mysql_volume:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: "voyages"
+
+  voyagesapi-django:
+    image: "voyagesapi-django"
+    container_name: "voyagesapi-django"
+    hostname: "voyagesapi-django"
+    restart: "on-failure"
+    depends_on:
+      - "voyagesapi-mysql"
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./src/:/srv/voyagesapi"
+    build:
+      context: "."
+      dockerfile: "./docker/django/Dockerfile"
+
+  voyagesapi-adminer:
+    image: "adminer:latest"
+    container_name: "voyagesapi-adminer"
+    hostname: "voyagesapi-adminer"
+    restart: "on-failure"
+    depends_on:
+      - "voyagesapi-mysql"
+    ports:
+      - "8080:8080"
+
+networks:
+  default:
+    name: voyagesapi
+
+volumes:
+  mysql_volume: {}

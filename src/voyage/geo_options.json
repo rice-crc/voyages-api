@@ -1,0 +1,24 @@
+{"id": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "ID"},
+	 "id": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Place SQL ID"},
+	 "place": {"type": "<class 'rest_framework.fields.CharField'>", "label": "Place Name"},
+	 "longitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Place Longitude"},
+	 "latitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Place Latitude"},
+	 "value": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Place Code"},
+	 "show_on_main_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show place on map"},
+	 "show_on_voyage_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show place on voyage map"},
+
+	 "region__id": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Region SQL ID"},
+	 "region__region": {"type": "<class 'rest_framework.fields.CharField'>", "label": "Region Name"},
+	 "region__longitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Region Longitude"},
+	 "region__latitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Region Latitude"},
+	 "region__value": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Region Code"},
+	 "region__show_on_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show region on map"},
+	 "region__show_on_main_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show region on main map"},
+	 
+	 "region__broad_region__id": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Broad Region SQL ID"},
+	 "region__broad_region__broad_region": {"type": "<class 'rest_framework.fields.CharField'>", "label": "Broad Region Name"},
+	 "region__broad_region__longitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Broad Region Longitude"},
+	 "region__broad_region__latitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Broad Region Latitude"},
+	 "region__broad_region__value": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Broad Region Code"},
+	 "region__broad_region__show_on_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show broad region on map"}
+}

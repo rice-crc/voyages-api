@@ -37,12 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'voyage',
-    'common',
+	'voyage',
     'assessment',
     'past',
     'rest_framework'
 ]
+
+
 
 #DRF settings
 #via https://www.django-rest-framework.org/api-guide/metadata/#setting-the-metadata-scheme

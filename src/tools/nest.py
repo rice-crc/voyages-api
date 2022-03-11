@@ -52,7 +52,12 @@ def addlevel(thisdict,keychain,payload):
 			thisdict[thiskey]={}
 		thisdict[thiskey]=addlevel(thisdict[thiskey],keychain,payload)
 	else:
-		thisdict[thiskey]=payload
+		if thiskey not in thisdict:
+			thisdict[thiskey]=payload
+		else:
+			if type(payload)==dict:
+				for p in payload:
+					thisdict[thiskey][p]=payload[p]
 	return thisdict
 
 ##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES

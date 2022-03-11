@@ -18,13 +18,18 @@ from tools.nest import *
 from tools.reqs import *
 import collections
 
+
+d=open('past/past_options.json','r')
+past_options=(json.loads(d.read()))
+d.close()
+
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class EnslavedList(generics.GenericAPIView):
 	serializer_class=EnslavedSerializer
 	def options(self,request):
-		schema=options_handler(self,request,auto='True')
-		return JsonResponse(schema,safe=False)
+		schema=options_handler(self,request,past_options)
+		return JsonResponse(schema)
 	def get(self,request):
 		times=[]
 		labels=[]

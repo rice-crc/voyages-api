@@ -21,13 +21,13 @@ host:~/Projects/voyagesapi$ docker-compose up -d --build
 Create the database.
 
 ```bash
-host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages -e "create database voyages"
+host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages -e "create database voyagesapi"
 ```
 
 Import the database dump to MySQL.
 
 ```bash
-host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages voyages < data/voyagesapi.sql
+host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages voyagesapi < data/voyagesapi.sql
 ```
 
 View container logs.

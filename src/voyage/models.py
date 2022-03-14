@@ -27,7 +27,7 @@ class BroadRegion(models.Model):
 	value = models.IntegerField("Numeric code", unique=True)
 	show_on_map = models.BooleanField(default=True)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.broad_region
 
 	class Meta:
@@ -64,7 +64,7 @@ class Region(models.Model):
 		verbose_name_plural = "Regions"
 		ordering = ['value']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.region
 
 
@@ -95,7 +95,7 @@ class Place(models.Model):
 		verbose_name_plural = "Places (Ports or Locations)"
 		ordering = ['value']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.place
 
 
@@ -235,7 +235,7 @@ class VoyageShip(models.Model):
 							   related_name="voyage_name_ship",
 							   on_delete=models.CASCADE)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.ship_name if self.ship_name is not None else "None"
 
 	class Meta:
@@ -252,7 +252,7 @@ class VoyageShipOwner(models.Model):
 	class Meta:
 		verbose_name = "Ship Owner"
 		verbose_name_plural = "Ship Owners"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 
@@ -268,7 +268,7 @@ class VoyageShipOwnerConnection(models.Model):
 							   on_delete=models.CASCADE)
 	owner_order = models.IntegerField()
 
-	def __unicode__(self):
+	def __str__(self):
 		return "Ship owner:"
 
 
@@ -319,8 +319,8 @@ class OwnerOutcome(models.Model):
 	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
 
-	def __unicode__(self):
-		return self.label
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name='Owner Outcome'
@@ -382,7 +382,7 @@ class VoyageOutcome(models.Model):
 							   related_name="voyage_outcomes",
 							   on_delete=models.CASCADE)
 	
-	def __unicode__(self):
+	def __str__(self):
 		# TODO: We may want to change this.
 		#return "Outcome"
 		return '%d %d %d %d' %(
@@ -962,6 +962,9 @@ class VoyageDates(models.Model):
 							   related_name="voyage_name_dates",
 							   on_delete=models.CASCADE)
 	
+	def __str__(self):
+		return self.imp_arrival_at_port_of_dis
+	
 	@classmethod
 	def get_date_year(cls, value):
 		"""
@@ -1045,7 +1048,7 @@ class VoyageCaptain(models.Model):
 		verbose_name = "Captain"
 		verbose_name_plural = "Captains"
 		
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 
@@ -1068,7 +1071,7 @@ class VoyageCaptainConnection(models.Model):
 		verbose_name = "Voyage captain information"
 		verbose_name_plural = "Voyage captain information"
 
-	def __unicode__(self):
+	def __str__(self):
 		return "Captain: %d %s" % (self.captain_order, str(self.captain))
 
 
@@ -1751,7 +1754,7 @@ class VoyageSourcesType(models.Model):
 		verbose_name_plural = "Sources types"
 		ordering = ['group_id']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.group_name
 
 
@@ -1788,7 +1791,7 @@ class VoyageSources(models.Model):
 		verbose_name_plural = "Sources"
 		ordering = ['short_ref', 'full_ref']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.full_ref
 
 
@@ -1935,7 +1938,7 @@ class Voyage(models.Model):
 		verbose_name = "Voyage"
 		verbose_name_plural = "Voyages"
 
-	def __unicode__(self):
+	def __str__(self):
 		return "Voyage #%s" % str(self.voyage_id)
 
 

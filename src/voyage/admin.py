@@ -8,14 +8,12 @@ class BroadRegionAdmin(admin.ModelAdmin):
     search_fields = ['broad_region', 'value']
     list_editable = ['show_on_map']
 
-
 class RegionAdmin(admin.ModelAdmin):
     list_display = ('region', 'value', 'broad_region', 'show_on_map',
                     'show_on_main_map')
     list_display_links = ('region',)
     search_fields = ['region', 'value']
     list_editable = ['show_on_map', 'show_on_main_map']
-
 
 class PlaceAdmin(admin.ModelAdmin):
     list_display = ('place', 'value', 'region', 'longitude', 'latitude',
@@ -25,7 +23,6 @@ class PlaceAdmin(admin.ModelAdmin):
     ordering = ['value']
     list_editable = ['show_on_main_map', 'show_on_voyage_map']
 
-
 class VoyageCrewInline(admin.StackedInline):
 	model=VoyageCrew
 	max_num=1
@@ -34,6 +31,99 @@ class VoyageCrewInline(admin.StackedInline):
 class VoyageDatesInline(admin.StackedInline):
 	model = VoyageDates
 	max_num=1
+	classes = ['collapse']
+
+class VoyageSlavesNumbersInline(admin.StackedInline):
+	model=VoyageSlavesNumbers
+	classes = ['collapse']
+	max_num=1
+
+class ParticularOutcomeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=ParticularOutcome
+	search_fields=['name']
+	classes = ['collapse']
+
+class SlavesOutcomeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=SlavesOutcome
+	search_fields=['name']
+	classes = ['collapse']
+	
+class VesselCapturedOutcomeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=VesselCapturedOutcome
+	search_fields=['name']
+	classes = ['collapse']
+
+class OwnerOutcomeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=OwnerOutcome
+	search_fields=['name']
+	classes = ['collapse']
+
+class ResistanceAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=Resistance
+	search_fields=['name']
+	classes = ['collapse']
+
+##Autocomplete won't work on this
+##Until we update the voyages table to explicitly point at outcomes
+##Which I'm still unclear about why it wasn't done that way
+##But the number of selections on the outcome table is small enough
+##That we don't hit any performance issues here
+##So it can stay for now
+##Until I figure out what's going to break when I migrate that.
+##It is worth saying that I think it's currently broken
+##Insofar as you can apply more than one outcome entry to each voyage
+##But it doesn't appear that this has ever been done
+##which on this admin page results in multiple possible outcome fields being allowed
+class VoyageOutcomeInline(admin.StackedInline):
+	max_num = 0
+	classes = ['collapse']
+	model=VoyageOutcome
+
+class NationalityAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=Nationality
+	search_fields=['name']
+	classes = ['collapse']
+
+class TonTypeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=TonType
+	search_fields=['name']
+	classes = ['collapse']
+
+class RigOfVesselAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=RigOfVessel
+	search_fields=['name']
+	classes = ['collapse']
+
+
+class VoyageShipInline(admin.StackedInline):
+	model = VoyageShip
+	max_num = 1
+	autocomplete_fields=[
+		'nationality_ship',
+		'ton_type',
+		'rig_of_vessel',
+		'vessel_construction_place',
+		'vessel_construction_region',
+		'registered_place',
+		'registered_region',
+		'imputed_nationality'
+	]
 	classes = ['collapse']
 
 class VoyageItineraryInline(admin.StackedInline):
@@ -111,7 +201,6 @@ class VoyageOutcomeInline(admin.StackedInline):
 	model=VoyageOutcome
 	classes = ['collapse']
 
-
 class VoyageAdmin(admin.ModelAdmin):
 
 	inlines=(
@@ -121,13 +210,14 @@ class VoyageAdmin(admin.ModelAdmin):
 		VoyageShipOwnerConnectionInline,
 		VoyageCaptainConnectionInline,
 		VoyageCrewInline,
+		VoyageOutcomeInline,
+		VoyageShipInline,
+		VoyageSlavesNumbersInline
 	)
-	fields=['voyage_id','dataset',]
+	fields=['voyage_id','dataset','voyage_groupings','voyage_in_cd_rom']
 	list_display=('voyage_id',)
 	search_fields=('voyage_id',)
 	model=Voyage
-
-
 
 # Voyage (main section)
 admin.site.register(Voyage, VoyageAdmin)
@@ -137,8 +227,13 @@ admin.site.register(Region, RegionAdmin)
 admin.site.register(Place, PlaceAdmin)
 admin.site.register(VoyageCaptain, VoyageCaptainAdmin)
 admin.site.register(VoyageShipOwner, VoyageShipOwnerAdmin)
-
-
-
+admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
+admin.site.register(SlavesOutcome, SlavesOutcomeAdmin)
+admin.site.register(VesselCapturedOutcome, VesselCapturedOutcomeAdmin)
+admin.site.register(OwnerOutcome, OwnerOutcomeAdmin)
+admin.site.register(Resistance, ResistanceAdmin)
+admin.site.register(Nationality, NationalityAdmin)
+admin.site.register(TonType, TonTypeAdmin)
+admin.site.register(RigOfVessel, RigOfVesselAdmin)
 
 

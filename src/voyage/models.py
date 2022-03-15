@@ -107,6 +107,8 @@ class VoyageGroupings(models.Model):
 	"""
 	name = models.CharField(max_length=30)
 	value = models.IntegerField()
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name = "Grouping for estimating imputed slaves"
@@ -120,6 +122,8 @@ class Nationality(models.Model):
 	"""
 	name = models.CharField(max_length=255)
 	value = models.IntegerField()
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name = "Nationality"
@@ -132,6 +136,8 @@ class TonType(models.Model):
 	"""
 	name = models.CharField(max_length=255)
 	value = models.IntegerField()
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name = "Type of tons"
@@ -145,6 +151,8 @@ class RigOfVessel(models.Model):
 	"""
 	name = models.CharField(max_length=25)
 	value = models.IntegerField()
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name = "Rig of vessel"
@@ -279,7 +287,8 @@ class ParticularOutcome(models.Model):
 	"""
 	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-
+	def __str__(self):
+		return self.name
 	class Meta:
 		ordering = ['value']
 		verbose_name = "Fate (particular outcome of voyage)"
@@ -292,7 +301,8 @@ class SlavesOutcome(models.Model):
 	"""
 	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-	
+	def __str__(self):
+		return self.name
 	class Meta:
 		verbose_name = "Captives Outcome"
 		verbose_name_plural = "Captives' Outcomes"
@@ -305,7 +315,8 @@ class VesselCapturedOutcome(models.Model):
 	"""
 	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-
+	def __str__(self):
+		return self.name
 	class Meta:
 		verbose_name = "Vessel Captured Outcome"
 		verbose_name_plural = "Vessel Captured Outcomes"
@@ -334,7 +345,8 @@ class Resistance(models.Model):
 	"""
 	name = models.CharField("Resistance label", max_length=255)
 	value = models.IntegerField("Code of resistance")
-
+	def __str__(self):
+		return self.name
 	class Meta:
 		verbose_name='Resistance'
 		verbose_name_plural='Resistances'
@@ -385,7 +397,7 @@ class VoyageOutcome(models.Model):
 	def __str__(self):
 		# TODO: We may want to change this.
 		#return "Outcome"
-		return '%d %d %d %d' %(
+		return '%s %s %s %s' %(
 				self.particular_outcome,
 				self.resistance,
 				self.outcome_slaves,

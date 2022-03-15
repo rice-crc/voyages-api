@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
@@ -18,6 +18,11 @@ from tools.timer import timer
 import collections
 import gc
 from .serializers import *
+from .forms import *
+from django.forms import modelformset_factory,inlineformset_factory
+
+
+
 
 d=open('voyage/voyage_options.json','r')
 voyage_options=(json.loads(d.read()))
@@ -198,3 +203,64 @@ class VoyagePlaceList(generics.GenericAPIView):
 			
 		t=timer('flattening',t,True)
 		return JsonResponse(outputs,safe=False)
+
+
+def manage_voyage(request,pk):
+	voyage_instance = get_object_or_404(Voyage, pk=pk)
+
+	# If this is a POST request then process the Form data
+	if request.method == 'POST':
+
+		# Create a form instance and populate it with data from the request (binding):
+		form = VoyageForm(request.POST)
+
+		# Check if the form is valid:
+		'''if form.is_valid():
+			# process the data in form.cleaned_data as required (here we just write it to the model due_back field)
+			book_instance.due_back = form.cleaned_data['renewal_date']
+			book_instance.save()
+
+			# redirect to a new URL:
+			return HttpResponseRedirect(reverse('all-borrowed') )'''
+
+	# If this is a GET (or any other method) create the default form.
+	else:
+		#proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+		form = VoyageForm()
+
+	context = {
+		'form': form,
+		'voyage_instance': voyage_instance,
+	}
+
+	return render(request, 'manage_voyages.html', context)
+
+def manage_voyage_inlineformset(request,pk):
+	voyage=Voyage.objects.get(pk=pk)
+	VoyageInlineFormset=inlineformset_factory(Voyage,VoyageDates,fields='__all__')
+
+	# If this is a POST request then process the Form data
+	if request.method == 'POST':
+
+		# Create a form instance and populate it with data from the request (binding):
+		form = VoyageForm(request.POST)
+
+		# Check if the form is valid:
+		'''if form.is_valid():
+			# process the data in form.cleaned_data as required (here we just write it to the model due_back field)
+			book_instance.due_back = form.cleaned_data['renewal_date']
+			book_instance.save()
+
+			# redirect to a new URL:
+			return HttpResponseRedirect(reverse('all-borrowed') )'''
+
+	# If this is a GET (or any other method) create the default form.
+	else:
+		#proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+		formset = VoyageInlineFormset(instance=voyage)
+
+	context = {
+		'formset': formset
+	}
+
+	return render(request, 'manage_voyages.html', context)

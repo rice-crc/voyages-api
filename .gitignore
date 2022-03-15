@@ -3,6 +3,8 @@ src/static/
 *.sql
 dbconf.json
 
+*__pycache__/
+
 instance/
 .webassets-cache
 

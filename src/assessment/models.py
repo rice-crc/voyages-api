@@ -4,7 +4,7 @@ from builtins import str
 
 from django.db import models
 from django.db.models import Prefetch
-from django.utils.translation import ugettext as _
+#from django.utils.translation import ugettext as _
 
 #from common.validators import date_csv_field_validator
 

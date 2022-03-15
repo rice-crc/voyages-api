@@ -4,8 +4,7 @@ from builtins import str
 
 from django.db import models
 from django.db.models import Prefetch
-from django.utils.translation import ugettext as _
-
+#from django.utils.translation import gettext_lazy as _
 
 # Voyage Regions and Places
 class BroadRegion(models.Model):
@@ -27,7 +26,7 @@ class BroadRegion(models.Model):
 	value = models.IntegerField("Numeric code", unique=True)
 	show_on_map = models.BooleanField(default=True)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.broad_region
 
 	class Meta:
@@ -64,7 +63,7 @@ class Region(models.Model):
 		verbose_name_plural = "Regions"
 		ordering = ['value']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.region
 
 
@@ -95,7 +94,7 @@ class Place(models.Model):
 		verbose_name_plural = "Places (Ports or Locations)"
 		ordering = ['value']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.place
 
 
@@ -107,6 +106,8 @@ class VoyageGroupings(models.Model):
 	"""
 	name = models.CharField(max_length=30)
 	value = models.IntegerField()
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name = "Grouping for estimating imputed slaves"
@@ -120,6 +121,8 @@ class Nationality(models.Model):
 	"""
 	name = models.CharField(max_length=255)
 	value = models.IntegerField()
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name = "Nationality"
@@ -132,6 +135,8 @@ class TonType(models.Model):
 	"""
 	name = models.CharField(max_length=255)
 	value = models.IntegerField()
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name = "Type of tons"
@@ -145,6 +150,8 @@ class RigOfVessel(models.Model):
 	"""
 	name = models.CharField(max_length=25)
 	value = models.IntegerField()
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name = "Rig of vessel"
@@ -235,7 +242,7 @@ class VoyageShip(models.Model):
 							   related_name="voyage_name_ship",
 							   on_delete=models.CASCADE)
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.ship_name if self.ship_name is not None else "None"
 
 	class Meta:
@@ -252,7 +259,7 @@ class VoyageShipOwner(models.Model):
 	class Meta:
 		verbose_name = "Ship Owner"
 		verbose_name_plural = "Ship Owners"
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 
@@ -268,7 +275,7 @@ class VoyageShipOwnerConnection(models.Model):
 							   on_delete=models.CASCADE)
 	owner_order = models.IntegerField()
 
-	def __unicode__(self):
+	def __str__(self):
 		return "Ship owner:"
 
 
@@ -279,7 +286,8 @@ class ParticularOutcome(models.Model):
 	"""
 	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-
+	def __str__(self):
+		return self.name
 	class Meta:
 		ordering = ['value']
 		verbose_name = "Fate (particular outcome of voyage)"
@@ -292,7 +300,8 @@ class SlavesOutcome(models.Model):
 	"""
 	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-	
+	def __str__(self):
+		return self.name
 	class Meta:
 		verbose_name = "Captives Outcome"
 		verbose_name_plural = "Captives' Outcomes"
@@ -305,7 +314,8 @@ class VesselCapturedOutcome(models.Model):
 	"""
 	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-
+	def __str__(self):
+		return self.name
 	class Meta:
 		verbose_name = "Vessel Captured Outcome"
 		verbose_name_plural = "Vessel Captured Outcomes"
@@ -319,8 +329,8 @@ class OwnerOutcome(models.Model):
 	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
 
-	def __unicode__(self):
-		return self.label
+	def __str__(self):
+		return self.name
 
 	class Meta:
 		verbose_name='Owner Outcome'
@@ -334,7 +344,8 @@ class Resistance(models.Model):
 	"""
 	name = models.CharField("Resistance label", max_length=255)
 	value = models.IntegerField("Code of resistance")
-
+	def __str__(self):
+		return self.name
 	class Meta:
 		verbose_name='Resistance'
 		verbose_name_plural='Resistances'
@@ -382,10 +393,10 @@ class VoyageOutcome(models.Model):
 							   related_name="voyage_outcomes",
 							   on_delete=models.CASCADE)
 	
-	def __unicode__(self):
+	def __str__(self):
 		# TODO: We may want to change this.
 		#return "Outcome"
-		return '%d %d %d %d' %(
+		return '%s %s %s %s' %(
 				self.particular_outcome,
 				self.resistance,
 				self.outcome_slaves,
@@ -962,6 +973,9 @@ class VoyageDates(models.Model):
 							   related_name="voyage_name_dates",
 							   on_delete=models.CASCADE)
 	
+	def __str__(self):
+		return self.imp_arrival_at_port_of_dis
+	
 	@classmethod
 	def get_date_year(cls, value):
 		"""
@@ -1045,7 +1059,7 @@ class VoyageCaptain(models.Model):
 		verbose_name = "Captain"
 		verbose_name_plural = "Captains"
 		
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 
@@ -1068,7 +1082,7 @@ class VoyageCaptainConnection(models.Model):
 		verbose_name = "Voyage captain information"
 		verbose_name_plural = "Voyage captain information"
 
-	def __unicode__(self):
+	def __str__(self):
 		return "Captain: %d %s" % (self.captain_order, str(self.captain))
 
 
@@ -1751,7 +1765,7 @@ class VoyageSourcesType(models.Model):
 		verbose_name_plural = "Sources types"
 		ordering = ['group_id']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.group_name
 
 
@@ -1774,11 +1788,11 @@ class VoyageSources(models.Model):
 	and etc to SOURCER
 	"""
 
-	short_ref = models.CharField(_('Short reference'),
+	short_ref = models.CharField('Short reference',
 								 max_length=255, null=False, blank=True,
 								 unique=True)
 	# Might contain HTML text formatting
-	full_ref = models.CharField(_('Full reference'),
+	full_ref = models.CharField('Full reference',
 								max_length=2550, null=False, blank=True)
 	source_type = models.ForeignKey('VoyageSourcesType', verbose_name="Source Type", null=False,
 									on_delete=models.CASCADE)
@@ -1788,7 +1802,7 @@ class VoyageSources(models.Model):
 		verbose_name_plural = "Sources"
 		ordering = ['short_ref', 'full_ref']
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.full_ref
 
 
@@ -1807,7 +1821,7 @@ class VoyageSourcesConnection(models.Model):
 	group = models.ForeignKey('Voyage', related_name="source_groups",
 							  on_delete=models.CASCADE)
 	#source_order = models.IntegerField()
-	text_ref = models.CharField(_('Text reference(citation)'),
+	text_ref = models.CharField('Text reference(citation)',
 								max_length=255, null=False, blank=True)
 
 
@@ -1935,7 +1949,7 @@ class Voyage(models.Model):
 		verbose_name = "Voyage"
 		verbose_name_plural = "Voyages"
 
-	def __unicode__(self):
+	def __str__(self):
 		return "Voyage #%s" % str(self.voyage_id)
 
 

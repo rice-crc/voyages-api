@@ -199,3 +199,32 @@ class VoyagePlaceList(generics.GenericAPIView):
 		t=timer('flattening',t,True)
 		return JsonResponse(outputs,safe=False)
 
+#This will only accept one field at a time
+#Should only be a text field
+#And it will only return max 10 results
+#It will therefore serve as an autocomplete endpoint
+#I should make all text queries into 'or' queries
+class VoyageTextFieldAutoComplete(generics.GenericAPIView):
+	serializer_class=VoyageSerializer
+	def get(self,request):
+		st=time.time()
+		params=request.GET
+		k=next(iter(params))
+		v=params[k]
+		retrieve_all=True
+		queryset=Voyage.objects.all()
+		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+		print(kwargs)
+		queryset=queryset.filter(**kwargs)
+		results_count=queryset.count()
+		queryset=queryset[:10]
+		serialized=VoyageSerializer(queryset,many=False,selected_fields=[k])
+		serialized=serialized.data
+		
+		output_dict=serialized
+		print(results_count)
+		
+		print("executed in %d seconds" %(time.time()-st))
+		return JsonResponse(output_dict,safe=False)
+
+

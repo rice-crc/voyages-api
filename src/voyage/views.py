@@ -18,11 +18,6 @@ from tools.timer import timer
 import collections
 import gc
 from .serializers import *
-from .forms import *
-from django.forms import modelformset_factory,inlineformset_factory
-
-
-
 
 d=open('voyage/voyage_options.json','r')
 voyage_options=(json.loads(d.read()))

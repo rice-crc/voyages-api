@@ -4,8 +4,7 @@ from builtins import str
 
 from django.db import models
 from django.db.models import Prefetch
-from django.utils.translation import ugettext as _
-
+#from django.utils.translation import gettext_lazy as _
 
 # Voyage Regions and Places
 class BroadRegion(models.Model):
@@ -1789,11 +1788,11 @@ class VoyageSources(models.Model):
 	and etc to SOURCER
 	"""
 
-	short_ref = models.CharField(_('Short reference'),
+	short_ref = models.CharField('Short reference',
 								 max_length=255, null=False, blank=True,
 								 unique=True)
 	# Might contain HTML text formatting
-	full_ref = models.CharField(_('Full reference'),
+	full_ref = models.CharField('Full reference',
 								max_length=2550, null=False, blank=True)
 	source_type = models.ForeignKey('VoyageSourcesType', verbose_name="Source Type", null=False,
 									on_delete=models.CASCADE)
@@ -1822,7 +1821,7 @@ class VoyageSourcesConnection(models.Model):
 	group = models.ForeignKey('Voyage', related_name="source_groups",
 							  on_delete=models.CASCADE)
 	#source_order = models.IntegerField()
-	text_ref = models.CharField(_('Text reference(citation)'),
+	text_ref = models.CharField('Text reference(citation)',
 								max_length=255, null=False, blank=True)
 
 

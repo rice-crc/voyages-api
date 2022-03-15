@@ -165,7 +165,7 @@ class VoyageItineraryInline(admin.StackedInline):
 		'imp_broad_region_of_slave_purchase',
 		'principal_port_of_slave_dis',
 		'imp_principal_port_slave_dis',
-		'imp_broad_region_slave_dis=BroadRegionSerializer'
+		'imp_broad_region_slave_dis'
 	]
 	classes = ['collapse']
 
@@ -202,7 +202,6 @@ class VoyageOutcomeInline(admin.StackedInline):
 	classes = ['collapse']
 
 class VoyageAdmin(admin.ModelAdmin):
-
 	inlines=(
 		VoyageDatesInline,
 		VoyageItineraryInline,

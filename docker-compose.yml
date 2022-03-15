@@ -3,7 +3,7 @@ version: "3.7"
 
 services:
   voyagesapi-mysql:
-    image: "mariadb:latest"
+    image: "mysql:latest"
     container_name: "voyagesapi-mysql"
     hostname: "voyagesapi-mysql"
     restart: "on-failure"

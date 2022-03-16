@@ -165,7 +165,6 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	return queryset,selected_fields,next_uri,prev_uri,results_count
 
-
 def options_handler(self,request,flatfile=None,auto=False):
 	"""
 	Handler method for 'OPTIONS' request.

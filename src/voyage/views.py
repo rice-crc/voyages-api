@@ -212,19 +212,31 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		k=next(iter(params))
 		v=params[k]
 		retrieve_all=True
-		queryset=Voyage.objects.all()
+		queryset=Voyage.objects.all()		
 		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-		print(kwargs)
 		queryset=queryset.filter(**kwargs)
 		results_count=queryset.count()
-		queryset=queryset[:10]
-		serialized=VoyageSerializer(queryset,many=False,selected_fields=[k])
-		serialized=serialized.data
-		
-		output_dict=serialized
-		print(results_count)
-		
-		print("executed in %d seconds" %(time.time()-st))
+		fetchcount=10
+		vals=[]
+		for v in queryset.values_list(k).iterator():
+			if v not in vals:
+				vals.append(v)
+			if len(vals)>=fetchcount:
+				break
+		def flattenthis(l):
+			fl=[]
+			for i in l:
+				if type(i)==tuple:
+					for e in i:
+						fl.append(e)
+				else:
+					fl.append(i)
+			return fl
+		val_list=flattenthis(l=vals)
+		output_dict={
+			k:val_list,
+			"results_count":results_count
+		}
+		print("executed in",time.time()-st,"seconds")
 		return JsonResponse(output_dict,safe=False)
-
 

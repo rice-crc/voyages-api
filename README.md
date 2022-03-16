@@ -57,15 +57,12 @@ host:~/Projects/voyagesapi$ docker network prune
 
 ## Using the API
 
-### 1. Request People, Voyages, Places, or Estimates
+### 1. Request People, Voyages, Places, Estimates, or an Autocompletion
 
 1. People: GET http://127.0.0.1:8000/past
 1. Voyages: GET http://127.0.0.1:8000/voyage
 1. Places: GET http://127.0.0.1:8000/voyage/geo
 1. Estimates:  GET http://127.0.0.1:8000/assessment
-
-This looks like:
-
 
 ```
 	'imp_broad_region_voyage_begin':
@@ -78,6 +75,37 @@ This looks like:
 		'value': 50000
 		},
 	
+```
+
+Autocomplete
+
+1. accepts a request
+	1. for one field
+	1. which must be text
+1. returns
+	1. the first 10 unique entries in flat list form
+	1. and a results count
+
+example: GET http://127.0.0.1:8000/voyage/autocomplete?voyage_captain__name=jos
+
+Looks like:
+
+```
+{"voyage_captain__name":
+	[
+		"Dias, Manoel José",
+		"Mata, José Maria da",
+		"Ferreira, José dos Santos",
+		"Amorim, José Gomes de",
+		"Santos, Félix José dos",
+		"Teodoro, Teotônio José",
+		"Castro, Alexandre José de",
+		"Teixeira, José de Souza",
+		"Oliveira, José Malaquias de",
+		"Gomes, Manoel José"
+	],
+	"results_count": 8207
+}
 ```
 
 

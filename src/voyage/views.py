@@ -4,13 +4,14 @@ from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from django.views.generic.list import ListView
 import urllib
 import json
 import requests
 import time
 from .models import *
-#from .serializers import *
 import pprint
 from tools.nest import *
 from tools.reqs import *
@@ -31,10 +32,13 @@ d.close()
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class VoyageList(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def options(self,request):
 		schema=options_handler(self,request,voyage_options)
 		return JsonResponse(schema)
 	def get(self,request):
+		print("username:",request.auth.user)
 		t=timer('FETCHING...',[])
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,voyage_options)
@@ -76,7 +80,10 @@ class VoyageList(generics.GenericAPIView):
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageAggregations(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def get(self,request):
+		print("username:",request.auth.user)
 		params=request.GET
 		aggregations=params.get('aggregate_fields')
 		queryset=Voyage.objects.all()
@@ -96,7 +103,10 @@ class VoyageAggregations(generics.GenericAPIView):
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageDataFrames(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def get(self,request):
+		print("username:",request.auth.user)
 		t=timer("FETCHING...",[])
 		params=request.GET
 		retrieve_all=True
@@ -129,10 +139,13 @@ class VoyageDataFrames(generics.GenericAPIView):
 #By passing it the req param 'inverse=True', you'll get back broad_regions::regions::places
 class VoyagePlaceList(generics.GenericAPIView):
 	serializer_class=PlaceSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def options(self,request):
 		schema=options_handler(self,request,geo_options)
 		return JsonResponse(schema,safe=False)
 	def get(self,request):
+		print("username:",request.auth.user)
 		t=timer("FETCHING...",[])
 		queryset=Place.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,geo_options,retrieve_all=True)
@@ -206,7 +219,10 @@ class VoyagePlaceList(generics.GenericAPIView):
 #I should make all text queries into 'or' queries
 class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def get(self,request):
+		print("username:",request.auth.user)
 		st=time.time()
 		params=request.GET
 		k=next(iter(params))

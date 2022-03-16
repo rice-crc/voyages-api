@@ -57,6 +57,44 @@ host:~/Projects/voyagesapi$ docker network prune
 
 ## Using the API
 
+### 0. AUTHENTICATION
+
+#### Required as of March 16.
+
+documentation: https://www.django-rest-framework.org/api-guide/authentication/
+
+It's pretty straightforward. You simply need to declare a header with the key "Authorization" and the value "Token abcdef....".
+
+So any request, like ```GET http://127.0.0.1:8000/past``` simply becomes ```GET http://127.0.0.1:8000/past -H 'Authorization: Token abcdef....'```
+
+A full python example follows.
+
+#### Authentication workflow
+
+Create a user:
+
+1. First, enter the django container: ```docker exec -it voyagesapi-django /bin/bash```
+1. Next, create a user (in this example, a superuser): ```python3.9 manage.py createsuperuser```
+
+Let's imagine that that username and password you've set are simply "voyages"/"voyages"
+
+The full authentication workflow would look like:
+
+```
+import requests
+import json
+url='http://127.0.0.1:8000/voyages2022_auth_endpoint/'
+r=requests.post(url,{'username':'voyages','password':'voyages'})
+token=json.loads(r.text)['token']
+
+headers={'Authorization':'Token %s' %token}
+
+print(headers)
+
+url='http://127.0.0.1:8000/voyage/'
+r=requests.get(url,headers=headers)
+```
+
 ### 1. Request People, Voyages, Places, Estimates, or an Autocompletion
 
 1. People: GET http://127.0.0.1:8000/past
@@ -65,16 +103,15 @@ host:~/Projects/voyagesapi$ docker network prune
 1. Estimates:  GET http://127.0.0.1:8000/assessment
 
 ```
-	'imp_broad_region_voyage_begin':
-		{
-		'broad_region': 'Brazil',
-		'id': 6,
-		'latitude': '-18.8645820',
-		'longitude': '-39.7548900',
-		'show_on_map': True,
-		'value': 50000
-		},
-	
+'imp_broad_region_voyage_begin':
+	{
+	'broad_region': 'Brazil',
+	'id': 6,
+	'latitude': '-18.8645820',
+	'longitude': '-39.7548900',
+	'show_on_map': True,
+	'value': 50000
+	},	
 ```
 
 Autocomplete
@@ -119,11 +156,11 @@ Looks like:
 This looks like:
 
 ```
-	'transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__region__latitude':
-		{
-		'label': 'Latitude of point',
-		'type': '<class "rest_framework.fields.DecimalField>"
-		}
+'transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__region__latitude':
+	{
+	'label': 'Latitude of point',
+	'type': '<class "rest_framework.fields.DecimalField>"
+	}
 ```
 
 Why "hierarchical=False"?
@@ -191,33 +228,33 @@ e.g., GET http://127.0.0.1:8000/voyage/dataframes?&voyage_dates__imp_arrival_at_
 Looks like:
 
 ```
-	{   'voyage_itinerary__first_landing_place__place':
-		[
-			'Barbados, port unspecified',
-			'Freetown',
-			'Freetown',
-			...
-		],
-		'voyage_itinerary__first_landing_region__region':
-		[
-			'Barbados',
-			'Sierra Leone',
-			'Sierra Leone',
-			...
-		],
-		'voyage_itinerary__imp_broad_region_voyage_begin__broad_region':
-		[
-			'Mainland North America',
-			None,
-			None,
-			...
-		],
-		'voyage_slaves_numbers__imp_total_num_slaves_embarked':
-		[
-			168,
-			130,
-			68,
-			...
-		]
-	}
+{   'voyage_itinerary__first_landing_place__place':
+	[
+		'Barbados, port unspecified',
+		'Freetown',
+		'Freetown',
+		...
+	],
+	'voyage_itinerary__first_landing_region__region':
+	[
+		'Barbados',
+		'Sierra Leone',
+		'Sierra Leone',
+		...
+	],
+	'voyage_itinerary__imp_broad_region_voyage_begin__broad_region':
+	[
+		'Mainland North America',
+		None,
+		None,
+		...
+	],
+	'voyage_slaves_numbers__imp_total_num_slaves_embarked':
+	[
+		168,
+		130,
+		68,
+		...
+	]
+}
 ```

@@ -40,15 +40,19 @@ INSTALLED_APPS = [
 	'voyage',
     'assessment',
     'past',
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken'
 ]
-
-
 
 #DRF settings
 #via https://www.django-rest-framework.org/api-guide/metadata/#setting-the-metadata-scheme
 REST_FRAMEWORK = {
-	'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata'
+	'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata',
+	'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+		'rest_framework.authentication.TokenAuthentication'
+    ]
 }
 
 MIDDLEWARE = [

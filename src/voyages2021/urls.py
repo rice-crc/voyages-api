@@ -17,10 +17,12 @@ from django.contrib import admin
 from django.urls import include,path
 from django.conf.urls.static import static
 from django.conf import settings
+from rest_framework.authtoken import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('voyage/',include('voyage.urls')),
     path('past/',include('past.urls')),
-    path('assessment/',include('assessment.urls'))
+    path('assessment/',include('assessment.urls')),
+    path('voyages2022_auth_endpoint/', views.obtain_auth_token)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -91,6 +91,8 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		prefetch_keys=list(options_dict.keys())
 	else:
 		prefetch_keys = active_fields
+	
+	print(prefetch_keys)
 	##ideally, I'd run this list against the model and see
 	##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
 	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_keys if '__' in i]))

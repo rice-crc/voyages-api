@@ -3,6 +3,8 @@ from django.db.models import Q,Prefetch
 from django.http import HttpResponse, JsonResponse
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from django.views.generic.list import ListView
@@ -25,20 +27,21 @@ d.close()
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class AssessmentList(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	serializer_class=EstimateSerializer
 	def options(self,request):
 		schema=options_handler(self,request,flatfile=assessment_options,auto='False')
 		return JsonResponse(schema,safe=False)
 	def get(self,request):
-		r=requests.options("http://127.0.0.1:8000/assessment/?hierarchical=False&auto=False")
-		options=json.loads(r.text)
+		print("username:",request.auth.user)
 		times=[]
 		labels=[]
 		print("FETCHING...")
 		times.append(time.time())
 		queryset=Estimate.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,options,retrieve_all=True)
-		selected_fields=list(options.keys())
+		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,assessment_options,auto_prefetch=True,retrieve_all=True)
+		selected_fields=list(assessment_options.keys())
 		times.append(time.time())
 		labels.append('building query')
 		read_serializer=EstimateSerializer(queryset,many=True)

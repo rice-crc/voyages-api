@@ -42,6 +42,7 @@ class VoyageList(generics.GenericAPIView):
 		t=timer('FETCHING...',[])
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,voyage_options)
+		print(queryset)
 		headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 		#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
 		t=timer('building query',t)
@@ -80,7 +81,7 @@ class VoyageList(generics.GenericAPIView):
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageAggregations(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	authentication_classes=[TokenAuthentication]
+	#authentication_classes=[TokenAuthentication]
 	#permission_classes=[IsAuthenticated]
 	def get(self,request):
 		#print("username:",request.auth.user)
@@ -103,10 +104,10 @@ class VoyageAggregations(generics.GenericAPIView):
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageDataFrames(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	#authentication_classes=[TokenAuthentication]
+	#permission_classes=[IsAuthenticated]
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		t=timer("FETCHING...",[])
 		params=request.GET
 		retrieve_all=True
@@ -139,13 +140,13 @@ class VoyageDataFrames(generics.GenericAPIView):
 #By passing it the req param 'inverse=True', you'll get back broad_regions::regions::places
 class VoyagePlaceList(generics.GenericAPIView):
 	serializer_class=PlaceSerializer
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	#authentication_classes=[TokenAuthentication]
+	#permission_classes=[IsAuthenticated]
 	def options(self,request):
 		schema=options_handler(self,request,geo_options)
 		return JsonResponse(schema,safe=False)
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		t=timer("FETCHING...",[])
 		queryset=Place.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,geo_options,retrieve_all=True)
@@ -219,10 +220,10 @@ class VoyagePlaceList(generics.GenericAPIView):
 #I should make all text queries into 'or' queries
 class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	#authentication_classes=[TokenAuthentication]
+	#permission_classes=[IsAuthenticated]
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		st=time.time()
 		params=request.GET
 		k=next(iter(params))
@@ -256,27 +257,3 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		print("executed in",time.time()-st,"seconds")
 		return JsonResponse(output_dict,safe=False)
 
-
-
-
-
-
-class VoyageInsert(generics.GenericAPIView):
-	def get(self,request):
-		
-		
-		
-		#first, create voyage
-		existing_voyages=Voyage.objects.all()
-		max_voyage_id=existing_voyages.order_by('-voyage_id')[0].voyage_id
-		new_voyage_id=max_voyage_id+1
-		v=Voyage(voyage_id=new_voyage_id,dataset=1)
-		v.save()
-		
-		#then, as needed, create places, regions, broad regions
-		
-		
-		
-		
-		output_dict={"old_voyage_id":max_voyage_id,"new_voyage_id":v.voyage_id}
-		return JsonResponse(output_dict,safe=False)

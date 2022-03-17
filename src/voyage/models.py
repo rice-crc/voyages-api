@@ -1073,10 +1073,10 @@ class VoyageCaptainConnection(models.Model):
 
 	captain = models.ForeignKey('VoyageCaptain',
 								on_delete=models.CASCADE,
-								related_name='captain_voyage')
+								related_name='voyage_captain')
 	voyage = models.ForeignKey('Voyage',
 							   on_delete=models.CASCADE,
-							   related_name='voyage_captain')
+							   related_name='captain_voyage')
 	captain_order = models.IntegerField()
 
 	class Meta:

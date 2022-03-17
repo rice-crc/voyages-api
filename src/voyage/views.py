@@ -32,13 +32,13 @@ d.close()
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class VoyageList(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	#authentication_classes=[TokenAuthentication]
+	#permission_classes=[IsAuthenticated]
 	def options(self,request):
 		schema=options_handler(self,request,voyage_options)
 		return JsonResponse(schema)
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		t=timer('FETCHING...',[])
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,voyage_options)
@@ -81,9 +81,9 @@ class VoyageList(generics.GenericAPIView):
 class VoyageAggregations(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	#permission_classes=[IsAuthenticated]
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		params=request.GET
 		aggregations=params.get('aggregate_fields')
 		queryset=Voyage.objects.all()
@@ -256,3 +256,27 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		print("executed in",time.time()-st,"seconds")
 		return JsonResponse(output_dict,safe=False)
 
+
+
+
+
+
+class VoyageInsert(generics.GenericAPIView):
+	def get(self,request):
+		
+		
+		
+		#first, create voyage
+		existing_voyages=Voyage.objects.all()
+		max_voyage_id=existing_voyages.order_by('-voyage_id')[0].voyage_id
+		new_voyage_id=max_voyage_id+1
+		v=Voyage(voyage_id=new_voyage_id,dataset=1)
+		v.save()
+		
+		#then, as needed, create places, regions, broad regions
+		
+		
+		
+		
+		output_dict={"old_voyage_id":max_voyage_id,"new_voyage_id":v.voyage_id}
+		return JsonResponse(output_dict,safe=False)

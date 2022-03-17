@@ -270,11 +270,10 @@ class VoyageShipOwnerConnection(models.Model):
 	"""
 	owner = models.ForeignKey(	'VoyageShipOwner',
 								verbose_name="Ship Owner",
-							  	on_delete=models.CASCADE,
-							  	related_name='voyage_owner')
+							  	on_delete=models.CASCADE)
 	voyage = models.ForeignKey(	'Voyage',
 							  	 on_delete=models.CASCADE,
-							   	related_name='owner_voyage')
+							   	related_name='voyage_shipownerconnection')
 	owner_order = models.IntegerField()
 
 	def __str__(self):
@@ -1072,11 +1071,10 @@ class VoyageCaptainConnection(models.Model):
 	"""
 
 	captain = models.ForeignKey('VoyageCaptain',
-								on_delete=models.CASCADE,
-								related_name='voyage_captain')
+								on_delete=models.CASCADE,)
 	voyage = models.ForeignKey('Voyage',
 							   on_delete=models.CASCADE,
-							   related_name='captain_voyage')
+							   related_name='voyage_captainconnection')
 	captain_order = models.IntegerField()
 
 	class Meta:
@@ -1815,10 +1813,9 @@ class VoyageSourcesConnection(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
 	source = models.ForeignKey(	'VoyageSources',
-							   	related_name="voyage_source",
 							   	on_delete=models.CASCADE)
 	voyage = models.ForeignKey(	'Voyage',
-								related_name="source_voyage",
+								related_name="voyage_sourceconnection",
 							 	 on_delete=models.CASCADE)
 	#source_order = models.IntegerField()
 	text_ref = models.CharField('Text reference(citation)',
@@ -1856,12 +1853,14 @@ class Voyage(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.VoyageCaptain`
 	related to: :class:`~voyages.apps.voyage.models.VoyageShipOwner`
 	related to: :class:`~voyages.apps.voyage.models.VoyageSources`
-	#new naming convention -- reverse lookups will have 'reverse' name format
-	##e.g., voyage_outcome related name = outcome_voyage
+	#new naming convention (mar 17) -- reverse lookups will have 'reverse' name format
+	##e.g., the reverse link/related name to the captain table from the voyage table is now "voyage_captain" ... 
+	## and the related name to the voyage table from the ship table is "ship_voyage"
 	#new m2m rule -- avoiding the m2m "through" convention where there's data on the intermediate/"through" table
 	###(which is all of them as of now)
 	##formerly "through" tables will instead point at their connecting tables
 	##lookups can then be performed using the new reverse lookup naming convention as above
+	##also, finally (mostly) fixed the outcome tables' foreign key to outcomes just like with dates or itinerary
 	"""
 
 	voyage_id = models.IntegerField("Voyage ID", unique=True)

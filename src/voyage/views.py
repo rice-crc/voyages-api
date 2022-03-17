@@ -257,3 +257,23 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		print("executed in",time.time()-st,"seconds")
 		return JsonResponse(output_dict,safe=False)
 
+
+class VoyageInsert(generics.GenericAPIView):
+	def get(self,request):
+		
+		
+		
+		#first, create voyage
+		existing_voyages=Voyage.objects.all()
+		max_voyage_id=existing_voyages.order_by('-voyage_id')[0].voyage_id
+		new_voyage_id=max_voyage_id+1
+		v=Voyage(voyage_id=new_voyage_id,dataset=1)
+		v.save()
+		
+		#then, as needed, create places, regions, broad regions
+		
+		
+		
+		
+		output_dict={"old_voyage_id":max_voyage_id,"new_voyage_id":v.voyage_id}
+		return JsonResponse(output_dict,safe=False)

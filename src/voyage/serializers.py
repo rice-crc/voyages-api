@@ -248,11 +248,11 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_groupings=VoyageGroupingsSerializer(many=False)
 	voyage_crew=VoyageCrewSerializer(many=False)
 	voyage_ship=VoyageShipSerializer(many=False)
-	captain_voyage=VoyageCaptainConnectionSerializer(many=True,read_only=True)
-	owner_voyage=VoyageShipOwnerConnectionSerializer(many=True,read_only=True)
+	voyage_captainconnection=VoyageCaptainConnectionSerializer(many=True,read_only=True)
+	voyage_shipownerconnection=VoyageShipOwnerConnectionSerializer(many=True,read_only=True)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)
 	voyage_outcome=VoyageOutcomeSerializer(many=False)
-	source_groups=VoyageSourcesConnectionSerializer(many=True,read_only=True)
+	voyage_sourceconnection=VoyageSourcesConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
 		fields='__all__'

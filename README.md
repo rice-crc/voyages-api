@@ -123,12 +123,12 @@ Autocomplete
 	1. the first 10 unique entries in flat list form
 	1. and a results count
 
-example: GET http://127.0.0.1:8000/voyage/autocomplete?voyage_captain__name=jos
+example: GET http://127.0.0.1:8000/voyage/autocomplete?voyage_captainconnection__captain__name=jos
 
 Looks like:
 
 ```
-{"voyage_captain__name":
+{"voyage_captainconnection__captain__name":
 	[
 		"Dias, Manoel José",
 		"Mata, José Maria da",

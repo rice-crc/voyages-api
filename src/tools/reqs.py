@@ -92,14 +92,14 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	else:
 		prefetch_keys = active_fields
 	
-	print(prefetch_keys)
+	#print(prefetch_keys)
 	##ideally, I'd run this list against the model and see
 	##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
 	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_keys if '__' in i]))
 	for p in prefetch_vars:
 		queryset=queryset.prefetch_related(p)
-	print('--prefetch--')
-	print(prefetch_vars)
+	#print('--prefetch--')
+	#print(prefetch_vars)
 	
 	#AGGREGATIONS
 	##e.g. voyage_slaves_numbers__imp_total_num_slaves_embarked__sum

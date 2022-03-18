@@ -42,7 +42,7 @@ class EnslavedList(generics.GenericAPIView):
 
 		queryset=Enslaved.objects.all()
 		
-		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,past_options,auto_prefetch=True)
+		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,past_options,auto_prefetch=False)
 		headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 		#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
 		times.append(time.time())

@@ -36,7 +36,7 @@ RUN apt-get update -y \
     /var/lib/apt/lists/* \
     /var/tmp/*
 
-WORKDIR /srv/voyagesapi
+WORKDIR /srv/voyages-api
 
 RUN python3.9 -m pip install --user --no-cache-dir --upgrade \
     pip \
@@ -50,7 +50,7 @@ RUN python3.9 -m pip install --user --no-cache-dir -r ./requirements.txt
 
 FROM base AS release
 
-WORKDIR /srv/voyagesapi
+WORKDIR /srv/voyages-api
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1

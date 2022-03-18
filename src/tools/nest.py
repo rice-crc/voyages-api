@@ -1,6 +1,6 @@
 import collections
 from rest_framework import serializers
-
+import re
 
 def nestthis(keychain,thisdict={}):
 	while keychain:
@@ -88,10 +88,21 @@ def options_walker(schema,base_address,serializer):
 			if address.endswith("__id"):
 				try:
 					label=serializer.Meta.model._meta.verbose_name
+					s=str(serializer.Meta.model)
+					try:
+						model=re.search("(?<=<class \').*(?=\')",s).group(0)
+					except:
+						model="Unkown model name -- retrieval failed"
 				except:
 					label=serializer.__dict__['child'].Meta.model._meta.verbose_name
+					s=str(serializer.__dict__['child'].Meta.model)
+					try:
+						model=re.search("(?<=<class \').*(?=\')",s).group(0)
+					except:
+						model="Unkown model name -- retrieval failed"
+				
 				schema[address]={'type':datatypestr,'label':label+" ID"}
-				schema[address[:-4]]={'type':"table",'label':label}
+				schema[address[:-4]]={'type':"table",'label':label,'model':model}
 			else:
 				label=fields[field].label
 				schema[address]={'type':datatypestr,'label':label}

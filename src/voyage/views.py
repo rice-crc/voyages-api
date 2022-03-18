@@ -42,7 +42,6 @@ class VoyageList(generics.GenericAPIView):
 		t=timer('FETCHING...',[])
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,voyage_options)
-		print(queryset)
 		headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 		#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
 		t=timer('building query',t)

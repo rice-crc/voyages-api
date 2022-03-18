@@ -182,14 +182,14 @@ def options_handler(self,request,flatfile=None,auto=False):
 	#GOING TO MOVE TO A MANAGED STATIC OPTIONS ENDPOINT
 	#FIRST STEP, REMOVE PUBLIC ACCESS TO AUTO-GENERATED SCHEMA
 	#& GET THE STATIC ENDPOINT RIGHT
-	'''if 'auto' in request.query_params:
+	if 'auto' in request.query_params:
 		if request.query_params['auto'].lower() in ['true','1','y']:
 			auto=True
 	
 	if auto==True:
 		schema=options_walker({},'',self.get_serializer())
 	else:
-		schema=flatfile'''
+		schema=flatfile
 	
 	hierarchical=True
 	if 'hierarchical' in request.query_params:

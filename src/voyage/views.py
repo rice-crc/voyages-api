@@ -32,13 +32,13 @@ d.close()
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class VoyageList(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	#authentication_classes=[TokenAuthentication]
-	#permission_classes=[IsAuthenticated]
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def options(self,request):
 		schema=options_handler(self,request,voyage_options)
 		return JsonResponse(schema)
 	def get(self,request):
-		#print("username:",request.auth.user)
+		print("username:",request.auth.user)
 		t=timer('FETCHING...',[])
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,voyage_options)
@@ -103,8 +103,8 @@ class VoyageAggregations(generics.GenericAPIView):
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageDataFrames(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	#authentication_classes=[TokenAuthentication]
-	#permission_classes=[IsAuthenticated]
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def get(self,request):
 		#print("username:",request.auth.user)
 		t=timer("FETCHING...",[])
@@ -139,8 +139,8 @@ class VoyageDataFrames(generics.GenericAPIView):
 #By passing it the req param 'inverse=True', you'll get back broad_regions::regions::places
 class VoyagePlaceList(generics.GenericAPIView):
 	serializer_class=PlaceSerializer
-	#authentication_classes=[TokenAuthentication]
-	#permission_classes=[IsAuthenticated]
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def options(self,request):
 		schema=options_handler(self,request,geo_options)
 		return JsonResponse(schema,safe=False)
@@ -219,8 +219,8 @@ class VoyagePlaceList(generics.GenericAPIView):
 #I should make all text queries into 'or' queries
 class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	#authentication_classes=[TokenAuthentication]
-	#permission_classes=[IsAuthenticated]
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def get(self,request):
 		#print("username:",request.auth.user)
 		st=time.time()

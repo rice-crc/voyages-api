@@ -28,13 +28,13 @@ d.close()
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	serializer_class=EnslavedSerializer
+	#permission_classes=[IsAuthenticated]
+	#serializer_class=EnslavedSerializer
 	def options(self,request):
 		schema=options_handler(self,request,past_options)
 		return JsonResponse(schema)
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		times=[]
 		labels=[]
 		print("FETCHING...")

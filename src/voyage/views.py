@@ -260,48 +260,28 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 class DuplicateVoyage(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	def get(self,request):
-		#first, create voyage
-		
 		params=request.GET
-		
 		try:
 			voyage_id=int(params['voyage_id'])
 		except:
 			return JsonResponse({"message":"No voyage ID supplied"},safe=False)
-		
 		existing_voyages=Voyage.objects.all()
-		
 		kwargs={'voyage_id':voyage_id}
-		
 		v_queryset=existing_voyages.filter(**kwargs)
-		
 		if len(v_queryset)==0:
 			return JsonResponse({"message":"Error: Voyage %d does not exist" %voyage_id})
 		elif len(v_queryset)>1:
 			return JsonResponse({"message":"Error: Multiple voyages with id %d -- check your database" %voyage_id})
 		else:
 			voyage_to_duplicate=v_queryset[0]
-		
 		max_voyage_id=existing_voyages.order_by('-voyage_id')[0].voyage_id
 		new_voyage_id=max_voyage_id+1
-		
-		print(new_voyage_id,max_voyage_id)
-		
 		duplicated_voyage=voyage_to_duplicate
 		duplicated_voyage.id=new_voyage_id
 		duplicated_voyage.voyage_id=new_voyage_id
 		duplicated_voyage.save()
-		
-		print("++++",duplicated_voyage)
-		
-		print("-->",duplicated_voyage.id)
-		
 		existing_voyages=Voyage.objects.all()
-		
 		kwargs={'voyage_id':new_voyage_id}
-		
 		new_voyage=existing_voyages.filter(**kwargs)
-		
 		output_dict=VoyageSerializer(duplicated_voyage,many=False).data
-		
 		return JsonResponse(output_dict,safe=False)

@@ -209,9 +209,22 @@ class VoyageCaptainSerializer(serializers.ModelSerializer):
 		model=VoyageCaptain
 		fields='__all__'
 
+class VoyageCaptainConnectionSerializer(serializers.ModelSerializer):
+	captain=VoyageCaptainSerializer(many=False)
+	class Meta:
+		model=VoyageCaptainConnection
+		fields='__all__'
+	
 class VoyageShipOwnerSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=VoyageShipOwner
+		fields='__all__'
+
+
+class VoyageShipOwnerConnectionSerializer(serializers.ModelSerializer):
+	owner=VoyageShipOwnerSerializer(many=False)
+	class Meta:
+		model=VoyageShipOwnerConnection
 		fields='__all__'
 
 class VoyageDatesSerializer(serializers.ModelSerializer):
@@ -235,11 +248,11 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_groupings=VoyageGroupingsSerializer(many=False)
 	voyage_crew=VoyageCrewSerializer(many=False)
 	voyage_ship=VoyageShipSerializer(many=False)
-	voyage_captain=VoyageCaptainSerializer(many=True,read_only=True)
-	voyage_ship_owner=VoyageShipOwnerSerializer(many=True,read_only=True)
+	voyage_captainconnection=VoyageCaptainConnectionSerializer(many=True,read_only=True)
+	voyage_shipownerconnection=VoyageShipOwnerConnectionSerializer(many=True,read_only=True)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)
-	voyage_outcomes=VoyageOutcomeSerializer(many=True,read_only=True)
-	source_groups=VoyageSourcesConnectionSerializer(many=True,read_only=True)
+	voyage_outcome=VoyageOutcomeSerializer(many=False)
+	voyage_sourceconnection=VoyageSourcesConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
 		fields='__all__'

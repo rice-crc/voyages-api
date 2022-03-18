@@ -80,10 +80,10 @@ class VoyageList(generics.GenericAPIView):
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageAggregations(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	#authentication_classes=[TokenAuthentication]
+	#permission_classes=[IsAuthenticated]
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		params=request.GET
 		aggregations=params.get('aggregate_fields')
 		queryset=Voyage.objects.all()
@@ -106,7 +106,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		t=timer("FETCHING...",[])
 		params=request.GET
 		retrieve_all=True
@@ -145,7 +145,7 @@ class VoyagePlaceList(generics.GenericAPIView):
 		schema=options_handler(self,request,geo_options)
 		return JsonResponse(schema,safe=False)
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		t=timer("FETCHING...",[])
 		queryset=Place.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,geo_options,retrieve_all=True)
@@ -222,7 +222,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		st=time.time()
 		params=request.GET
 		k=next(iter(params))
@@ -256,3 +256,32 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		print("executed in",time.time()-st,"seconds")
 		return JsonResponse(output_dict,safe=False)
 
+
+class DuplicateVoyage(generics.GenericAPIView):
+	serializer_class=VoyageSerializer
+	def get(self,request):
+		params=request.GET
+		try:
+			voyage_id=int(params['voyage_id'])
+		except:
+			return JsonResponse({"message":"No voyage ID supplied"},safe=False)
+		existing_voyages=Voyage.objects.all()
+		kwargs={'voyage_id':voyage_id}
+		v_queryset=existing_voyages.filter(**kwargs)
+		if len(v_queryset)==0:
+			return JsonResponse({"message":"Error: Voyage %d does not exist" %voyage_id})
+		elif len(v_queryset)>1:
+			return JsonResponse({"message":"Error: Multiple voyages with id %d -- check your database" %voyage_id})
+		else:
+			voyage_to_duplicate=v_queryset[0]
+		max_voyage_id=existing_voyages.order_by('-voyage_id')[0].voyage_id
+		new_voyage_id=max_voyage_id+1
+		duplicated_voyage=voyage_to_duplicate
+		duplicated_voyage.id=new_voyage_id
+		duplicated_voyage.voyage_id=new_voyage_id
+		duplicated_voyage.save()
+		existing_voyages=Voyage.objects.all()
+		kwargs={'voyage_id':new_voyage_id}
+		new_voyage=existing_voyages.filter(**kwargs)
+		output_dict=VoyageSerializer(duplicated_voyage,many=False).data
+		return JsonResponse(output_dict,safe=False)

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+from .localsettings import *
 
 from pathlib import Path
 
@@ -19,14 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-gfl=jfnj(+by72c%7v*ac=iix9u7azz$fpo2g*y3_b5)011ch7'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -97,21 +91,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'voyages2021.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'USER': 'root',
-        'NAME': 'voyagesapi',
-        'PASSWORD': 'voyages',
-        'HOST':'voyagesapi-mysql',
-        'PORT':'3306'
-    }
-}
 
 
 # Password validation

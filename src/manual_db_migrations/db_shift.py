@@ -59,8 +59,8 @@ def drop_unique_constraints(unique_constraints,db_name):
 			cnx.commit()
 	
 
-new_db="voyagesapi_NEW"
-old_db="voyagesapi_OLD"
+new_db="voyagesapi_mar17"
+old_db="voyagesapi_mar16"
 
 
 old_foreign_key_constraints,old_unique_constraints=get_fk_constraints(tables,old_db,cursor)

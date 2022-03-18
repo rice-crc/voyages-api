@@ -28,13 +28,13 @@ d.close()
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	serializer_class=EnslavedSerializer
+	#permission_classes=[IsAuthenticated]
+	#serializer_class=EnslavedSerializer
 	def options(self,request):
 		schema=options_handler(self,request,past_options)
 		return JsonResponse(schema)
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		times=[]
 		labels=[]
 		print("FETCHING...")
@@ -42,7 +42,7 @@ class EnslavedList(generics.GenericAPIView):
 
 		queryset=Enslaved.objects.all()
 		
-		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,past_options,auto_prefetch=True)
+		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,past_options,auto_prefetch=False)
 		headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 		#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
 		times.append(time.time())

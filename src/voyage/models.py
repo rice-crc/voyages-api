@@ -239,7 +239,6 @@ class VoyageShip(models.Model):
 	voyage = models.ForeignKey('Voyage',
 							   null=True,
 							   blank=True,
-							   related_name="voyage_name_ship",
 							   on_delete=models.CASCADE)
 
 	def __str__(self):
@@ -269,10 +268,12 @@ class VoyageShipOwnerConnection(models.Model):
 	Owner.
 	owner_order represents order of each owner (1st, 2nd, ...)
 	"""
-	owner = models.ForeignKey('VoyageShipOwner', verbose_name="Ship Owner", related_name="owner_name",
-							  on_delete=models.CASCADE)
-	voyage = models.ForeignKey('Voyage', related_name="voyage_related",
-							   on_delete=models.CASCADE)
+	owner = models.ForeignKey(	'VoyageShipOwner',
+								verbose_name="Ship Owner",
+							  	on_delete=models.CASCADE)
+	voyage = models.ForeignKey(	'Voyage',
+							  	 on_delete=models.CASCADE,
+							   	related_name='voyage_shipownerconnection')
 	owner_order = models.IntegerField()
 
 	def __str__(self):
@@ -390,7 +391,6 @@ class VoyageOutcome(models.Model):
 	voyage = models.ForeignKey('Voyage',
 							   null=True,
 							   blank=True,
-							   related_name="voyage_outcomes",
 							   on_delete=models.CASCADE)
 	
 	def __str__(self):
@@ -699,7 +699,6 @@ class VoyageItinerary(models.Model):
 	voyage = models.ForeignKey('Voyage',
 							   null=True,
 							   blank=True,
-							   related_name="voyage_name_itinerary",
 							   on_delete=models.CASCADE)
 
 	class Meta:
@@ -970,7 +969,6 @@ class VoyageDates(models.Model):
 	voyage = models.ForeignKey('Voyage',
 							   null=True,
 							   blank=True,
-							   related_name="voyage_name_dates",
 							   on_delete=models.CASCADE)
 	
 	def __str__(self):
@@ -1072,10 +1070,11 @@ class VoyageCaptainConnection(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
 
-	captain = models.ForeignKey('VoyageCaptain', related_name='captain_name',
-								on_delete=models.CASCADE)
-	voyage = models.ForeignKey('Voyage', related_name='voyage',
-							   on_delete=models.CASCADE)
+	captain = models.ForeignKey('VoyageCaptain',
+								on_delete=models.CASCADE,)
+	voyage = models.ForeignKey('Voyage',
+							   on_delete=models.CASCADE,
+							   related_name='voyage_captainconnection')
 	captain_order = models.IntegerField()
 
 	class Meta:
@@ -1084,6 +1083,7 @@ class VoyageCaptainConnection(models.Model):
 
 	def __str__(self):
 		return "Captain: %d %s" % (self.captain_order, str(self.captain))
+
 
 
 class VoyageCrew(models.Model):
@@ -1133,7 +1133,6 @@ class VoyageCrew(models.Model):
 	voyage = models.ForeignKey('Voyage',
 							   null=True,
 							   blank=True,
-							   related_name="voyage_name_crew",
 							   on_delete=models.CASCADE)
 
 	class Meta:
@@ -1813,17 +1812,14 @@ class VoyageSourcesConnection(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.VoyageSources`
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
-	source = models.ForeignKey('VoyageSources',
-							   related_name="voyage_sources",
-							   null=False,
-							   blank=True,
-							   on_delete=models.CASCADE)
-	group = models.ForeignKey('Voyage', related_name="source_groups",
-							  on_delete=models.CASCADE)
+	source = models.ForeignKey(	'VoyageSources',
+							   	on_delete=models.CASCADE)
+	voyage = models.ForeignKey(	'Voyage',
+								related_name="voyage_sourceconnection",
+							 	 on_delete=models.CASCADE)
 	#source_order = models.IntegerField()
 	text_ref = models.CharField('Text reference(citation)',
 								max_length=255, null=False, blank=True)
-
 
 class VoyageDatasetManager(models.Manager):
 
@@ -1857,6 +1853,14 @@ class Voyage(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.VoyageCaptain`
 	related to: :class:`~voyages.apps.voyage.models.VoyageShipOwner`
 	related to: :class:`~voyages.apps.voyage.models.VoyageSources`
+	#new naming convention (mar 17) -- reverse lookups will have 'reverse' name format
+	##e.g., the reverse link/related name to the captain table from the voyage table is now "voyage_captain" ... 
+	## and the related name to the voyage table from the ship table is "ship_voyage"
+	#new m2m rule -- avoiding the m2m "through" convention where there's data on the intermediate/"through" table
+	###(which is all of them as of now)
+	##formerly "through" tables will instead point at their connecting tables
+	##lookups can then be performed using the new reverse lookup naming convention as above
+	##also, finally (mostly) fixed the outcome tables' foreign key to outcomes just like with dates or itinerary
 	"""
 
 	voyage_id = models.IntegerField("Voyage ID", unique=True)
@@ -1867,62 +1871,54 @@ class Voyage(models.Model):
 										   blank=True)
 
 	# Technical variables
-	voyage_groupings = models.ForeignKey('VoyageGroupings',
-										verbose_name="Voyage Groupings",
-										 blank=True,
-										 null=True,
-										 on_delete=models.CASCADE)
+	voyage_groupings = models.ForeignKey(	'VoyageGroupings',
+											verbose_name="Voyage Groupings",
+											related_name='groupings_voyage',
+											blank=True,
+											null=True,
+											on_delete=models.CASCADE)
 
 	# Data and imputed variables
-	voyage_ship = models.ForeignKey('VoyageShip',
-									blank=True,
-									null=True,
-									verbose_name="Ship",
-									related_name='voyage_ship',
-									on_delete=models.CASCADE)
-	voyage_itinerary = models.ForeignKey('VoyageItinerary',
-										 blank=True,
-										 null=True,
-										 verbose_name="Itinerary",
-										 related_name='voyage_itinerary',
-										 on_delete=models.CASCADE)
-	voyage_dates = models.ForeignKey('VoyageDates',
-									 blank=True,
-									 null=True,
-									 verbose_name="Dates",
-									 related_name='voyage_dates',
-									 on_delete=models.CASCADE)
+	voyage_ship = models.ForeignKey(	'VoyageShip',
+										verbose_name="Ship",
+										related_name='ship_voyage',
+										blank=True,
+										null=True,
+										on_delete=models.CASCADE)
+	voyage_itinerary = models.ForeignKey(	'VoyageItinerary',
+											verbose_name="Itinerary",
+											related_name='itinerary_voyage',
+											blank=True,
+											null=True,
+											on_delete=models.CASCADE)
+	voyage_dates = models.ForeignKey(	'VoyageDates',
+										verbose_name="Dates",
+										related_name='dates_voyage',
+										blank=True,
+										null=True,
+										on_delete=models.CASCADE)
 	voyage_crew = models.ForeignKey('VoyageCrew',
 									verbose_name="Crew",
+									related_name='crew_voyage',
 									blank=True,
 									null=True,
-									related_name='voyage_crew',
 									on_delete=models.CASCADE)
 	voyage_slaves_numbers = models.ForeignKey(
 		'VoyageSlavesNumbers',
+		related_name='slaves_numbers_voyage',
 		blank=True,
 		null=True,
-		related_name='voyage_slaves_numbers',
 		on_delete=models.CASCADE)
 	
-	voyage_captain = models.ManyToManyField("VoyageCaptain",
-											through='VoyageCaptainConnection',
-											help_text="Voyage Captain",
-											blank=True)
-	voyage_ship_owner = models.ManyToManyField(
-		"VoyageShipOwner",
-		through='VoyageShipOwnerConnection',
-		help_text="Voyage Ship Owner",
-		blank=True)
-	
-	# One Voyage can contain multiple sources and one source can refer
-	# to multiple voyages
-	voyage_sources = models.ManyToManyField('VoyageSources',
-											through='VoyageSourcesConnection',
-											related_name='sources',
-											blank=True)
-
+	voyage_outcome = models.ForeignKey(
+		'VoyageOutcome',
+		related_name='outcome_voyage',
+		blank=True,
+		null=True,
+		on_delete=models.CASCADE)
+		
 	last_update = models.DateTimeField(auto_now=True)
+	
 	dataset = models.IntegerField(
 		null=False,
 		default=VoyageDataset.Transatlantic,

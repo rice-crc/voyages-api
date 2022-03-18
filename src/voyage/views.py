@@ -52,8 +52,7 @@ class VoyageList(generics.GenericAPIView):
 
 		#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
 		if selected_fields==[]:
-			r=requests.options("http://127.0.0.1:8000/voyage/?hierarchical=False&auto=True")
-			selected_fields=list(json.loads(r.text).keys())
+			selected_fields=list(voyage_options.keys())
 		outputs=[]
 		
 		hierarchical=True
@@ -120,7 +119,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 		serialized=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
 		t=timer('sql execution',t)
 		serialized=serialized.data
-		r=requests.options("http://127.0.0.1:8000/voyage/?hierarchical=False&auto=True")
 		t=timer('serialization',t)
 		output_dicts={}
 		for selected_field in sf:
@@ -195,8 +193,7 @@ class VoyagePlaceList(generics.GenericAPIView):
 		else:
 			#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
 			if selected_fields==[]:
-				r=requests.options("http://127.0.0.1:8000/voyage/geo?hierarchical=False&auto=True")
-				selected_fields=list(json.loads(r.text).keys())
+				selected_fields=list(voyage_options.keys())
 			outputs=[]
 			for s in serialized:
 				d={}

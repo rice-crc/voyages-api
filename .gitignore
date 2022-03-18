@@ -2,6 +2,7 @@
 src/static/
 *.sql
 dbconf.json
+src/voyages2021/localsettings.py
 
 *__pycache__/
 

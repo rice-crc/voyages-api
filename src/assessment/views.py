@@ -34,7 +34,7 @@ class AssessmentList(generics.GenericAPIView):
 		schema=options_handler(self,request,flatfile=assessment_options,auto='False')
 		return JsonResponse(schema,safe=False)
 	def get(self,request):
-		print("username:",request.auth.user)
+		#print("username:",request.auth.user)
 		times=[]
 		labels=[]
 		print("FETCHING...")

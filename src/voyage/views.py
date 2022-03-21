@@ -79,8 +79,8 @@ class VoyageList(generics.GenericAPIView):
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageAggregations(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	#authentication_classes=[TokenAuthentication]
-	#permission_classes=[IsAuthenticated]
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def get(self,request):
 		#print("username:",request.auth.user)
 		params=request.GET

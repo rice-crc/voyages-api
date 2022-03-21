@@ -36,6 +36,8 @@ def bottomout(input,keychain):
 		##this allows it to return split fields (which occur with many to many relations, like voyage_ship_owner__name)
 		elif type(input[k])==list and len(keychain)>0:
 			k2=keychain.pop(0)
+			#you can use this to test for bad entries in the options file
+			#print(k,k2,[i for i in input[k]])
 			r=[i[k2] for i in input[k]]
 			return(r)
 		else:

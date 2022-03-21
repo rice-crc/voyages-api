@@ -24,7 +24,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - "./src/:/srv/voyagesapi"
+      - "./src/:/srv/voyages-api"
     build:
       context: "."
       dockerfile: "./docker/django/Dockerfile"

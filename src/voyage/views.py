@@ -228,6 +228,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		queryset=Voyage.objects.all()		
 		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
 		queryset=queryset.filter(**kwargs)
+		queryset=queryset.prefetch_related(k)
 		results_count=queryset.count()
 		fetchcount=10
 		vals=[]

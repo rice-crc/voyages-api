@@ -989,7 +989,6 @@
 	"voyage_sourceconnection__source__full_ref": {"type": "<class 'rest_framework.fields.CharField'>", "label": "Full reference"},
 	"voyage_sourceconnection__source__source_type": {"type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>", "label": "Source Type"},
 	"voyage_sourceconnection__text_ref": {"type": "<class 'rest_framework.fields.CharField'>", "label": "Text reference(citation)"},
-	"voyage_sourceconnection__group": {"type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>", "label": "Group"},
 	"voyage_id": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Voyage ID"},
 	"voyage_in_cd_rom": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Voyage in 1999 CD-ROM?"},
 	"last_update": {"type": "<class 'rest_framework.fields.DateTimeField'>", "label": "Last update"},

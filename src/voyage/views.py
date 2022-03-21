@@ -193,7 +193,7 @@ class VoyagePlaceList(generics.GenericAPIView):
 		else:
 			#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
 			if selected_fields==[]:
-				selected_fields=list(voyage_options.keys())
+				selected_fields=list(geo_options.keys())
 			outputs=[]
 			for s in serialized:
 				d={}

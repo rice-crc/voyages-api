@@ -98,7 +98,7 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_keys if '__' in i]))
 	for p in prefetch_vars:
 		queryset=queryset.prefetch_related(p)
-	#print('--prefetch--')
+	print('--prefetching %d vars--' %len(prefetch_vars))
 	#print(prefetch_vars)
 	
 	#AGGREGATIONS

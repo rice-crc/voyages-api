@@ -62,6 +62,9 @@ class EnslavedList(generics.GenericAPIView):
 				hierarchical=False
 		
 		if hierarchical==False:
+			if selected_fields==[]:
+				selected_fields=[i for i in past_options]
+			
 			for s in serialized:
 				d={}
 				for selected_field in selected_fields:
@@ -71,7 +74,9 @@ class EnslavedList(generics.GenericAPIView):
 				outputs.append(d)
 		else:
 			outputs=serialized
-
+		
+		
+		
 		times.append(time.time())
 		labels.append('flattening...')
 		print('--timings--')

@@ -347,7 +347,7 @@ def options_handler(self,request,flatfile=None,auto=False):
 	if 'auto' in request.query_params:
 		if request.query_params['auto'].lower() in ['true','1','y']:
 			auto=True
-	
+
 	if auto==True:
 		schema=options_walker({},'',self.get_serializer())
 	else:

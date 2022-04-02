@@ -39,9 +39,7 @@ class EnslavedList(generics.GenericAPIView):
 		labels=[]
 		print("FETCHING...")
 		times.append(time.time())
-
 		queryset=Enslaved.objects.all()
-		
 		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,past_options,auto_prefetch=True)
 		headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 		#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
@@ -74,9 +72,50 @@ class EnslavedList(generics.GenericAPIView):
 				outputs.append(d)
 		else:
 			outputs=serialized
+		times.append(time.time())
+		labels.append('flattening...')
+		print('--timings--')
+		for i in range(1,len(times)):
+			print(labels[i-1],times[i]-times[i-1])		
+		return JsonResponse(outputs,safe=False,headers=headers)
+	def post(self,request):
+		times=[]
+		labels=[]
+		print("FETCHING...")
+		times.append(time.time())
+		queryset=Enslaved.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,past_options,auto_prefetch=True)
+		headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+		times.append(time.time())
+		labels.append('building query')
+		read_serializer=EnslavedSerializer(queryset,many=True)
+		times.append(time.time())
+		labels.append('serialization')
+		serialized=read_serializer.data
+		times.append(time.time())
+		labels.append('sql execution')
+			
+		outputs=[]
 		
+		hierarchical=request.POST.get('hierarchical')
+		if str(hierarchical).lower() in ['false','0','f','n']:
+			hierarchical=False
+		else:
+			hierarchical=True
 		
-		
+		if hierarchical==False:
+			if selected_fields==[]:
+				selected_fields=[i for i in past_options]
+			
+			for s in serialized:
+				d={}
+				for selected_field in selected_fields:
+					keychain=selected_field.split('__')
+					bottomval=bottomout(s,list(keychain))
+					d[selected_field]=bottomval
+				outputs.append(d)
+		else:
+			outputs=serialized
 		times.append(time.time())
 		labels.append('flattening...')
 		print('--timings--')

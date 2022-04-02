@@ -80,30 +80,86 @@ Let's imagine that that username and password you've set are simply "voyages"/"v
 
 The full authentication workflow would look like:
 
-```
-import requests
-import json
-url='http://127.0.0.1:8000/voyages2022_auth_endpoint/'
-r=requests.post(url,{'username':'voyages','password':'voyages'})
-token=json.loads(r.text)['token']
 
-headers={'Authorization':'Token %s' %token}
+	import requests
+	import json
+	url='http://127.0.0.1:8000/voyages2022_auth_endpoint/'
+	r=requests.post(url,{'username':'voyages','password':'voyages'})
+	token=json.loads(r.text)['token']
 
-print(headers)
+	headers={'Authorization':'Token %s' %token}
 
-url='http://127.0.0.1:8000/voyage/'
-r=requests.get(url,headers=headers)
-```
+	print(headers)
 
-### 1. Request People, Voyages, Places, Estimates, or an Autocompletion
+	url='http://127.0.0.1:8000/voyage/'
+	r=requests.get(url,headers=headers)
+
+
+### 1. POST Requests
+
+March 31: Enabled POST requests
+
+Why?
+
+* This will allow for the construction of more complex queries
+* For instance, it allows us to use the autocomplete endpoint to turn inexact text searches into precise selectors
+
+How does it differ from GET requests documented below?
+
+* As little as possible :)
+* Values should simply be passed wrapped as arrays
+* With the one exception that inexact text matching has been deprecated in favor of exact matching of arrayed values
+
+So a request to PAST asking of people transported on voyages with Voyage ID's between 2314 and 2500 would look like
+	
+	POST http://127.0.0.1:8000/past/
+	
+	Body:
+	{
+		'hierarchical': ['false'],
+		'results_page': ['3'],
+		'results_per_page': ['20'],
+		'voyage__voyage_id': ['2314,2500']
+	}
+	
+And would return results 60-79 of 21,867 total records.
+
+
+Or, to use the exact text with autocomplete as hinted at above, you might send the following request
+
+	POST http://127.0.0.1:8000/voyage/autocomplete
+
+	Body:
+	{'voyage_itinerary__imp_principal_region_slave_dis__region': 'jam'}
+
+And get back
+
+	{
+		"voyage_itinerary__imp_principal_region_slave_dis__region": [
+			"Jamaica"
+		]
+	}
+
+Then feed that precise value into that variable:
+
+	POST http://127.0.0.1:8000/voyage/
+	
+	Body:
+	{	'voyage_itinerary__imp_principal_region_slave_dis__region':
+		['Barbados','Jamaica']
+	}
+
+And get back 5,816 results.
+
+
+### 2. Request People, Voyages, Places, Estimates, or an Autocompletion
 
 1. People: GET http://127.0.0.1:8000/past
 1. Voyages: GET http://127.0.0.1:8000/voyage
 1. Places: GET http://127.0.0.1:8000/voyage/geo
 1. Estimates:  GET http://127.0.0.1:8000/assessment
 
-```
-'imp_broad_region_voyage_begin':
+	'imp_broad_region_voyage_begin':
 	{
 	'broad_region': 'Brazil',
 	'id': 6,
@@ -112,9 +168,8 @@ r=requests.get(url,headers=headers)
 	'show_on_map': True,
 	'value': 50000
 	},	
-```
 
-Autocomplete
+#### 2a. Autocomplete
 
 1. accepts a request
 	1. for one field
@@ -127,50 +182,78 @@ example: GET http://127.0.0.1:8000/voyage/autocomplete?voyage_captainconnection_
 
 Looks like:
 
-```
-{"voyage_captainconnection__captain__name":
-	[
-		"Dias, Manoel José",
-		"Mata, José Maria da",
-		"Ferreira, José dos Santos",
-		"Amorim, José Gomes de",
-		"Santos, Félix José dos",
-		"Teodoro, Teotônio José",
-		"Castro, Alexandre José de",
-		"Teixeira, José de Souza",
-		"Oliveira, José Malaquias de",
-		"Gomes, Manoel José"
-	],
-	"results_count": 8207
-}
-```
+	{"voyage_captainconnection__captain__name":
+		[
+			"Dias, Manoel José",
+			"Mata, José Maria da",
+			"Ferreira, José dos Santos",
+			"Amorim, José Gomes de",
+			"Santos, Félix José dos",
+			"Teodoro, Teotônio José",
+			"Castro, Alexandre José de",
+			"Teixeira, José de Souza",
+			"Oliveira, José Malaquias de",
+			"Gomes, Manoel José"
+		],
+		"results_count": 8207
+	}
 
+### 3. Get a list of the variables available to you, and their labels and data types
 
-### 2. Get a list of the variables available to you, and their labels and data types
-
-1. People: ```OPTIONS http://127.0.0.1:8000/past?hierarchical=False```
-1. Voyages: ```OPTIONS http://127.0.0.1:8000/voyage?hierarchical=False```
+1. People: ```OPTIONS http://127.0.0.1:8000/past/?hierarchical=False```
+1. Voyages: ```OPTIONS http://127.0.0.1:8000/voyage/?hierarchical=False```
 1. Places: ```OPTIONS http://127.0.0.1:8000/voyage/geo?hierarchical=False```
 1. Estimates ```OPTIONS http://127.0.0.1:8000/assessment/?hierarchical=False```
-
-This looks like:
-
-```
-'transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__region__latitude':
-	{
-	'label': 'Latitude of point',
-	'type': '<class "rest_framework.fields.DecimalField>"
-	}
-```
 
 Why "hierarchical=False"?
 
 1. The default is hierarchical=True, which gives you a tree
 1. These variables' hierarchical relations correspond to links between db tables
 1. The django syntax for those links is a double underscore: "__"
-1. Coders are telling me it's easier to use the fully-qualified name of the variable rather than piecing it together
+1. Variable labels are now presented in two formats:
+	1. "label" which is just the field label without context (good for nested menus)
+	1. "flatlabel" which is a concatenated label -- good for menus targeting specific fields
 
-### 3a. Filter, Sort, Order_by on any of these variables
+hierarchical=False looks like:
+
+
+    ...
+    "voyage_itinerary__port_of_departure__region__longitude": {
+        "type": "<class 'rest_framework.fields.DecimalField'>",
+        "label": "Longitude of point",
+        "flatlabel": "Voyage itinerary : Port of departure : Region : Longitude of point"
+    }
+    ...
+
+
+hierarchical=True looks like:
+
+	...
+    "voyage_itinerary": {
+        "type": "table",
+        "label": "Voyage itinerary",
+        "flatlabel": "Voyage itinerary",
+        "model": "voyage.models.Voyage",
+        "id": {
+            "type": "<class 'rest_framework.fields.IntegerField'>",
+            "label": "ID",
+            "flatlabel": "Voyage itinerary : ID"
+        },
+        "port_of_departure": {
+            "type": "table",
+            "label": "Port of departure",
+            "flatlabel": "Voyage itinerary : Port of departure",
+            "model": "voyage.models.VoyageItinerary",
+            "id": {
+                "type": "<class 'rest_framework.fields.IntegerField'>",
+                "label": "ID",
+                "flatlabel": "Voyage itinerary : Port of departure : ID"
+            },
+        }
+    }
+	...
+
+### 3a. Filter and sort on any of these variables
 
 1. GET http://127.0.0.1:8000/voyage?voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1810
 1. GET http://127.0.0.1:8000/voyage/?voyage_itinerary__imp_principal_region_slave_dis__region=Barbados&voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1850&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_yyyy,voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_itinerary__imp_port_voyage_begin__place,voyage_ship_owner__name,voyage_itinerary__imp_principal_region_slave_dis__region&results_page=2&order_by=voyage_dates__imp_arrival_at_port_of_dis_yyyy,voyage_itinerary__imp_port_voyage_begin__name,voyage_itinerary__imp_port_voyage_begin__longitude
@@ -192,26 +275,25 @@ e.g., ```GET http://127.0.0.1:8000/voyage/aggregations?aggregate_fields=voyage_s
 
 Looks like:
 
-```
-{
-"voyage_slaves_numbers__imp_total_num_slaves_embarked":
 	{
-	"sum": 11264030,
-	"avg": 181.3269,
-	"min": 0,
-	"max": 2024,
-	"stddev": 186.44502407088743
-	},
-"voyage_slaves_numbers__imp_total_num_slaves_disembarked":
-	{
-	"sum": 9776588,
-	"avg": 158.1281,
-	"min": 0,
-	"max": 1700,
-	"stddev": 163.52181290079272
+	"voyage_slaves_numbers__imp_total_num_slaves_embarked":
+		{
+		"sum": 11264030,
+		"avg": 181.3269,
+		"min": 0,
+		"max": 2024,
+		"stddev": 186.44502407088743
+		},
+	"voyage_slaves_numbers__imp_total_num_slaves_disembarked":
+		{
+		"sum": 9776588,
+		"avg": 158.1281,
+		"min": 0,
+		"max": 1700,
+		"stddev": 163.52181290079272
+		}
 	}
-}
-```
+
 
 ### 4. Paginate
 
@@ -227,34 +309,33 @@ e.g., GET http://127.0.0.1:8000/voyage/dataframes?&voyage_dates__imp_arrival_at_
 
 Looks like:
 
-```
-{   'voyage_itinerary__first_landing_place__place':
-	[
-		'Barbados, port unspecified',
-		'Freetown',
-		'Freetown',
-		...
-	],
-	'voyage_itinerary__first_landing_region__region':
-	[
-		'Barbados',
-		'Sierra Leone',
-		'Sierra Leone',
-		...
-	],
-	'voyage_itinerary__imp_broad_region_voyage_begin__broad_region':
-	[
-		'Mainland North America',
-		None,
-		None,
-		...
-	],
-	'voyage_slaves_numbers__imp_total_num_slaves_embarked':
-	[
-		168,
-		130,
-		68,
-		...
-	]
-}
-```
+	{   'voyage_itinerary__first_landing_place__place':
+		[
+			'Barbados, port unspecified',
+			'Freetown',
+			'Freetown',
+			...
+		],
+		'voyage_itinerary__first_landing_region__region':
+		[
+			'Barbados',
+			'Sierra Leone',
+			'Sierra Leone',
+			...
+		],
+		'voyage_itinerary__imp_broad_region_voyage_begin__broad_region':
+		[
+			'Mainland North America',
+			None,
+			None,
+			...
+		],
+		'voyage_slaves_numbers__imp_total_num_slaves_embarked':
+		[
+			168,
+			130,
+			68,
+			...
+		]
+	}
+

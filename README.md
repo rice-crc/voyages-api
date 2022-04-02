@@ -200,27 +200,58 @@ Looks like:
 
 ### 3. Get a list of the variables available to you, and their labels and data types
 
-1. People: ```OPTIONS http://127.0.0.1:8000/past?hierarchical=False```
-1. Voyages: ```OPTIONS http://127.0.0.1:8000/voyage?hierarchical=False```
+1. People: ```OPTIONS http://127.0.0.1:8000/past/?hierarchical=False```
+1. Voyages: ```OPTIONS http://127.0.0.1:8000/voyage/?hierarchical=False```
 1. Places: ```OPTIONS http://127.0.0.1:8000/voyage/geo?hierarchical=False```
 1. Estimates ```OPTIONS http://127.0.0.1:8000/assessment/?hierarchical=False```
-
-This looks like:
-
-
-	'transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__region__latitude':
-		{
-		'label': 'Latitude of point',
-		'type': '<class "rest_framework.fields.DecimalField>"
-		}
-
 
 Why "hierarchical=False"?
 
 1. The default is hierarchical=True, which gives you a tree
 1. These variables' hierarchical relations correspond to links between db tables
 1. The django syntax for those links is a double underscore: "__"
-1. Coders are telling me it's easier to use the fully-qualified name of the variable rather than piecing it together
+1. Variable labels are now presented in two formats:
+	1. "label" which is just the field label without context (good for nested menus)
+	1. "flatlabel" which is a concatenated label -- good for menus targeting specific fields
+
+hierarchical=False looks like:
+
+
+    ...
+    "voyage_itinerary__port_of_departure__region__longitude": {
+        "type": "<class 'rest_framework.fields.DecimalField'>",
+        "label": "Longitude of point",
+        "flatlabel": "Voyage itinerary : Port of departure : Region : Longitude of point"
+    }
+    ...
+
+
+hierarchical=True looks like:
+
+	...
+    "voyage_itinerary": {
+        "type": "table",
+        "label": "Voyage itinerary",
+        "flatlabel": "Voyage itinerary",
+        "model": "voyage.models.Voyage",
+        "id": {
+            "type": "<class 'rest_framework.fields.IntegerField'>",
+            "label": "ID",
+            "flatlabel": "Voyage itinerary : ID"
+        },
+        "port_of_departure": {
+            "type": "table",
+            "label": "Port of departure",
+            "flatlabel": "Voyage itinerary : Port of departure",
+            "model": "voyage.models.VoyageItinerary",
+            "id": {
+                "type": "<class 'rest_framework.fields.IntegerField'>",
+                "label": "ID",
+                "flatlabel": "Voyage itinerary : Port of departure : ID"
+            },
+        }
+    }
+	...
 
 ### 3a. Filter and sort on any of these variables
 

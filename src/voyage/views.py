@@ -20,6 +20,8 @@ import collections
 import gc
 from .serializers import *
 
+pp = pprint.PrettyPrinter(indent=4)
+
 d=open('voyage/voyage_options.json','r')
 voyage_options=(json.loads(d.read()))
 d.close()
@@ -28,6 +30,21 @@ d=open('voyage/geo_options.json','r')
 geo_options=(json.loads(d.read()))
 d.close()
 
+def vaddlevel(thisdict,keychain,payload):
+	thiskey=keychain.pop(0)
+	if len(keychain)>0:
+		if thiskey not in thisdict:
+			thisdict[thiskey]={}
+		thisdict[thiskey]=addlevel(thisdict[thiskey],keychain,payload)
+	else:
+		if thiskey not in thisdict:
+			thisdict[thiskey]=payload
+		else:
+			if type(payload)==dict:
+				for p in payload:
+					thisdict[thiskey][p]=payload[p]
+	return thisdict
+
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class VoyageList(generics.GenericAPIView):
@@ -35,8 +52,22 @@ class VoyageList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
-		schema=options_handler(self,request,voyage_options)
-		return JsonResponse(schema)
+		hierarchical=True
+		if 'hierarchical' in request.query_params:
+			if request.query_params['hierarchical'].lower() in ['false','0','n']:
+				hierarchical=False
+		
+		if hierarchical:
+			options_file='voyage/voyage_options_hierarchical.json'
+		else:
+			options_file='voyage/voyage_options_flat.json'
+			
+		print(options_file)
+		d=open(options_file,'r')
+		t=d.read()
+		d.close()
+		j=json.loads(t)
+		return JsonResponse(j)
 	def get(self,request):
 		print("username:",request.auth.user)
 		t=timer('FETCHING...',[])
@@ -221,8 +252,22 @@ class VoyagePlaceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
-		schema=options_handler(self,request,geo_options)
-		return JsonResponse(schema,safe=False)
+		schema=voyage_options
+		hierarchical=True
+		if 'hierarchical' in request.query_params:
+			if request.query_params['hierarchical'].lower() in ['false','0','n']:
+				hierarchical=False
+		
+		if hierarchical:
+			options_file='voyage/geo_options_hierarchical.json'
+		else:
+			options_file='voyage/geo_options_flat.json'
+			
+		d=open(options_file,'r')
+		t=d.read()
+		d.close()
+		j=json.loads(t)
+		return JsonResponse(j)
 	def post(self,request):
 		#print("username:",request.auth.user)
 		t=timer("FETCHING...",[])

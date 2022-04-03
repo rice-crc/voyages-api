@@ -64,60 +64,8 @@ def addlevel(thisdict,keychain,payload):
 
 ##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES
 ##PUSHING MODEL VERBOSE NAMES INTO THE ID FIELDS' LABELS SO THAT WE HAVE TABLE-LEVEL LABELS
-##ASSUMES ID AS PK ON EVERY TABLE -- WILL NEED LOTS OF MIGRATIONS TO MAKE THIS HAPPEN
+##ASSUMES ID AS PK ON EVERY TABLE -- WILL NEED LOTS OF MIGRATIONS TO MAKE THIS HAPPEN	
 
-def labelconcatenate(valuelist):
-	joinedlabel=' : '.join([i for i in valuelist if i not in [None,'s']])
-	return(joinedlabel)
-	
-
-def options_walker(schema,base_address,serializer,baseflatlabel=None):
-	try:
-		fields=serializer.fields.__dict__['fields']
-	except:
-		#this (unintelligently) handles through fields
-		fields=serializer.__dict__['child'].fields
-	for field in fields:
-		datatypestr=str(type(fields[field]))
-		if base_address!='':
-			address='__'.join([base_address,field])
-		else:
-			address=field
-		if 'SerializerMethodField' in datatypestr:
-			#this handles serializermethodfields
-			#(which I am storing in the "default" key)
-			#print("++++++++++++",address,label)
-			label=fields[field].label
-			datatypestr=str(fields[field].__dict__['default'])
-			schema[address]={'type':datatypestr,'label':label,'flatlabel': labelconcatenate([baseflatlabel,label])}	
-		elif 'PrimaryKeyRelatedField' in datatypestr:
-			label=fields[field].label
-			#print("++++++++++++",address,label)
-		elif 'serializer' in datatypestr:
-			label=fields[field].label
-			try:
-				s=str(serializer.Meta.model)
-				try:
-					model=re.search("(?<=<class \').*(?=\')",s).group(0)
-				except:
-					model="Unkown model name -- retrieval failed"
-			except:
-				s=str(serializer.__dict__['child'].Meta.model)
-				try:
-					model=re.search("(?<=<class \').*(?=\')",s).group(0)
-				except:
-					model="Unkown model name -- retrieval failed"
-			schema[address]={'type':'table','label':label,'flatlabel': labelconcatenate([baseflatlabel,label]),'model':model}
-			
-			schema=options_walker(schema,address,fields[field],labelconcatenate([baseflatlabel,label]))
-		else:			
-			if address.endswith("__id"):
-				label="ID"
-				schema[address]={'type':datatypestr,'label':label,'flatlabel': labelconcatenate([baseflatlabel,label])}
-			else:
-				label=fields[field].label
-				schema[address]={'type':datatypestr,'label':label,'flatlabel': labelconcatenate([baseflatlabel,label])}
-	return schema
 
 def nest_selected_fields(self,selected_fields_dict):
 	fields=list(self.fields)

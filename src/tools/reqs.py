@@ -349,6 +349,7 @@ def options_handler(self,request,flatfile=None,auto=False):
 			auto=True
 
 	if auto==True:
+		print("auto")
 		schema=options_walker({},'',self.get_serializer())
 	else:
 		schema=flatfile
@@ -360,6 +361,7 @@ def options_handler(self,request,flatfile=None,auto=False):
 	
 	unwound={}
 	if hierarchical==True:
+		print("tree")
 		for i in schema:
 			payload=schema[i]
 			keychain=i.split('__')

@@ -20,7 +20,7 @@ from tools.reqs import *
 import collections
 
 
-d=open('past/past_options.json','r')
+d=open('past/past_options_flat.json','r')
 past_options=(json.loads(d.read()))
 d.close()
 

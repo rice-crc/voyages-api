@@ -58,6 +58,8 @@ class PlaceSerializer(DynamicFieldsModelSerializer):
 		model=Place
 		fields='__all__'
 
+
+
 ##### VESSEL VARIABLES ##### 
 
 class RigOfVesselSerializer(serializers.ModelSerializer):
@@ -244,7 +246,6 @@ class VoyageSourcesConnectionSerializer(serializers.ModelSerializer):
 class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_itinerary=VoyageItinerarySerializer(many=False)
 	voyage_dates=VoyageDatesSerializer(many=False)
-	voyage_dates=VoyageDatesSerializer(many=False)
 	voyage_groupings=VoyageGroupingsSerializer(many=False)
 	voyage_crew=VoyageCrewSerializer(many=False)
 	voyage_ship=VoyageShipSerializer(many=False)
@@ -253,6 +254,11 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)
 	voyage_outcome=VoyageOutcomeSerializer(many=False)
 	voyage_sourceconnection=VoyageSourcesConnectionSerializer(many=True,read_only=True)
+	
 	class Meta:
 		model=Voyage
+		#can't get away without declaring these
+		##so long as I'm using the _declared_fields function in the options file maker
 		fields='__all__'
+		
+		

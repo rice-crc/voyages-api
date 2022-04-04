@@ -271,6 +271,8 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		aggqueryset=[]
 		selected_fields=[]
 		for aggfield in aggregation_fields:
+			print('aggggggg--->',aggfield)
+			queryset=queryset.prefetch_related(aggfield)
 			for aggsuffix in ["sum","avg","min","max","count","stddev"]:
 				selected_fields.append(aggfield+"_"+aggsuffix)
 			aggqueryset.append(queryset.aggregate(Sum(aggfield)))
@@ -278,7 +280,7 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			aggqueryset.append(queryset.aggregate(Min(aggfield)))
 			aggqueryset.append(queryset.aggregate(Max(aggfield)))
 			aggqueryset.append(queryset.aggregate(Max(aggfield)))
-			aggqueryset.append(queryset.aggregate(StdDev(aggfield)))
+			#aggqueryset.append(queryset.aggregate(StdDev(aggfield)))
 		queryset=aggqueryset
 		
 	#PAGINATION/LIMITS

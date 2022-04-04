@@ -20,7 +20,7 @@ from tools.nest import *
 from tools.reqs import *
 import collections
 
-d=open('assessment/assessment_options.json','r')
+d=open('assessment/assessment_options_flat.json','r')
 assessment_options=(json.loads(d.read()))
 d.close()
 

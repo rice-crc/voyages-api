@@ -2,6 +2,11 @@ import requests
 import json
 from django.core.management.base import BaseCommand, CommandError
 from voyage.serializers import VoyageSerializer,PlaceSerializer
+from voyage.models import Voyage,Place
+from past.serializers import EnslavedSerializer
+from past.models import Enslaved
+from assessment.serializers import EstimateSerializer
+from assessment.models import Estimate
 
 
 class Command(BaseCommand):
@@ -10,12 +15,24 @@ class Command(BaseCommand):
 		flatfile_params=[
 			{
 				'output_filename':'voyage/voyage_options',
-				'serializer':VoyageSerializer
+				'serializer':VoyageSerializer,
+				'objectclass':Voyage
 			},
 			{
-				'output_filename':'/voyage/geo/geo_options',
-				'serializer':PlaceSerializer
-			}
+				'output_filename':'voyage/geo_options',
+				'serializer':PlaceSerializer,
+				'objectclass':Place
+			},
+			{
+				'output_filename':'past/past_options',
+				'serializer':EnslavedSerializer,
+				'objectclass':Enslaved
+			},
+			{
+				'output_filename':'assessment/assessment_options',
+				'serializer':EstimateSerializer,
+				'objectclass':Estimate
+			},
 		]
 
 		def addlevel(thisdict,keychain,payload):
@@ -63,8 +80,11 @@ class Command(BaseCommand):
 			
 			if base_address=='':
 				extrafields=serializer.Meta.fields
+				print(base_address)
+				#print(extrafields,fields)
 				for f in extrafields:
 					if f not in fields:
+						print(f)
 						#print(eval("serializer.Meta.model."+f+".__dict__"))
 						#print(serializer.Meta.model.__dict__[f].__dict__['field'].__dict__)
 						fields[f]=serializer.Meta.model.__dict__[f].__dict__['field']
@@ -100,10 +120,10 @@ class Command(BaseCommand):
 					#print(label)
 					flatlabel=valuesconcatenate([baseflatlabel,label]," : ")
 					
-					schema[address]={'type':datatypestr,'label':label,'flatlabel':flatlabel}
+					schema[address]={'type':'table','label':label,'flatlabel':flatlabel}
 					
 					#schema[address]={}
-					schema=options_walker2(schema,address,fields[field],flatlabel)
+					schema=options_walker(schema,address,fields[field],flatlabel)
 				else:
 					#print("--->",address,datatypestr)
 					#print(fields[field])
@@ -117,11 +137,63 @@ class Command(BaseCommand):
 					schema[address]={'type':datatypestr,'label':label,'flatlabel':flatlabel}
 			
 			return schema
+	
+	
+	
+	
+	
+	
+	
 
+		def options_walker2(schema,base_address,serializer,baseflatlabel=None):
+			
+			fields=serializer.fields
+			
+			if len(fields)<=1:
+			#if base_address=="voyage_itinerary__first_landing_place":
+				#print(base_address,list(fields),str(serializer))
+				try:
+					#print(serializer.fields)
+					fields=serializer.fields
+				except:
+					pass
+			for field in fields:
+				datatypestr=str(type(fields[field]))
+				if base_address!='':
+					address='__'.join([base_address,field])
+				else:
+					address=field
+				
+				if 'serializer' in datatypestr:
+					
+					try:
+						label=serializer.Meta.model.__dict__[field].__dict__['field'].__dict__['verbose_name']
+					except:
+						label=serializer.child.fields[field].Meta.model._meta.verbose_name
+					flatlabel=valuesconcatenate([baseflatlabel,label]," : ")
+					schema[address]={'type':'table','label':label,'flatlabel':flatlabel}
+					schema=options_walker(schema,address,fields[field],flatlabel)
+				else:
+					try:
+						label=fields[field].__dict__['label']
+					except:
+						label=fields[field].__dict__['verbose_name']
+					flatlabel=valuesconcatenate([baseflatlabel,label]," : ")
+					#queryset=fields[field].queryset
+					schema[address]={'type':datatypestr,'label':label,'flatlabel':flatlabel}
+			
+			return schema
+		
 		for fp in flatfile_params:
+			
+			
 			output_filename=fp['output_filename']
 			serializer=fp['serializer']
-			flat=options_walker2({},'',serializer)
+			objectclass=fp['objectclass']
+			
+			testobject=objectclass.objects.all()
+			testobject=serializer(testobject,many=False)
+			flat=options_walker2({},'',testobject)
 			d=open(output_filename+'_flat.json','w')
 			d.write(json.dumps(flat))
 			d.close

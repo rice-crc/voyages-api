@@ -22,11 +22,11 @@ from .serializers import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
-d=open('voyage/voyage_options.json','r')
+d=open('voyage/voyage_options_flat.json','r')
 voyage_options=(json.loads(d.read()))
 d.close()
 
-d=open('voyage/geo_options.json','r')
+d=open('voyage/geo_options_flat.json','r')
 geo_options=(json.loads(d.read()))
 d.close()
 
@@ -67,7 +67,7 @@ class VoyageList(generics.GenericAPIView):
 		t=d.read()
 		d.close()
 		j=json.loads(t)
-		return JsonResponse(j)
+		return JsonResponse(j,safe=False)
 	def get(self,request):
 		print("username:",request.auth.user)
 		t=timer('FETCHING...',[])
@@ -267,7 +267,7 @@ class VoyagePlaceList(generics.GenericAPIView):
 		t=d.read()
 		d.close()
 		j=json.loads(t)
-		return JsonResponse(j)
+		return JsonResponse(j,safe=False)
 	def post(self,request):
 		#print("username:",request.auth.user)
 		t=timer("FETCHING...",[])

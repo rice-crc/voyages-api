@@ -16,22 +16,22 @@ class Command(BaseCommand):
 		 
 		flatfile_params=[
 			{
-				'output_filename':'voyage/voyage_options',
+				'output_filename':'voyage/voyage_options.json',
 				'serializer':VoyageSerializer,
 				'objectclass':Voyage
 			},
 			{
-				'output_filename':'voyage/geo_options',
+				'output_filename':'voyage/geo_options.json',
 				'serializer':PlaceSerializer,
 				'objectclass':Place
 			},
 			{
-				'output_filename':'past/past_options',
+				'output_filename':'past/past_options.json',
 				'serializer':EnslavedSerializer,
 				'objectclass':Enslaved
 			},
 			{
-				'output_filename':'assessment/assessment_options',
+				'output_filename':'assessment/assessment_options.json',
 				'serializer':EstimateSerializer,
 				'objectclass':Estimate
 			}
@@ -99,16 +99,7 @@ class Command(BaseCommand):
 			testobject=objectclass.objects.all()
 			testobject=serializer(testobject,many=False)
 			flat=options_walker2({},'',testobject)
-			d=open(output_filename+'_flat.json','w')
+			d=open(output_filename,'w')
 			d.write(json.dumps(flat))
 			d.close
-			hierarchical={}
-			for i in flat:
-				payload=flat[i]
-				keychain=i.split('__')
-				key=keychain[0]
-				hierarchical=addlevel(hierarchical,keychain,payload)
-			d=open(output_filename+'_hierarchical.json','w')
-			d.write(json.dumps(hierarchical))
 			print("--> wrote %d var descriptions"%len(flat))
-			d.close

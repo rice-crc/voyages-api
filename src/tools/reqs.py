@@ -1,3 +1,4 @@
+import json
 import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q
@@ -330,3 +331,17 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		prev_uri=None
 	
 	return queryset,selected_fields,next_uri,prev_uri,results_count
+
+
+def options_handler(flatfilepath,request):
+	hierarchical=True
+	if 'hierarchical' in request.query_params:
+		if request.query_params['hierarchical'].lower() in ['false','0','n']:
+			hierarchical=False
+	d=open(flatfilepath,'r')
+	t=d.read()
+	j=json.loads(t)
+	d.close()
+	if hierarchical:
+		j=nest_django_dict(j)
+	return j

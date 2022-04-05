@@ -22,14 +22,6 @@ from .serializers import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
-d=open('voyage/voyage_options_flat.json','r')
-voyage_options=(json.loads(d.read()))
-d.close()
-
-d=open('voyage/geo_options_flat.json','r')
-geo_options=(json.loads(d.read()))
-d.close()
-
 def vaddlevel(thisdict,keychain,payload):
 	thiskey=keychain.pop(0)
 	if len(keychain)>0:
@@ -52,21 +44,7 @@ class VoyageList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
-		hierarchical=True
-		if 'hierarchical' in request.query_params:
-			if request.query_params['hierarchical'].lower() in ['false','0','n']:
-				hierarchical=False
-		
-		if hierarchical:
-			options_file='voyage/voyage_options_hierarchical.json'
-		else:
-			options_file='voyage/voyage_options_flat.json'
-			
-		print(options_file)
-		d=open(options_file,'r')
-		t=d.read()
-		d.close()
-		j=json.loads(t)
+		j=options_handler('voyage/voyage_options.json',request)
 		return JsonResponse(j,safe=False)
 	def get(self,request):
 		print("username:",request.auth.user)
@@ -252,21 +230,7 @@ class VoyagePlaceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
-		schema=voyage_options
-		hierarchical=True
-		if 'hierarchical' in request.query_params:
-			if request.query_params['hierarchical'].lower() in ['false','0','n']:
-				hierarchical=False
-		
-		if hierarchical:
-			options_file='voyage/geo_options_hierarchical.json'
-		else:
-			options_file='voyage/geo_options_flat.json'
-			
-		d=open(options_file,'r')
-		t=d.read()
-		d.close()
-		j=json.loads(t)
+		j=options_handler('voyage/geo_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		#print("username:",request.auth.user)

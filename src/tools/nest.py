@@ -2,28 +2,6 @@ import collections
 from rest_framework import serializers
 import re
 
-def nestthis(keychain,thisdict={}):
-	while keychain:
-		k=keychain.pop(0)
-		kvs=k.split('__')
-		if len(kvs)==2:
-			i,v=kvs
-			if i in thisdict:
-				thisdict[i][v]={}
-			else:
-				thisdict[i]={v:{}}
-					
-		elif len(kvs)==1:
-			thisdict[kvs[0]]={}
-		else:
-			i=kvs[0]
-			j=['__'.join(kvs[1:])]
-			if i in thisdict:
-				thisdict[i]=nestthis(j,thisdict[i])
-			else:
-				thisdict[i]=nestthis(j,{})
-	return thisdict
-
 #provided an ordered dict and a hierarchically-ordered list of keys
 ##like: ['voyage_itinerary','imp_port_voyage_begin','longitude']
 ##and: OrderedDict([('imp_principal_region_slave_dis', None), ('imp_port_voyage_begin', OrderedDict([('place', 'Baltimore'), ('longitude', '-76.6125000')]))])
@@ -47,6 +25,29 @@ def bottomout(input,keychain):
 	return(r)
 
 ##RECURSIVE NEST-BUILDERS
+
+def nestthis(keychain,thisdict={}):
+	while keychain:
+		k=keychain.pop(0)
+		kvs=k.split('__')
+		if len(kvs)==2:
+			i,v=kvs
+			if i in thisdict:
+				thisdict[i][v]={}
+			else:
+				thisdict[i]={v:{}}
+					
+		elif len(kvs)==1:
+			thisdict[kvs[0]]={}
+		else:
+			i=kvs[0]
+			j=['__'.join(kvs[1:])]
+			if i in thisdict:
+				thisdict[i]=nestthis(j,thisdict[i])
+			else:
+				thisdict[i]=nestthis(j,{})
+	return thisdict
+
 def addlevel(thisdict,keychain,payload):
 	thiskey=keychain.pop(0)
 	if len(keychain)>0:
@@ -61,6 +62,15 @@ def addlevel(thisdict,keychain,payload):
 				for p in payload:
 					thisdict[thiskey][p]=payload[p]
 	return thisdict
+
+def nest_django_dict(flat_dict):
+	hierarchical={}
+	for i in flat_dict:
+		payload=flat_dict[i]
+		keychain=i.split('__')
+		key=keychain[0]
+		hierarchical=addlevel(hierarchical,keychain,payload)
+	return hierarchical
 
 def nest_selected_fields(self,selected_fields_dict):
 	fields=list(self.fields)

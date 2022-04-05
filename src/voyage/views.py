@@ -22,6 +22,11 @@ from .serializers import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
+
+voyage_options=options_handler('voyage/voyage_options.json',hierarchical=False)
+geo_options=options_handler('voyage/geo_options.json',hierarchical=False)
+
+
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class VoyageList(generics.GenericAPIView):

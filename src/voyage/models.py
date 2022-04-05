@@ -74,7 +74,7 @@ class Place(models.Model):
 	"""
 
 	place = models.CharField(max_length=255)
-	region = models.ForeignKey('Region', on_delete=models.CASCADE)
+	region = models.ForeignKey('Region', on_delete=models.CASCADE, verbose_name="Region")
 	value = models.IntegerField("Numeric code", unique=True)
 	longitude = models.DecimalField("Longitude of point",
 									max_digits=10,

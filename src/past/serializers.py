@@ -81,4 +81,32 @@ class EnslavedSerializer(serializers.ModelSerializer):
 	captive_status=CaptiveStatusSerializer(many=False)
 	class Meta:
 		model=Enslaved
-		fields='__all__'
+		fields=[
+			'post_disembark_location',
+			'voyage',
+			'captive_fate',
+			'sources_conn',
+			'transactions',
+			'captive_status',
+			'id',
+			'documented_name',
+			'name_first',
+			'name_second',
+			'name_third',
+			'modern_name',
+			'editor_modern_names_certainty',
+			'age',
+			'gender',
+			'height',
+			'skin_color',
+			'last_known_date',
+			'last_known_date_dd',
+			'last_known_date_mm',
+			'last_known_year_yyyy',
+			'dataset',
+			'notes',
+			'sources',
+			]
+		
+		
+		

@@ -20,13 +20,7 @@ import collections
 import gc
 from .serializers import *
 
-d=open('voyage/voyage_options.json','r')
-voyage_options=(json.loads(d.read()))
-d.close()
-
-d=open('voyage/geo_options.json','r')
-geo_options=(json.loads(d.read()))
-d.close()
+pp = pprint.PrettyPrinter(indent=4)
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
@@ -35,8 +29,8 @@ class VoyageList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
-		schema=options_handler(self,request,voyage_options)
-		return JsonResponse(schema)
+		j=options_handler('voyage/voyage_options.json',request)
+		return JsonResponse(j,safe=False)
 	def get(self,request):
 		print("username:",request.auth.user)
 		t=timer('FETCHING...',[])
@@ -221,8 +215,8 @@ class VoyagePlaceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
-		schema=options_handler(self,request,geo_options)
-		return JsonResponse(schema,safe=False)
+		j=options_handler('voyage/geo_options.json',request)
+		return JsonResponse(j,safe=False)
 	def post(self,request):
 		#print("username:",request.auth.user)
 		t=timer("FETCHING...",[])

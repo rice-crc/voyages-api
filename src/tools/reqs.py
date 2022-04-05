@@ -1,3 +1,4 @@
+import json
 import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q
@@ -271,6 +272,8 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		aggqueryset=[]
 		selected_fields=[]
 		for aggfield in aggregation_fields:
+			print('aggggggg--->',aggfield)
+			queryset=queryset.prefetch_related(aggfield)
 			for aggsuffix in ["sum","avg","min","max","count","stddev"]:
 				selected_fields.append(aggfield+"_"+aggsuffix)
 			aggqueryset.append(queryset.aggregate(Sum(aggfield)))
@@ -278,7 +281,7 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			aggqueryset.append(queryset.aggregate(Min(aggfield)))
 			aggqueryset.append(queryset.aggregate(Max(aggfield)))
 			aggqueryset.append(queryset.aggregate(Max(aggfield)))
-			aggqueryset.append(queryset.aggregate(StdDev(aggfield)))
+			#aggqueryset.append(queryset.aggregate(StdDev(aggfield)))
 		queryset=aggqueryset
 		
 	#PAGINATION/LIMITS
@@ -329,42 +332,16 @@ def get_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	return queryset,selected_fields,next_uri,prev_uri,results_count
 
-def options_handler(self,request,flatfile=None,auto=False):
-	"""
-	Handler method for 'OPTIONS' request.
-	CAN SPECIFY "hierarchical=True to get a nested schema" -- DEFAULT IS FLAT
-	"""		
-	#GETS A FLAT VERSION OF THE SCHEMA WITH DOUBLE-UNDERSCORES FOR NESTED RELATIONS
-	
-	schema=flatfile
-	
-	#AUTO OPTIONS IS
-	#OVERKILL FOR THE PUBLIC API
-	#WEIRD & FRAGILE
-	#GOING TO MOVE TO A MANAGED STATIC OPTIONS ENDPOINT
-	#FIRST STEP, REMOVE PUBLIC ACCESS TO AUTO-GENERATED SCHEMA
-	#& GET THE STATIC ENDPOINT RIGHT
-	if 'auto' in request.query_params:
-		if request.query_params['auto'].lower() in ['true','1','y']:
-			auto=True
 
-	if auto==True:
-		schema=options_walker({},'',self.get_serializer())
-	else:
-		schema=flatfile
-	
+def options_handler(flatfilepath,request):
 	hierarchical=True
 	if 'hierarchical' in request.query_params:
 		if request.query_params['hierarchical'].lower() in ['false','0','n']:
 			hierarchical=False
-	
-	unwound={}
-	if hierarchical==True:
-		for i in schema:
-			payload=schema[i]
-			keychain=i.split('__')
-			key=keychain[0]
-			unwound=addlevel(unwound,keychain,payload)
-		schema=unwound
-	
-	return schema
+	d=open(flatfilepath,'r')
+	t=d.read()
+	j=json.loads(t)
+	d.close()
+	if hierarchical:
+		j=nest_django_dict(j)
+	return j

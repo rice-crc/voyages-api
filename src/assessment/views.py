@@ -20,30 +20,6 @@ from tools.nest import *
 from tools.reqs import *
 import collections
 
-
-def nest_django_dict(flat_dict):
-	hierarchical={}
-	for i in flat_dict:
-		payload=flat_dict[i]
-		keychain=i.split('__')
-		key=keychain[0]
-		hierarchical=addlevel(hierarchical,keychain,payload)
-	return hierarchical
-
-def options_handler(flatfilepath,request):
-	hierarchical=True
-	if 'hierarchical' in request.query_params:
-		if request.query_params['hierarchical'].lower() in ['false','0','n']:
-			hierarchical=False
-	d=open(flatfilepath,'r')
-	t=d.read()
-	j=json.loads(t)
-	d.close()
-	if hierarchical:
-		j=nest_django_dict(j)
-	return j
-
-
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class AssessmentList(generics.GenericAPIView):

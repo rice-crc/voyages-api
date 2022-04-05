@@ -63,15 +63,6 @@ def addlevel(thisdict,keychain,payload):
 					thisdict[thiskey][p]=payload[p]
 	return thisdict
 
-def nest_django_dict(flat_dict):
-	hierarchical={}
-	for i in flat_dict:
-		payload=flat_dict[i]
-		keychain=i.split('__')
-		key=keychain[0]
-		hierarchical=addlevel(hierarchical,keychain,payload)
-	return hierarchical
-
 def nest_selected_fields(self,selected_fields_dict):
 	fields=list(self.fields)
 	for field in fields:

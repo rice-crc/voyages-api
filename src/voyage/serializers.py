@@ -144,7 +144,6 @@ class VoyageItinerarySerializer(serializers.ModelSerializer):
 ##### SOURCES ##### 
 
 class VoyageSourcesSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=VoyageSources
 		fields='__all__'
@@ -152,32 +151,27 @@ class VoyageSourcesSerializer(serializers.ModelSerializer):
 ##### OUTCOMES #####
 
 class ParticularOutcomeSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=ParticularOutcome
 		fields='__all__'
 
 
 class SlavesOutcomeSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=SlavesOutcome
 		fields='__all__'
 		
 class ResistanceSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=Resistance
 		fields='__all__'
 
 class OwnerOutcomeSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=OwnerOutcome
 		fields='__all__'
 
 class VesselCapturedOutcomeSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=VesselCapturedOutcome
 		fields='__all__'
@@ -257,8 +251,6 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	
 	class Meta:
 		model=Voyage
-		#can't get away without declaring these
-		##so long as I'm using the _declared_fields function in the options file maker
 		fields='__all__'
 		
 		

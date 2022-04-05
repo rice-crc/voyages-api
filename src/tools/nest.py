@@ -46,7 +46,7 @@ def bottomout(input,keychain):
 		r=[]
 	return(r)
 
-##RECURSIVE NEST-BUILDER
+##RECURSIVE NEST-BUILDERS
 def addlevel(thisdict,keychain,payload):
 	thiskey=keychain.pop(0)
 	if len(keychain)>0:
@@ -61,11 +61,6 @@ def addlevel(thisdict,keychain,payload):
 				for p in payload:
 					thisdict[thiskey][p]=payload[p]
 	return thisdict
-
-##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES
-##PUSHING MODEL VERBOSE NAMES INTO THE ID FIELDS' LABELS SO THAT WE HAVE TABLE-LEVEL LABELS
-##ASSUMES ID AS PK ON EVERY TABLE -- WILL NEED LOTS OF MIGRATIONS TO MAKE THIS HAPPEN	
-
 
 def nest_selected_fields(self,selected_fields_dict):
 	fields=list(self.fields)

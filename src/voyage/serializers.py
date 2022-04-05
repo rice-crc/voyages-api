@@ -58,6 +58,8 @@ class PlaceSerializer(DynamicFieldsModelSerializer):
 		model=Place
 		fields='__all__'
 
+
+
 ##### VESSEL VARIABLES ##### 
 
 class RigOfVesselSerializer(serializers.ModelSerializer):
@@ -142,7 +144,6 @@ class VoyageItinerarySerializer(serializers.ModelSerializer):
 ##### SOURCES ##### 
 
 class VoyageSourcesSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=VoyageSources
 		fields='__all__'
@@ -150,32 +151,27 @@ class VoyageSourcesSerializer(serializers.ModelSerializer):
 ##### OUTCOMES #####
 
 class ParticularOutcomeSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=ParticularOutcome
 		fields='__all__'
 
 
 class SlavesOutcomeSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=SlavesOutcome
 		fields='__all__'
 		
 class ResistanceSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=Resistance
 		fields='__all__'
 
 class OwnerOutcomeSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=OwnerOutcome
 		fields='__all__'
 
 class VesselCapturedOutcomeSerializer(serializers.ModelSerializer):
-	#source_type=serializers.SlugRelatedField(default=CharField,slug_field='group_name',read_only=True)
 	class Meta:
 		model=VesselCapturedOutcome
 		fields='__all__'
@@ -244,7 +240,6 @@ class VoyageSourcesConnectionSerializer(serializers.ModelSerializer):
 class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_itinerary=VoyageItinerarySerializer(many=False)
 	voyage_dates=VoyageDatesSerializer(many=False)
-	voyage_dates=VoyageDatesSerializer(many=False)
 	voyage_groupings=VoyageGroupingsSerializer(many=False)
 	voyage_crew=VoyageCrewSerializer(many=False)
 	voyage_ship=VoyageShipSerializer(many=False)
@@ -253,6 +248,9 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)
 	voyage_outcome=VoyageOutcomeSerializer(many=False)
 	voyage_sourceconnection=VoyageSourcesConnectionSerializer(many=True,read_only=True)
+	
 	class Meta:
 		model=Voyage
 		fields='__all__'
+		
+		

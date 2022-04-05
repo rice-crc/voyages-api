@@ -81,6 +81,8 @@ DETAILED BREAKDOWN
 * Improving text field searching/filtering
 	* You'll probably want to start with a simple text input just to get it working
 	* But very quickly iterate that into an autocomplete selector
+		* https://react-select.com/advanced (multi-select)
+		* https://www.npmjs.com/package/react-autocomplete (async)
 	* Autocomplete selection workflow
 		* A user selects a text field they want to filter on
 		* A text input is presented which, as they type,

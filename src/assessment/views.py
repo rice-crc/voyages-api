@@ -20,9 +20,7 @@ from tools.nest import *
 from tools.reqs import *
 import collections
 
-d=open('assessment/assessment_options.json','r')
-assessment_options=(json.loads(d.read()))
-d.close()
+assessment_options=options_handler('assessment/assessment_options.json',hierarchical=False)
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
@@ -31,8 +29,8 @@ class AssessmentList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	serializer_class=EstimateSerializer
 	def options(self,request):
-		schema=options_handler(self,request,flatfile=assessment_options,auto='False')
-		return JsonResponse(schema,safe=False)
+		j=options_handler('assessment/assessment_options.json',request)
+		return JsonResponse(j,safe=False)
 	def get(self,request):
 		#print("username:",request.auth.user)
 		times=[]

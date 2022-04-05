@@ -19,6 +19,8 @@ from tools.nest import *
 from tools.reqs import *
 import collections
 
+past_options=options_handler('past/past_options.json',hierarchical=False)
+
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class EnslavedList(generics.GenericAPIView):

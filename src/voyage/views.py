@@ -161,7 +161,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		t=timer("FETCHING...",[])
-		params=request.GET
+		params=request.POST
 		retrieve_all=True
 		if 'results_per_page' in params:
 			retrieve_all=False
@@ -211,6 +211,31 @@ class VoyageDataFrames(generics.GenericAPIView):
 					output_dicts[selected_field]=[bottomval]
 		t=timer('flattening',t,done=True)
 		return JsonResponse(output_dicts,safe=False,headers=headers)
+
+#We'll run this one as a two-step
+##1. run the search and get only the voyage_ids but all the voyage_ids
+##2. if that's sufficiently fast, then run those ids against a redis cache (or solr, actually -- just need a super fast flat record generator)
+##2a. into which we'll bake a few different slices of the data -- the specific vars needed by some special view like the timelapse
+##2b. which slice will be specified by something like a sub-view or display-mode argument
+#only doing this in post as i'd very much like to deprecate get reqs
+####basic testing shows the serializer to add marginally to the processing time ~>2%
+##but it does look fast enough and capable of scaling -- approx 1 second for 5k records, 2 seconds for 63k records on local docker build
+##I don't think we want to run step 2 through python. Instead
+###python gets the keys in max 3 seconds, handling basically any query even as models are changed
+###our cache/index returns the curated fields in columnar/long df format directly via a redirect sent back to nginx. (or at worst compressed via py)
+####This seems doable. all the 63k voyage ids amount to 400k of data, as an uncompressed txt file.
+####So: how quickly can Redis or Solr return, say, 10 fields on 63k records if hit directly? then add 3 seconds :)
+class VoyageDataFrames2(generics.GenericAPIView):
+	#authentication_classes=[TokenAuthentication]
+	#permission_classes=[IsAuthenticated]
+	def post(self,request):
+		st=time.time()
+		params=request.POST
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,auto_prefetch=False,retrieve_all=True)
+		ids=[i.voyage_id for i in queryset]
+		print("time:",time.time()-st)
+		return JsonResponse(ids,safe=False)
 
 #Get data on Places
 #Default structure is places::region::broad_region

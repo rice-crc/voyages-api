@@ -102,6 +102,6 @@ class Command(BaseCommand):
 			testobject=serializer(testobject,many=False)
 			flat=options_walker2({},'',testobject)
 			d=open(output_filename,'w')
-			d.write(json.dumps(flat))
+			d.write(json.dumps(flat,indent=2))
 			d.close
 			print("--> wrote %d var descriptions"%len(flat))

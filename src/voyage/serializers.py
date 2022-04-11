@@ -100,7 +100,6 @@ class VoyageSlavesNumbersSerializer(serializers.ModelSerializer):
 ##### ITINERARY #####
 
 class VoyageItinerarySerializer(serializers.ModelSerializer):
-	imp_broad_region_voyage_begin=BroadRegionSerializer(many=False)	
 	port_of_departure=PlaceSerializer(many=False)
 	int_first_port_emb=PlaceSerializer(many=False)
 	int_second_port_emb=PlaceSerializer(many=False)

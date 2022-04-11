@@ -4,6 +4,8 @@ src/static/
 dbconf.json
 src/voyages2021/localsettings.py
 
+app_secrets.py
+
 *__pycache__/
 
 instance/

@@ -225,17 +225,35 @@ class VoyageDataFrames(generics.GenericAPIView):
 ###our cache/index returns the curated fields in columnar/long df format directly via a redirect sent back to nginx. (or at worst compressed via py)
 ####This seems doable. all the 63k voyage ids amount to 400k of data, as an uncompressed txt file.
 ####So: how quickly can Redis or Solr return, say, 10 fields on 63k records if hit directly? then add 3 seconds :)
-class VoyageDataFrames2(generics.GenericAPIView):
+class VoyageAnimationCache(generics.GenericAPIView):
 	#authentication_classes=[TokenAuthentication]
 	#permission_classes=[IsAuthenticated]
 	def post(self,request):
-		st=time.time()
 		params=request.POST
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,auto_prefetch=False,retrieve_all=True)
-		ids=[i.voyage_id for i in queryset]
-		print("time:",time.time()-st)
-		return JsonResponse(ids,safe=False)
+		
+		
+		
+		
+		#ok, it does not work to hand this off to an id lookup iterator. this takes 200% more time than a dataframes call for 11 columns
+		#queryset=VoyageAnimationIndex.objects.all()
+		#ids=[i.voyage_animation_index.json_dump for i in queryset]
+		#items=[va.json_dump for va in queryset if va.id in ids]
+		
+		#neither, apparently, does it work to run it off the orm
+		##the below takes 300% longer than my dataframes endpoint
+		#resp=[json.loads(j.voyage_animation_index.json_dump) for j in queryset]
+		
+		d=open('voyage/voyage_animations__index.json','r')
+		j=json.loads(d.read())
+		d.close()
+		ids=[i.id for i in queryset]
+		resp={i:j[str(i)] for i in ids}
+		
+		
+		
+		return JsonResponse(resp,safe=False)
 
 #Get data on Places
 #Default structure is places::region::broad_region

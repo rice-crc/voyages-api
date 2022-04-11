@@ -1845,6 +1845,13 @@ class LinkedVoyages(models.Model):
 	# and the second is a transatlantic voyage.
 	INTRA_AMERICAN_LINK_MODE = 1
 
+#Trying out a custom index...
+class VoyageAnimationIndex(models.Model):
+    """
+    Index of variables for voyage animation
+    """
+    json_dump = models.CharField('json_dump',
+								max_length=255, null=False, blank=False)
 
 class Voyage(models.Model):
 	"""
@@ -1925,6 +1932,13 @@ class Voyage(models.Model):
 		help_text='Which dataset the voyage belongs to '
 				  '(e.g. Transatlantic, IntraAmerican)'
 	)
+	
+	voyage_animation_index = models.ForeignKey(
+		'VoyageAnimationIndex',
+		blank=True,
+		null=True,
+		on_delete=models.SET_NULL
+		)
 
 	# generate natural key
 	def natural_key(self):
@@ -1947,6 +1961,8 @@ class Voyage(models.Model):
 
 	def __str__(self):
 		return "Voyage #%s" % str(self.voyage_id)
+
+
 
 
 '''class VoyagesFullQueryHelper:

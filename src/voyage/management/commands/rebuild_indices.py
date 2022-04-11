@@ -83,21 +83,3 @@ class Command(BaseCommand):
 			d.close()
 			elapsed_seconds=int(time.time()-st)
 			print("...finished in %d minutes %d seconds" %(int(elapsed_seconds/60),elapsed_seconds%60))
-			
-			
-			#this seemed like it could be a slick solution but it's not a fast retrieval
-			#for row_idx in range(number_entries):
-			#	row=[columns[col][row_idx] for col in vars]
-			#	id=columns[fk][row_idx]
-			#	
-			#	#keep it light in this prelim test, only do every 50th
-			#	indexing_object=indexing_model(json_dump=json.dumps(row))
-			#	indexing_object.save()
-			#	indexed_object=indexed_model.objects.get(pk=id)
-			#	setattr(indexed_object,index_fk_fieldname,indexing_object)
-			#	indexed_object.save()
-			#	if row_idx%1000==0:
-			#		print(row_idx)
-			#elapsed_seconds=int(time.time()-st)
-			#print("...finished in %d minutes %d seconds" %(int(elapsed_seconds/60),elapsed_seconds%60))
-					

@@ -80,8 +80,8 @@ class Command(BaseCommand):
 						except:
 							label=serializer.Meta.model.__dict__[field].__dict__['field'].__dict__['verbose_name']
 					flatlabel=valuesconcatenate([baseflatlabel,label]," : ")
-					#schema[address]={'type':'table','label':label,'flatlabel':flatlabel}
-					schema[address]={'type':'table','label':label}
+					schema[address]={'type':'table','label':label,'flatlabel':flatlabel}
+					#schema[address]={'type':'table','label':label}
 					schema=options_walker2(schema,address,fields[field],flatlabel)
 				else:
 					try:
@@ -89,8 +89,8 @@ class Command(BaseCommand):
 					except:
 						label=fields[field].__dict__['verbose_name']
 					flatlabel=valuesconcatenate([baseflatlabel,label]," : ")
-					#schema[address]={'type':datatypestr,'label':label,'flatlabel':flatlabel}
-					schema[address]={'type':datatypestr,'label':label}
+					schema[address]={'type':datatypestr,'label':label,'flatlabel':flatlabel}
+					#schema[address]={'type':datatypestr,'label':label}
 			return schema
 		
 		for fp in flatfile_params:

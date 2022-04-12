@@ -97,20 +97,7 @@ The full authentication workflow would look like:
 
 ### 1. POST Requests
 
-March 31: Enabled POST requests
-
-Why?
-
-* This will allow for the construction of more complex queries
-* For instance, it allows us to use the autocomplete endpoint to turn inexact text searches into precise selectors
-
-How does it differ from GET requests documented below?
-
-* As little as possible :)
-* Values should simply be passed wrapped as arrays
-* With the one exception that inexact text matching has been deprecated in favor of exact matching of arrayed values
-
-So a request to PAST asking of people transported on voyages with Voyage ID's between 2314 and 2500 would look like
+A request to PAST asking for people transported on voyages with Voyage ID's between 2314 and 2500 would look like
 	
 	POST http://127.0.0.1:8000/past/
 	
@@ -125,7 +112,7 @@ So a request to PAST asking of people transported on voyages with Voyage ID's be
 And would return results 60-79 of 21,867 total records.
 
 
-Or, to use the exact text with autocomplete as hinted at above, you might send the following request
+Or, to use the exact text with autocomplete, you might send the following request
 
 	POST http://127.0.0.1:8000/voyage/autocomplete
 
@@ -154,10 +141,10 @@ And get back 5,816 results.
 
 ### 2. Request People, Voyages, Places, Estimates, or an Autocompletion
 
-1. People: GET http://127.0.0.1:8000/past
-1. Voyages: GET http://127.0.0.1:8000/voyage
-1. Places: GET http://127.0.0.1:8000/voyage/geo
-1. Estimates:  GET http://127.0.0.1:8000/assessment
+1. People: POST http://127.0.0.1:8000/past
+1. Voyages: POST http://127.0.0.1:8000/voyage
+1. Places: POST http://127.0.0.1:8000/voyage/geo
+1. Estimates:  POST http://127.0.0.1:8000/assessment
 
 	'imp_broad_region_voyage_begin':
 	{
@@ -178,7 +165,11 @@ And get back 5,816 results.
 	1. the first 10 unique entries in flat list form
 	1. and a results count
 
-example: GET http://127.0.0.1:8000/voyage/autocomplete?voyage_captainconnection__captain__name=jos
+example: POST
+
+	http://127.0.0.1:8000/voyage/autocomplete
+	
+	{"voyage_captainconnection__captain__name": "jos"}
 
 Looks like:
 
@@ -255,9 +246,9 @@ hierarchical=True looks like:
 
 ### 3a. Filter and sort on any of these variables
 
-1. GET http://127.0.0.1:8000/voyage?voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1810
-1. GET http://127.0.0.1:8000/voyage/?voyage_itinerary__imp_principal_region_slave_dis__region=Barbados&voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1850&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_yyyy,voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_itinerary__imp_port_voyage_begin__place,voyage_ship_owner__name,voyage_itinerary__imp_principal_region_slave_dis__region&results_page=2&order_by=voyage_dates__imp_arrival_at_port_of_dis_yyyy,voyage_itinerary__imp_port_voyage_begin__name,voyage_itinerary__imp_port_voyage_begin__longitude
-1. GET http://127.0.0.1:8000/voyage/geo?longitude=-20,-6&latitude=-20,38
+1. POST http://127.0.0.1:8000/voyage?voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1810
+1. POST http://127.0.0.1:8000/voyage/?voyage_itinerary__imp_principal_region_slave_dis__region=Barbados&voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1850&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_yyyy,voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_itinerary__imp_port_voyage_begin__place,voyage_ship_owner__name,voyage_itinerary__imp_principal_region_slave_dis__region&results_page=2&order_by=voyage_dates__imp_arrival_at_port_of_dis_yyyy,voyage_itinerary__imp_port_voyage_begin__name,voyage_itinerary__imp_port_voyage_begin__longitude
+1. POST http://127.0.0.1:8000/voyage/geo?longitude=-20,-6&latitude=-20,38
 
 ### 3b. Aggregate on any variable
 
@@ -271,7 +262,16 @@ You can still run filters and sorts on variables, e.g. ```voyage_dates__imp_arri
 
 Fields to aggregate 
 
-e.g., ```GET http://127.0.0.1:8000/voyage/aggregations?aggregate_fields=voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_slaves_numbers__imp_total_num_slaves_disembarked```
+e.g.,
+
+	POST http://127.0.0.1:8000/voyage/aggregations
+	
+	{
+		"aggregate_fields" : [
+			"voyage_slaves_numbers__imp_total_num_slaves_embarked"
+			"voyage_slaves_numbers__imp_total_num_slaves_disembarked"
+			]
+	}
 
 Looks like:
 
@@ -297,15 +297,34 @@ Looks like:
 
 ### 4. Paginate
 
-e.g., GET http://127.0.0.1:8000/voyage?results_page=4&results_per_page=20
+e.g., 
 
-Check the headers to see previous_uri, next_uri, and total_results_count
+	POST http://127.0.0.1:8000/voyage
+		
+		{
+		"results_page" : [4]
+		"results_per_page" : [20]
+		}
+
+Check the headers to see total_results_count
 
 ### 5. Dataframes / Field Selection
 
 There is functionality to select only specific variables. It is best used with the voyages dataframes endpoint, which returns columns of variables (to the extent possible with multi-valued fields). It could be improved upon in terms of performance and functionality.
 
-e.g., GET http://127.0.0.1:8000/voyage/dataframes?&voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1810&selected_fields=voyage_itinerary__imp_broad_region_voyage_begin__broad_region,voyage_itinerary__first_landing_region__region,voyage_itinerary__first_landing_place__place,voyage_slaves_numbers__imp_total_num_slaves_embarked
+e.g., 
+
+	POST http://127.0.0.1:8000/voyage/dataframes
+	
+	{
+		"voyage_dates__imp_arrival_at_port_of_dis_yyyy" : [1800,1810],
+		"selected_fields" : [
+			"voyage_itinerary__imp_broad_region_voyage_begin__broad_region"
+			"voyage_itinerary__first_landing_region__region",
+			"voyage_itinerary__first_landing_place__place",
+			"voyage_slaves_numbers__imp_total_num_slaves_embarked"
+			]
+	}
 
 Looks like:
 
@@ -338,4 +357,65 @@ Looks like:
 			...
 		]
 	}
+
+### 6. Custom caching
+
+(currently only enabled on voyages, not past, as it utilizes the dataframes functionality to rebuild efficiently, and past doesn't have that yet)
+
+This endpoint allows full searchability as with dataframes and list endpoints above. The only difference is that you can't select all fields -- only those that exist in that particular cache.
+
+For instance:
+
+	data={
+		'voyage_itinerary__imp_principal_region_slave_dis__region':[
+			'Barbados',
+			'Jamaica'
+		],
+		'cachename':'voyage_export',
+		'download_csv':'True'
+	}
+	
+	r=requests.post('http://127.0.0.1:8000/voyage/caches',headers=headers,data=data)
+
+Returns 67 columns with 5,816 results each. Split value fields are joined with a space-buffered pipe (" | ")
+
+	{
+	'id': 
+		[1860, 2555, ...],
+	'voyage_captainconnection__captain__name':
+		['Fabrequez, S', Lisboa, Antônio Pereira',...],
+	'voyage_crew__crew_died_complete_voyage':
+		[None, None, ...],
+	...
+	}
+
+There are 2 caches/indices at the time of this writing:
+
+1. 'voyage_export' --> this indexes 67 fields to replicate the download functionality
+1. 'voyage_animation' --> this indexes 11 fields to replicate the animation functionality
+
+
+### 7. Custom admin commands
+
+2 custom admin commands have been built in to date. They are both defined in the voyage app, under src/voyage/management/commands
+
+#### A. rebuild_options
+
+This rebuilds the options file for all the current endpoints by:
+
+* Running through several serializers (voyage, geo (voyage), enslaved (past), assessment)
+* Articulating a full list of fields, auto-generated labels, relations, and datatypes in json format
+* These are saved as flat files which the options calls then subsequently pick up
+
+It was a necessity to do this because Django exhibits some odd behavior at times, where old data is returned for new requests.
+
+run with ```python3.9 manage.py rebuild_options```
+
+#### B. rebuild_indices
+
+This rebuilds the two json flat files that enable the "Custom caching" endpoint above.
+
+The flat files are stored in static/custom_caching/...
+
+run with ```python3.9 manage.py rebuild_indices```
 

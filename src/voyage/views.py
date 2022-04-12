@@ -143,18 +143,37 @@ class VoyageDataFrames(generics.GenericAPIView):
 ### #11 fields, 5816 results-->0.3 seconds
 ### #11 fields, 63k results-->1.2 seconds
 
-class VoyageAnimationCache(generics.GenericAPIView):
+class VoyageCaches(generics.GenericAPIView):
+	'''
+	This view takes:
+		All the search arguments you can pass to dataframes or voyage list endpoints
+		A specified "cachename" argument -- currently valid values are:
+			"voyage_export" --> for csv exports -- cached 67 variables
+			"voyage_animation" --> for the timelapse animation -- cached 11 variables
+		And returns a dataframes-style response -- a dictionary with:
+			keys are fully-qualified var names
+			values are equal-length arrays, each corresponding to a single entity
+				(use voyage_id or id column as your index if you're going to load it into pandas)
+		List view is highly inefficient because of the repetitive var names for each voyage
+	'''
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		params=request.POST
+		cachename=params.get('cachename')
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,auto_prefetch=False,retrieve_all=True)		
-		d=open('voyage/voyage_animations__index.json','r')
+		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,auto_prefetch=True,retrieve_all=True)		
+		d=open('static/customcache/%s.json' %cachename,'r')
 		j=json.loads(d.read())
 		d.close()
 		ids=[i[0] for i in queryset.values_list('id')]
-		resp={i:j[str(i)] for i in ids}
+		items=j['items']
+		varnames=j['ordered_keys']
+		#filter down cache to only selected items
+		selected_items={i:items[str(i)] for i in ids}
+		#then reorder those items into columns of values underneath their var names
+		resp={v:[selected_items[i][varnames.index(v)] for i in selected_items] for v in varnames}
+		
 		return JsonResponse(resp,safe=False)
 
 #Get data on Places
@@ -259,7 +278,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		queryset=queryset.prefetch_related(k)
 		queryset=queryset.order_by(k)
 		results_count=queryset.count()
-		fetchcount=10
+		fetchcount=20
 		vals=[]
 		for v in queryset.values_list(k).iterator():
 			if v not in vals:

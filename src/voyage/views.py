@@ -76,14 +76,16 @@ class VoyageList(generics.GenericAPIView):
 		t=timer('flattening',t,done=True)
 		return JsonResponse(outputs,safe=False,headers=headers)
 
-#VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
+# Basic statistics
+## takes a numeric variable
+## returns its sum, average, max, min, and stdv
 class VoyageAggregations(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		#print("username:",request.auth.user)
-		params=request.GET
+		params=request.POST
 		aggregations=params.get('aggregate_fields')
 		queryset=Voyage.objects.all()
 		aggregation,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
@@ -99,7 +101,34 @@ class VoyageAggregations(generics.GenericAPIView):
 					output_dict[varname]={fn:a[k]}
 		return JsonResponse(output_dict,safe=False)
 
-#VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
+#trying out group by functionality
+class VoyageGroupBy(generics.GenericAPIView):
+	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		#print("username:",request.auth.user)
+		params=request.POST
+		#aggregations=params.get('aggregate_fields')
+		queryset=Voyage.objects.all()
+		print('ccc')
+		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		print('ddd')
+		print(queryset)
+		
+		output_dict={}
+		'''for a in aggregation:
+			for k in a:
+				v=a[k]
+				fn=k.split('__')[-1]
+				varname=k[:-len(fn)-2]
+				if varname in output_dict:
+					output_dict[varname][fn]=a[k]
+				else:
+					output_dict[varname]={fn:a[k]}'''
+		return JsonResponse(output_dict,safe=False)
+
+#DATAFRAME ENDPOINT (experimental & a resource hog!)
 class VoyageDataFrames(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]

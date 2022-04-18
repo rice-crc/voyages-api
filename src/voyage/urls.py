@@ -8,5 +8,6 @@ urlpatterns = [
     path('caches',views.VoyageCaches.as_view()),
     path('geo',views.VoyagePlaceList.as_view()),
     path('aggregations',views.VoyageAggregations.as_view()),
-	path('autocomplete',views.VoyageTextFieldAutoComplete.as_view())
+	path('autocomplete',views.VoyageTextFieldAutoComplete.as_view()),
+	path('groupby',views.VoyageGroupBy.as_view())
     ]

@@ -65,7 +65,7 @@ documentation: https://www.django-rest-framework.org/api-guide/authentication/
 
 It's pretty straightforward. You simply need to declare a header with the key "Authorization" and the value "Token abcdef....".
 
-So any request, like ```GET http://127.0.0.1:8000/past``` simply becomes ```GET http://127.0.0.1:8000/past -H 'Authorization: Token abcdef....'```
+So any request, like ```POST http://127.0.0.1:8000/past``` simply becomes ```POST http://127.0.0.1:8000/past -H 'Authorization: Token abcdef....'```
 
 A full python example follows.
 
@@ -92,7 +92,7 @@ The full authentication workflow would look like:
 	print(headers)
 
 	url='http://127.0.0.1:8000/voyage/'
-	r=requests.get(url,headers=headers)
+	r=requests.post(url,headers=headers)
 
 
 ### 1. POST Requests
@@ -117,7 +117,7 @@ Or, to use the exact text with autocomplete, you might send the following reques
 	POST http://127.0.0.1:8000/voyage/autocomplete
 
 	Body:
-	{'voyage_itinerary__imp_principal_region_slave_dis__region': 'jam'}
+	{'voyage_itinerary__imp_principal_region_slave_dis__region': ['jam']}
 
 And get back
 
@@ -165,11 +165,11 @@ And get back 5,816 results.
 	1. the first 10 unique entries in flat list form
 	1. and a results count
 
-example: POST
+example:
 
-	http://127.0.0.1:8000/voyage/autocomplete
+	POST http://127.0.0.1:8000/voyage/autocomplete
 	
-	{"voyage_captainconnection__captain__name": "jos"}
+	{"voyage_captainconnection__captain__name": ["jos"]}
 
 Looks like:
 

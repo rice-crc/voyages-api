@@ -111,9 +111,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 		params=request.POST
 		#aggregations=params.get('aggregate_fields')
 		queryset=Voyage.objects.all()
-		print('ccc')
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
-		print('ddd')
 		print(queryset)
 		
 		output_dict={}

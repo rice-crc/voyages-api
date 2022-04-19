@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import json
 import math
+import time
 
 def load_long_df(filepath):
 	d=open(filepath,'r')
@@ -33,13 +34,7 @@ voyage_export=load_long_df('./static/customcache/voyage_export.json')
 
 def pivottable(dfname,ids,rows,columns,cells):
 	df=eval(dfname)
-	
-	
-
-
-
-
-
+	print(ids)
 
 #GROUPBY (SUMS ONLY for now)
 ##e.g., how many people embarked for all port_embarkation/port_disembarkation pairs in a given year range?
@@ -49,8 +44,8 @@ def pivottable(dfname,ids,rows,columns,cells):
 #	'Barbados',
 #	'Jamaica'
 #	],
-#	'groupby_value_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
-#	'groupby_sum_fields':['voyage_slaves_numbers__imp_total_num_slaves_disembarked']
+#	'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
+#    'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum']
 #}
 #receives
 ##the name of a dataframe ("registered above")
@@ -58,14 +53,22 @@ def pivottable(dfname,ids,rows,columns,cells):
 ##value fields (an array of double-underscore-delimited, fully-qualified django (categorical) variable names to group by)
 ##function tuples (another array of tuples, of the names of numeric variables and the summary functions to be performed on them)
 
-def groupby(dfname,ids,groupby_value_fields,groupby_function_tuples):
+#https://pandas.pydata.org/docs/reference/api/pandas.crosstab.html#pandas.crosstab
 
-	groupby_value_fields=params.get('groupby_value_fields')
-	groupby_sum_fields=params.get('groupby_sum_fields')
-	
-	'''if groupby_value_fields is not None and groupby_sum_fields is not None:
-	queryset=eval('queryset.values(%s)' %('\''+'\',\''.join(groupby_value_fields)+'\'')).annotate(sumfield=Sum(groupby_sum_fields[0])).order_by()'''
-	
-	
-	
-	
+def crosstab(dfname,ids,groupby_fields,value_field_tuple):
+	st=time.time()
+	df=eval(dfname)
+	val,fn=value_field_tuple
+	#first, filter down
+	df2=df[df['id'].isin(ids)]
+	#second, group
+	ct=pd.crosstab(
+		df[groupby_fields[0]],
+		df[groupby_fields[1]],
+		values=df[val],
+		aggfunc=eval("np."+fn)
+	)
+	#third, dump the empties (this is for rollup computations, not pivot tables)
+	#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
+	ctd2={col: ct[col].dropna().to_dict() for col in ct.columns}
+	return ctd2

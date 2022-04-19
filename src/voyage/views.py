@@ -17,7 +17,7 @@ from tools.nest import *
 from tools.reqs import *
 from tools.timer import timer
 import collections
-from tools import grouper
+from tools.grouper import *
 import gc
 from .serializers import *
 
@@ -86,8 +86,9 @@ class VoyageAggregations(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		#print("username:",request.auth.user)
-		params=request.POST
+		params=dict(request.POST)
 		aggregations=params.get('aggregate_fields')
+		print("aggregations:",aggregations)
 		queryset=Voyage.objects.all()
 		aggregation,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		output_dict={}
@@ -103,25 +104,44 @@ class VoyageAggregations(generics.GenericAPIView):
 		return JsonResponse(output_dict,safe=False)
 
 #trying out group by functionality
+##REQUEST LOOKS LIKE THIS
+##TAKES ABOUT 7 SECONDS
+####WHICH IS TOO LONG
+####BUT NOT WHEN YOU THINK ABOUT WHAT IT'S RETURNING (number of people transported from all ports to all ports)
+####AND IT'S JUST AS FAST FOR ALL VOYAGES AS IT IS FOR THE BELOW FILTERED SET OF 5800 VOYAGES
+####THE PROBLEM IS MORE ABOUT SPINNING UP PANDAS -- IT SEEMS TO BOG EVERYTHING DOWN
+#st=time.time()
+#data={
+#    'voyage_itinerary__imp_principal_region_slave_dis__region':[
+#        'Barbados',
+#        'Jamaica'
+#    ],
+#    'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
+#    'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum']
+#}
+#r=requests.post(url=base_url+'groupby',headers=headers,data=data)
+#j=json.loads(r.text)
+#print(time.time()-st)
+
+
 class VoyageGroupBy(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		#print("username:",request.auth.user)
-		params=request.POST
-		#aggregations=params.get('aggregate_fields')
+		params=dict(request.POST)
+		groupby_fields=params.get('groupby_fields')
+		value_field_tuple=params.get('value_field_tuple')
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
-		
 		ids=[i[0] for i in queryset.values_list('id')]
-		
-		grouper.pivottable(dfname='voyage_export',ids=ids)
-		
-		
-		items=j['items']
-		varnames=j['ordered_keys']
-		
+		output_dict=crosstab(
+			dfname='voyage_export',
+			ids=ids,
+			groupby_fields=groupby_fields,
+			value_field_tuple=value_field_tuple
+			)
 		return JsonResponse(output_dict,safe=False)
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)
@@ -131,7 +151,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		t=timer("FETCHING...",[])
-		params=request.POST
+		params=dict(request.POST)
 		retrieve_all=True
 		if 'results_per_page' in params:
 			retrieve_all=False
@@ -184,7 +204,7 @@ class VoyageCaches(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		params=request.POST
+		params=dict(request.POST)
 		cachename=params.get('cachename')
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,auto_prefetch=True,retrieve_all=True)		
@@ -293,7 +313,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 	def post(self,request):
 		#print("username:",request.auth.user)
 		st=time.time()
-		params=request.POST
+		params=dict(request.POST)
 		k=next(iter(params))
 		v=params[k]
 		retrieve_all=True

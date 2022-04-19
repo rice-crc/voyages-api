@@ -17,7 +17,6 @@ from tools.nest import *
 from tools.reqs import *
 from tools.timer import timer
 import collections
-from tools.grouper import *
 import gc
 from .serializers import *
 
@@ -103,14 +102,12 @@ class VoyageAggregations(generics.GenericAPIView):
 					output_dict[varname]={fn:a[k]}
 		return JsonResponse(output_dict,safe=False)
 
-#trying out group by functionality
-##REQUEST LOOKS LIKE THIS
-##TAKES ABOUT 7 SECONDS
-####WHICH IS TOO LONG
-####BUT NOT WHEN YOU THINK ABOUT WHAT IT'S RETURNING (number of people transported from all ports to all ports)
-####AND IT'S JUST AS FAST FOR ALL VOYAGES AS IT IS FOR THE BELOW FILTERED SET OF 5800 VOYAGES
-####THE PROBLEM IS MORE ABOUT SPINNING UP PANDAS -- IT SEEMS TO BOG EVERYTHING DOWN
-#st=time.time()
+
+#Django really did not like running pandas inside of itself
+#Maybe I'm wrong and there's a way to do it
+#But in the meantime, we're going to use Flask as a pandas sidecar for complex statistical operations
+#Currently running on port 5000. just hardcoding this for dev w docker-compose, obviously needs to be changed for production
+##It's fast as hell :)
 #data={
 #    'voyage_itinerary__imp_principal_region_slave_dis__region':[
 #        'Barbados',
@@ -119,10 +116,8 @@ class VoyageAggregations(generics.GenericAPIView):
 #    'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
 #    'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum']
 #}
-#r=requests.post(url=base_url+'groupby',headers=headers,data=data)
+#r=requests.post(url='http://127.0.0.1:8000/voyage/groupby',headers=headers,data=data)
 #j=json.loads(r.text)
-#print(time.time()-st)
-
 
 class VoyageGroupBy(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
@@ -136,13 +131,18 @@ class VoyageGroupBy(generics.GenericAPIView):
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		ids=[i[0] for i in queryset.values_list('id')]
-		output_dict=crosstab(
-			dfname='voyage_export',
-			ids=ids,
-			groupby_fields=groupby_fields,
-			value_field_tuple=value_field_tuple
-			)
-		return JsonResponse(output_dict,safe=False)
+		
+		#HARDCODED URL
+		u2='http://voyagesapi-flask:5000/'
+		d2={
+			"groupby_fields":groupby_fields,
+			"value_field_tuple":value_field_tuple,
+			'ids':ids
+		}
+
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		
+		return JsonResponse(r.text,safe=False)
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)
 class VoyageDataFrames(generics.GenericAPIView):

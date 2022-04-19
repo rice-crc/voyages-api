@@ -29,6 +29,19 @@ services:
       context: "."
       dockerfile: "./docker/django/Dockerfile"
 
+  voyagesapi-flask:
+    image: "voyagesapi-flask"
+    container_name: "voyagesapi-flask"
+    hostname: "voyagesapi-flask"
+    restart: "on-failure"
+    ports:
+      - "5000:5000"
+    volumes:
+      - "./flask/:/srv/voyages-flask"
+    build:
+      context: "."
+      dockerfile: "./docker/flask/Dockerfile"
+
   voyagesapi-adminer:
     image: "adminer:latest"
     container_name: "voyagesapi-adminer"

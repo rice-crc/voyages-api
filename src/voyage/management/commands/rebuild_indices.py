@@ -21,7 +21,6 @@ class Command(BaseCommand):
 		##flat files w line ids corresponding to the pk ids [fast to build, fast to read]
 		##redis caches or solr indices
 		
-		
 		#FIRST FIELD MUST BE THE PK ON THE TOP TABLE BEING INDEXED
 		
 		indices={
@@ -117,7 +116,7 @@ class Command(BaseCommand):
 		base_filepath='static/customcache'
 		os.makedirs(base_filepath,exist_ok=True)
 		
-		url='http://127.0.0.1:8000/voyage/dataframes'
+		url='http://voyagesapi-django:8000/voyage/dataframes'
 		from .app_secrets import headers
 		
 		for ind in indices:

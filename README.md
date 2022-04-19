@@ -30,11 +30,17 @@ Import the database dump to MySQL.
 host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages voyagesapi < data/voyagesapi.sql
 ```
 
+Run the custom management commands (see bottom of this doc):
+
+	docker exec -i voyagesapi-django bash -c "python3.9 manage.py rebuild_options"
+	docker exec -i voyagesapi-django bash -c "python3.9 manage.py rebuild_indices"
+
 View container logs.
 
 ```bash
 host:~/Projects/voyagesapi$ docker logs voyagesapi-django
 host:~/Projects/voyagesapi$ docker logs voyagesapi-mysql
+host:~/Projects/voyagesapi$ docker logs voyagesapi-flask
 ```
 
 *The Adminer app is provided as an additional way to work with the database.*
@@ -46,16 +52,24 @@ Note the following project resources:
 
 ## Cleanup
 
-```bash
-host:~/Projects/voyagesapi$ docker-compose down
+	bash
+	host:~/Projects/voyagesapi$ docker-compose down
 
-host:~/Projects/voyagesapi$ docker container prune
-host:~/Projects/voyagesapi$ docker image prune
-host:~/Projects/voyagesapi$ docker volume prune
-host:~/Projects/voyagesapi$ docker network prune
-```
+	host:~/Projects/voyagesapi$ docker container prune
+	host:~/Projects/voyagesapi$ docker image prune
+	host:~/Projects/voyagesapi$ docker volume prune
+	host:~/Projects/voyagesapi$ docker network prune
+
+----------------------
 
 ## Using the API
+
+There are currently 4 major endpoints, which allow you to query on People, Voyages, Places, and Estimates
+
+1. Enslaved: POST http://127.0.0.1:8000/past
+1. Voyages: POST http://127.0.0.1:8000/voyage
+1. Places: POST http://127.0.0.1:8000/voyage/geo
+1. Estimates:  POST http://127.0.0.1:8000/assessment
 
 ### 0. AUTHENTICATION
 
@@ -95,7 +109,7 @@ The full authentication workflow would look like:
 	r=requests.post(url,headers=headers)
 
 
-### 1. POST Requests
+### 1. Using POST Requests
 
 A request to PAST asking for people transported on voyages with Voyage ID's between 2314 and 2500 would look like
 	
@@ -138,25 +152,95 @@ Then feed that precise value into that variable:
 
 And get back 5,816 results.
 
+### 2. Enumerating variables, relationships, and data types
 
-### 2. Request People, Voyages, Places, Estimates, or an Autocompletion
+1. People: ```OPTIONS http://127.0.0.1:8000/past/?hierarchical=False```
+1. Voyages: ```OPTIONS http://127.0.0.1:8000/voyage/?hierarchical=False```
+1. Places: ```OPTIONS http://127.0.0.1:8000/voyage/geo?hierarchical=False```
+1. Estimates ```OPTIONS http://127.0.0.1:8000/assessment/?hierarchical=False```
 
-1. People: POST http://127.0.0.1:8000/past
-1. Voyages: POST http://127.0.0.1:8000/voyage
-1. Places: POST http://127.0.0.1:8000/voyage/geo
-1. Estimates:  POST http://127.0.0.1:8000/assessment
+Why "hierarchical=False"?
 
-	'imp_broad_region_voyage_begin':
-	{
-	'broad_region': 'Brazil',
-	'id': 6,
-	'latitude': '-18.8645820',
-	'longitude': '-39.7548900',
-	'show_on_map': True,
-	'value': 50000
-	},	
+1. The default is hierarchical=True, which gives you a tree
+1. These variables' hierarchical relations correspond to links between db tables
+1. The django syntax for those links is a double underscore: "__"
+1. Variable labels are now presented in two formats:
+	1. "label" which is just the field label without context (good for nested menus)
+	1. "flatlabel" which is a concatenated label -- good for menus targeting specific fields
 
-#### 2a. Autocomplete
+hierarchical=False looks like:
+
+    ...
+    "voyage_itinerary__port_of_departure__region__longitude": {
+        "type": "<class 'rest_framework.fields.DecimalField'>",
+        "label": "Longitude of point",
+        "flatlabel": "Voyage itinerary : Port of departure : Region : Longitude of point"
+    }
+    ...
+
+hierarchical=True looks like:
+
+	...
+    "voyage_itinerary": {
+        "type": "table",
+        "label": "Voyage itinerary",
+        "flatlabel": "Voyage itinerary",
+        "model": "voyage.models.Voyage",
+        "id": {
+            "type": "<class 'rest_framework.fields.IntegerField'>",
+            "label": "ID",
+            "flatlabel": "Voyage itinerary : ID"
+        },
+        "port_of_departure": {
+            "type": "table",
+            "label": "Port of departure",
+            "flatlabel": "Voyage itinerary : Port of departure",
+            "model": "voyage.models.VoyageItinerary",
+            "id": {
+                "type": "<class 'rest_framework.fields.IntegerField'>",
+                "label": "ID",
+                "flatlabel": "Voyage itinerary : Port of departure : ID"
+            },
+        }
+    }
+	...
+
+-------------------------
+
+## METHODS: Filter/Search, Paginate, Autocomplete, Aggregate, and GroupBy
+
+### Filter/Search
+
+Filter and sort on any variable
+
+Numeric fields: provide a range
+
+	POST http://127.0.0.1:8000/voyage
+	data={'voyage_dates__imp_arrival_at_port_of_dis_yyyy'=[1800,1810]}
+	
+	POST http://127.0.0.1:8000/voyage/geo
+	data={
+		'longitude'=[-20,-6],
+		'latitude'=[-20,38]
+	}
+
+Text fields: inclusive OR on arrayed values, exactly matched (see Autocomplete below):
+
+	POST http://127.0.0.1:8000/voyage/
+	data={'voyage_itinerary__imp_principal_region_slave_dis__region'=['Barbados','Jamaica']}
+
+### Paginate
+
+Check the headers to see total_results_count, and paginate accordingly:
+
+	POST http://127.0.0.1:8000/voyage
+		
+		{
+		"results_page" : [4]
+		"results_per_page" : [20]
+		}
+
+### Autocomplete Text Variables (Voyages only)
 
 1. accepts a request
 	1. for one field
@@ -189,76 +273,13 @@ Looks like:
 		"results_count": 8207
 	}
 
-### 3. Get a list of the variables available to you, and their labels and data types
+### Aggregate Numeric Variables (Voyages only)
 
-1. People: ```OPTIONS http://127.0.0.1:8000/past/?hierarchical=False```
-1. Voyages: ```OPTIONS http://127.0.0.1:8000/voyage/?hierarchical=False```
-1. Places: ```OPTIONS http://127.0.0.1:8000/voyage/geo?hierarchical=False```
-1. Estimates ```OPTIONS http://127.0.0.1:8000/assessment/?hierarchical=False```
+You can aggregate on numerical variable. This will only return aggregations on valid numeric fields.
 
-Why "hierarchical=False"?
+But it returns *all* django aggregation functions on selected numeric fields (sum, min, max, avg, stddev), so some data may be nonsensical (e.g., the sum of the mortality ratio).
 
-1. The default is hierarchical=True, which gives you a tree
-1. These variables' hierarchical relations correspond to links between db tables
-1. The django syntax for those links is a double underscore: "__"
-1. Variable labels are now presented in two formats:
-	1. "label" which is just the field label without context (good for nested menus)
-	1. "flatlabel" which is a concatenated label -- good for menus targeting specific fields
-
-hierarchical=False looks like:
-
-
-    ...
-    "voyage_itinerary__port_of_departure__region__longitude": {
-        "type": "<class 'rest_framework.fields.DecimalField'>",
-        "label": "Longitude of point",
-        "flatlabel": "Voyage itinerary : Port of departure : Region : Longitude of point"
-    }
-    ...
-
-
-hierarchical=True looks like:
-
-	...
-    "voyage_itinerary": {
-        "type": "table",
-        "label": "Voyage itinerary",
-        "flatlabel": "Voyage itinerary",
-        "model": "voyage.models.Voyage",
-        "id": {
-            "type": "<class 'rest_framework.fields.IntegerField'>",
-            "label": "ID",
-            "flatlabel": "Voyage itinerary : ID"
-        },
-        "port_of_departure": {
-            "type": "table",
-            "label": "Port of departure",
-            "flatlabel": "Voyage itinerary : Port of departure",
-            "model": "voyage.models.VoyageItinerary",
-            "id": {
-                "type": "<class 'rest_framework.fields.IntegerField'>",
-                "label": "ID",
-                "flatlabel": "Voyage itinerary : Port of departure : ID"
-            },
-        }
-    }
-	...
-
-### 3a. Filter and sort on any of these variables
-
-1. POST http://127.0.0.1:8000/voyage?voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1810
-1. POST http://127.0.0.1:8000/voyage/?voyage_itinerary__imp_principal_region_slave_dis__region=Barbados&voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1850&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_yyyy,voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_itinerary__imp_port_voyage_begin__place,voyage_ship_owner__name,voyage_itinerary__imp_principal_region_slave_dis__region&results_page=2&order_by=voyage_dates__imp_arrival_at_port_of_dis_yyyy,voyage_itinerary__imp_port_voyage_begin__name,voyage_itinerary__imp_port_voyage_begin__longitude
-1. POST http://127.0.0.1:8000/voyage/geo?longitude=-20,-6&latitude=-20,38
-
-### 3b. Aggregate on any variable
-
-You can also aggregate on numerical voyage variables by requesting any number of comma-separated numeric fields with the parameter ```aggregate_fields=...```
-
-It will only return aggregations on valid numeric fields.
-
-But it returns *all* aggregation functions on selected numeric fields (sum, min, max, avg, stddev), so some data may be nonsensical (e.g., the sum of a percentage field).
-
-You can still run filters and sorts on variables, e.g. ```voyage_dates__imp_arrival_at_port_of_dis_yyyy=1800,1810```
+You can still run filters and sorts on variables--these filters will be executed before the aggregation.
 
 Fields to aggregate 
 
@@ -294,23 +315,80 @@ Looks like:
 		}
 	}
 
+### GroupBy (Voyages only)
 
-### 4. Paginate
+Let's say you wanted to run a search (e.g., voyages btw. 1800-1820) and then determine how many people disembarked voyages by the pairings of port A,B in those years.
 
-e.g., 
+You would simply hit the GroupBy endpoint with your regular search query and specify:
 
-	POST http://127.0.0.1:8000/voyage
-		
-		{
-		"results_page" : [4]
-		"results_per_page" : [20]
-		}
+1. which fields to group on
+1. which field to get the summary stat on (and the operation to run, like "sum")
+	
+	POST "http://127.0.0.1:8100/voyage/groupby"
+	data={
+		"voyage_itinerary__imp_principal_region_slave_dis__region":[
+			"Barbados",
+			"Jamaica"
+		],
+		'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
+		'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum']
+	}
 
-Check the headers to see total_results_count
+This will be iterated over the coming weeks to cover Pivot Tables and other functions.
 
-### 5. Dataframes / Field Selection
+It uses Pandas syntax and relies on the indexing functionality outlined below as well as a Flask app running alongside this Django app.
 
-There is functionality to select only specific variables. It is best used with the voyages dataframes endpoint, which returns columns of variables (to the extent possible with multi-valued fields). It could be improved upon in terms of performance and functionality.
+--------------------
+
+## Under the hood
+
+### Custom caching/indexing
+
+(currently only enabled on voyages, not past, as it utilizes the dataframes functionality to rebuild efficiently, and past doesn't have that yet)
+
+This endpoint allows full searchability as with dataframes and list endpoints above. The only difference is that you can't select all fields -- only those that exist in that particular cache.
+
+For instance:
+
+	data={
+		'voyage_itinerary__imp_principal_region_slave_dis__region':[
+			'Barbados',
+			'Jamaica'
+		],
+		'cachename':'voyage_export',
+		'download_csv':'True'
+	}
+	
+	r=requests.post('http://127.0.0.1:8000/voyage/caches',headers=headers,data=data)
+
+Returns 67 columns with 5,816 results each. Split value fields are joined with a space-buffered pipe (" | ")
+
+	{
+	'id': 
+		[1860, 2555, ...],
+	'voyage_captainconnection__captain__name':
+		['Fabrequez, S', Lisboa, Antônio Pereira',...],
+	'voyage_crew__crew_died_complete_voyage':
+		[None, None, ...],
+	...
+	}
+
+There are 2 caches/indices at the time of this writing:
+
+1. 'voyage_export' --> this indexes 67 fields to replicate the download functionality
+1. 'voyage_animation' --> this indexes 11 fields to replicate the animation functionality
+
+
+
+### Dataframes / Field Selection
+
+There is functionality to
+
+1. run a search
+1. select only specific variables
+1. retrieve all results for them in columnar format
+
+(But the caching/indexing is much, much faster and intended to replace this for public use)
 
 e.g., 
 
@@ -358,44 +436,7 @@ Looks like:
 		]
 	}
 
-### 6. Custom caching
-
-(currently only enabled on voyages, not past, as it utilizes the dataframes functionality to rebuild efficiently, and past doesn't have that yet)
-
-This endpoint allows full searchability as with dataframes and list endpoints above. The only difference is that you can't select all fields -- only those that exist in that particular cache.
-
-For instance:
-
-	data={
-		'voyage_itinerary__imp_principal_region_slave_dis__region':[
-			'Barbados',
-			'Jamaica'
-		],
-		'cachename':'voyage_export',
-		'download_csv':'True'
-	}
-	
-	r=requests.post('http://127.0.0.1:8000/voyage/caches',headers=headers,data=data)
-
-Returns 67 columns with 5,816 results each. Split value fields are joined with a space-buffered pipe (" | ")
-
-	{
-	'id': 
-		[1860, 2555, ...],
-	'voyage_captainconnection__captain__name':
-		['Fabrequez, S', Lisboa, Antônio Pereira',...],
-	'voyage_crew__crew_died_complete_voyage':
-		[None, None, ...],
-	...
-	}
-
-There are 2 caches/indices at the time of this writing:
-
-1. 'voyage_export' --> this indexes 67 fields to replicate the download functionality
-1. 'voyage_animation' --> this indexes 11 fields to replicate the animation functionality
-
-
-### 7. Custom admin commands
+### Custom admin commands
 
 2 custom admin commands have been built in to date. They are both defined in the voyage app, under src/voyage/management/commands
 

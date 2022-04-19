@@ -101,7 +101,6 @@ class Command(BaseCommand):
 					'voyage_ship__tonnage',
 					'voyage_ship__tonnage_mod',
 					'voyage_slaves_numbers__total_num_slaves_arr_first_port_embark',
-					'voyage_slaves_numbers__imp_total_num_slaves_embarked',
 					'voyage_ship__vessel_construction_place__place',
 					'voyage_dates__voyage_began',
 					'voyage_dates__voyage_completed',

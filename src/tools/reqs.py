@@ -123,28 +123,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			aggqueryset.append(queryset.aggregate(StdDev(aggfield)))
 		queryset=aggqueryset
 	
-	#GROUPBY (SUMS ONLY for now)
-	##e.g., how many people embarked for all port_embarkation/port_disembarkation pairs in a given year range?
-	
-	## So the below payload works on this function, as written
-	#data={
-	#	'voyage_itinerary__imp_principal_region_slave_dis__region':[
-	#	'Barbados',
-	#	'Jamaica'
-	#	],
-	#	'groupby_value_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
-	#	'groupby_sum_fields':['voyage_slaves_numbers__imp_total_num_slaves_disembarked']
-	#}
-	
-	# but they built in binning and percentages which would require a few ineresting algo's here
-	# so i think i should just do this in pandas as it will allow for more functionality down the line
-	# saving this anyways in an april 18 2022 5pm commit
-	
-	groupby_value_fields=params.get('groupby_value_fields')
-	groupby_sum_fields=params.get('groupby_sum_fields')
-	
-	if groupby_value_fields is not None and groupby_sum_fields is not None:
-		queryset=eval('queryset.values(%s)' %('\''+'\',\''.join(groupby_value_fields)+'\'')).annotate(sumfield=Sum(groupby_sum_fields[0])).order_by()
 	
 	#PAGINATION/LIMITS
 	if retrieve_all==False:

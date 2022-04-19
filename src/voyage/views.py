@@ -17,6 +17,7 @@ from tools.nest import *
 from tools.reqs import *
 from tools.timer import timer
 import collections
+from tools import grouper
 import gc
 from .serializers import *
 
@@ -112,18 +113,15 @@ class VoyageGroupBy(generics.GenericAPIView):
 		#aggregations=params.get('aggregate_fields')
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
-		print(queryset)
 		
-		output_dict={}
-		'''for a in aggregation:
-			for k in a:
-				v=a[k]
-				fn=k.split('__')[-1]
-				varname=k[:-len(fn)-2]
-				if varname in output_dict:
-					output_dict[varname][fn]=a[k]
-				else:
-					output_dict[varname]={fn:a[k]}'''
+		ids=[i[0] for i in queryset.values_list('id')]
+		
+		grouper.pivottable(dfname='voyage_export',ids=ids)
+		
+		
+		items=j['items']
+		varnames=j['ordered_keys']
+		
 		return JsonResponse(output_dict,safe=False)
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)

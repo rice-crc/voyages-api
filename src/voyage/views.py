@@ -145,6 +145,9 @@ class VoyageDataFrames(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('voyage/voyage_options.json',request)
+		return JsonResponse(j,safe=False)
 	def post(self,request):
 		t=timer("FETCHING...",[])
 		params=dict(request.POST)
@@ -201,7 +204,7 @@ class VoyageCaches(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		params=dict(request.POST)
-		cachename=params.get('cachename')
+		cachename=params.get('cachename')[0]
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,auto_prefetch=True,retrieve_all=True)		
 		d=open('static/customcache/%s.json' %cachename,'r')

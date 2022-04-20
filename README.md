@@ -30,7 +30,7 @@ Import the database dump to MySQL.
 host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages voyagesapi < data/voyagesapi.sql
 ```
 
-Run the custom management commands (see bottom of this doc):
+Run the custom management commands (see bottom of this doc) -- and it's a good idea to run them in this order:
 
 	docker exec -i voyagesapi-django bash -c "python3.9 manage.py rebuild_options"
 	docker exec -i voyagesapi-django bash -c "python3.9 manage.py rebuild_indices"

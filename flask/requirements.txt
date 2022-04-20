@@ -1,0 +1,15 @@
+certifi
+charset-normalizer
+click
+Flask
+gunicorn
+idna
+itsdangerous
+Jinja2
+MarkupSafe
+protobuf
+requests
+selenium
+urllib3
+Werkzeug
+pandas

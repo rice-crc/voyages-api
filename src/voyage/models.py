@@ -1845,7 +1845,6 @@ class LinkedVoyages(models.Model):
 	# and the second is a transatlantic voyage.
 	INTRA_AMERICAN_LINK_MODE = 1
 
-
 class Voyage(models.Model):
 	"""
 	Information about voyages.
@@ -1925,7 +1924,7 @@ class Voyage(models.Model):
 		help_text='Which dataset the voyage belongs to '
 				  '(e.g. Transatlantic, IntraAmerican)'
 	)
-
+	
 	# generate natural key
 	def natural_key(self):
 		return (self.voyage_id,)
@@ -1947,6 +1946,8 @@ class Voyage(models.Model):
 
 	def __str__(self):
 		return "Voyage #%s" % str(self.voyage_id)
+
+
 
 
 '''class VoyagesFullQueryHelper:

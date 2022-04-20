@@ -1,1 +1,112 @@
-{"id": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "ID"}, "region": {"type": "table", "label": "Region"}, "region__id": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "ID"}, "region__broad_region": {"type": "table", "label": "Broad Region"}, "region__broad_region__id": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "ID"}, "region__broad_region__broad_region": {"type": "<class 'rest_framework.fields.CharField'>", "label": "Broad region (Area) name"}, "region__broad_region__longitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Longitude of point"}, "region__broad_region__latitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Latitude of point"}, "region__broad_region__value": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Numeric code"}, "region__broad_region__show_on_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show on map"}, "region__region": {"type": "<class 'rest_framework.fields.CharField'>", "label": "Specific region (country or colony)"}, "region__longitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Longitude of point"}, "region__latitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Latitude of point"}, "region__value": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Numeric code"}, "region__show_on_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show on map"}, "region__show_on_main_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show on main map"}, "place": {"type": "<class 'rest_framework.fields.CharField'>", "label": "Place"}, "value": {"type": "<class 'rest_framework.fields.IntegerField'>", "label": "Numeric code"}, "longitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Longitude of point"}, "latitude": {"type": "<class 'rest_framework.fields.DecimalField'>", "label": "Latitude of point"}, "show_on_main_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show on main map"}, "show_on_voyage_map": {"type": "<class 'rest_framework.fields.BooleanField'>", "label": "Show on voyage map"}}
+{
+  "id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "ID"
+  },
+  "region": {
+    "type": "table",
+    "label": "Region",
+    "flatlabel": "Region"
+  },
+  "region__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Region : ID"
+  },
+  "region__broad_region": {
+    "type": "table",
+    "label": "Broad Region",
+    "flatlabel": "Region : Broad Region"
+  },
+  "region__broad_region__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Region : Broad Region : ID"
+  },
+  "region__broad_region__broad_region": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Broad region (Area) name",
+    "flatlabel": "Region : Broad Region : Broad region (Area) name"
+  },
+  "region__broad_region__longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of point",
+    "flatlabel": "Region : Broad Region : Longitude of point"
+  },
+  "region__broad_region__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of point",
+    "flatlabel": "Region : Broad Region : Latitude of point"
+  },
+  "region__broad_region__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Numeric code",
+    "flatlabel": "Region : Broad Region : Numeric code"
+  },
+  "region__broad_region__show_on_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on map",
+    "flatlabel": "Region : Broad Region : Show on map"
+  },
+  "region__region": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Specific region (country or colony)",
+    "flatlabel": "Region : Specific region (country or colony)"
+  },
+  "region__longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of point",
+    "flatlabel": "Region : Longitude of point"
+  },
+  "region__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of point",
+    "flatlabel": "Region : Latitude of point"
+  },
+  "region__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Numeric code",
+    "flatlabel": "Region : Numeric code"
+  },
+  "region__show_on_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on map",
+    "flatlabel": "Region : Show on map"
+  },
+  "region__show_on_main_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on main map",
+    "flatlabel": "Region : Show on main map"
+  },
+  "place": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Place",
+    "flatlabel": "Place"
+  },
+  "value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Numeric code",
+    "flatlabel": "Numeric code"
+  },
+  "longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of point",
+    "flatlabel": "Longitude of point"
+  },
+  "latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of point",
+    "flatlabel": "Latitude of point"
+  },
+  "show_on_main_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on main map",
+    "flatlabel": "Show on main map"
+  },
+  "show_on_voyage_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on voyage map",
+    "flatlabel": "Show on voyage map"
+  }
+}

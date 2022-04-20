@@ -31,14 +31,14 @@ class AssessmentList(generics.GenericAPIView):
 	def options(self,request):
 		j=options_handler('assessment/assessment_options.json',request)
 		return JsonResponse(j,safe=False)
-	def get(self,request):
+	def post(self,request):
 		#print("username:",request.auth.user)
 		times=[]
 		labels=[]
 		print("FETCHING...")
 		times.append(time.time())
 		queryset=Estimate.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,assessment_options,auto_prefetch=True,retrieve_all=True)
+		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,assessment_options,auto_prefetch=True,retrieve_all=True)
 		selected_fields=list(assessment_options.keys())
 		times.append(time.time())
 		labels.append('building query')

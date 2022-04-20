@@ -134,12 +134,8 @@ class VoyageGroupBy(generics.GenericAPIView):
 		
 		#HARDCODED URL
 		u2='http://voyagesapi-flask:5000/'
-		d2={
-			"groupby_fields":groupby_fields,
-			"value_field_tuple":value_field_tuple,
-			'ids':ids
-		}
-
+		d2=params
+		d2['ids']=ids
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 		
 		return JsonResponse(r.text,safe=False)

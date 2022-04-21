@@ -1,0 +1,1 @@
+DJANGO_STATIC_URL="http://voyages-django:8000/static/"

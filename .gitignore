@@ -6,6 +6,8 @@ src/voyages2021/localsettings.py
 
 app_secrets.py
 
+localsettings.py
+
 *__pycache__/
 
 instance/

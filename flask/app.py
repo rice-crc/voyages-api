@@ -5,6 +5,7 @@ import numpy as np
 import json
 import math
 import requests
+from localsettings import *
 
 app = Flask(__name__)
 
@@ -22,7 +23,7 @@ def load_long_df(idx_url):
 #on initialization, load every index as a dataframe, via a call to the django api's static assets
 
 ##HARD-CODED URL
-voyage_export=load_long_df('http://voyages-django:8000/static/customcache/voyage_export.json')
+voyage_export=load_long_df(DJANGO_STATIC_URL+'customcache/voyage_export.json')
 
 #Implementing this as a limited pivot table with some weird twists at the end to replicate legacy functionality
 ##first series is the rows of course

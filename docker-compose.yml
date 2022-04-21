@@ -2,10 +2,10 @@
 version: "3.7"
 
 services:
-  voyagesapi-mysql:
+  voyages-mysql:
     image: "mysql:latest"
-    container_name: "voyagesapi-mysql"
-    hostname: "voyagesapi-mysql"
+    container_name: "voyages-mysql"
+    hostname: "voyages-mysql"
     restart: "on-failure"
     ports:
       - "3306:3306"
@@ -14,13 +14,13 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "voyages"
 
-  voyagesapi-django:
-    image: "voyagesapi-django"
-    container_name: "voyagesapi-django"
-    hostname: "voyagesapi-django"
+  voyages-django:
+    image: "voyages-django"
+    container_name: "voyages-django"
+    hostname: "voyages-django"
     restart: "on-failure"
     depends_on:
-      - "voyagesapi-mysql"
+      - "voyages-mysql"
     ports:
       - "8000:8000"
     volumes:
@@ -29,10 +29,10 @@ services:
       context: "."
       dockerfile: "./docker/django/Dockerfile"
 
-  voyagesapi-flask:
-    image: "voyagesapi-flask"
-    container_name: "voyagesapi-flask"
-    hostname: "voyagesapi-flask"
+  voyages-flask:
+    image: "voyages-flask"
+    container_name: "voyages-flask"
+    hostname: "voyages-flask"
     restart: "on-failure"
     ports:
       - "5000:5000"
@@ -42,19 +42,19 @@ services:
       context: "."
       dockerfile: "./docker/flask/Dockerfile"
 
-  voyagesapi-adminer:
+  voyages-adminer:
     image: "adminer:latest"
-    container_name: "voyagesapi-adminer"
-    hostname: "voyagesapi-adminer"
+    container_name: "voyages-adminer"
+    hostname: "voyages-adminer"
     restart: "on-failure"
     depends_on:
-      - "voyagesapi-mysql"
+      - "voyages-mysql"
     ports:
       - "8080:8080"
 
 networks:
   default:
-    name: voyagesapi
+    name: voyages
 
 volumes:
   mysql_volume: {}

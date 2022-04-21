@@ -230,7 +230,7 @@ class Command(BaseCommand):
 		base_filepath='static/customcache'
 		os.makedirs(base_filepath,exist_ok=True)
 		
-		url='http://voyagesapi-django:8000/voyage/dataframes'
+		url='http://voyages-django:8000/voyage/dataframes'
 		from .app_secrets import headers
 		
 		for ind in indices:

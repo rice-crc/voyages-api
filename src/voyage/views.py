@@ -19,6 +19,7 @@ from tools.timer import timer
 import collections
 import gc
 from .serializers import *
+from voyages2021.localsettings import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -120,25 +121,58 @@ class VoyageAggregations(generics.GenericAPIView):
 #j=json.loads(r.text)
 
 class VoyageGroupBy(generics.GenericAPIView):
+	'''
+	Think of this as a pivot table (but it will generalize later)
+	This view takes:
+		a groupby tuple (row, col)
+		a value field tuple (cellvalue,aggregationfunction)
+		any search parameters you want!
+	'''
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		#print("username:",request.auth.user)
 		params=dict(request.POST)
 		groupby_fields=params.get('groupby_fields')
 		value_field_tuple=params.get('value_field_tuple')
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		ids=[i[0] for i in queryset.values_list('id')]
-		
-		#HARDCODED URL
-		u2='http://voyages-flask:5000/'
+		u2=FLASK_BASE_URL
 		d2=params
 		d2['ids']=ids
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		
-		return JsonResponse(r.text,safe=False)
+		return JsonResponse(json.loads(r.text),safe=False)
+
+class VoyageCaches(generics.GenericAPIView):
+	'''
+	This view takes:
+		All the search arguments you can pass to dataframes or voyage list endpoints
+		A specified "cachename" argument -- currently valid values are:
+			"voyage_export" --> for csv exports -- cached 67 variables
+			"voyage_animation" --> for the timelapse animation -- cached 11 variables
+			"voyage_maps" --> for aggregating some geo & numbers vars
+			"voyage_pivot_tables"
+			"voyage_summary_statistics"
+			"voyage_xyscatter"
+		And returns a dataframes-style response -- a dictionary with:
+			keys are fully-qualified var names
+			values are equal-length arrays, each corresponding to a single entity
+				(use voyage_id or id column as your index if you're going to load it into pandas)
+		List view is highly inefficient because of the repetitive var names for each voyage
+	'''
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		params=dict(request.POST)
+		u2='http://voyages-flask:5000/dataframes/'
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		ids=[i[0] for i in queryset.values_list('id')]
+		d2=params
+		d2['ids']=ids
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		return JsonResponse(json.loads(r.text),safe=False)
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)
 class VoyageDataFrames(generics.GenericAPIView):
@@ -175,50 +209,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 		t=timer('flattening',t,done=True)
 		return JsonResponse(output_dicts,safe=False,headers=headers)
 
-#We'll run this one as a two-step
-##1. run the search and get only the voyage_ids but all the voyage_ids
-##2. if that's sufficiently fast, then run those ids against a redis cache (or solr, actually -- just need a super fast flat record generator)
-##2a. into which we'll bake a few different slices of the data -- the specific vars needed by some special view like the timelapse
-##-->Flat files seem pretty fast (though a little more work needs to be done in terms of which vars are indexed)
-### #basic dataframes call
-### #11 fields, 5816 results-->2 seconds
-### #11 fields, 63k results-->23.14067506790161 seconds
-### #cached voyages call
-### #11 fields, 5816 results-->0.3 seconds
-### #11 fields, 63k results-->1.2 seconds
-
-class VoyageCaches(generics.GenericAPIView):
-	'''
-	This view takes:
-		All the search arguments you can pass to dataframes or voyage list endpoints
-		A specified "cachename" argument -- currently valid values are:
-			"voyage_export" --> for csv exports -- cached 67 variables
-			"voyage_animation" --> for the timelapse animation -- cached 11 variables
-		And returns a dataframes-style response -- a dictionary with:
-			keys are fully-qualified var names
-			values are equal-length arrays, each corresponding to a single entity
-				(use voyage_id or id column as your index if you're going to load it into pandas)
-		List view is highly inefficient because of the repetitive var names for each voyage
-	'''
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		params=dict(request.POST)
-		cachename=params.get('cachename')[0]
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,auto_prefetch=True,retrieve_all=True)		
-		d=open('static/customcache/%s.json' %cachename,'r')
-		j=json.loads(d.read())
-		d.close()
-		ids=[i[0] for i in queryset.values_list('id')]
-		items=j['items']
-		varnames=j['ordered_keys']
-		#filter down cache to only selected items
-		selected_items={i:items[str(i)] for i in ids}
-		#then reorder those items into columns of values underneath their var names
-		resp={v:[selected_items[i][varnames.index(v)] for i in selected_items] for v in varnames}
-		
-		return JsonResponse(resp,safe=False)
 
 #Get data on Places
 #Default structure is places::region::broad_region

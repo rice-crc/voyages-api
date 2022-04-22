@@ -85,6 +85,7 @@ def groupby():
 		normalize=False
 	
 	df=eval(dfname)
+	
 	df2=df[df['id'].isin(ids)]
 	
 	bins=rdata.get('bins')
@@ -96,6 +97,8 @@ def groupby():
 	#print(columns)
 	#print(df2.columns)
 	#print("+++++++++++++++++++")
+
+	print(df2)
 
 	#https://pandas.pydata.org/docs/user_guide/reshaping.html#reshaping-crosstabulations
 	ct=pd.crosstab(

@@ -103,7 +103,6 @@ class VoyageAggregations(generics.GenericAPIView):
 					output_dict[varname]={fn:a[k]}
 		return JsonResponse(output_dict,safe=False)
 
-
 #Django really did not like running pandas inside of itself
 #Maybe I'm wrong and there's a way to do it
 #But in the meantime, we're going to use Flask as a pandas sidecar for complex statistical operations
@@ -138,7 +137,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		ids=[i[0] for i in queryset.values_list('id')]
-		u2=FLASK_BASE_URL
+		u2=FLASK_BASE_URL+'groupby/'
 		d2=params
 		d2['ids']=ids
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
@@ -165,7 +164,7 @@ class VoyageCaches(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		params=dict(request.POST)
-		u2='http://voyages-flask:5000/dataframes/'
+		u2=FLASK_BASE_URL + 'dataframes/'
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		ids=[i[0] for i in queryset.values_list('id')]

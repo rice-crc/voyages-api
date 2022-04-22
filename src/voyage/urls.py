@@ -11,3 +11,5 @@ urlpatterns = [
 	path('autocomplete',views.VoyageTextFieldAutoComplete.as_view()),
 	path('groupby',views.VoyageGroupBy.as_view())
     ]
+    
+    

@@ -143,7 +143,7 @@ class Command(BaseCommand):
 					'voyage_id',
 					'voyage_itinerary__imp_principal_port_slave_dis__value',
 					'voyage_itinerary__imp_principal_region_slave_dis__value',
-					'voyage_itinerary__imp_broad_region_slave_dis__broad_value',
+					'voyage_itinerary__imp_broad_region_slave_dis__value',
 					'voyage_itinerary__imp_principal_place_of_slave_purchase__value',
 					'voyage_itinerary__imp_principal_region_of_slave_purchase__value',
 					'voyage_itinerary__imp_broad_region_of_slave_purchase__value',

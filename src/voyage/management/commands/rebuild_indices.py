@@ -142,11 +142,11 @@ class Command(BaseCommand):
 					'id',
 					'voyage_id',
 					'voyage_itinerary__imp_principal_port_slave_dis__value',
-					'voyage_itinerary__imp_principal_region_slave_dis__value',
-					'voyage_itinerary__imp_broad_region_slave_dis__value',
+					'voyage_itinerary__imp_principal_port_slave_dis__region__value',
+					'voyage_itinerary__imp_principal_port_slave_dis__region__broad_region__value',
 					'voyage_itinerary__imp_principal_place_of_slave_purchase__value',
-					'voyage_itinerary__imp_principal_region_of_slave_purchase__value',
-					'voyage_itinerary__imp_broad_region_of_slave_purchase__value',
+					'voyage_itinerary__imp_principal_place_of_slave_purchase__region__value',
+					'voyage_itinerary__imp_principal_place_of_slave_purchase__region__broad_region__value',
 					'voyage_ship__imputed_nationality__name',
 					'voyage_ship__tonnage_mod',
 					'voyage_ship__ship_name',
@@ -233,7 +233,8 @@ class Command(BaseCommand):
 		url='http://voyages-django:8000/voyage/dataframes'
 		from .app_secrets import headers
 		
-		for ind in indices:
+		#for ind in indices:
+		for ind in ['voyage_maps']:
 			st=time.time()
 			vars=indices[ind]['vars']
 			print('-------')

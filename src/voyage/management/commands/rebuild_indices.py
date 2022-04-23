@@ -233,8 +233,7 @@ class Command(BaseCommand):
 		url='http://voyages-django:8000/voyage/dataframes'
 		from .app_secrets import headers
 		
-		#for ind in indices:
-		for ind in ['voyage_maps']:
+		for ind in indices:
 			st=time.time()
 			vars=indices[ind]['vars']
 			print('-------')

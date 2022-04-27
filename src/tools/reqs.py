@@ -57,8 +57,8 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
 	if len(active_numeric_search_fields)>0:
 		for field in active_numeric_search_fields:
-			range=params.get(field)[0]
-			vals=[float(i) for i in range.split(',')]
+			range=params.get(field)
+			vals=[float(i) for i in range]
 			vals.sort()
 			min,max=vals
 			kwargs['{0}__{1}'.format(field, 'lte')]=max
@@ -75,7 +75,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	active_boolean_search_fields=[i for i in set(params).intersection(set(boolean_fields))]
 	if len(active_boolean_search_fields)>0:
 		for field in active_boolean_search_fields:
-			searchstring=params.get(field)
+			searchstring=params.get(field)[0]
 			if searchstring.lower() in ["true","t","1","yes"]:
 				searchstring=True
 			elif searchstring.lower() in ["false","f","0","no"]:

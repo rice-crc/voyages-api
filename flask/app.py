@@ -126,6 +126,8 @@ def dataframes():
 	
 	dfname=rdata['cachename'][0]
 	df=eval(dfname)
+	ids=rdata['ids']
+	df2=df[df['id'].isin(ids)]
 	
 	#it must have a list of ids (even if it's all of the ids)
 	#ids=rdata['ids']
@@ -135,6 +137,6 @@ def dataframes():
 	#and provide indexed dataframe access like so
 	columns=rdata['selected_fields']
 	
-	df2=df[[c for c in columns]]
+	df2=df2[[c for c in columns]]
 	
 	return jsonify(df2.to_dict())

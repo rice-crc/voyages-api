@@ -96,6 +96,7 @@ def groupby():
 	#print("+++++++++++++++++++")
 	#print(columns)
 	#print(df2.columns)
+	#print(rows)
 	#print("+++++++++++++++++++")
 
 	#https://pandas.pydata.org/docs/user_guide/reshaping.html#reshaping-crosstabulations
@@ -107,6 +108,8 @@ def groupby():
 		normalize=normalize,
 		dropna=rmna
 	)
+	
+	#print(ct)
 	
 	if removeallNA:
 		#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna

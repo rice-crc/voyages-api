@@ -303,7 +303,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		st=time.time()
 		params=dict(request.POST)
 		k=next(iter(params))
-		v=params[k]
+		v=params[k][0]
 		retrieve_all=True
 		queryset=Voyage.objects.all()		
 		kwargs={'{0}__{1}'.format(k, 'icontains'):v}

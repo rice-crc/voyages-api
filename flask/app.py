@@ -93,11 +93,11 @@ def groupby():
 		binvar,nbins=[bins[0],int(bins[1])]
 		df2=pd.cut(df2[binvar],nbins)
 	
-	print("+++++++++++++++++++")
-	print(columns)
-	print(df2.columns)
-	print(rows)
-	print("+++++++++++++++++++")
+	#print("+++++++++++++++++++")
+	#print(columns)
+	#print(df2.columns)
+	#print(rows)
+	#print("+++++++++++++++++++")
 
 	#https://pandas.pydata.org/docs/user_guide/reshaping.html#reshaping-crosstabulations
 	ct=pd.crosstab(
@@ -109,7 +109,7 @@ def groupby():
 		dropna=rmna
 	)
 	
-	print(ct)
+	#print(ct)
 	
 	if removeallNA:
 		#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna

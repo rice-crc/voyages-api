@@ -188,6 +188,7 @@ class Command(BaseCommand):
 					'voyage_ship__guns_mounted',
 					'voyage_dates__imp_arrival_at_port_of_dis',
 					'voyage_dates__imp_length_home_to_disembark',
+					'voyage_dates__imp_arrival_at_port_of_dis_yyyy',
 					'voyage_slaves_numbers__imp_total_num_slaves_embarked',
 					'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
 					'voyage_slaves_numbers__imp_mortality_during_voyage',

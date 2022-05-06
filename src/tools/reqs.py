@@ -17,7 +17,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	pp = pprint.PrettyPrinter(indent=4)
 	print("--post req params--")
 	pp.pprint(params)
-		
+	
 	#SELECT SPECIFIC FIELDS TO RETURN
 	selected_fields=params.get('selected_fields')
 	
@@ -37,13 +37,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	all_fields={i:options_dict[i] for i in options_dict if 'type' in options_dict[i]}
 	active_fields=list(set([i for i in params]+selected_fields+aggregation_fields).intersection(set(all_fields)))
-	
-	#ORDER RESULTS
-	order_by=params.get('order_by')
-	if order_by is not None:
-		print('--order by--')
-		print(order_by)
-		queryset=queryset.order_by(*order_by)
 	
 	###FILTER RESULTS
 	##select text and numeric fields, ignoring those without a type
@@ -124,7 +117,13 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			aggqueryset.append(queryset.aggregate(StdDev(aggfield)))
 		queryset=aggqueryset
 	
-	
+	print(queryset)
+	#ORDER RESULTS
+	order_by=params.get('order_by')
+	if order_by is not None:
+		print("---->",order_by)
+		queryset=queryset.order_by(*order_by)
+	print(queryset)
 	#PAGINATION/LIMITS
 	if retrieve_all==False:
 		default_results_per_page=10
@@ -170,6 +169,8 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	else:
 		next_uri=None
 		prev_uri=None
+	
+	print(queryset)
 	
 	return queryset,selected_fields,next_uri,prev_uri,results_count
 

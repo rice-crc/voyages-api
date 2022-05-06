@@ -165,12 +165,17 @@ class VoyageCaches(generics.GenericAPIView):
 	def post(self,request):
 		params=dict(request.POST)
 		u2=FLASK_BASE_URL + 'dataframes/'
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		retrieve_all=True
+		if 'results_per_page' in params:
+			retrieve_all=False
+		voyageobjects=Voyage.objects
+		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(voyageobjects,self,request,voyage_options,retrieve_all=retrieve_all)
 		ids=[i[0] for i in queryset.values_list('id')]
 		d2=params
 		d2['ids']=ids
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		print("----------------------------")
+		print(json.loads(r.text))
 		return JsonResponse(json.loads(r.text),safe=False)
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)

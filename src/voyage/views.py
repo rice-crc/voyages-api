@@ -174,9 +174,7 @@ class VoyageCaches(generics.GenericAPIView):
 		d2=params
 		d2['ids']=ids
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		print("----------------------------")
-		print(json.loads(r.text))
-		return JsonResponse(json.loads(r.text),safe=False)
+		return JsonResponse(json.loads(r.text),safe=False,headers={'results_count':results_count})
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)
 class VoyageDataFrames(generics.GenericAPIView):

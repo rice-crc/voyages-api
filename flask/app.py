@@ -127,18 +127,12 @@ def dataframes():
 	
 	dfname=rdata['cachename'][0]
 	df=eval(dfname)
-	print(df)
 	ids=rdata['ids']
-	print(ids)
 	df2=df[df['id'].isin(ids)]
-	print(df2)
 	columns=list(set(rdata['selected_fields']+['id']))
 	df2=df2[[c for c in columns]]
 	df3=df2.set_index('id')
 	df3=df3.reindex(ids)
-	print(df3)
-	
 	j3=df3.to_dict()
-	print(j3)
 	
 	return jsonify(j3)

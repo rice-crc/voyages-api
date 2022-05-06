@@ -117,13 +117,12 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			aggqueryset.append(queryset.aggregate(StdDev(aggfield)))
 		queryset=aggqueryset
 	
-	print(queryset)
 	#ORDER RESULTS
 	order_by=params.get('order_by')
 	if order_by is not None:
-		print("---->",order_by)
+		print("---->order by---->",order_by)
 		queryset=queryset.order_by(*order_by)
-	print(queryset)
+	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')
 	#PAGINATION/LIMITS
 	if retrieve_all==False:
 		default_results_per_page=10
@@ -170,7 +169,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		next_uri=None
 		prev_uri=None
 	
-	print(queryset)
 	
 	return queryset,selected_fields,next_uri,prev_uri,results_count
 

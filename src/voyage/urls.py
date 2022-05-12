@@ -10,8 +10,8 @@ urlpatterns = [
     path('aggregations',views.VoyageAggregations.as_view()),
 	path('autocomplete',views.VoyageTextFieldAutoComplete.as_view()),
 	path('groupby',views.VoyageGroupBy.as_view()),
-	#path('<int:voyage_id>/',views.VoyageListHuman.as_view()),
-	path('<int:voyage_id>/<varname>/',views.VoyageVarListHuman.as_view())
+	path('<int:voyage_id>/',views.SingleVoyage.as_view()),
+	path('<int:voyage_id>/<varname>/',views.SingleVoyageVar.as_view())
     ]
     
     

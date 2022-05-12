@@ -21,6 +21,33 @@ import collections
 
 past_options=options_handler('past/past_options.json',hierarchical=False)
 
+
+
+class SingleEnslaved(generics.GenericAPIView):
+	def get(self,request,enslaved_id):
+		enslaved_record=Enslaved.objects.get(pk=enslaved_id)
+		serialized=EnslavedSerializer(enslaved_record,many=False).data
+		return JsonResponse(serialized,safe=False)
+
+class SingleEnslavedVar(generics.GenericAPIView):
+	def get(self,request,enslaved_id,varname):
+		enslaved_record=Enslaved.objects.get(pk=enslaved_id)
+		serialized=EnslavedSerializer(enslaved_record,many=False).data
+		keychain=varname.split('__')
+		bottomval=bottomout(serialized,list(keychain))
+		var_options=past_options[varname]
+		output={
+			'enslaved_id':enslaved_id,
+			'variable_api_name':varname,
+			'variable_label':var_options['flatlabel'],
+			'variable_type':var_options['type'],
+			'value':bottomval
+		}
+		return JsonResponse(output,safe=False)
+
+
+
+
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class EnslavedList(generics.GenericAPIView):

@@ -78,21 +78,20 @@ class VoyageList(generics.GenericAPIView):
 		return JsonResponse(outputs,safe=False,headers=headers)
 
 
-class VoyageListHuman(generics.GenericAPIView):
+class SingleVoyage(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	def get(self,request,voyage_id):
 		thisvoyage=Voyage.objects.get(pk=voyage_id)
 		serialized=VoyageSerializer(thisvoyage,many=False).data
 		return JsonResponse(serialized,safe=False)
 
-class VoyageVarListHuman(generics.GenericAPIView):
+class SingleVoyageVar(generics.GenericAPIView):
 	def get(self,request,voyage_id,varname):
 		thisvoyage=Voyage.objects.get(pk=voyage_id)
 		serialized=VoyageSerializer(thisvoyage,many=False).data
 		keychain=varname.split('__')
 		bottomval=bottomout(serialized,list(keychain))
 		var_options=voyage_options[varname]
-		
 		output={
 			'voyage_id':voyage_id,
 			'variable_api_name':varname,
@@ -100,11 +99,7 @@ class VoyageVarListHuman(generics.GenericAPIView):
 			'variable_type':var_options['type'],
 			'value':bottomval
 		}
-		
 		return JsonResponse(output,safe=False)
-
-
-
 
 # Basic statistics
 ## takes a numeric variable

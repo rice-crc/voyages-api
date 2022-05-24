@@ -316,16 +316,21 @@ Let's say you wanted to run a search (e.g., voyages btw. 1800-1820) and then det
 You would simply hit the GroupBy endpoint with your regular search query and specify:
 
 1. which fields to group on
+
 1. which field to get the summary stat on (and the operation to run, like "sum")
-	
+ 
+For instance:
+
 	POST "http://127.0.0.1:8000/voyage/groupby"
 	data={
 		"voyage_itinerary__imp_principal_region_slave_dis__region":[
 			"Barbados",
 			"Jamaica"
 		],
-		'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
-		'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum']
+		'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place',
+		                  'voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
+		'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum'],
+		'cachename':['voyage_export']
 	}
 
 This will be iterated over the coming weeks to cover Pivot Tables and other functions.

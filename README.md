@@ -277,7 +277,7 @@ Looks like:
 
 You can aggregate on numerical variable. This will only return aggregations on valid numeric fields.
 
-But it returns *all* django aggregation functions on selected numeric fields (sum, min, max, avg, stddev), so some data may be nonsensical (e.g., the sum of the mortality ratio).
+But it returns min & max on selected numeric fields.
 
 You can still run filters and sorts on variables--these filters will be executed before the aggregation.
 
@@ -299,19 +299,13 @@ Looks like:
 	{
 	"voyage_slaves_numbers__imp_total_num_slaves_embarked":
 		{
-		"sum": 11264030,
-		"avg": 181.3269,
 		"min": 0,
-		"max": 2024,
-		"stddev": 186.44502407088743
+		"max": 2024
 		},
 	"voyage_slaves_numbers__imp_total_num_slaves_disembarked":
 		{
-		"sum": 9776588,
-		"avg": 158.1281,
 		"min": 0,
-		"max": 1700,
-		"stddev": 163.52181290079272
+		"max": 1700
 		}
 	}
 

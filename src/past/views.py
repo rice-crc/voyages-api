@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.views.generic.list import ListView
+from django.views.generic.base import TemplateView
 import urllib
 import json
 import requests
@@ -29,21 +30,24 @@ class SingleEnslaved(generics.GenericAPIView):
 		serialized=EnslavedSerializer(enslaved_record,many=False).data
 		return JsonResponse(serialized,safe=False)
 
-class SingleEnslavedVar(generics.GenericAPIView):
+class SingleEnslavedVar(TemplateView):
+	template_name='singlevar.html'
 	def get(self,request,enslaved_id,varname):
 		enslaved_record=Enslaved.objects.get(pk=enslaved_id)
 		serialized=EnslavedSerializer(enslaved_record,many=False).data
 		keychain=varname.split('__')
 		bottomval=bottomout(serialized,list(keychain))
 		var_options=past_options[varname]
-		output={
+		data={
 			'enslaved_id':enslaved_id,
 			'variable_api_name':varname,
 			'variable_label':var_options['flatlabel'],
 			'variable_type':var_options['type'],
-			'value':bottomval
+			'variable_value':bottomval
 		}
-		return JsonResponse(output,safe=False)
+		context = super(SingleEnslavedVar, self).get_context_data()
+		context['data']=data
+		return context
 
 
 
@@ -57,92 +61,50 @@ class EnslavedList(generics.GenericAPIView):
 	def options(self,request):
 		j=options_handler('past/past_options.json',request)
 		return JsonResponse(j,safe=False)
-	def get(self,request):
-		#print("username:",request.auth.user)
-		times=[]
-		labels=[]
-		print("FETCHING...")
-		times.append(time.time())
-		queryset=Enslaved.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count=get_req(queryset,self,request,past_options,auto_prefetch=True)
-		headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-		#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
-		times.append(time.time())
-		labels.append('building query')
-		read_serializer=EnslavedSerializer(queryset,many=True)
-		times.append(time.time())
-		labels.append('serialization')
-		serialized=read_serializer.data
-		times.append(time.time())
-		labels.append('sql execution')
-			
-		outputs=[]
-		
-		hierarchical=True
-		if 'hierarchical' in request.query_params:
-			if request.query_params['hierarchical'].lower() in ['false','0','n']:
-				hierarchical=False
-		
-		if hierarchical==False:
-			if selected_fields==[]:
-				selected_fields=[i for i in past_options]
-			
-			for s in serialized:
-				d={}
-				for selected_field in selected_fields:
-					keychain=selected_field.split('__')
-					bottomval=bottomout(s,list(keychain))
-					d[selected_field]=bottomval
-				outputs.append(d)
-		else:
-			outputs=serialized
-		times.append(time.time())
-		labels.append('flattening...')
-		print('--timings--')
-		for i in range(1,len(times)):
-			print(labels[i-1],times[i]-times[i-1])		
-		return JsonResponse(outputs,safe=False,headers=headers)
 	def post(self,request):
 		times=[]
 		labels=[]
 		print("FETCHING...")
 		times.append(time.time())
 		queryset=Enslaved.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count=post_req(queryset,self,request,past_options,auto_prefetch=True)
-		headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-		times.append(time.time())
-		labels.append('building query')
-		read_serializer=EnslavedSerializer(queryset,many=True)
-		times.append(time.time())
-		labels.append('serialization')
-		serialized=read_serializer.data
-		times.append(time.time())
-		labels.append('sql execution')
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,past_options,auto_prefetch=True)
+		if len(error_messages)==0:
+			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			times.append(time.time())
+			labels.append('building query')
+			read_serializer=EnslavedSerializer(queryset,many=True)
+			times.append(time.time())
+			labels.append('serialization')
+			serialized=read_serializer.data
+			times.append(time.time())
+			labels.append('sql execution')
 			
-		outputs=[]
+			outputs=[]
 		
-		hierarchical=request.POST.get('hierarchical')
-		if str(hierarchical).lower() in ['false','0','f','n']:
-			hierarchical=False
-		else:
-			hierarchical=True
+			hierarchical=request.POST.get('hierarchical')
+			if str(hierarchical).lower() in ['false','0','f','n']:
+				hierarchical=False
+			else:
+				hierarchical=True
 		
-		if hierarchical==False:
-			if selected_fields==[]:
-				selected_fields=[i for i in past_options]
+			if hierarchical==False:
+				if selected_fields==[]:
+					selected_fields=[i for i in past_options]
 			
-			for s in serialized:
-				d={}
-				for selected_field in selected_fields:
-					keychain=selected_field.split('__')
-					bottomval=bottomout(s,list(keychain))
-					d[selected_field]=bottomval
-				outputs.append(d)
+				for s in serialized:
+					d={}
+					for selected_field in selected_fields:
+						keychain=selected_field.split('__')
+						bottomval=bottomout(s,list(keychain))
+						d[selected_field]=bottomval
+					outputs.append(d)
+			else:
+				outputs=serialized
+			times.append(time.time())
+			labels.append('flattening...')
+			print('--timings--')
+			for i in range(1,len(times)):
+				print(labels[i-1],times[i]-times[i-1])		
+			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
-			outputs=serialized
-		times.append(time.time())
-		labels.append('flattening...')
-		print('--timings--')
-		for i in range(1,len(times)):
-			print(labels[i-1],times[i]-times[i-1])		
-		return JsonResponse(outputs,safe=False,headers=headers)
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)

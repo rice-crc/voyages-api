@@ -9,7 +9,7 @@ THIS REQUIRES AN EXTERNAL SQL DUMP. CONTACT JCM FOR THIS.
 Create an external Docker network.
 
 ```bash
-host:~/Projects/voyagesapi$ docker network create voyagesapi
+host:~/Projects/voyagesapi$ docker network create voyages
 ```
 
 Build and run the containers.
@@ -21,26 +21,26 @@ host:~/Projects/voyagesapi$ docker-compose up -d --build
 Create the database.
 
 ```bash
-host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages -e "create database voyagesapi"
+host:~/Projects/voyagesapi$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create database voyages"
 ```
 
 Import the database dump to MySQL.
 
 ```bash
-host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages voyagesapi < data/voyagesapi.sql
+host:~/Projects/voyagesapi$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages < data/voyagesapi.sql
 ```
 
 Run the custom management commands (see bottom of this doc) -- and it's a good idea to run them in this order:
 
-	docker exec -i voyagesapi-django bash -c "python3.9 manage.py rebuild_options"
-	docker exec -i voyagesapi-django bash -c "python3.9 manage.py rebuild_indices"
+	docker exec -i voyages-django bash -c "python3.9 manage.py rebuild_options"
+	docker exec -i voyages-django bash -c "python3.9 manage.py rebuild_indices"
 
 View container logs.
 
 ```bash
-host:~/Projects/voyagesapi$ docker logs voyagesapi-django
-host:~/Projects/voyagesapi$ docker logs voyagesapi-mysql
-host:~/Projects/voyagesapi$ docker logs voyagesapi-flask
+host:~/Projects/voyagesapi$ docker logs voyages-django
+host:~/Projects/voyagesapi$ docker logs voyages-mysql
+host:~/Projects/voyagesapi$ docker logs voyages-flask
 ```
 
 *The Adminer app is provided as an additional way to work with the database.*

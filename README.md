@@ -66,10 +66,10 @@ Note the following project resources:
 
 There are currently 4 major endpoints, which allow you to query on People, Voyages, Places, and Estimates
 
-1. Enslaved: POST http://127.0.0.1:8000/past
-1. Voyages: POST http://127.0.0.1:8000/voyage
+1. Enslaved: POST http://127.0.0.1:8000/past/
+1. Voyages: POST http://127.0.0.1:8000/voyage/
 1. Places: POST http://127.0.0.1:8000/voyage/geo
-1. Estimates:  POST http://127.0.0.1:8000/assessment
+1. Estimates:  POST http://127.0.0.1:8000/assessment/
 
 ### 0. AUTHENTICATION
 
@@ -77,9 +77,11 @@ There are currently 4 major endpoints, which allow you to query on People, Voyag
 
 documentation: https://www.django-rest-framework.org/api-guide/authentication/
 
+local token: http://127.0.0.1:8000/admin/authtoken/tokenproxy/
+
 It's pretty straightforward. You simply need to declare a header with the key "Authorization" and the value "Token abcdef....".
 
-So any request, like ```POST http://127.0.0.1:8000/past``` simply becomes ```POST http://127.0.0.1:8000/past -H 'Authorization: Token abcdef....'```
+So any request, like ```POST http://127.0.0.1:8000/past/``` simply becomes ```POST http://127.0.0.1:8000/past/ -H 'Authorization: Token abcdef....'```
 
 A full python example follows.
 
@@ -215,7 +217,7 @@ Filter and sort on any variable
 
 Numeric fields: provide a range
 
-	POST http://127.0.0.1:8000/voyage
+	POST http://127.0.0.1:8000/voyage/
 	data={'voyage_dates__imp_arrival_at_port_of_dis_yyyy'=[1800,1810]}
 	
 	POST http://127.0.0.1:8000/voyage/geo
@@ -233,7 +235,7 @@ Text fields: inclusive OR on arrayed values, exactly matched (see Autocomplete b
 
 Check the headers to see total_results_count, and paginate accordingly:
 
-	POST http://127.0.0.1:8000/voyage
+	POST http://127.0.0.1:8000/voyage/
 		
 		{
 		"results_page" : [4]
@@ -316,16 +318,21 @@ Let's say you wanted to run a search (e.g., voyages btw. 1800-1820) and then det
 You would simply hit the GroupBy endpoint with your regular search query and specify:
 
 1. which fields to group on
+
 1. which field to get the summary stat on (and the operation to run, like "sum")
-	
-	POST "http://127.0.0.1:8100/voyage/groupby"
+ 
+For instance:
+
+	POST "http://127.0.0.1:8000/voyage/groupby"
 	data={
 		"voyage_itinerary__imp_principal_region_slave_dis__region":[
 			"Barbados",
 			"Jamaica"
 		],
-		'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
-		'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum']
+		'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place',
+		                  'voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
+		'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum'],
+		'cachename':['voyage_export']
 	}
 
 This will be iterated over the coming weeks to cover Pivot Tables and other functions.
@@ -349,8 +356,9 @@ For instance:
 			'Barbados',
 			'Jamaica'
 		],
-		'cachename':'voyage_export',
-		'download_csv':'True'
+		'cachename':['voyage_export'],
+		'download_csv':['True'],
+		'selected_fields':['voyage_itinerary__imp_principal_place_of_slave_purchase__place']
 	}
 	
 	r=requests.post('http://127.0.0.1:8000/voyage/caches',headers=headers,data=data)

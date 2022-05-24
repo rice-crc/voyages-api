@@ -77,6 +77,8 @@ There are currently 4 major endpoints, which allow you to query on People, Voyag
 
 documentation: https://www.django-rest-framework.org/api-guide/authentication/
 
+local token: http://127.0.0.1:8000/admin/authtoken/tokenproxy/
+
 It's pretty straightforward. You simply need to declare a header with the key "Authorization" and the value "Token abcdef....".
 
 So any request, like ```POST http://127.0.0.1:8000/past``` simply becomes ```POST http://127.0.0.1:8000/past -H 'Authorization: Token abcdef....'```

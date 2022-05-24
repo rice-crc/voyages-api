@@ -356,7 +356,7 @@ For instance:
 		],
 		'cachename':'voyage_export',
 		'download_csv':'True',
-		'selected_fields':'voyage_itinerary__imp_principal_place_of_slave_purchase__place'
+		'selected_fields':['voyage_itinerary__imp_principal_place_of_slave_purchase__place']
 	}
 	
 	r=requests.post('http://127.0.0.1:8000/voyage/caches',headers=headers,data=data)

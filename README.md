@@ -354,8 +354,8 @@ For instance:
 			'Barbados',
 			'Jamaica'
 		],
-		'cachename':'voyage_export',
-		'download_csv':'True',
+		'cachename':['voyage_export'],
+		'download_csv':['True'],
 		'selected_fields':['voyage_itinerary__imp_principal_place_of_slave_purchase__place']
 	}
 	

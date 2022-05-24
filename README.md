@@ -81,7 +81,7 @@ local token: http://127.0.0.1:8000/admin/authtoken/tokenproxy/
 
 It's pretty straightforward. You simply need to declare a header with the key "Authorization" and the value "Token abcdef....".
 
-So any request, like ```POST http://127.0.0.1:8000/past``` simply becomes ```POST http://127.0.0.1:8000/past -H 'Authorization: Token abcdef....'```
+So any request, like ```POST http://127.0.0.1:8000/past/``` simply becomes ```POST http://127.0.0.1:8000/past/ -H 'Authorization: Token abcdef....'```
 
 A full python example follows.
 
@@ -217,7 +217,7 @@ Filter and sort on any variable
 
 Numeric fields: provide a range
 
-	POST http://127.0.0.1:8000/voyage
+	POST http://127.0.0.1:8000/voyage/
 	data={'voyage_dates__imp_arrival_at_port_of_dis_yyyy'=[1800,1810]}
 	
 	POST http://127.0.0.1:8000/voyage/geo
@@ -235,7 +235,7 @@ Text fields: inclusive OR on arrayed values, exactly matched (see Autocomplete b
 
 Check the headers to see total_results_count, and paginate accordingly:
 
-	POST http://127.0.0.1:8000/voyage
+	POST http://127.0.0.1:8000/voyage/
 		
 		{
 		"results_page" : [4]

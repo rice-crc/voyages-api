@@ -66,10 +66,10 @@ Note the following project resources:
 
 There are currently 4 major endpoints, which allow you to query on People, Voyages, Places, and Estimates
 
-1. Enslaved: POST http://127.0.0.1:8000/past
-1. Voyages: POST http://127.0.0.1:8000/voyage
+1. Enslaved: POST http://127.0.0.1:8000/past/
+1. Voyages: POST http://127.0.0.1:8000/voyage/
 1. Places: POST http://127.0.0.1:8000/voyage/geo
-1. Estimates:  POST http://127.0.0.1:8000/assessment
+1. Estimates:  POST http://127.0.0.1:8000/assessment/
 
 ### 0. AUTHENTICATION
 
@@ -318,7 +318,7 @@ You would simply hit the GroupBy endpoint with your regular search query and spe
 1. which fields to group on
 1. which field to get the summary stat on (and the operation to run, like "sum")
 	
-	POST "http://127.0.0.1:8100/voyage/groupby"
+	POST "http://127.0.0.1:8000/voyage/groupby"
 	data={
 		"voyage_itinerary__imp_principal_region_slave_dis__region":[
 			"Barbados",

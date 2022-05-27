@@ -81,7 +81,7 @@ class VoyageList(generics.GenericAPIView):
 			t=timer('flattening',t,done=True)
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 
 class SingleVoyage(generics.GenericAPIView):
@@ -135,7 +135,7 @@ class VoyageAggregations(generics.GenericAPIView):
 						output_dict[varname]={fn:a[k]}
 			return JsonResponse(output_dict,safe=False)
 		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 #Django really did not like running pandas inside of itself
 #Maybe I'm wrong and there's a way to do it
@@ -176,9 +176,12 @@ class VoyageGroupBy(generics.GenericAPIView):
 			d2=params
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-			return JsonResponse(json.loads(r.text),safe=False)
+			if r.ok:
+				return JsonResponse(json.loads(r.text),safe=False)
+			else:
+				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
 		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 
 class VoyageCaches(generics.GenericAPIView):
@@ -213,9 +216,12 @@ class VoyageCaches(generics.GenericAPIView):
 			d2=params
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-			return JsonResponse(json.loads(r.text),safe=False,headers={'results_count':results_count})
+			if r.ok:
+				return JsonResponse(json.loads(r.text),safe=False,headers={'results_count':results_count})
+			else:
+				return JsonResponse({'status':'false','message':'bad request to cache'}, status=400)
 		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)
 class VoyageDataFrames(generics.GenericAPIView):
@@ -257,7 +263,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 			t=timer('flattening',t,done=True)
 			return JsonResponse(output_dicts,safe=False,headers=headers)
 		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 
 
@@ -344,7 +350,7 @@ class VoyagePlaceList(generics.GenericAPIView):
 			t=timer('flattening',t,True)
 			return JsonResponse(outputs,safe=False)
 		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 
 #This will only accept one field at a time

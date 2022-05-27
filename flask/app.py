@@ -1,5 +1,5 @@
 import time
-from flask import Flask,jsonify,request
+from flask import Flask,jsonify,request,abort
 import pandas as pd
 import numpy as np
 import json
@@ -54,85 +54,92 @@ for rc in registered_caches:
 
 @app.route('/groupby/',methods=['POST'])
 def groupby():
-	st=time.time()
-	rdata=request.json
 	
-	#print("------->",rdata)
-	dfname=rdata['cachename'][0]
+	try:
+		st=time.time()
+		rdata=request.json
 	
-	#it must have a list of ids (even if it's all of the ids)
-	ids=rdata['ids']
+		#print("------->",rdata)
+		dfname=rdata['cachename'][0]
 	
-	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
-	columns,rows=rdata['groupby_fields']
-	val,fn=rdata['value_field_tuple']
+		#it must have a list of ids (even if it's all of the ids)
+		ids=rdata['ids']
 	
-	removeallNA=False
-	rmna=rdata.get('rmna')
+		#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
+		columns,rows=rdata['groupby_fields']
+		val,fn=rdata['value_field_tuple']
 	
-	if rmna is not None:
-		rmna=rmna[0]
+		removeallNA=False
+		rmna=rdata.get('rmna')
 	
-	if rmna in ["True",True]:
-		rmna=True
-	elif rmna in ["all","All"]:
-		rmna=False
-		removeallNA=True
+		if rmna is not None:
+			rmna=rmna[0]
 	
-	normalize=rdata.get('normalize')
-	if normalize is not None:
-		normalize=normalize[0]
-	if normalize not in ["columns","index"]:
-		normalize=False
+		if rmna in ["True",True]:
+			rmna=True
+		elif rmna in ["all","All"]:
+			rmna=False
+			removeallNA=True
 	
-	df=eval(dfname)
+		normalize=rdata.get('normalize')
+		if normalize is not None:
+			normalize=normalize[0]
+		if normalize not in ["columns","index"]:
+			normalize=False
 	
-	df2=df[df['id'].isin(ids)]
+		df=eval(dfname)
 	
-	bins=rdata.get('bins')
-	if bins is not None:
-		binvar,nbins=[bins[0],int(bins[1])]
-		df2=pd.cut(df2[binvar],nbins)
+		df2=df[df['id'].isin(ids)]
 	
-	#print("+++++++++++++++++++")
-	#print(columns)
-	#print(df2.columns)
-	#print(rows)
-	#print("+++++++++++++++++++")
+		bins=rdata.get('bins')
+		if bins is not None:
+			binvar,nbins=[bins[0],int(bins[1])]
+			df2=pd.cut(df2[binvar],nbins)
+	
+		#print("+++++++++++++++++++")
+		#print(columns)
+		#print(df2.columns)
+		#print(rows)
+		#print("+++++++++++++++++++")
 
-	#https://pandas.pydata.org/docs/user_guide/reshaping.html#reshaping-crosstabulations
-	ct=pd.crosstab(
-		df2[columns],
-		df2[rows],
-		values=df2[val],
-		aggfunc=eval("np."+fn),
-		normalize=normalize,
-		dropna=rmna
-	)
+		#https://pandas.pydata.org/docs/user_guide/reshaping.html#reshaping-crosstabulations
+		ct=pd.crosstab(
+			df2[columns],
+			df2[rows],
+			values=df2[val],
+			aggfunc=eval("np."+fn),
+			normalize=normalize,
+			dropna=rmna
+		)
 	
-	#print(ct)
+		#print(ct)
 	
-	if removeallNA:
-		#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
-		ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
-	else:
-		ctd=ct.to_dict()
-	return jsonify(ctd)
+		if removeallNA:
+			#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
+			ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
+		else:
+			ctd=ct.to_dict()
+		return jsonify(ctd)
+	except:
+		abort(400)
 
 @app.route('/dataframes/',methods=['POST'])
 def dataframes():
-	st=time.time()
+	try:
+		st=time.time()
 	
-	rdata=request.json
+		rdata=request.json
 	
-	dfname=rdata['cachename'][0]
-	df=eval(dfname)
-	ids=rdata['ids']
-	df2=df[df['id'].isin(ids)]
-	columns=list(set(rdata['selected_fields']+['id']))
-	df2=df2[[c for c in columns]]
-	df3=df2.set_index('id')
-	df3=df3.reindex(ids)
-	j3=df3.to_dict()
+		dfname=rdata['cachename'][0]
+		df=eval(dfname)
+		ids=rdata['ids']
+		df2=df[df['id'].isin(ids)]
+		columns=list(set(rdata['selected_fields']+['id']))
+		df2=df2[[c for c in columns]]
+		df3=df2.set_index('id')
+		df3=df3.reindex(ids)
+		j3=df3.to_dict()
 	
-	return jsonify(j3)
+		return jsonify(j3)
+	except:
+		abort(400)

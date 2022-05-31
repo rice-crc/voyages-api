@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 	'voyage',
     'assessment',
+    'geo',
     'past',
     'rest_framework',
     'rest_framework.authtoken'

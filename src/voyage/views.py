@@ -35,9 +35,15 @@ class VoyageList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
+		print("vvv----VOYAGES OPTIONS----vvv")
+		print("username:",request.auth.user)
+		print("data",request.data)
+		print("headers:",request.headers)
 		j=options_handler('voyage/voyage_options.json',request)
+		print("^^^----VOYAGES OPTIONS----^^^")
 		return JsonResponse(j,safe=False)
 	def post(self,request):
+		print("vvv----VOYAGES POST----vvv")
 		print("username:",request.auth.user)
 		print("data",request.data)
 		print("headers:",request.headers)
@@ -81,9 +87,11 @@ class VoyageList(generics.GenericAPIView):
 			else:
 				outputs=serialized
 			t=timer('flattening',t,done=True)
+			print("^^^----VOYAGES POST----^^^")
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+			print("^^^----VOYAGES POST----^^^")
 
 
 class SingleVoyage(generics.GenericAPIView):

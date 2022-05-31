@@ -34,7 +34,6 @@ class VoyageList(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	def options(self,request):
 		j=options_handler('voyage/voyage_options.json',request)
-		print("^^^----VOYAGES OPTIONS----^^^")
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		t=timer('FETCHING...',[])

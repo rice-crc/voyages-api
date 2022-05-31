@@ -7,6 +7,8 @@ from past.serializers import EnslavedSerializer
 from past.models import Enslaved
 from assessment.serializers import EstimateSerializer
 from assessment.models import Estimate
+from geo.serializers import LocationSerializer,RouteSerializer
+from geo.models import Location,Route
 
 class Command(BaseCommand):
 	help = 'rebuilds the options flatfiles'
@@ -34,6 +36,16 @@ class Command(BaseCommand):
 				'output_filename':'assessment/assessment_options.json',
 				'serializer':EstimateSerializer,
 				'objectclass':Estimate
+			},
+			{
+				'output_filename':'geo/location_options.json',
+				'serializer':LocationSerializer,
+				'objectclass':Location
+			},
+			{
+				'output_filename':'geo/route_options.json',
+				'serializer':RouteSerializer,
+				'objectclass':Route
 			}
 		]
 
@@ -74,11 +86,15 @@ class Command(BaseCommand):
 						#so, for instance, the reverse lookup from voyagesourceconnections to voyage
 						##gets returns the label "voyage source connection"
 						label=serializer.fields[field].child.Meta.model._meta.verbose_name
-					else:
+					else:						
 						try:
 							label=serializer.child.fields[field].Meta.model._meta.verbose_name
 						except:
-							label=serializer.Meta.model.__dict__[field].__dict__['field'].__dict__['verbose_name']
+							try:
+								label=serializer.Meta.model.__dict__[field].__dict__['field'].__dict__['related_query_name']
+							except:
+								label=serializer.Meta.model.__dict__[field].__dict__['field'].__dict__['verbose_name']
+							
 					flatlabel=valuesconcatenate([baseflatlabel,label]," : ")
 					schema[address]={'type':'table','label':label,'flatlabel':flatlabel}
 					#schema[address]={'type':'table','label':label}

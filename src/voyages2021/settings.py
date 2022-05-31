@@ -126,6 +126,7 @@ USE_L10N = True
 
 USE_TZ = True
 
+APPEND_SLASH=False
 
 STATIC_ROOT='static'
 

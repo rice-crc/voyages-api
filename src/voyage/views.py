@@ -39,6 +39,8 @@ class VoyageList(generics.GenericAPIView):
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("username:",request.auth.user)
+		print("data",request.data)
+		print("headers:",request.headers)
 		t=timer('FETCHING...',[])
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options)

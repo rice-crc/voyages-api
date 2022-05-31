@@ -32,6 +32,8 @@ geo_options=options_handler('voyage/geo_options.json',hierarchical=False)
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class VoyageList(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def options(self,request):
 		j=options_handler('voyage/voyage_options.json',request)
 		return JsonResponse(j,safe=False)

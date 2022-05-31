@@ -27,9 +27,11 @@ class BroadRegion(models.Model):
 	value = models.IntegerField("Numeric code", unique=True)
 	show_on_map = models.BooleanField(default=True)
 	
-	#geo_location = models.ForeignKey('Location',
-	#								on_delete=models.CASCADE,
-	#								verbose_name="Location")
+	#Placeholder for porting over to new geo app & tearing this out of voyages app
+	geo_location = models.ForeignKey(Location,
+									on_delete=models.CASCADE,
+									verbose_name="Location",
+									null=True)
 
 	def __str__(self):
 		return self.broad_region
@@ -63,9 +65,11 @@ class Region(models.Model):
 	show_on_map = models.BooleanField(default=True)
 	show_on_main_map = models.BooleanField(default=True)
 	
-	#geo_location = models.ForeignKey('Location',
-	#								on_delete=models.CASCADE,
-	#								verbose_name="Location")
+	#Placeholder for porting over to new geo app & tearing this out of voyages app
+	geo_location = models.ForeignKey(Location,
+									on_delete=models.CASCADE,
+									verbose_name="Location",
+									null=True)
 
 	class Meta:
 		verbose_name = "Region"
@@ -98,9 +102,11 @@ class Place(models.Model):
 	show_on_main_map = models.BooleanField(default=True)
 	show_on_voyage_map = models.BooleanField(default=True)
 	
-	#geo_location = models.ForeignKey('Location',
-	#								on_delete=models.CASCADE,
-	#								verbose_name="Location")
+	#Placeholder for porting over to new geo app & tearing this out of voyages app
+	geo_location = models.ForeignKey(Location,
+									on_delete=models.CASCADE,
+									verbose_name="Location",
+									null=True)
 	
 	class Meta:
 		verbose_name = "Place (Port or Location)"

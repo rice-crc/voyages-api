@@ -49,6 +49,11 @@
     "label": "Show on map",
     "flatlabel": "Region : Broad Region : Show on map"
   },
+  "region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "Region : Broad Region : Location"
+  },
   "region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -79,6 +84,11 @@
     "label": "Show on main map",
     "flatlabel": "Region : Show on main map"
   },
+  "region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "Region : Location"
+  },
   "place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -108,5 +118,10 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "Show on voyage map"
+  },
+  "geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "Location"
   }
 }

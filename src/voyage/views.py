@@ -32,21 +32,10 @@ geo_options=options_handler('voyage/geo_options.json',hierarchical=False)
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
 class VoyageList(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
 	def options(self,request):
-		print("vvv----VOYAGES OPTIONS----vvv")
-		print("username:",request.auth.user)
-		print("data",request.data)
-		print("headers:",request.headers)
 		j=options_handler('voyage/voyage_options.json',request)
-		print("^^^----VOYAGES OPTIONS----^^^")
 		return JsonResponse(j,safe=False)
 	def post(self,request):
-		print("vvv----VOYAGES POST----vvv")
-		print("username:",request.auth.user)
-		print("data",request.data)
-		print("headers:",request.headers)
 		t=timer('FETCHING...',[])
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options)

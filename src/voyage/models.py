@@ -4,6 +4,7 @@ from builtins import str
 
 from django.db import models
 from django.db.models import Prefetch
+from geo.models import Location
 #from django.utils.translation import gettext_lazy as _
 
 # Voyage Regions and Places
@@ -25,6 +26,12 @@ class BroadRegion(models.Model):
 								   blank=True)
 	value = models.IntegerField("Numeric code", unique=True)
 	show_on_map = models.BooleanField(default=True)
+	
+	#Placeholder for porting over to new geo app & tearing this out of voyages app
+	geo_location = models.ForeignKey(Location,
+									on_delete=models.CASCADE,
+									verbose_name="Location",
+									null=True)
 
 	def __str__(self):
 		return self.broad_region
@@ -57,6 +64,12 @@ class Region(models.Model):
 	value = models.IntegerField("Numeric code", unique=True)
 	show_on_map = models.BooleanField(default=True)
 	show_on_main_map = models.BooleanField(default=True)
+	
+	#Placeholder for porting over to new geo app & tearing this out of voyages app
+	geo_location = models.ForeignKey(Location,
+									on_delete=models.CASCADE,
+									verbose_name="Location",
+									null=True)
 
 	class Meta:
 		verbose_name = "Region"
@@ -88,7 +101,13 @@ class Place(models.Model):
 								   blank=True)
 	show_on_main_map = models.BooleanField(default=True)
 	show_on_voyage_map = models.BooleanField(default=True)
-
+	
+	#Placeholder for porting over to new geo app & tearing this out of voyages app
+	geo_location = models.ForeignKey(Location,
+									on_delete=models.CASCADE,
+									verbose_name="Location",
+									null=True)
+	
 	class Meta:
 		verbose_name = "Place (Port or Location)"
 		verbose_name_plural = "Places (Ports or Locations)"

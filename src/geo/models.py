@@ -31,16 +31,21 @@ class Route(models.Model):
 		on_delete=models.CASCADE,
 		related_name='targetof'
 	)
-	models.JSONField(null=False)
+	route_linestring=models.JSONField(
+		"Geojson Linestring",
+		null=True
+		)
 
 class Polygon(models.Model):
 	"""
 	Shape of a spatial entity (optional for the locations that link to these)
 	"""
 	
-	models.JSONField(null=False)
-	
- 
+	shape=models.JSONField(
+		"Geojson Polygon",
+		null=True
+		)
+
 # Voyage Regions and Places
 class LocationType(models.Model):
 	"""
@@ -67,7 +72,7 @@ class Location(models.Model):
 	"""
 
 	name = models.CharField(
-		"Broad region (Area) name",
+		"Location name",
 		max_length=255
 	)
 	longitude = models.DecimalField(
@@ -90,7 +95,8 @@ class Location(models.Model):
 		verbose_name="Child of",
 		null=True,
 		on_delete=models.CASCADE,
-		related_name='parentof'
+		related_name='parent_of',
+		related_query_name='Parent of'
 	)
 	
 	location_type = models.ForeignKey(

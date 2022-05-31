@@ -54,6 +54,11 @@
     "label": "Show on map",
     "flatlabel": "post disembark location : Region : Broad Region : Show on map"
   },
+  "post_disembark_location__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "post disembark location : Region : Broad Region : Location"
+  },
   "post_disembark_location__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -84,6 +89,11 @@
     "label": "Show on main map",
     "flatlabel": "post disembark location : Region : Show on main map"
   },
+  "post_disembark_location__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "post disembark location : Region : Location"
+  },
   "post_disembark_location__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -113,6 +123,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "post disembark location : Show on voyage map"
+  },
+  "post_disembark_location__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "post disembark location : Location"
   },
   "voyage": {
     "type": "table",
@@ -189,6 +204,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Port of departure (PORTDEP) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__port_of_departure__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Port of departure (PORTDEP) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__port_of_departure__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -219,6 +239,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Port of departure (PORTDEP) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__port_of_departure__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Port of departure (PORTDEP) : Region : Location"
+  },
   "voyage__voyage_itinerary__port_of_departure__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -248,6 +273,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Port of departure (PORTDEP) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__port_of_departure__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Port of departure (PORTDEP) : Location"
   },
   "voyage__voyage_itinerary__int_first_port_emb": {
     "type": "table",
@@ -304,6 +334,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : First intended port of embarkation (EMBPORT) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__int_first_port_emb__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended port of embarkation (EMBPORT) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__int_first_port_emb__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -334,6 +369,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : First intended port of embarkation (EMBPORT) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__int_first_port_emb__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended port of embarkation (EMBPORT) : Region : Location"
+  },
   "voyage__voyage_itinerary__int_first_port_emb__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -363,6 +403,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : First intended port of embarkation (EMBPORT) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__int_first_port_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended port of embarkation (EMBPORT) : Location"
   },
   "voyage__voyage_itinerary__int_second_port_emb": {
     "type": "table",
@@ -419,6 +464,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__int_second_port_emb__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__int_second_port_emb__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -449,6 +499,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__int_second_port_emb__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Region : Location"
+  },
   "voyage__voyage_itinerary__int_second_port_emb__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -478,6 +533,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__int_second_port_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Location"
   },
   "voyage__voyage_itinerary__int_first_region_purchase_slaves": {
     "type": "table",
@@ -524,6 +584,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__int_first_region_purchase_slaves__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__int_first_region_purchase_slaves__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -553,6 +618,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : First intended region of purchase of slaves (EMBREG) : Show on main map"
+  },
+  "voyage__voyage_itinerary__int_first_region_purchase_slaves__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended region of purchase of slaves (EMBREG) : Location"
   },
   "voyage__voyage_itinerary__int_second_region_purchase_slaves": {
     "type": "table",
@@ -599,6 +669,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__int_second_region_purchase_slaves__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__int_second_region_purchase_slaves__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -628,6 +703,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Second intended region of purchase of slaves (EMBREG2) : Show on main map"
+  },
+  "voyage__voyage_itinerary__int_second_region_purchase_slaves__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended region of purchase of slaves (EMBREG2) : Location"
   },
   "voyage__voyage_itinerary__int_first_port_dis": {
     "type": "table",
@@ -684,6 +764,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__int_first_port_dis__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__int_first_port_dis__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -714,6 +799,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__int_first_port_dis__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Region : Location"
+  },
   "voyage__voyage_itinerary__int_first_port_dis__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -743,6 +833,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Location"
   },
   "voyage__voyage_itinerary__int_second_port_dis": {
     "type": "table",
@@ -799,6 +894,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__int_second_port_dis__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__int_second_port_dis__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -829,6 +929,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__int_second_port_dis__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Region : Location"
+  },
   "voyage__voyage_itinerary__int_second_port_dis__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -858,6 +963,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__int_second_port_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Location"
   },
   "voyage__voyage_itinerary__int_first_region_slave_landing": {
     "type": "table",
@@ -904,6 +1014,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : First intended region of slave landing (REGARR) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__int_first_region_slave_landing__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended region of slave landing (REGARR) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__int_first_region_slave_landing__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -933,6 +1048,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : First intended region of slave landing (REGARR) : Show on main map"
+  },
+  "voyage__voyage_itinerary__int_first_region_slave_landing__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First intended region of slave landing (REGARR) : Location"
   },
   "voyage__voyage_itinerary__imp_principal_region_slave_dis": {
     "type": "table",
@@ -979,6 +1099,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__imp_principal_region_slave_dis__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__imp_principal_region_slave_dis__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1008,6 +1133,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Show on main map"
+  },
+  "voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Location"
   },
   "voyage__voyage_itinerary__int_second_place_region_slave_landing": {
     "type": "table",
@@ -1054,6 +1184,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Second intended region of slave landing (REGARR2) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__int_second_place_region_slave_landing__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended region of slave landing (REGARR2) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__int_second_place_region_slave_landing__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1083,6 +1218,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Second intended region of slave landing (REGARR2) : Show on main map"
+  },
+  "voyage__voyage_itinerary__int_second_place_region_slave_landing__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second intended region of slave landing (REGARR2) : Location"
   },
   "voyage__voyage_itinerary__first_place_slave_purchase": {
     "type": "table",
@@ -1139,6 +1279,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__first_place_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__first_place_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1169,6 +1314,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__first_place_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Region : Location"
+  },
   "voyage__voyage_itinerary__first_place_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -1198,6 +1348,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__first_place_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Location"
   },
   "voyage__voyage_itinerary__second_place_slave_purchase": {
     "type": "table",
@@ -1254,6 +1409,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__second_place_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__second_place_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1284,6 +1444,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__second_place_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Region : Location"
+  },
   "voyage__voyage_itinerary__second_place_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -1313,6 +1478,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__second_place_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Location"
   },
   "voyage__voyage_itinerary__third_place_slave_purchase": {
     "type": "table",
@@ -1369,6 +1539,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__third_place_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__third_place_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1399,6 +1574,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__third_place_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Region : Location"
+  },
   "voyage__voyage_itinerary__third_place_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -1428,6 +1608,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__third_place_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Location"
   },
   "voyage__voyage_itinerary__first_region_slave_emb": {
     "type": "table",
@@ -1474,6 +1659,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : First region of embarkation of slaves (REGEM1) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__first_region_slave_emb__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First region of embarkation of slaves (REGEM1) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__first_region_slave_emb__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1503,6 +1693,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : First region of embarkation of slaves (REGEM1) : Show on main map"
+  },
+  "voyage__voyage_itinerary__first_region_slave_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First region of embarkation of slaves (REGEM1) : Location"
   },
   "voyage__voyage_itinerary__second_region_slave_emb": {
     "type": "table",
@@ -1549,6 +1744,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__second_region_slave_emb__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__second_region_slave_emb__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1578,6 +1778,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Second region of embarkation of slaves (REGEM2) : Show on main map"
+  },
+  "voyage__voyage_itinerary__second_region_slave_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second region of embarkation of slaves (REGEM2) : Location"
   },
   "voyage__voyage_itinerary__third_region_slave_emb": {
     "type": "table",
@@ -1624,6 +1829,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__third_region_slave_emb__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__third_region_slave_emb__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1653,6 +1863,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Third region of embarkation of slaves (REGEM3) : Show on main map"
+  },
+  "voyage__voyage_itinerary__third_region_slave_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third region of embarkation of slaves (REGEM3) : Location"
   },
   "voyage__voyage_itinerary__port_of_call_before_atl_crossing": {
     "type": "table",
@@ -1709,6 +1924,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__port_of_call_before_atl_crossing__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__port_of_call_before_atl_crossing__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1739,6 +1959,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__port_of_call_before_atl_crossing__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Region : Location"
+  },
   "voyage__voyage_itinerary__port_of_call_before_atl_crossing__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -1768,6 +1993,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__port_of_call_before_atl_crossing__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Location"
   },
   "voyage__voyage_itinerary__first_landing_place": {
     "type": "table",
@@ -1824,6 +2054,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : First place of slave landing (SLA1PORT) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__first_landing_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First place of slave landing (SLA1PORT) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__first_landing_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1854,6 +2089,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : First place of slave landing (SLA1PORT) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__first_landing_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First place of slave landing (SLA1PORT) : Region : Location"
+  },
   "voyage__voyage_itinerary__first_landing_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -1883,6 +2123,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : First place of slave landing (SLA1PORT) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__first_landing_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First place of slave landing (SLA1PORT) : Location"
   },
   "voyage__voyage_itinerary__second_landing_place": {
     "type": "table",
@@ -1939,6 +2184,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Second place of slave landing (ADPSALE1) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__second_landing_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second place of slave landing (ADPSALE1) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__second_landing_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -1969,6 +2219,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Second place of slave landing (ADPSALE1) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__second_landing_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second place of slave landing (ADPSALE1) : Region : Location"
+  },
   "voyage__voyage_itinerary__second_landing_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -1998,6 +2253,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Second place of slave landing (ADPSALE1) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__second_landing_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second place of slave landing (ADPSALE1) : Location"
   },
   "voyage__voyage_itinerary__third_landing_place": {
     "type": "table",
@@ -2054,6 +2314,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Third place of slave landing (ADPSALE2) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__third_landing_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third place of slave landing (ADPSALE2) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__third_landing_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2084,6 +2349,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Third place of slave landing (ADPSALE2) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__third_landing_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third place of slave landing (ADPSALE2) : Region : Location"
+  },
   "voyage__voyage_itinerary__third_landing_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -2113,6 +2383,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Third place of slave landing (ADPSALE2) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__third_landing_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third place of slave landing (ADPSALE2) : Location"
   },
   "voyage__voyage_itinerary__first_landing_region": {
     "type": "table",
@@ -2159,6 +2434,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : First region of slave landing (REGDIS1) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__first_landing_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First region of slave landing (REGDIS1) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__first_landing_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2188,6 +2468,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : First region of slave landing (REGDIS1) : Show on main map"
+  },
+  "voyage__voyage_itinerary__first_landing_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : First region of slave landing (REGDIS1) : Location"
   },
   "voyage__voyage_itinerary__second_landing_region": {
     "type": "table",
@@ -2234,6 +2519,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Second region of slave landing (REGDIS2) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__second_landing_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second region of slave landing (REGDIS2) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__second_landing_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2263,6 +2553,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Second region of slave landing (REGDIS2) : Show on main map"
+  },
+  "voyage__voyage_itinerary__second_landing_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Second region of slave landing (REGDIS2) : Location"
   },
   "voyage__voyage_itinerary__third_landing_region": {
     "type": "table",
@@ -2309,6 +2604,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Third region of slave landing (REGDIS3) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__third_landing_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third region of slave landing (REGDIS3) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__third_landing_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2338,6 +2638,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Third region of slave landing (REGDIS3) : Show on main map"
+  },
+  "voyage__voyage_itinerary__third_landing_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Third region of slave landing (REGDIS3) : Location"
   },
   "voyage__voyage_itinerary__place_voyage_ended": {
     "type": "table",
@@ -2394,6 +2699,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Place at which voyage ended (PORTRET) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__place_voyage_ended__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Place at which voyage ended (PORTRET) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__place_voyage_ended__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2424,6 +2734,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Place at which voyage ended (PORTRET) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__place_voyage_ended__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Place at which voyage ended (PORTRET) : Region : Location"
+  },
   "voyage__voyage_itinerary__place_voyage_ended__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -2453,6 +2768,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Place at which voyage ended (PORTRET) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__place_voyage_ended__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Place at which voyage ended (PORTRET) : Location"
   },
   "voyage__voyage_itinerary__region_of_return": {
     "type": "table",
@@ -2499,6 +2819,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Region of return (RETRNREG) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__region_of_return__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Region of return (RETRNREG) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__region_of_return__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2528,6 +2853,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Region of return (RETRNREG) : Show on main map"
+  },
+  "voyage__voyage_itinerary__region_of_return__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Region of return (RETRNREG) : Location"
   },
   "voyage__voyage_itinerary__broad_region_of_return": {
     "type": "table",
@@ -2563,6 +2893,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Broad region of return (RETRNREG1) : Show on map"
+  },
+  "voyage__voyage_itinerary__broad_region_of_return__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Broad region of return (RETRNREG1) : Location"
   },
   "voyage__voyage_itinerary__imp_port_voyage_begin": {
     "type": "table",
@@ -2619,6 +2954,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__imp_port_voyage_begin__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__imp_port_voyage_begin__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2649,6 +2989,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__imp_port_voyage_begin__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Region : Location"
+  },
   "voyage__voyage_itinerary__imp_port_voyage_begin__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -2678,6 +3023,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__imp_port_voyage_begin__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Location"
   },
   "voyage__voyage_itinerary__imp_region_voyage_begin": {
     "type": "table",
@@ -2724,6 +3074,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__imp_region_voyage_begin__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__imp_region_voyage_begin__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2753,6 +3108,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Imputed region where voyage began (DEPTREGIMP) : Show on main map"
+  },
+  "voyage__voyage_itinerary__imp_region_voyage_begin__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed region where voyage began (DEPTREGIMP) : Location"
   },
   "voyage__voyage_itinerary__imp_broad_region_voyage_begin": {
     "type": "table",
@@ -2788,6 +3148,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Show on map"
+  },
+  "voyage__voyage_itinerary__imp_broad_region_voyage_begin__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Location"
   },
   "voyage__voyage_itinerary__principal_place_of_slave_purchase": {
     "type": "table",
@@ -2844,6 +3209,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__principal_place_of_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__principal_place_of_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2874,6 +3244,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__principal_place_of_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Region : Location"
+  },
   "voyage__voyage_itinerary__principal_place_of_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -2903,6 +3278,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__principal_place_of_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Location"
   },
   "voyage__voyage_itinerary__imp_principal_place_of_slave_purchase": {
     "type": "table",
@@ -2959,6 +3339,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -2989,6 +3374,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Region : Location"
+  },
   "voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -3018,6 +3408,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Location"
   },
   "voyage__voyage_itinerary__imp_principal_region_of_slave_purchase": {
     "type": "table",
@@ -3064,6 +3459,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -3093,6 +3493,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Show on main map"
+  },
+  "voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Location"
   },
   "voyage__voyage_itinerary__imp_broad_region_of_slave_purchase": {
     "type": "table",
@@ -3128,6 +3533,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Show on map"
+  },
+  "voyage__voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Location"
   },
   "voyage__voyage_itinerary__principal_port_of_slave_dis": {
     "type": "table",
@@ -3184,6 +3594,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__principal_port_of_slave_dis__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__principal_port_of_slave_dis__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -3214,6 +3629,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__principal_port_of_slave_dis__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Region : Location"
+  },
   "voyage__voyage_itinerary__principal_port_of_slave_dis__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -3243,6 +3663,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__principal_port_of_slave_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Location"
   },
   "voyage__voyage_itinerary__imp_principal_port_slave_dis": {
     "type": "table",
@@ -3299,6 +3724,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_itinerary__imp_principal_port_slave_dis__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Region : Broad Region : Location"
+  },
   "voyage__voyage_itinerary__imp_principal_port_slave_dis__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -3329,6 +3759,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Region : Show on main map"
   },
+  "voyage__voyage_itinerary__imp_principal_port_slave_dis__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Region : Location"
+  },
   "voyage__voyage_itinerary__imp_principal_port_slave_dis__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -3358,6 +3793,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Show on voyage map"
+  },
+  "voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Location"
   },
   "voyage__voyage_itinerary__imp_broad_region_slave_dis": {
     "type": "table",
@@ -3393,6 +3833,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
     "flatlabel": "voyage : Itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Show on map"
+  },
+  "voyage__voyage_itinerary__imp_broad_region_slave_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Location"
   },
   "voyage__voyage_itinerary__ports_called_buying_slaves": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -3874,6 +4319,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Ship : Place where vessel constructed : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_ship__vessel_construction_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Place where vessel constructed : Region : Broad Region : Location"
+  },
   "voyage__voyage_ship__vessel_construction_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -3904,6 +4354,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Ship : Place where vessel constructed : Region : Show on main map"
   },
+  "voyage__voyage_ship__vessel_construction_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Place where vessel constructed : Region : Location"
+  },
   "voyage__voyage_ship__vessel_construction_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -3933,6 +4388,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Ship : Place where vessel constructed : Show on voyage map"
+  },
+  "voyage__voyage_ship__vessel_construction_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Place where vessel constructed : Location"
   },
   "voyage__voyage_ship__vessel_construction_region": {
     "type": "table",
@@ -3979,6 +4439,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Ship : Region where vessel constructed : Broad Region : Show on map"
   },
+  "voyage__voyage_ship__vessel_construction_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Region where vessel constructed : Broad Region : Location"
+  },
   "voyage__voyage_ship__vessel_construction_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -4008,6 +4473,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Ship : Region where vessel constructed : Show on main map"
+  },
+  "voyage__voyage_ship__vessel_construction_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Region where vessel constructed : Location"
   },
   "voyage__voyage_ship__registered_place": {
     "type": "table",
@@ -4064,6 +4534,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Ship : Place where vessel registered : Region : Broad Region : Show on map"
   },
+  "voyage__voyage_ship__registered_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Place where vessel registered : Region : Broad Region : Location"
+  },
   "voyage__voyage_ship__registered_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -4094,6 +4569,11 @@
     "label": "Show on main map",
     "flatlabel": "voyage : Ship : Place where vessel registered : Region : Show on main map"
   },
+  "voyage__voyage_ship__registered_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Place where vessel registered : Region : Location"
+  },
   "voyage__voyage_ship__registered_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -4123,6 +4603,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "voyage : Ship : Place where vessel registered : Show on voyage map"
+  },
+  "voyage__voyage_ship__registered_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Place where vessel registered : Location"
   },
   "voyage__voyage_ship__registered_region": {
     "type": "table",
@@ -4169,6 +4654,11 @@
     "label": "Show on map",
     "flatlabel": "voyage : Ship : Region where vessel registered : Broad Region : Show on map"
   },
+  "voyage__voyage_ship__registered_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Region where vessel registered : Broad Region : Location"
+  },
   "voyage__voyage_ship__registered_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -4198,6 +4688,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "voyage : Ship : Region where vessel registered : Show on main map"
+  },
+  "voyage__voyage_ship__registered_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "voyage : Ship : Region where vessel registered : Location"
   },
   "voyage__voyage_ship__ship_name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -5334,6 +5829,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : principal location : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__enslavers__enslaver_alias__identity__principal_location__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : principal location : Region : Broad Region : Location"
+  },
   "transactions__transaction__enslavers__enslaver_alias__identity__principal_location__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -5364,6 +5864,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : principal location : Region : Show on main map"
   },
+  "transactions__transaction__enslavers__enslaver_alias__identity__principal_location__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : principal location : Region : Location"
+  },
   "transactions__transaction__enslavers__enslaver_alias__identity__principal_location__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -5393,6 +5898,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : principal location : Show on voyage map"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__principal_location__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : principal location : Location"
   },
   "transactions__transaction__enslavers__enslaver_alias__identity__principal_alias": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -5639,6 +6149,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of departure (PORTDEP) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__port_of_departure__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of departure (PORTDEP) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__port_of_departure__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -5669,6 +6184,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of departure (PORTDEP) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__port_of_departure__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of departure (PORTDEP) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__port_of_departure__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -5698,6 +6218,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of departure (PORTDEP) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__port_of_departure__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of departure (PORTDEP) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__int_first_port_emb": {
     "type": "table",
@@ -5754,6 +6279,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of embarkation (EMBPORT) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_port_emb__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of embarkation (EMBPORT) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_first_port_emb__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -5784,6 +6314,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of embarkation (EMBPORT) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_port_emb__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of embarkation (EMBPORT) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_first_port_emb__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -5813,6 +6348,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of embarkation (EMBPORT) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_port_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of embarkation (EMBPORT) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__int_second_port_emb": {
     "type": "table",
@@ -5869,6 +6409,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_port_emb__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_second_port_emb__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -5899,6 +6444,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_port_emb__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_second_port_emb__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -5928,6 +6478,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_port_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of embarkation (EMBPORT2) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__int_first_region_purchase_slaves": {
     "type": "table",
@@ -5974,6 +6529,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_region_purchase_slaves__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_first_region_purchase_slaves__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6003,6 +6563,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended region of purchase of slaves (EMBREG) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_region_purchase_slaves__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended region of purchase of slaves (EMBREG) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__int_second_region_purchase_slaves": {
     "type": "table",
@@ -6049,6 +6614,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_region_purchase_slaves__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_second_region_purchase_slaves__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6078,6 +6648,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended region of purchase of slaves (EMBREG2) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_region_purchase_slaves__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended region of purchase of slaves (EMBREG2) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__int_first_port_dis": {
     "type": "table",
@@ -6134,6 +6709,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_port_dis__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_first_port_dis__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6164,6 +6744,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_port_dis__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_first_port_dis__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -6193,6 +6778,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_port_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended port of disembarkation (ARRPORT) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__int_second_port_dis": {
     "type": "table",
@@ -6249,6 +6839,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_port_dis__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_second_port_dis__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6279,6 +6874,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_port_dis__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_second_port_dis__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -6308,6 +6908,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_port_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended port of disembarkation (ARRPORT2) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__int_first_region_slave_landing": {
     "type": "table",
@@ -6354,6 +6959,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended region of slave landing (REGARR) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_region_slave_landing__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended region of slave landing (REGARR) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_first_region_slave_landing__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6383,6 +6993,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended region of slave landing (REGARR) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__int_first_region_slave_landing__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First intended region of slave landing (REGARR) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_region_slave_dis": {
     "type": "table",
@@ -6429,6 +7044,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_region_slave_dis__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_region_slave_dis__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6458,6 +7078,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__int_second_place_region_slave_landing": {
     "type": "table",
@@ -6504,6 +7129,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended region of slave landing (REGARR2) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_place_region_slave_landing__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended region of slave landing (REGARR2) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__int_second_place_region_slave_landing__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6533,6 +7163,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended region of slave landing (REGARR2) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__int_second_place_region_slave_landing__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second intended region of slave landing (REGARR2) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__first_place_slave_purchase": {
     "type": "table",
@@ -6589,6 +7224,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__first_place_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__first_place_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6619,6 +7259,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__first_place_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__first_place_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -6648,6 +7293,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__first_place_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave purchase (PLAC1TRA) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__second_place_slave_purchase": {
     "type": "table",
@@ -6704,6 +7354,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__second_place_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__second_place_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6734,6 +7389,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__second_place_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__second_place_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -6763,6 +7423,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__second_place_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave purchase (PLAC2TRA) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__third_place_slave_purchase": {
     "type": "table",
@@ -6819,6 +7484,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__third_place_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__third_place_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6849,6 +7519,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__third_place_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__third_place_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -6878,6 +7553,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__third_place_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave purchase (PLAC3TRA) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__first_region_slave_emb": {
     "type": "table",
@@ -6924,6 +7604,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First region of embarkation of slaves (REGEM1) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__first_region_slave_emb__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First region of embarkation of slaves (REGEM1) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__first_region_slave_emb__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -6953,6 +7638,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First region of embarkation of slaves (REGEM1) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__first_region_slave_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First region of embarkation of slaves (REGEM1) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__second_region_slave_emb": {
     "type": "table",
@@ -6999,6 +7689,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__second_region_slave_emb__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__second_region_slave_emb__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7028,6 +7723,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second region of embarkation of slaves (REGEM2) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__second_region_slave_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second region of embarkation of slaves (REGEM2) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__third_region_slave_emb": {
     "type": "table",
@@ -7074,6 +7774,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__third_region_slave_emb__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__third_region_slave_emb__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7103,6 +7808,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third region of embarkation of slaves (REGEM3) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__third_region_slave_emb__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third region of embarkation of slaves (REGEM3) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__port_of_call_before_atl_crossing": {
     "type": "table",
@@ -7159,6 +7869,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__port_of_call_before_atl_crossing__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__port_of_call_before_atl_crossing__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7189,6 +7904,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__port_of_call_before_atl_crossing__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__port_of_call_before_atl_crossing__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -7218,6 +7938,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__port_of_call_before_atl_crossing__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__first_landing_place": {
     "type": "table",
@@ -7274,6 +7999,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave landing (SLA1PORT) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__first_landing_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave landing (SLA1PORT) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__first_landing_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7304,6 +8034,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave landing (SLA1PORT) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__first_landing_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave landing (SLA1PORT) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__first_landing_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -7333,6 +8068,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave landing (SLA1PORT) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__first_landing_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First place of slave landing (SLA1PORT) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__second_landing_place": {
     "type": "table",
@@ -7389,6 +8129,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave landing (ADPSALE1) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__second_landing_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave landing (ADPSALE1) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__second_landing_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7419,6 +8164,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave landing (ADPSALE1) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__second_landing_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave landing (ADPSALE1) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__second_landing_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -7448,6 +8198,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave landing (ADPSALE1) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__second_landing_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second place of slave landing (ADPSALE1) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__third_landing_place": {
     "type": "table",
@@ -7504,6 +8259,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave landing (ADPSALE2) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__third_landing_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave landing (ADPSALE2) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__third_landing_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7534,6 +8294,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave landing (ADPSALE2) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__third_landing_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave landing (ADPSALE2) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__third_landing_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -7563,6 +8328,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave landing (ADPSALE2) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__third_landing_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third place of slave landing (ADPSALE2) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__first_landing_region": {
     "type": "table",
@@ -7609,6 +8379,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First region of slave landing (REGDIS1) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__first_landing_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First region of slave landing (REGDIS1) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__first_landing_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7638,6 +8413,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First region of slave landing (REGDIS1) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__first_landing_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : First region of slave landing (REGDIS1) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__second_landing_region": {
     "type": "table",
@@ -7684,6 +8464,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second region of slave landing (REGDIS2) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__second_landing_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second region of slave landing (REGDIS2) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__second_landing_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7713,6 +8498,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second region of slave landing (REGDIS2) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__second_landing_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Second region of slave landing (REGDIS2) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__third_landing_region": {
     "type": "table",
@@ -7759,6 +8549,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third region of slave landing (REGDIS3) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__third_landing_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third region of slave landing (REGDIS3) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__third_landing_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7788,6 +8583,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third region of slave landing (REGDIS3) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__third_landing_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Third region of slave landing (REGDIS3) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__place_voyage_ended": {
     "type": "table",
@@ -7844,6 +8644,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Place at which voyage ended (PORTRET) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__place_voyage_ended__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Place at which voyage ended (PORTRET) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__place_voyage_ended__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7874,6 +8679,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Place at which voyage ended (PORTRET) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__place_voyage_ended__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Place at which voyage ended (PORTRET) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__place_voyage_ended__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -7903,6 +8713,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Place at which voyage ended (PORTRET) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__place_voyage_ended__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Place at which voyage ended (PORTRET) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__region_of_return": {
     "type": "table",
@@ -7949,6 +8764,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Region of return (RETRNREG) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__region_of_return__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Region of return (RETRNREG) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__region_of_return__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -7978,6 +8798,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Region of return (RETRNREG) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__region_of_return__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Region of return (RETRNREG) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__broad_region_of_return": {
     "type": "table",
@@ -8013,6 +8838,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Broad region of return (RETRNREG1) : Show on map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__broad_region_of_return__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Broad region of return (RETRNREG1) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin": {
     "type": "table",
@@ -8069,6 +8899,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -8099,6 +8934,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -8128,6 +8968,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed port where voyage began (PTDEPIMP) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_region_voyage_begin": {
     "type": "table",
@@ -8174,6 +9019,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_region_voyage_begin__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_region_voyage_begin__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -8203,6 +9053,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed region where voyage began (DEPTREGIMP) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_region_voyage_begin__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed region where voyage began (DEPTREGIMP) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_broad_region_voyage_begin": {
     "type": "table",
@@ -8238,6 +9093,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Show on map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_broad_region_voyage_begin__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__principal_place_of_slave_purchase": {
     "type": "table",
@@ -8294,6 +9154,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__principal_place_of_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__principal_place_of_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -8324,6 +9189,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__principal_place_of_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__principal_place_of_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -8353,6 +9223,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__principal_place_of_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal place of slave purchase (MAJBUYPT) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase": {
     "type": "table",
@@ -8409,6 +9284,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -8439,6 +9319,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -8468,6 +9353,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase": {
     "type": "table",
@@ -8514,6 +9404,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -8543,6 +9438,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_broad_region_of_slave_purchase": {
     "type": "table",
@@ -8578,6 +9478,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Show on map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__principal_port_of_slave_dis": {
     "type": "table",
@@ -8634,6 +9539,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__principal_port_of_slave_dis__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__principal_port_of_slave_dis__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -8664,6 +9574,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__principal_port_of_slave_dis__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__principal_port_of_slave_dis__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -8693,6 +9608,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__principal_port_of_slave_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Principal port of slave disembarkation (MAJSELPT) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_port_slave_dis": {
     "type": "table",
@@ -8749,6 +9669,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_port_slave_dis__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_port_slave_dis__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -8779,6 +9704,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_port_slave_dis__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_itinerary__imp_principal_port_slave_dis__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -8808,6 +9738,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__imp_broad_region_slave_dis": {
     "type": "table",
@@ -8843,6 +9778,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Show on map"
+  },
+  "transactions__transaction__voyage__voyage_itinerary__imp_broad_region_slave_dis__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Location"
   },
   "transactions__transaction__voyage__voyage_itinerary__ports_called_buying_slaves": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -9324,6 +10264,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel constructed : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_ship__vessel_construction_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel constructed : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_ship__vessel_construction_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -9354,6 +10299,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel constructed : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_ship__vessel_construction_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel constructed : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_ship__vessel_construction_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -9383,6 +10333,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel constructed : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_ship__vessel_construction_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel constructed : Location"
   },
   "transactions__transaction__voyage__voyage_ship__vessel_construction_region": {
     "type": "table",
@@ -9429,6 +10384,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Region where vessel constructed : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_ship__vessel_construction_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Region where vessel constructed : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_ship__vessel_construction_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -9458,6 +10418,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Region where vessel constructed : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_ship__vessel_construction_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Region where vessel constructed : Location"
   },
   "transactions__transaction__voyage__voyage_ship__registered_place": {
     "type": "table",
@@ -9514,6 +10479,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel registered : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_ship__registered_place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel registered : Region : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_ship__registered_place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -9544,6 +10514,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel registered : Region : Show on main map"
   },
+  "transactions__transaction__voyage__voyage_ship__registered_place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel registered : Region : Location"
+  },
   "transactions__transaction__voyage__voyage_ship__registered_place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -9573,6 +10548,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel registered : Show on voyage map"
+  },
+  "transactions__transaction__voyage__voyage_ship__registered_place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Place where vessel registered : Location"
   },
   "transactions__transaction__voyage__voyage_ship__registered_region": {
     "type": "table",
@@ -9619,6 +10599,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Region where vessel registered : Broad Region : Show on map"
   },
+  "transactions__transaction__voyage__voyage_ship__registered_region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Region where vessel registered : Broad Region : Location"
+  },
   "transactions__transaction__voyage__voyage_ship__registered_region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -9648,6 +10633,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Region where vessel registered : Show on main map"
+  },
+  "transactions__transaction__voyage__voyage_ship__registered_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Ship : Region where vessel registered : Location"
   },
   "transactions__transaction__voyage__voyage_ship__ship_name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -10624,6 +11614,11 @@
     "label": "Show on map",
     "flatlabel": "enslaved in relation : enslavement relation : place : Region : Broad Region : Show on map"
   },
+  "transactions__transaction__place__region__broad_region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : place : Region : Broad Region : Location"
+  },
   "transactions__transaction__place__region__region": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Specific region (country or colony)",
@@ -10654,6 +11649,11 @@
     "label": "Show on main map",
     "flatlabel": "enslaved in relation : enslavement relation : place : Region : Show on main map"
   },
+  "transactions__transaction__place__region__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : place : Region : Location"
+  },
   "transactions__transaction__place__place": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Place",
@@ -10683,6 +11683,11 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "enslaved in relation : enslavement relation : place : Show on voyage map"
+  },
+  "transactions__transaction__place__geo_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location",
+    "flatlabel": "enslaved in relation : enslavement relation : place : Location"
   },
   "transactions__transaction__date": {
     "type": "<class 'rest_framework.fields.CharField'>",

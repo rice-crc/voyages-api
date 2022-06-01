@@ -76,11 +76,9 @@ class VoyageList(generics.GenericAPIView):
 			else:
 				outputs=serialized
 			t=timer('flattening',t,done=True)
-			print("^^^----VOYAGES POST----^^^")
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-			print("^^^----VOYAGES POST----^^^")
 
 
 class SingleVoyage(generics.GenericAPIView):

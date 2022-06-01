@@ -3,25 +3,22 @@ from django import forms
 from voyage.models import *
 
 class BroadRegionAdmin(admin.ModelAdmin):
-    list_display = ('broad_region', 'value', 'show_on_map')
-    list_display_links = ('broad_region',)
-    search_fields = ['broad_region', 'value']
-    list_editable = ['show_on_map']
+    list_display = ('geo_location',)
+    list_display_links = ('geo_location',)
+    search_fields = ['geo_location']
+    ordering = ['geo_location']
 
 class RegionAdmin(admin.ModelAdmin):
-    list_display = ('region', 'value', 'broad_region', 'show_on_map',
-                    'show_on_main_map')
-    list_display_links = ('region',)
-    search_fields = ['region', 'value']
-    list_editable = ['show_on_map', 'show_on_main_map']
+    list_display = ('geo_location',)
+    list_display_links = ('geo_location',)
+    search_fields = ['geo_location']
+    ordering = ['geo_location']
 
 class PlaceAdmin(admin.ModelAdmin):
-    list_display = ('place', 'value', 'region', 'longitude', 'latitude',
-                    'show_on_main_map', 'show_on_voyage_map')
-    list_display_links = ('place',)
-    search_fields = ['place', 'value']
-    ordering = ['value']
-    list_editable = ['show_on_main_map', 'show_on_voyage_map']
+    list_display = ('geo_location',)
+    list_display_links = ('geo_location',)
+    search_fields = ['geo_location']
+    ordering = ['geo_location']
 
 class VoyageCrewInline(admin.StackedInline):
 	model=VoyageCrew

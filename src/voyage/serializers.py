@@ -5,6 +5,7 @@ from .models import *
 import pprint
 import gc
 from tools.nest import nest_selected_fields
+from geo.serializers import *
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 	def __init__(self, *args, **kwargs):
@@ -42,18 +43,19 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 ##### GEO #####
 
 class BroadRegionSerializer(DynamicFieldsModelSerializer):
+	geo_location=LocationSerializer(many=False)
 	class Meta:
 		model=BroadRegion
 		fields='__all__'
 
 class RegionSerializer(DynamicFieldsModelSerializer):
-	broad_region=BroadRegionSerializer(many=False)
+	geo_location=LocationSerializer(many=False)
 	class Meta:
 		model=Region
 		fields='__all__'
 
 class PlaceSerializer(DynamicFieldsModelSerializer):
-	region=RegionSerializer(many=False)
+	geo_location=LocationSerializer(many=False)
 	class Meta:
 		model=Place
 		fields='__all__'

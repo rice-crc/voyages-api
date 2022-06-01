@@ -103,6 +103,15 @@ def groupby():
 		#print("+++++++++++++++++++")
 
 		#https://pandas.pydata.org/docs/user_guide/reshaping.html#reshaping-crosstabulations
+		'''ct=pd.crosstab(
+			df2[columns],
+			df2[rows],
+			values=df2[val],
+			aggfunc=eval("np."+fn),
+			normalize=normalize,
+			dropna=rmna
+		)'''
+		
 		ct=pd.crosstab(
 			df2[columns],
 			df2[rows],
@@ -111,9 +120,8 @@ def groupby():
 			normalize=normalize,
 			dropna=rmna
 		)
-	
+		
 		#print(ct)
-	
 		if removeallNA:
 			#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
 			ctd={col: ct[col].dropna().to_dict() for col in ct.columns}

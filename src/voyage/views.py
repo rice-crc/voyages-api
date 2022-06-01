@@ -23,29 +23,8 @@ from voyages2021.localsettings import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
-
 voyage_options=options_handler('voyage/voyage_options.json',hierarchical=False)
 geo_options=options_handler('voyage/geo_options.json',hierarchical=False)
-
-
-from django import http
-
-
-class CorsMiddleware(object):
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.get_response(request)
-        if (request.method == "OPTIONS"  and "HTTP_ACCESS_CONTROL_REQUEST_METHOD" in request.META):
-            response = http.HttpResponse()
-            response["Content-Length"] = "0"
-            response["Access-Control-Max-Age"] = 86400
-        response["Access-Control-Allow-Origin"] = "*"
-        response["Access-Control-Allow-Methods"] = "DELETE, GET, OPTIONS, PATCH, POST, PUT"
-        response["Access-Control-Allow-Headers"] = "accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with"
-        return response
-
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
@@ -384,40 +363,43 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		#print("username:",request.auth.user)
-		st=time.time()
-		params=dict(request.POST)
-		k=next(iter(params))
-		v=params[k][0]
-		retrieve_all=True
-		queryset=Voyage.objects.all()		
-		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-		queryset=queryset.filter(**kwargs)
-		queryset=queryset.prefetch_related(k)
-		queryset=queryset.order_by(k)
-		results_count=queryset.count()
-		fetchcount=20
-		vals=[]
-		for v in queryset.values_list(k).iterator():
-			if v not in vals:
-				vals.append(v)
-			if len(vals)>=fetchcount:
-				break
-		def flattenthis(l):
-			fl=[]
-			for i in l:
-				if type(i)==tuple:
-					for e in i:
-						fl.append(e)
-				else:
-					fl.append(i)
-			return fl
-		val_list=flattenthis(l=vals)
-		output_dict={
-			k:val_list,
-			"results_count":results_count
-		}
-		print("executed in",time.time()-st,"seconds")
-		return JsonResponse(output_dict,safe=False)
+		try:
+			st=time.time()
+			params=dict(request.POST)
+			k=next(iter(params))
+			v=params[k][0]
+			retrieve_all=True
+			queryset=Voyage.objects.all()		
+			kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+			queryset=queryset.filter(**kwargs)
+			queryset=queryset.prefetch_related(k)
+			queryset=queryset.order_by(k)
+			results_count=queryset.count()
+			fetchcount=20
+			vals=[]
+			for v in queryset.values_list(k).iterator():
+				if v not in vals:
+					vals.append(v)
+				if len(vals)>=fetchcount:
+					break
+			def flattenthis(l):
+				fl=[]
+				for i in l:
+					if type(i)==tuple:
+						for e in i:
+							fl.append(e)
+					else:
+						fl.append(i)
+				return fl
+			val_list=flattenthis(l=vals)
+			output_dict={
+				k:val_list,
+				"results_count":results_count
+			}
+			print("executed in",time.time()-st,"seconds")
+			return JsonResponse(output_dict,safe=False)
+		except:
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
 
 class DuplicateVoyage(generics.GenericAPIView):
 	serializer_class=VoyageSerializer

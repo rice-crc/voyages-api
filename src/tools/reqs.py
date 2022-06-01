@@ -14,6 +14,10 @@ from .nest import *
 def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	errormessages=[]
+	selected_fields=None
+	next_uri=None
+	prev_uri=None
+	results_count=None
 	
 	try:
 		params=dict(r.POST)

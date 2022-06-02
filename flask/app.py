@@ -55,81 +55,62 @@ for rc in registered_caches:
 @app.route('/groupby/',methods=['POST'])
 def groupby():
 	
-	try:
-		st=time.time()
-		rdata=request.json
-	
-		#print("------->",rdata)
-		dfname=rdata['cachename'][0]
-	
-		#it must have a list of ids (even if it's all of the ids)
-		ids=rdata['ids']
-	
-		#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
-		columns,rows=rdata['groupby_fields']
-		val,fn=rdata['value_field_tuple']
-	
-		removeallNA=False
-		rmna=rdata.get('rmna')
-	
-		if rmna is not None:
-			rmna=rmna[0]
-	
-		if rmna in ["True",True]:
-			rmna=True
-		elif rmna in ["all","All"]:
-			rmna=False
-			removeallNA=True
-	
-		normalize=rdata.get('normalize')
-		if normalize is not None:
-			normalize=normalize[0]
-		if normalize not in ["columns","index"]:
-			normalize=False
-	
-		df=eval(dfname)
-	
-		df2=df[df['id'].isin(ids)]
-	
-		bins=rdata.get('bins')
-		if bins is not None:
-			binvar,nbins=[bins[0],int(bins[1])]
-			df2=pd.cut(df2[binvar],nbins)
-	
-		#print("+++++++++++++++++++")
-		#print(columns)
-		#print(df2.columns)
-		#print(rows)
-		#print("+++++++++++++++++++")
+	st=time.time()
+	rdata=request.json
 
-		#https://pandas.pydata.org/docs/user_guide/reshaping.html#reshaping-crosstabulations
-		'''ct=pd.crosstab(
-			df2[columns],
-			df2[rows],
-			values=df2[val],
-			aggfunc=eval("np."+fn),
-			normalize=normalize,
-			dropna=rmna
-		)'''
-		
-		ct=pd.crosstab(
-			df2[columns],
-			df2[rows],
-			values=df2[val],
-			aggfunc=eval("np."+fn),
-			normalize=normalize,
-			dropna=rmna
-		)
-		
-		#print(ct)
-		if removeallNA:
-			#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
-			ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
-		else:
-			ctd=ct.to_dict()
-		return jsonify(ctd)
-	except:
-		abort(400)
+	#print("------->",rdata)
+	dfname=rdata['cachename'][0]
+
+	#it must have a list of ids (even if it's all of the ids)
+	ids=rdata['ids']
+
+	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
+	#columns,rows=rdata['groupby_fields']
+	groupby_fields=rdata['groupby_fields']
+	val,fn=rdata['value_field_tuple']
+
+	removeallNA=False
+	rmna=rdata.get('rmna')
+
+	if rmna is not None:
+		rmna=rmna[0]
+
+	if rmna in ["True",True]:
+		rmna=True
+	elif rmna in ["all","All"]:
+		rmna=False
+		removeallNA=True
+
+	normalize=rdata.get('normalize')
+	if normalize is not None:
+		normalize=normalize[0]
+	if normalize not in ["columns","index"]:
+		normalize=False
+
+	df=eval(dfname)
+
+	df2=df[df['id'].isin(ids)]
+
+	bins=rdata.get('bins')
+	if bins is not None:
+		binvar,nbins=[bins[0],int(bins[1])]
+		df2=pd.cut(df2[binvar],nbins)
+
+	#print("+++++++++++++++++++")
+	#print(columns)
+	#print(df2.columns)
+	#print(rows)
+	#print("+++++++++++++++++++")
+	
+	ct=df2.groupby(groupby_fields[0]).agg({val:fn})
+	
+	#print(ct)
+	if removeallNA:
+		#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
+		ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
+	else:
+		ctd=ct.to_dict()
+	return jsonify(ctd)
 
 @app.route('/dataframes/',methods=['POST'])
 def dataframes():

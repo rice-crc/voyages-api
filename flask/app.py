@@ -57,15 +57,11 @@ def groupby():
 	
 	st=time.time()
 	rdata=request.json
-
-	#print("------->",rdata)
+	
 	dfname=rdata['cachename'][0]
-
-	#it must have a list of ids (even if it's all of the ids)
+	
 	ids=rdata['ids']
-
-	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
-	#columns,rows=rdata['groupby_fields']
+	
 	groupby_fields=rdata['groupby_fields']
 	
 	groupby_row=groupby_fields[0]
@@ -74,25 +70,11 @@ def groupby():
 	
 	agg_fn=rdata['agg_fn'][0]
 
-	removeallNA=False
-	rmna=rdata.get('rmna')
-
-	if rmna is not None:
-		rmna=rmna[0]
-
-	if rmna in ["True",True]:
-		rmna=True
-	elif rmna in ["all","All"]:
-		rmna=False
-		removeallNA=True
-
 	df=eval(dfname)
 
 	df2=df[df['id'].isin(ids)]
 	
 	ct=df2.groupby(groupby_row)[groupby_cols].agg(agg_fn)
-	
-	print(ct)
 	
 	ctd=ct.to_dict()
 	

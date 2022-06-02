@@ -71,6 +71,7 @@ class VoyageList(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
+			print("failed\n+++++++"))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 
@@ -127,6 +128,7 @@ class VoyageAggregations(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dict,safe=False)
 		else:
+			print("failed\n+++++++"))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 #Django really did not like running pandas inside of itself
@@ -174,8 +176,10 @@ class VoyageGroupBy(generics.GenericAPIView):
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
 				return JsonResponse(json.loads(r.text),safe=False)
 			else:
+				print("failed\n+++++++"))
 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
 		else:
+			print("failed\n+++++++"))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 
@@ -215,8 +219,10 @@ class VoyageCaches(generics.GenericAPIView):
 			if r.ok:
 				return JsonResponse(json.loads(r.text),safe=False,headers={'results_count':results_count})
 			else:
+				print("failed\n+++++++"))
 				return JsonResponse({'status':'false','message':'bad request to cache'}, status=400)
 		else:
+			print("failed\n+++++++"))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)
@@ -257,6 +263,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dicts,safe=False,headers=headers)
 		else:
+			print("failed\n+++++++"))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 #This will only accept one field at a time
@@ -303,9 +310,10 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 				k:val_list,
 				"results_count":results_count
 			}
-			print("executed in",time.time()-st,"seconds")
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dict,safe=False)
 		except:
+			print("failed\n+++++++"))
 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
 
 class DuplicateVoyage(generics.GenericAPIView):

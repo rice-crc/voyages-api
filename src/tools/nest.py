@@ -15,8 +15,10 @@ def bottomout(input,keychain):
 		elif type(input[k])==list and len(keychain)>0:
 			k2=keychain.pop(0)
 			#you can use this to test for bad entries in the options file
-			#print(k,k2,[i for i in input[k]])
-			r=[i[k2] for i in input[k]]
+			r=[]
+			for i in input[k]:
+				keychain2=list(keychain)
+				r.append(bottomout(i[k2],keychain2))
 			return(r)
 		else:
 			r=input[k]

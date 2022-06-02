@@ -55,8 +55,11 @@ class VoyageList(generics.GenericAPIView):
 				hierarchical=False
 			else:
 				hierarchical=True
+			
+			
 			if hierarchical==False:
 				for s in serialized:
+					
 					d={}
 					for selected_field in selected_fields:
 						#In this flattened view, the reverse relationship breaks the references to the outcome variables in the serializer

@@ -394,7 +394,7 @@ Returns 67 columns with 5,816 results each. Split value fields are joined with a
 	'id': 
 		[1860, 2555, ...],
 	'voyage_captainconnection__captain__name':
-		['Fabrequez, S', Lisboa, Antônio Pereira',...],
+		['Fabrequez, S', 'Lisboa, Antônio Pereira',...],
 	'voyage_crew__crew_died_complete_voyage':
 		[None, None, ...],
 	...

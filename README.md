@@ -331,13 +331,7 @@ Looks like:
 
 ### GroupBy (Voyages only)
 
-Let's say you wanted to run a search (e.g., voyages btw. 1800-1820) and then determine how many people disembarked voyages by the pairings of port A,B in those years.
-
-You would simply hit the GroupBy endpoint with your regular search query and specify:
-
-1. which fields to group on
-
-1. which field to get the summary stat on (and the operation to run, like "sum")
+Using Pandas-like syntax, we can also run searches and then perform groupings on categorical variables.
  
 For instance:
 
@@ -347,15 +341,28 @@ For instance:
 			"Barbados",
 			"Jamaica"
 		],
-		'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__geo_location__name',
-		                  'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name'],
-		'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum'],
-		'cachename':['voyage_export']
+		'groupby_fields':['voyage_itinerary__imp_broad_region_slave_dis__geo_location__name',
+		                  'voyage_slaves_numbers__imp_total_num_slaves_disembarked'],
+		'agg_fn':['sum'],
+		'cachename':['voyage_bar_and_donut_charts']
 	}
 
-This will be iterated over the coming weeks to cover Pivot Tables and other functions.
 
-It uses Pandas syntax and relies on the indexing functionality outlined below as well as a Flask app running alongside this Django app.
+... would return the following:
+
+	{
+		"voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
+			"Africa": 146224.0,
+			"Brazil": 3254758.0,
+			"Caribbean": 4585846.0,
+			"Europe": 7616.0,
+			"Mainland North America": 421929.0,
+			"Other": 174668.0,
+			"Spanish Mainland Americas": 691717.0
+		}
+	}
+
+
 
 --------------------
 

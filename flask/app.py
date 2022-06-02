@@ -67,7 +67,12 @@ def groupby():
 	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
 	#columns,rows=rdata['groupby_fields']
 	groupby_fields=rdata['groupby_fields']
-	val,fn=rdata['value_field_tuple']
+	
+	groupby_row=groupby_fields[0]
+	
+	groupby_cols=groupby_fields[1:len(groupby_fields)]
+	
+	agg_fn=rdata['agg_fn'][0]
 
 	removeallNA=False
 	rmna=rdata.get('rmna')
@@ -81,35 +86,16 @@ def groupby():
 		rmna=False
 		removeallNA=True
 
-	normalize=rdata.get('normalize')
-	if normalize is not None:
-		normalize=normalize[0]
-	if normalize not in ["columns","index"]:
-		normalize=False
-
 	df=eval(dfname)
 
 	df2=df[df['id'].isin(ids)]
-
-	bins=rdata.get('bins')
-	if bins is not None:
-		binvar,nbins=[bins[0],int(bins[1])]
-		df2=pd.cut(df2[binvar],nbins)
-
-	#print("+++++++++++++++++++")
-	#print(columns)
-	#print(df2.columns)
-	#print(rows)
-	#print("+++++++++++++++++++")
 	
-	ct=df2.groupby(groupby_fields[0]).agg({val:fn})
+	ct=df2.groupby(groupby_row)[groupby_cols].agg(agg_fn)
 	
-	#print(ct)
-	if removeallNA:
-		#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
-		ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
-	else:
-		ctd=ct.to_dict()
+	print(ct)
+	
+	ctd=ct.to_dict()
+	
 	return jsonify(ctd)
 
 @app.route('/dataframes/',methods=['POST'])

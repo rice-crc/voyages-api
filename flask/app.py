@@ -55,30 +55,22 @@ for rc in registered_caches:
 @app.route('/groupby/',methods=['POST'])
 def groupby():
 	
-	st=time.time()
-	rdata=request.json
-	
-	dfname=rdata['cachename'][0]
-	
-	ids=rdata['ids']
-	
-	groupby_fields=rdata['groupby_fields']
-	
-	groupby_row=groupby_fields[0]
-	
-	groupby_cols=groupby_fields[1:len(groupby_fields)]
-	
-	agg_fn=rdata['agg_fn'][0]
-
-	df=eval(dfname)
-
-	df2=df[df['id'].isin(ids)]
-	
-	ct=df2.groupby(groupby_row)[groupby_cols].agg(agg_fn)
-	
-	ctd=ct.to_dict()
-	
-	return jsonify(ctd)
+	try:
+		st=time.time()
+		rdata=request.json
+		dfname=rdata['cachename'][0]
+		ids=rdata['ids']
+		groupby_fields=rdata['groupby_fields']
+		groupby_row=groupby_fields[0]
+		groupby_cols=groupby_fields[1:len(groupby_fields)]
+		agg_fn=rdata['agg_fn'][0]
+		df=eval(dfname)
+		df2=df[df['id'].isin(ids)]
+		ct=df2.groupby(groupby_row)[groupby_cols].agg(agg_fn)
+		ctd=ct.to_dict()
+		return jsonify(ctd)
+	except:
+		abort(400)
 
 @app.route('/dataframes/',methods=['POST'])
 def dataframes():

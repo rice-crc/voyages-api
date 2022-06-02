@@ -15,7 +15,6 @@ from .models import *
 import pprint
 from tools.nest import *
 from tools.reqs import *
-from tools.timer import timer
 import collections
 import gc
 from .serializers import *
@@ -36,32 +35,26 @@ class VoyageList(generics.GenericAPIView):
 		j=options_handler('voyage/voyage_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
-		t=timer('FETCHING...',[])
+		print("+++++++\nusername:",request.auth.user)
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options)
 		if len(error_messages)==0:
+			st=time.time()
 			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 			#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
-			t=timer('building query',t)
 			read_serializer=VoyageSerializer(queryset,many=True)
-			t=timer('sql execution',t)
 			serialized=read_serializer.data
-			t=timer('serializing',t)
-
 			#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
 			if selected_fields==[]:
 				selected_fields=list(voyage_options.keys())
 			else:
 				selected_fields=[i for i in selected_fields if i in list(voyage_options.keys())]
-			
 			outputs=[]
-		
 			hierarchical=request.POST.get('hierarchical')
 			if str(hierarchical).lower() in ['false','0','f','n']:
 				hierarchical=False
 			else:
 				hierarchical=True
-		
 			if hierarchical==False:
 				for s in serialized:
 					d={}
@@ -75,7 +68,7 @@ class VoyageList(generics.GenericAPIView):
 					outputs.append(d)
 			else:
 				outputs=serialized
-			t=timer('flattening',t,done=True)
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
@@ -112,7 +105,8 @@ class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		#print("username:",request.auth.user)
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
 		params=dict(request.POST)
 		aggregations=params.get('aggregate_fields')
 		print("aggregations:",aggregations)
@@ -130,6 +124,7 @@ class VoyageAggregations(generics.GenericAPIView):
 						output_dict[varname][fn]=a[k]
 					else:
 						output_dict[varname]={fn:a[k]}
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dict,safe=False)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
@@ -162,6 +157,8 @@ class VoyageGroupBy(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
 		params=dict(request.POST)
 		groupby_fields=params.get('groupby_fields')
 		value_field_tuple=params.get('value_field_tuple')
@@ -174,6 +171,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
+				print("Internal Response Time:",time.time()-st,"\n+++++++")
 				return JsonResponse(json.loads(r.text),safe=False)
 			else:
 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
@@ -201,6 +199,7 @@ class VoyageCaches(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
 		params=dict(request.POST)
 		u2=FLASK_BASE_URL + 'dataframes/'
 		retrieve_all=True
@@ -229,7 +228,8 @@ class VoyageDataFrames(generics.GenericAPIView):
 		j=options_handler('voyage/voyage_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
-		t=timer("FETCHING...",[])
+		print("+++++++\nusername:",request.auth.user)
+		st=time.time()
 		params=dict(request.POST)
 		retrieve_all=True
 		if 'results_per_page' in params:
@@ -243,11 +243,8 @@ class VoyageDataFrames(generics.GenericAPIView):
 			else:
 				sf=[i for i in selected_fields if i in list(voyage_options.keys())]
 			
-			t=timer('building query',t)
 			serialized=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
-			t=timer('sql execution',t)
 			serialized=serialized.data
-			t=timer('serialization',t)
 			output_dicts={}
 			for selected_field in sf:
 				keychain=selected_field.split('__')
@@ -257,98 +254,10 @@ class VoyageDataFrames(generics.GenericAPIView):
 						output_dicts[selected_field].append(bottomval)
 					else:
 						output_dicts[selected_field]=[bottomval]
-			t=timer('flattening',t,done=True)
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dicts,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
-
-
-#Get data on Places
-#Default structure is places::region::broad_region
-#By passing it the req param 'inverse=True', you'll get back broad_regions::regions::places
-class VoyagePlaceList(generics.GenericAPIView):
-	serializer_class=PlaceSerializer
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('voyage/geo_options.json',request)
-		return JsonResponse(j,safe=False)
-	def post(self,request):
-		#print("username:",request.auth.user)
-		t=timer("FETCHING...",[])
-		queryset=Place.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,geo_options,retrieve_all=True)
-		if len(error_messages)==0:
-			t=timer('building query',t)
-			read_serializer=PlaceSerializer(queryset,many=True)
-			t=timer('sql execution',t)
-			serialized=read_serializer.data
-			t=timer('serialization',t)
-			params=request.GET
-			tree={}
-		
-			hierarchical=request.POST.get('hierarchical')
-			if str(hierarchical).lower() in ['false','0','f','n']:
-				hierarchical=False
-			else:
-				hierarchical=True
-		
-			if hierarchical:
-				for place in serialized:
-					broadregion_id=place['region']['broad_region']['id']
-					region_id=place['region']['id']
-					place_id=place['id']
-					minimal_place_dict=dict(place)
-					del(minimal_place_dict['region'])
-					minimal_region_dict=dict(place['region'])
-					del(minimal_region_dict['broad_region'])
-					if broadregion_id not in tree:
-						tree[broadregion_id]=place['region']['broad_region']
-						tree[broadregion_id]['regions']={region_id:minimal_region_dict}
-						tree[broadregion_id]['regions'][region_id]['places']={place_id:minimal_place_dict}
-					else:
-						if region_id not in tree[broadregion_id]['regions']:
-							tree[broadregion_id]['regions'][region_id]=minimal_region_dict
-							tree[broadregion_id]['regions'][region_id]['places']={place_id:minimal_place_dict}
-						else:
-							tree[broadregion_id]['regions'][region_id]['places'][place_id]=minimal_place_dict
-				tree_list=[]
-				for broadregion_id in tree:
-					item=dict(tree[broadregion_id])
-					item['regions']=[]
-					for region_id in tree[broadregion_id]['regions']:
-						region=dict(tree[broadregion_id]['regions'][region_id])
-						places=[]
-						for place_id in region['places']:
-							places.append(region['places'][place_id])
-						region['places']=places
-						item['regions'].append(region)
-					tree_list.append(item)						
-				outputs=tree_list
-			else:
-				#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
-				if selected_fields==[]:
-					sf=list(geo_options.keys())
-				else:
-					sf=[i for i in selected_fields if i in list(geo_options.keys())]
-				outputs=[]
-				for s in serialized:
-					d={}
-					for selected_field in sf:
-						#In this flattened view, the reverse relationship breaks the references to the outcome variables in the serializer
-						#not badly -- you just get some repeat, nested data -- but that's unhelpful
-						#The fix will be to make it a through table relationship
-						keychain=selected_field.split('__')
-						bottomval=bottomout(s,list(keychain))
-						d[selected_field]=bottomval
-					outputs.append(d)
-			
-			t=timer('flattening',t,True)
-			return JsonResponse(outputs,safe=False)
-		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
 
 #This will only accept one field at a time
 #Should only be a text field
@@ -360,7 +269,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		#print("username:",request.auth.user)
+		print("+++++++\nusername:",request.auth.user)
 		try:
 			st=time.time()
 			params=dict(request.POST)

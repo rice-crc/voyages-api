@@ -12,34 +12,18 @@ class BroadRegion(models.Model):
 	"""
 	Broad Regions (continents).
 	"""
-
-	broad_region = models.CharField("Broad region (Area) name", max_length=255)
-	longitude = models.DecimalField("Longitude of point",
-									max_digits=10,
-									decimal_places=7,
-									null=True,
-									blank=True)
-	latitude = models.DecimalField("Latitude of point",
-								   max_digits=10,
-								   decimal_places=7,
-								   null=True,
-								   blank=True)
-	value = models.IntegerField("Numeric code", unique=True)
-	show_on_map = models.BooleanField(default=True)
 	
-	#Placeholder for porting over to new geo app & tearing this out of voyages app
 	geo_location = models.ForeignKey(Location,
 									on_delete=models.CASCADE,
 									verbose_name="Location",
 									null=True)
 
 	def __str__(self):
-		return self.broad_region
+		return self.geo_location.name
 
 	class Meta:
 		verbose_name = "Broad region (area)"
 		verbose_name_plural = "Broad regions (areas)"
-		ordering = ['value']
 
 
 class Region(models.Model):
@@ -48,24 +32,6 @@ class Region(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.BroadRegion`
 	"""
 
-	region = models.CharField("Specific region (country or colony)",
-							  max_length=255)
-	longitude = models.DecimalField("Longitude of point",
-									max_digits=10,
-									decimal_places=7,
-									null=True,
-									blank=True)
-	latitude = models.DecimalField("Latitude of point",
-								   max_digits=10,
-								   decimal_places=7,
-								   null=True,
-								   blank=True)
-	broad_region = models.ForeignKey('BroadRegion', on_delete=models.CASCADE, verbose_name="Broad Region")
-	value = models.IntegerField("Numeric code", unique=True)
-	show_on_map = models.BooleanField(default=True)
-	show_on_main_map = models.BooleanField(default=True)
-	
-	#Placeholder for porting over to new geo app & tearing this out of voyages app
 	geo_location = models.ForeignKey(Location,
 									on_delete=models.CASCADE,
 									verbose_name="Location",
@@ -74,10 +40,9 @@ class Region(models.Model):
 	class Meta:
 		verbose_name = "Region"
 		verbose_name_plural = "Regions"
-		ordering = ['value']
 
 	def __str__(self):
-		return self.region
+		return self.geo_location.name
 
 
 class Place(models.Model):
@@ -85,24 +50,7 @@ class Place(models.Model):
 	Place (port or location).
 	related to: :class:`voyages.apps.voyage.modles.Region`
 	"""
-
-	place = models.CharField(max_length=255)
-	region = models.ForeignKey('Region', on_delete=models.CASCADE, verbose_name="Region")
-	value = models.IntegerField("Numeric code", unique=True)
-	longitude = models.DecimalField("Longitude of point",
-									max_digits=10,
-									decimal_places=7,
-									null=True,
-									blank=True)
-	latitude = models.DecimalField("Latitude of point",
-								   max_digits=10,
-								   decimal_places=7,
-								   null=True,
-								   blank=True)
-	show_on_main_map = models.BooleanField(default=True)
-	show_on_voyage_map = models.BooleanField(default=True)
 	
-	#Placeholder for porting over to new geo app & tearing this out of voyages app
 	geo_location = models.ForeignKey(Location,
 									on_delete=models.CASCADE,
 									verbose_name="Location",
@@ -111,10 +59,9 @@ class Place(models.Model):
 	class Meta:
 		verbose_name = "Place (Port or Location)"
 		verbose_name_plural = "Places (Ports or Locations)"
-		ordering = ['value']
 
 	def __str__(self):
-		return self.place
+		return self.geo_location.name
 
 
 # Voyage Groupings
@@ -1965,99 +1912,3 @@ class Voyage(models.Model):
 
 	def __str__(self):
 		return "Voyage #%s" % str(self.voyage_id)
-
-
-
-
-'''class VoyagesFullQueryHelper:
-
-	def __init__(self):
-		# Here we prefetch lots of relations to avoid generating
-		# thousands of requests to the database when we essentially
-		# need to de-normalize all of voyages data.
-		self.related_models = {
-			'voyage_dates': VoyageDates,
-			'voyage_groupings': VoyageGroupings,
-			'voyage_crew': VoyageCrew,
-			'voyage_slaves_numbers': VoyageSlavesNumbers
-		}
-
-		self.itinerary_fields = [
-			'broad_region_of_return', 'first_landing_place',
-			'first_landing_region', 'first_place_slave_purchase',
-			'first_region_slave_emb', 'imp_broad_region_of_slave_purchase',
-			'imp_broad_region_slave_dis', 'imp_broad_region_voyage_begin',
-			'imp_port_voyage_begin', 'imp_principal_place_of_slave_purchase',
-			'imp_principal_place_of_slave_purchase__region',
-			'imp_principal_place_of_slave_purchase__region__broad_region',
-			'imp_principal_port_slave_dis',
-			'imp_principal_port_slave_dis__region',
-			'imp_principal_port_slave_dis__region__broad_region',
-			'imp_principal_region_of_slave_purchase',
-			'imp_principal_region_slave_dis', 'imp_region_voyage_begin',
-			'int_first_port_dis', 'int_first_port_emb',
-			'int_first_region_purchase_slaves',
-			'int_first_region_slave_landing',
-			'int_second_place_region_slave_landing', 'int_second_port_dis',
-			'int_second_port_emb', 'int_second_region_purchase_slaves',
-			'place_voyage_ended', 'port_of_call_before_atl_crossing',
-			'port_of_departure', 'principal_place_of_slave_purchase',
-			'principal_port_of_slave_dis', 'region_of_return',
-			'second_landing_place', 'second_landing_region',
-			'second_place_slave_purchase', 'second_region_slave_emb',
-			'third_landing_place', 'third_landing_region',
-			'third_place_slave_purchase', 'third_region_slave_emb'
-		]
-
-		self.prefetch_fields = [
-			Prefetch(
-				'voyage_dates__imp_length_home_to_disembark',
-				to_attr='voyage_dates__imp_length_home_to_disembark'
-				),
-			Prefetch('voyage_captain',
-					 queryset=VoyageCaptain.objects.order_by(
-						 'captain_name__captain_order')),
-			Prefetch('voyage_ship__nationality_ship'),
-			Prefetch('voyage_ship__imputed_nationality'),
-			Prefetch('voyage_ship__ton_type'),
-			Prefetch('voyage_ship__rig_of_vessel'),
-			Prefetch('voyage_ship__vessel_construction_place'),
-			Prefetch('voyage_ship__vessel_construction_region'),
-			Prefetch('voyage_ship__registered_place'),
-			Prefetch('voyage_ship__registered_region'),
-			Prefetch('voyage_ship_owner',
-					 queryset=VoyageShipOwner.objects.order_by(
-						 'owner_name__owner_order')),
-			Prefetch('group',
-					 queryset=VoyageSourcesConnection.objects.prefetch_related(
-						 'source').order_by('source_order')),
-			Prefetch('voyage_itinerary',
-					 queryset=VoyageItinerary.objects.prefetch_related(
-						 *self.itinerary_fields).all()),
-			Prefetch('voyage_name_outcome',
-					 queryset=VoyageOutcome.objects.prefetch_related(
-						 'particular_outcome', 'resistance', 'outcome_slaves',
-						 'vessel_captured_outcome', 'outcome_owner').all()),
-			Prefetch(
-				'links_to_other_voyages',
-				queryset=LinkedVoyages.objects.select_related('second').only(
-					'first_id', 'second_id', 'second__voyage_id'))
-		]
-
-		for k, v in list(self.related_models.items()):
-			self.prefetch_fields += [
-				Prefetch(k + '__' + f.name,
-						 queryset=f.related_model.objects.only('value'))
-				for f in v._meta.get_fields()
-				if f.many_to_one and f.name != 'voyage'
-			]
-
-	def get_manager(self, dataset=None):
-		return VoyageDatasetManager(
-			dataset) if dataset else Voyage.all_dataset_objects
-
-	def get_query(self, dataset=None):
-		return self.get_manager(dataset).select_related(
-			*list(self.related_models.keys())).prefetch_related(
-				*self.prefetch_fields).all()
-'''

@@ -68,7 +68,7 @@ There are currently 4 major endpoints, which allow you to query on People, Voyag
 
 1. Enslaved: POST http://127.0.0.1:8000/past/
 1. Voyages: POST http://127.0.0.1:8000/voyage/
-1. Places: POST http://127.0.0.1:8000/voyage/geo
+1. Places: POST http://127.0.0.1:8000/geo/
 1. Estimates:  POST http://127.0.0.1:8000/assessment/
 
 ### 0. AUTHENTICATION
@@ -133,12 +133,12 @@ Or, to use the exact text with autocomplete, you might send the following reques
 	POST http://127.0.0.1:8000/voyage/autocomplete
 
 	Body:
-	{'voyage_itinerary__imp_principal_region_slave_dis__region': ['jam']}
+	{'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name': ['jam']}
 
 And get back
 
 	{
-		"voyage_itinerary__imp_principal_region_slave_dis__region": [
+		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": [
 			"Jamaica"
 		]
 	}
@@ -148,7 +148,7 @@ Then feed that precise value into that variable:
 	POST http://127.0.0.1:8000/voyage/
 	
 	Body:
-	{	'voyage_itinerary__imp_principal_region_slave_dis__region':
+	{	'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name':
 		['Barbados','Jamaica']
 	}
 
@@ -173,39 +173,57 @@ Why "hierarchical=False"?
 hierarchical=False looks like:
 
     ...
-    "voyage_itinerary__port_of_departure__region__longitude": {
+    "voyage_itinerary__port_of_departure__geo_location__child_of__longitude": {
         "type": "<class 'rest_framework.fields.DecimalField'>",
-        "label": "Longitude of point",
-        "flatlabel": "Voyage itinerary : Port of departure : Region : Longitude of point"
-    }
+        "label": "Longitude of Centroid",
+        "flatlabel": "Itinerary : Port of departure (PORTDEP) : Location : Child of : Longitude of Centroid"
+    },
     ...
 
 hierarchical=True looks like:
 
 	...
-    "voyage_itinerary": {
-        "type": "table",
-        "label": "Voyage itinerary",
-        "flatlabel": "Voyage itinerary",
-        "model": "voyage.models.Voyage",
-        "id": {
-            "type": "<class 'rest_framework.fields.IntegerField'>",
-            "label": "ID",
-            "flatlabel": "Voyage itinerary : ID"
-        },
-        "port_of_departure": {
-            "type": "table",
-            "label": "Port of departure",
-            "flatlabel": "Voyage itinerary : Port of departure",
-            "model": "voyage.models.VoyageItinerary",
-            "id": {
-                "type": "<class 'rest_framework.fields.IntegerField'>",
-                "label": "ID",
-                "flatlabel": "Voyage itinerary : Port of departure : ID"
-            },
-        }
-    }
-	...
+	"voyage_itinerary": {
+			"type": "table",
+			"label": "Itinerary",
+			"flatlabel": "Itinerary",
+			"id": {
+				"type": "<class 'rest_framework.fields.IntegerField'>",
+				"label": "ID",
+				"flatlabel": "Itinerary : ID"
+			},
+			"port_of_departure": {
+				"type": "table",
+				"label": "Port of departure (PORTDEP)",
+				"flatlabel": "Itinerary : Port of departure (PORTDEP)",
+				"id": {
+					"type": "<class 'rest_framework.fields.IntegerField'>",
+					"label": "ID",
+					"flatlabel": "Itinerary : Port of departure (PORTDEP) : ID"
+				},
+				"geo_location": {
+					"type": "table",
+					"label": "Location",
+					"flatlabel": "Itinerary : Port of departure (PORTDEP) : Location",
+					"id": {
+						"type": "<class 'rest_framework.fields.IntegerField'>",
+						"label": "ID",
+						"flatlabel": "Itinerary : Port of departure (PORTDEP) : Location : ID"
+					},
+					"child_of": {
+						"type": "table",
+						"label": "Child of",
+						"flatlabel": "Itinerary : Port of departure (PORTDEP) : Location : Child of",
+						"id": {
+							"type": "<class 'rest_framework.fields.IntegerField'>",
+							"label": "ID",
+							"flatlabel": "Itinerary : Port of departure (PORTDEP) : Location : Child of : ID"
+						},
+						"name": {
+							"type": "<class 'rest_framework.fields.CharField'>",
+							"label": "Location name",
+							"flatlabel": "Itinerary : Port of departure (PORTDEP) : Location : Child of : Location name"
+						}, ....
 
 -------------------------
 
@@ -229,7 +247,7 @@ Numeric fields: provide a range
 Text fields: inclusive OR on arrayed values, exactly matched (see Autocomplete below):
 
 	POST http://127.0.0.1:8000/voyage/
-	data={'voyage_itinerary__imp_principal_region_slave_dis__region'=['Barbados','Jamaica']}
+	data={'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name'=['Barbados','Jamaica']}
 
 ### Paginate
 
@@ -325,12 +343,12 @@ For instance:
 
 	POST "http://127.0.0.1:8000/voyage/groupby"
 	data={
-		"voyage_itinerary__imp_principal_region_slave_dis__region":[
+		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name":[
 			"Barbados",
 			"Jamaica"
 		],
-		'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place',
-		                  'voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
+		'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__geo_location__name',
+		                  'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name'],
 		'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum'],
 		'cachename':['voyage_export']
 	}
@@ -352,13 +370,13 @@ This endpoint allows full searchability as with dataframes and list endpoints ab
 For instance:
 
 	data={
-		'voyage_itinerary__imp_principal_region_slave_dis__region':[
+		'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name':[
 			'Barbados',
 			'Jamaica'
 		],
 		'cachename':['voyage_export'],
 		'download_csv':['True'],
-		'selected_fields':['voyage_itinerary__imp_principal_place_of_slave_purchase__place']
+		'selected_fields':['voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name']
 	}
 	
 	r=requests.post('http://127.0.0.1:8000/voyage/caches',headers=headers,data=data)
@@ -399,30 +417,30 @@ e.g.,
 	{
 		"voyage_dates__imp_arrival_at_port_of_dis_yyyy" : [1800,1810],
 		"selected_fields" : [
-			"voyage_itinerary__imp_broad_region_voyage_begin__broad_region"
-			"voyage_itinerary__first_landing_region__region",
-			"voyage_itinerary__first_landing_place__place",
+			"voyage_itinerary__imp_broad_region_voyage_begin__geo_location__name"
+			"voyage_itinerary__first_landing_region__geo_location__name",
+			"voyage_itinerary__first_landing_place__geo_location__name",
 			"voyage_slaves_numbers__imp_total_num_slaves_embarked"
 			]
 	}
 
 Looks like:
 
-	{   'voyage_itinerary__first_landing_place__place':
+	{   'voyage_itinerary__first_landing_place__geo_location__name':
 		[
 			'Barbados, port unspecified',
 			'Freetown',
 			'Freetown',
 			...
 		],
-		'voyage_itinerary__first_landing_region__region':
+		'voyage_itinerary__first_landing_region__geo_location__name':
 		[
 			'Barbados',
 			'Sierra Leone',
 			'Sierra Leone',
 			...
 		],
-		'voyage_itinerary__imp_broad_region_voyage_begin__broad_region':
+		'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__name':
 		[
 			'Mainland North America',
 			None,

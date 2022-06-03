@@ -72,6 +72,49 @@ def groupby():
 	except:
 		abort(400)
 
+@app.route('/crosstabs/',methods=['POST'])
+def crosstabs():
+	
+	try:
+		st=time.time()
+		rdata=request.json
+		dfname=rdata['cachename'][0]
+
+		#it must have a list of ids (even if it's all of the ids)
+		ids=rdata['ids']
+
+		#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
+		columns,rows=rdata['groupby_fields']
+		val,fn=rdata['value_field_tuple']
+
+		normalize=rdata.get('normalize')
+		if normalize is not None:
+			normalize=normalize[0]
+		if normalize not in ["columns","index"]:
+			normalize=False
+
+		df=eval(dfname)
+
+		df2=df[df['id'].isin(ids)]
+
+		bins=rdata.get('bins')
+		if bins is not None:
+			binvar,nbins=[bins[0],int(bins[1])]
+			df2=pd.cut(df2[binvar],nbins)
+		ct=pd.crosstab(
+			df2[columns],
+			df2[rows],
+			values=df2[val],
+			aggfunc=eval("np."+fn),
+			normalize=normalize,
+		)
+		ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
+		return jsonify(ctd)
+	except:
+		abort(400)
+
+
+
 @app.route('/dataframes/',methods=['POST'])
 def dataframes():
 	try:

@@ -134,29 +134,47 @@ class VoyageAggregations(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-#Django really did not like running pandas inside of itself
-#Maybe I'm wrong and there's a way to do it
-#But in the meantime, we're going to use Flask as a pandas sidecar for complex statistical operations
-#Currently running on port 5000. just hardcoding this for dev w docker-compose, obviously needs to be changed for production
-##It's fast as hell :)
-#data={
-#    'voyage_itinerary__imp_principal_region_slave_dis__region':[
-#        'Barbados',
-#        'Jamaica'
-#    ],
-#    'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__place','voyage_itinerary__imp_principal_place_of_slave_purchase__place'],
-#    'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum']
-#}
-#r=requests.post(url='http://127.0.0.1:8000/voyage/groupby',headers=headers,data=data)
-#j=json.loads(r.text)
-
-class VoyageGroupBy(generics.GenericAPIView):
+class VoyageCrossTabs(generics.GenericAPIView):
 	'''
 	Think of this as a pivot table (but it will generalize later)
 	This view takes:
 		a groupby tuple (row, col)
 		a value field tuple (cellvalue,aggregationfunction)
 		any search parameters you want!
+	'''
+	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		params=dict(request.POST)
+		groupby_fields=params.get('groupby_fields')
+		value_field_tuple=params.get('value_field_tuple')
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		if len(error_messages)==0:
+			ids=[i[0] for i in queryset.values_list('id')]
+			u2=FLASK_BASE_URL+'crosstabs/'
+			d2=params
+			d2['ids']=ids
+			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+			if r.ok:
+				return JsonResponse(json.loads(r.text),safe=False)
+			else:
+				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
+		else:
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+class VoyageGroupBy(generics.GenericAPIView):
+	'''
+	Given
+	1. an aggregation function
+	2. a list of fields
+	2a. the first of which is the field you want to group by
+	2b. the following of which is/are the field(s) you want to get the summary stats on
+	returns
+	Dictionaries, organized by the numeric fields' names, with its' children being k/v pairs of
+	--> k = value of grouped var
+	--> v = aggregated value of numeric var for that grouped var val
 	'''
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
@@ -180,7 +198,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 				return JsonResponse(json.loads(r.text),safe=False)
 			else:
 				print("failed\n+++++++")
-				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
+				return JsonResponse({'status':'false','message':'bad crosstabs request'}, status=400)
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)

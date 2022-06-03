@@ -362,7 +362,35 @@ For instance:
 		}
 	}
 
+It uses Pandas syntax and relies on the indexing functionality outlined below as well as a Flask app running alongside this Django app.
 
+## CrossTabs
+
+Let's say you wanted to run a search (e.g., voyages btw. 1800-1820) and then determine how many people disembarked voyages by the pairings of port A,B in those years.
+
+You would simply hit the GroupBy endpoint with your regular search query and specify:
+
+    which fields to group on
+
+    which field to get the summary stat on (and the operation to run, like "sum")
+
+For instance:
+
+POST "http://127.0.0.1:8000/voyage/crosstabs"
+data={
+	"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name":[
+		"Barbados",
+		"Jamaica"
+	],
+	'groupby_fields':['voyage_itinerary__principal_port_of_slave_dis__geo_location__name',
+	                  'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name'],
+	'value_field_tuple':['voyage_slaves_numbers__imp_total_num_slaves_disembarked','sum'],
+	'cachename':['voyage_export']
+}
+
+This will be iterated over the coming weeks to cover Pivot Tables and other functions.
+
+It uses Pandas syntax and relies on the indexing functionality outlined below as well as a Flask app running alongside this Django app.
 
 --------------------
 

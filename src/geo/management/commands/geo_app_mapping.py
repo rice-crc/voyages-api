@@ -1,17 +1,17 @@
 from voyage.models import Place, Region, BroadRegion
 from geo.models import *
-import requests
 import json
 from django.core.management.base import BaseCommand, CommandError
 import time
 import os
+
 
 #worth noting that they do have one spss code collision -- btw regions and places
 #mismatch with: 621 Americas, region unspecified 80200 True --> Americas 2455 80200 Region
 #we'll need to patch that by hand and let the team know
 
 class Command(BaseCommand):
-	help = 'This is a one-off that I wanted to have live in manual_db_migrations. But it needs to be in django commands or else it won\'t work. I love this framework.'
+	help = 'This is a one-off used to migrate the geo data from voyages over to geo. It does not delete the existing entries (just in case).'
 	def handle(self, *args, **options):
 
 		locations=Location.objects.all()

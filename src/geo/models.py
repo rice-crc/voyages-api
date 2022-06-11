@@ -6,17 +6,10 @@ from django.db import models
 from django.db.models import Prefetch
 #from django.utils.translation import gettext_lazy as _
 
-class Route(models.Model):
+class Adjacency(models.Model):
 	"""
-	A/B Routes
-	From Location to Location
-	Should be stored as geojson linestrings
+	Simplified routes -- simple a/b connections
 	"""
-	name=models.CharField(
-		"Route name",
-		max_length=255,
-		null=True
-	)
 	source=models.ForeignKey(
 		'Location',
 		verbose_name="Alice",
@@ -31,11 +24,15 @@ class Route(models.Model):
 		on_delete=models.CASCADE,
 		related_name='targetof'
 	)
-	route_linestring=models.JSONField(
-		"Geojson Linestring",
+	dataset= models.IntegerField(
+		"trans-atlantic (0), intra-american (1), intra-african (2)",
 		null=True
-		)
+	)
 
+	class Meta:
+		verbose_name = "Location Adjacency"
+		verbose_name_plural = "Location Adjacencies"
+	
 class Polygon(models.Model):
 	"""
 	Shape of a spatial entity (optional for the locations that link to these)
@@ -118,6 +115,12 @@ class Location(models.Model):
 		"SPSS code",
 		unique=True
 	)
+	
+	dataset= models.IntegerField(
+		"trans-atlantic (0), intra-american (1), intra-african (2)",
+		null=True
+	)
+	
 	show_on_map = models.BooleanField(default=True,null=True)
 	show_on_main_map = models.BooleanField(default=True,null=True)
 	show_on_voyage_map = models.BooleanField(default=True,null=True)

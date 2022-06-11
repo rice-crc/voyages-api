@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
 from django.db.models import Q,Prefetch
 from django.http import HttpResponse, JsonResponse
@@ -34,19 +34,17 @@ class LocationList(generics.GenericAPIView):
 	def post(self,request):
 		times=[]
 		labels=[]
-		print("FETCHING...")
-		times.append(time.time())
+		#print("+++++++\nusername:",request.auth.user)
+		print("+++++++\nGEO")
+		st=time.time()
 		queryset=Location.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,location_options,auto_prefetch=True,retrieve_all=True)
 		if len(error_messages)==0:
 			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-			times.append(time.time())
 			labels.append('building query')
 			read_serializer=LocationSerializer(queryset,many=True)
-			times.append(time.time())
 			labels.append('serialization')
 			serialized=read_serializer.data
-			times.append(time.time())
 			labels.append('sql execution')
 			
 			outputs=[]
@@ -70,11 +68,45 @@ class LocationList(generics.GenericAPIView):
 					outputs.append(d)
 			else:
 				outputs=serialized
-			times.append(time.time())
 			labels.append('flattening...')
-			print('--timings--')
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			for i in range(1,len(times)):
 				print(labels[i-1],times[i]-times[i-1])		
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+
+
+class getGeoJsonNetwork(generics.GenericAPIView):
+	def get(self,request):
+		print("+++++++\nGeoJSON")
+		st=time.time()
+		adjacencies=Adjacency.objects.all()
+		routes_featurecollection={"type":"FeatureCollection","features":[]}
+		prefetch_fields=[
+			'source',
+			'target'
+		]
+		for f in prefetch_fields:
+			adjacencies=adjacencies.prefetch_related(f)
+		
+		for adjacency in adjacencies:
+			routes_featurecollection['features'].append({
+			"type":"Feature",
+			"geometry":{
+				"type":"LineString",
+				"coordinates":[
+					(adjacency.source.longitude,adjacency.source.latitude),
+					(adjacency.target.longitude,adjacency.target.latitude)
+				]
+			},
+			"properties":{}
+			})
+		
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		d=open('routes.json','w')
+		d.write(json.dumps(routes_featurecollection,cls=DjangoJSONEncoder))
+		d.close()
+		
+		return JsonResponse(routes_featurecollection,safe=False)

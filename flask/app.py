@@ -40,20 +40,13 @@ for rc in registered_caches:
 
 #voyage_export=load_long_df(DJANGO_STATIC_URL+'customcache/voyage_export.json')
 
-#Implementing this as a limited pivot table with some weird twists at the end to replicate legacy functionality
-##first series is the rows of course
-##only one column, however (at least for now)
-##### with the exception of binning -- we'll allow a column for that on numeric variables
-##then a tuple giving you one value and a function to apply on top of it
-###n.b. this would remove the embarked/disembarked split view on the pivot table (but it's fast enough to allow that to just be a toggle)
-##this allows us to use it as well as:
-###a groupby function
-#####non-tabular if you use rmna="All"
-###a normalized (percentages) table
-##& to apply binning -- which I'm going to require is expressed as a simple integer of the number of bins. making that friendly is a ui question.
-
 @app.route('/groupby/',methods=['POST'])
 def groupby():
+	
+	'''
+	Implements the pandas groupby function and returns the sparse summary.
+	Excellent for bar & pie charts.
+	'''
 	
 	try:
 		st=time.time()
@@ -75,6 +68,11 @@ def groupby():
 @app.route('/crosstabs/',methods=['POST'])
 def crosstabs():
 	
+	'''
+	Implements the pandas crosstab function and returns the sparse summary.
+	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
+	'''
+
 	try:
 		st=time.time()
 		rdata=request.json
@@ -113,10 +111,14 @@ def crosstabs():
 	except:
 		abort(400)
 
-
-
 @app.route('/dataframes/',methods=['POST'])
 def dataframes():
+	
+	'''
+	Allows you to select long-format columns of data on any (indexed) selected field.
+	Excellent for a data export or any general dataframe use-case.
+	'''
+	
 	try:
 		st=time.time()
 	

@@ -29,7 +29,7 @@ class Command(BaseCommand):
 		networks={
 			"iam":{
 				"fname":"intra_am_routeNodes.js",
-				"dataset":1
+				"dataset":0
 			},
 			"tatl":{
 				"fname":"trans_atl_routeNodes.js",
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 		
 		for network_name in networks:
 			c=0
-			print("++++++++++++++++",network_name,"++++++++++++++++")
+			print("\n\n++++++++++++++++",network_name,"++++++++++++++++")
 			network=networks[network_name]
 			network_fname=network['fname']
 			dataset=network['dataset']
@@ -106,7 +106,7 @@ class Command(BaseCommand):
 		
 			location_types=LocationType.objects.all()
 				
-			print("+++++++++++++++++\nlocation types")
+			print("+++++++\nlocation types")
 			for location_type in location_types:
 				print(location_type.name,location_type.id)
 			
@@ -114,7 +114,7 @@ class Command(BaseCommand):
 		
 			routenode_js_to_db_map={}
 			
-			print('+++++++++++++++++\nhighways: creating new oceanic waypoints and edges based on %s oceanic graph (routeNodes.js)' %network_name)
+			print('+++++++\nhighways: creating new oceanic waypoints and edges based on %s oceanic graph (routeNodes.js)' %network_name)
 			print('--->oceanic waypoints')
 			
 			for routenode in routenodes_coordinates:
@@ -168,70 +168,30 @@ class Command(BaseCommand):
 			locations=Location.objects.all()
 			
 			
-			print('+++++++++++++++++\non-ramps: connecting ports, regions, and broad regions to oceanic waypoint network')
+			print('+++++++\non-ramps: connecting ports, regions, and broad regions to oceanic waypoint network')
 			
+			location_types_names=["Port","Region","Broad Region"]
 			
-			
-			print('--->PORTS')
+			for location_type_name in location_types_names:
+				print('--->%ss' %location_type_name)
+				location_type=location_types.filter(**{'name':location_type_name})[0]
 		
-			port_location_type=location_types.filter(**{'name':'Port'})[0]
+				these_locations=locations.filter(**{'location_type':location_type,'show_on_voyage_map':1})
 		
-			ports=locations.filter(**{'location_type':port_location_type,'show_on_voyage_map':1})
+				waypoint_location_type=location_types.filter(**{'name':'Oceanic Waypoint'})[0]
 		
-			waypoint_location_type=location_types.filter(**{'name':'Oceanic Waypoint'})[0]
+				waypoints=locations.filter(**{'location_type':waypoint_location_type,'dataset':dataset})
 		
-			waypoints=locations.filter(**{'location_type':waypoint_location_type,'dataset':dataset})
-		
-			for port in ports:
-				if port.longitude!=None and port.latitude!= None:
-					distances=[(sqrt((port.longitude-waypoint.longitude)**2+(port.latitude-waypoint.latitude)**2),waypoint) for waypoint in waypoints]
-					closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
-					#print("linking",port,"to",closest_neighbor)
-					if port.id < closest_neighbor.id:
-						source=port
-						target=closest_neighbor
-					else:
-						source=closest_neighbor
-						target=port
-					adjacency=Adjacency(source=source,target=target,dataset=dataset)
-					adjacency.save()
-		
-			print('--->REGIONS')
-		
-			region_location_type=location_types.filter(**{'name':'Region'})[0]
-		
-			regions=locations.filter(**{'location_type':region_location_type})
-		
-			for region in regions:
-				if region.longitude!=None and region.latitude!= None:
-					distances=[(sqrt((region.longitude-waypoint.longitude)**2+(region.latitude-waypoint.latitude)**2),waypoint) for waypoint in waypoints]
-					closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
-					if region.id < closest_neighbor.id:
-						source=region
-						target=closest_neighbor
-					else:
-						source=closest_neighbor
-						target=region
-					adjacency=Adjacency(source=source,target=target,dataset=dataset)
-					adjacency.save()
-				
-			print('--->BROAD REGIONS')
-		
-			broad_region_location_type=location_types.filter(**{'name':'Broad Region'})[0]
-		
-			broad_regions=locations.filter(**{'location_type':broad_region_location_type})
-		
-			for broad_region in broad_regions:
-				if broad_region.longitude!=None and broad_region.latitude!= None:
-					distances=[(sqrt((broad_region.longitude-waypoint.longitude)**2+(broad_region.latitude-waypoint.latitude)**2),waypoint) for waypoint in waypoints]
-					closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
-					if broad_region.id < closest_neighbor.id:
-						source=broad_region
-						target=closest_neighbor
-					else:
-						source=closest_neighbor
-						target=broad_region
-					adjacency=Adjacency(source=source,target=target,dataset=dataset)
-					adjacency.save()
-		
-		
+				for location in these_locations:
+					if location.longitude!=None and location.latitude!= None:
+						distances=[(sqrt((location.longitude-waypoint.longitude)**2+(location.latitude-waypoint.latitude)**2),waypoint) for waypoint in waypoints]
+						closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
+						#print("linking",location,"to",closest_neighbor)
+						if location.id < closest_neighbor.id:
+							source=location
+							target=closest_neighbor
+						else:
+							source=closest_neighbor
+							target=location
+						adjacency=Adjacency(source=source,target=target,dataset=dataset)
+						adjacency.save()

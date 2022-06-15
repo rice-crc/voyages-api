@@ -44,6 +44,11 @@
     "label": "SPSS code",
     "flatlabel": "Location : Child of : SPSS code"
   },
+  "geo_location__child_of__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "Location : Child of : Trans-atlantic (0), intra-american (1), intra-african (2)"
+  },
   "geo_location__child_of__show_on_map": {
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
@@ -103,6 +108,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
     "flatlabel": "Location : Geographic Location : SPSS code"
+  },
+  "geo_location__parent_of__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "Location : Geographic Location : Trans-atlantic (0), intra-american (1), intra-african (2)"
   },
   "geo_location__parent_of__show_on_map": {
     "type": "<class 'rest_framework.fields.BooleanField'>",
@@ -183,6 +193,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
     "flatlabel": "Location : SPSS code"
+  },
+  "geo_location__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "Location : Trans-atlantic (0), intra-american (1), intra-african (2)"
   },
   "geo_location__show_on_map": {
     "type": "<class 'rest_framework.fields.BooleanField'>",

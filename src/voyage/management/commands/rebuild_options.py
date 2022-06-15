@@ -41,11 +41,6 @@ class Command(BaseCommand):
 				'output_filename':'geo/location_options.json',
 				'serializer':LocationSerializer,
 				'objectclass':Location
-			},
-			{
-				'output_filename':'geo/route_options.json',
-				'serializer':RouteSerializer,
-				'objectclass':Route
 			}
 		]
 

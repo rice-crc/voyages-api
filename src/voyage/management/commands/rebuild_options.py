@@ -7,7 +7,7 @@ from past.serializers import EnslavedSerializer
 from past.models import Enslaved
 from assessment.serializers import EstimateSerializer
 from assessment.models import Estimate
-from geo.serializers import LocationSerializer,RouteSerializer
+from geo.serializers import *
 from geo.models import Location,Route
 
 class Command(BaseCommand):

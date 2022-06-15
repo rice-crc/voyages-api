@@ -34,6 +34,11 @@
     "label": "SPSS code",
     "flatlabel": "Child of : SPSS code"
   },
+  "child_of__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "Child of : Trans-atlantic (0), intra-american (1), intra-african (2)"
+  },
   "child_of__show_on_map": {
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on map",
@@ -93,6 +98,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
     "flatlabel": "Geographic Location : SPSS code"
+  },
+  "parent_of__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "Geographic Location : Trans-atlantic (0), intra-american (1), intra-african (2)"
   },
   "parent_of__show_on_map": {
     "type": "<class 'rest_framework.fields.BooleanField'>",
@@ -173,6 +183,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
     "flatlabel": "SPSS code"
+  },
+  "dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "Trans-atlantic (0), intra-american (1), intra-african (2)"
   },
   "show_on_map": {
     "type": "<class 'rest_framework.fields.BooleanField'>",

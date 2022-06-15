@@ -68,6 +68,8 @@ CORS_ALLOW_CREDENTIALS= True
 
 ROOT_URLCONF = 'voyages2021.urls'
 
+CORS_EXPOSE_HEADERS = ["total_results_count"]
+
 ALLOWED_HOSTS=['*']
 
 from django.utils.translation import gettext_lazy as _

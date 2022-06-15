@@ -8,15 +8,41 @@ from django.db.models import Prefetch
 
 class Route(models.Model):
 	"""
-	A/B Routes
-	From Location to Location
-	Should be stored as geojson linestrings
+	Route json store
 	"""
-	name=models.CharField(
-		"Route name",
-		max_length=255,
+	source=models.ForeignKey(
+		'Location',
+		verbose_name="Alice",
+		null=False,
+		on_delete=models.CASCADE,
+		related_name='sourceofroute'
+	)
+	target=models.ForeignKey(
+		'Location',
+		verbose_name="Bob",
+		null=False,
+		on_delete=models.CASCADE,
+		related_name='targetofroute'
+	)
+	dataset= models.IntegerField(
+		"Dataset",
 		null=True
 	)
+	
+	shortest_route=models.JSONField(
+		"Endpoint to endpoint route",
+		null=True
+	)
+
+	
+	class Meta:
+		verbose_name = "Route"
+		verbose_name_plural = "Routes"
+
+class Adjacency(models.Model):
+	"""
+	Simplified network linkages -- simple a/b connections
+	"""
 	source=models.ForeignKey(
 		'Location',
 		verbose_name="Alice",
@@ -31,11 +57,15 @@ class Route(models.Model):
 		on_delete=models.CASCADE,
 		related_name='targetof'
 	)
-	route_linestring=models.JSONField(
-		"Geojson Linestring",
+	dataset= models.IntegerField(
+		"Dataset",
 		null=True
-		)
-
+	)
+	
+	class Meta:
+		verbose_name = "Location Adjacency"
+		verbose_name_plural = "Location Adjacencies"
+	
 class Polygon(models.Model):
 	"""
 	Shape of a spatial entity (optional for the locations that link to these)
@@ -118,6 +148,12 @@ class Location(models.Model):
 		"SPSS code",
 		unique=True
 	)
+	
+	dataset= models.IntegerField(
+		"trans-atlantic (0), intra-american (1), intra-african (2)",
+		null=True
+	)
+	
 	show_on_map = models.BooleanField(default=True,null=True)
 	show_on_main_map = models.BooleanField(default=True,null=True)
 	show_on_voyage_map = models.BooleanField(default=True,null=True)

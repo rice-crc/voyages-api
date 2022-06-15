@@ -17,3 +17,4 @@ six==1.16.0
 sqlparse==0.4.2
 urllib3==1.26.8
 django-cors-headers
+networkx

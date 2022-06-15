@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
-from .models import LocationType,Route,Polygon,Location
+from .models import *
 
 class LocationTypeSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -32,9 +32,9 @@ class LocationSerializer(serializers.ModelSerializer):
 		model=Location
 		fields='__all__'
 
-class RouteSerializer(serializers.ModelSerializer):
+class AdjacencySerializer(serializers.ModelSerializer):
 	source=LocationSerializer(many=False)
 	target=LocationSerializer(many=False)
 	class Meta:
-		model=Route
+		model=Adjacency
 		fields='__all__'

@@ -1,7 +1,7 @@
 import json
 import pprint
 import urllib
-from django.db.models import Avg,Sum,Min,Max,Count,Q
+from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
 from .nest import *
 
@@ -138,7 +138,11 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		order_by=params.get('order_by')
 		if order_by is not None:
 			print("---->order by---->",order_by)
-			queryset=queryset.order_by(*order_by)
+			for ob in order_by:
+				if ob.startswith('-'):
+					queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))
+				else:
+					queryset=queryset.order_by(F(ob).asc(nulls_last=True))
 		#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')
 		#PAGINATION/LIMITS
 		if retrieve_all==False:

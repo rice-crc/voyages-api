@@ -293,6 +293,41 @@ Looks like:
 		"results_count": 8207
 	}
 
+### Routes
+
+Get routes for voyages or aggregations of voyages, by providing a/b pairs of location ids
+
+This is pretty bare-bones and fragile right now. You have to give it the magnitude for each a/b pair. So requests look like:
+
+	POST http://127.0.0.1:8000/geo/Routes
+	
+	{
+		"abwtriples":["2452,2489,10","2407,2782,5"]
+		"dataset":[0]
+		"output_format":["geojson"]		
+	}
+
+This would draw a weight 5 line from Tortola (2407) to Louisiana (2782); and a weight 10 line from West Central Africa and St. Helena (2452) to Tennessee (2489). Where those trips use the same segments of the routes, the edges will have the combined weights of both lines.
+
+format=geojson
+
+* points (id is the id field for the location)
+	* names are applied to all non-oceanic waypoint locations
+* linestring segments with weights, summed up where the trips overlap
+	* id is the id field in the adjacencies table
+
+format=geosankey (in the hopes of using this: https://github.com/geodesign/spatialsankey )
+
+* points and waypoints are returned as geojson
+* links between them are returned as a source,target,weight triple
+
+So the use-case might look like:
+
+* run a pivot table query to get a/b pairs of embarkation and disembarkation location id's, and the number of people embarked
+* run all the resulting non-zero triples (source_location_id,target_location_id,value) into this routes endpoint
+* render a geosankey network with weighted line segments
+* consider adding event bindings so a person could click on a port and run another query, showing number of people transported in voyages that left or arrived at that place
+
 ### Aggregate Numeric Variables (Voyages only)
 
 You can aggregate on numerical variable. This will only return aggregations on valid numeric fields.
@@ -515,3 +550,26 @@ The flat files are stored in static/custom_caching/...
 
 run with ```python3.9 manage.py rebuild_indices```
 
+#### C. rebuild_geo_network
+
+This rebuilds the voyage route networks (a little aggressively):
+
+First, it deletes all entries
+
+* in the adjacencies table
+* in the locations table when those locations are coded as "oceanic waypoints"
+
+Then, it
+
+* takes the legacy routeNodes.js files from intra-american and trans-atlantic
+* creates the oceanic network
+	* nodes (in the locations table) for each of the oceanic waypoints in those networks, and codes them as dataset=0 (for translatlantic) or dataset=1 (for intraamerican)
+	* edges (in the adjacencies table) for each of the links between these oceanic waypoints as defined in the js file
+* creates more edges
+	* walks through every entity in the geo network that has a lat/long pair
+	* finds the closest oceanic waypoint node (inaccurate -- using euclidean distance)
+	* makes a connection to it
+	
+If you don't like the connections it's making ... draw a better map !!!!
+
+Run it with ```python3.9 manage.py rebuild_geo_network```

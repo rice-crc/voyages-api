@@ -136,7 +136,7 @@ class getRoutes(generics.GenericAPIView):
 			st=time.time()
 
 			params=dict(request.POST)
-		
+	
 			##user requests a/b pairs of port, region, or broad_region --- AND THESE MUST BE WEIGHTED
 			####SO THE FORMAT IS [SOURCE_ID,TARGET_ID,WEIGHT] [INT,INT,INT]
 			##and specifies whether we'll be using the intra-american or trans-atlantic dataset
@@ -151,7 +151,7 @@ class getRoutes(generics.GenericAPIView):
 			####"geojson", which returns just a big featurecollection or
 			####"geosankey", which returns a featurecollection of points only, alongside an edges dump as "links.csv" -- following the specifications here: https://github.com/geodesign/spatialsankey
 			output_format=params['output_format'][0]
-		
+	
 			##we fetch all of the adjacencies in specified dataset (trans-atlantic or intra-american)
 			##and prefetch all the places referenced by those adjacencies
 			adjacencies=Adjacency.objects.all()
@@ -159,14 +159,14 @@ class getRoutes(generics.GenericAPIView):
 			for i in ['source','target']:
 				adjacencies=adjacencies.prefetch_related(i)
 			locations=Location.objects.all()		
-		
+	
 			##we get all the voyage endpoints (port, region, broad_region)
 			##and let's also make sure that "places" with no long or lat are not in our results
 			qobjstrs=["Q(%s='%s')" %('location_type__name',endpoint_type) for endpoint_type in ["Port","Region","Broad Region"]]
 			qobjstrs.append('Q(latitude__isnull=True)')
 			qobjstrs.append('Q(longitude__isnull=True)')
 			voyage_endpoints=locations.filter(eval('|'.join(qobjstrs)))
-		
+	
 			##we then feed those into a networkx graph:
 			## nodes (waypoints and endpoints)
 			## edges (adjacencies)
@@ -177,17 +177,17 @@ class getRoutes(generics.GenericAPIView):
 				sv_id=a.source.id
 				tv_id=a.target.id
 				G.add_edge(sv_id,tv_id,edge_id=a.id)
-		
+	
 			## we then get all the pk ids of all the adjacencies
 			## and feed these into the networkx graph to find the shortest path between them (live)
 			#### we should almost certainly pre-generate these -- I started that in rebuild_geo_routes.py, but now I'm just running it live b/c I don't think I was doing it efficiently enough
 			#### and weight the edges in the future so the "shortest path" is the GEOGRAPHICALLY shortest path, not the least-hops shortest path)
 			routes_featurecollection={"type":"FeatureCollection","features":[]}
 			edge_weights={}
-		
+	
 			for s_t in abpairs:
 				s_id,t_id,w=[int(i) for i in s_t.split(",")]
-			
+		
 				for p_id in [s_id,t_id]:
 					p=locations.filter(**{'id':p_id})[0]
 					p_lat=p.latitude
@@ -195,12 +195,12 @@ class getRoutes(generics.GenericAPIView):
 					p_name=p.name
 					geojsonfeature={"type": "Feature", "id":p_id, "geometry":{"type":"Point","coordinates": [float(p_lon), float(p_lat)]},"properties":{"name":p_name}}
 					routes_featurecollection['features'].append(geojsonfeature)
-			
+		
 				try:
 					sp=nx.shortest_path(G,s_id,t_id)
 				except:
 					sp=[]
-			
+		
 				if len(sp)>0:
 					for idx in range(1,len(sp)):
 						a=sp[idx]
@@ -210,7 +210,7 @@ class getRoutes(generics.GenericAPIView):
 							edge_weights[e_id]+=w
 						else:
 							edge_weights[e_id]=w
-			
+		
 			if output_format=="geojson":
 				for e in edge_weights:
 					w=edge_weights[e]
@@ -244,11 +244,11 @@ class getRoutes(generics.GenericAPIView):
 						p_id,p_longlat=p
 						geojsonfeature={"type": "Feature", "id":p_id, "geometry": {"type":"Point","coordinates": p_longlat}}
 						routes_featurecollection['features'].append(geojsonfeature)
-					edges.append(sv_id,tv_id,w)
+					edges.append([sv_id,tv_id,w])
 				output={'links':edges,'nodes':routes_featurecollection}
-		
+	
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
-		
+	
 			return JsonResponse(output,safe=False)
 		except:
 			return JsonResponse({'status':'false','message':'routes request failed'}, status=500)

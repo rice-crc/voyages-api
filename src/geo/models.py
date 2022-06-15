@@ -6,9 +6,42 @@ from django.db import models
 from django.db.models import Prefetch
 #from django.utils.translation import gettext_lazy as _
 
+class Route(models.Model):
+	"""
+	Route json store
+	"""
+	source=models.ForeignKey(
+		'Location',
+		verbose_name="Alice",
+		null=False,
+		on_delete=models.CASCADE,
+		related_name='sourceofroute'
+	)
+	target=models.ForeignKey(
+		'Location',
+		verbose_name="Bob",
+		null=False,
+		on_delete=models.CASCADE,
+		related_name='targetofroute'
+	)
+	dataset= models.IntegerField(
+		"Dataset",
+		null=True
+	)
+	
+	shortest_route=models.JSONField(
+		"Endpoint to endpoint route",
+		null=True
+	)
+
+	
+	class Meta:
+		verbose_name = "Route"
+		verbose_name_plural = "Routes"
+
 class Adjacency(models.Model):
 	"""
-	Simplified routes -- simple a/b connections
+	Simplified network linkages -- simple a/b connections
 	"""
 	source=models.ForeignKey(
 		'Location',
@@ -25,10 +58,10 @@ class Adjacency(models.Model):
 		related_name='targetof'
 	)
 	dataset= models.IntegerField(
-		"trans-atlantic (0), intra-american (1), intra-african (2)",
+		"Dataset",
 		null=True
 	)
-
+	
 	class Meta:
 		verbose_name = "Location Adjacency"
 		verbose_name_plural = "Location Adjacencies"

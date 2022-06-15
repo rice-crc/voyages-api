@@ -71,8 +71,11 @@ class VoyageList(generics.GenericAPIView):
 					outputs.append(d)
 			else:
 				outputs=serialized
+			
+			resp=JsonResponse(outputs,safe=False,headers=headers)
+			resp.headers['total_results_count']=headers['total_results_count']
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(outputs,safe=False,headers=headers)
+			return resp
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)

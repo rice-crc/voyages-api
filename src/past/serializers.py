@@ -107,6 +107,44 @@ class EnslavedSerializer(serializers.ModelSerializer):
 			'notes',
 			'sources',
 			]
+
+
+
+class EnslaverSerializer(serializers.ModelSerializer):
+	principal_location=PlaceSerializer(many=False)
+	class Meta:
+		model=EnslaverIdentity
+		fields='__all__'
 		
+'''fields=[
+	'principal_alias',
+	'birth_year ',
+	'birth_month ',
+	'birth_day ',
+	'birth_place',
+	'death_year ',
+	'death_month ',
+	'death_day ',
+	'death_place',
+	'father_name ',
+	'father_occupation ',
+	'mother_name',
+	'first_spouse_name ',
+	'first_marriage_date ',
+	'second_spouse_name ',
+	'second_marriage_date',
+	'probate_date ',
+	'will_value_pounds ',
+	'will_value_dollars ',
+	'will_court ',
+	'text_id',
+	'first_active_year',
+	'last_active_year',
+	'number_enslaved',
+	'principal_location'
+	]'''
 		
-		
+
+
+
+

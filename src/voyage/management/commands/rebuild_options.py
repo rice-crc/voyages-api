@@ -3,8 +3,8 @@ import json
 from django.core.management.base import BaseCommand, CommandError
 from voyage.serializers import VoyageSerializer,PlaceSerializer
 from voyage.models import Voyage,Place
-from past.serializers import EnslavedSerializer
-from past.models import Enslaved
+from past.serializers import EnslavedSerializer,EnslaverSerializer
+from past.models import *
 from assessment.serializers import EstimateSerializer
 from assessment.models import Estimate
 from geo.serializers import *
@@ -28,9 +28,14 @@ class Command(BaseCommand):
 				'objectclass':Place
 			},
 			{
-				'output_filename':'past/past_options.json',
+				'output_filename':'past/enslaved_options.json',
 				'serializer':EnslavedSerializer,
 				'objectclass':Enslaved
+			},
+			{
+				'output_filename':'past/enslaver_options.json',
+				'serializer':EnslaverSerializer,
+				'objectclass':EnslaverIdentity
 			},
 			{
 				'output_filename':'assessment/assessment_options.json',

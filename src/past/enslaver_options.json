@@ -1,0 +1,347 @@
+{
+  "id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "ID"
+  },
+  "principal_location": {
+    "type": "table",
+    "label": "principal location",
+    "flatlabel": "principal location"
+  },
+  "principal_location__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "principal location : ID"
+  },
+  "principal_location__geo_location": {
+    "type": "table",
+    "label": "Location",
+    "flatlabel": "principal location : Location"
+  },
+  "principal_location__geo_location__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "principal location : Location : ID"
+  },
+  "principal_location__geo_location__child_of": {
+    "type": "table",
+    "label": "Child of",
+    "flatlabel": "principal location : Location : Child of"
+  },
+  "principal_location__geo_location__child_of__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "principal location : Location : Child of : ID"
+  },
+  "principal_location__geo_location__child_of__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Location name",
+    "flatlabel": "principal location : Location : Child of : Location name"
+  },
+  "principal_location__geo_location__child_of__longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of Centroid",
+    "flatlabel": "principal location : Location : Child of : Longitude of Centroid"
+  },
+  "principal_location__geo_location__child_of__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of Centroid",
+    "flatlabel": "principal location : Location : Child of : Latitude of Centroid"
+  },
+  "principal_location__geo_location__child_of__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "SPSS code",
+    "flatlabel": "principal location : Location : Child of : SPSS code"
+  },
+  "principal_location__geo_location__child_of__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "principal location : Location : Child of : Trans-atlantic (0), intra-american (1), intra-african (2)"
+  },
+  "principal_location__geo_location__child_of__show_on_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on map",
+    "flatlabel": "principal location : Location : Child of : Show on map"
+  },
+  "principal_location__geo_location__child_of__show_on_main_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on main map",
+    "flatlabel": "principal location : Location : Child of : Show on main map"
+  },
+  "principal_location__geo_location__child_of__show_on_voyage_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on voyage map",
+    "flatlabel": "principal location : Location : Child of : Show on voyage map"
+  },
+  "principal_location__geo_location__child_of__child_of": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Child of",
+    "flatlabel": "principal location : Location : Child of : Child of"
+  },
+  "principal_location__geo_location__child_of__location_type": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location Type",
+    "flatlabel": "principal location : Location : Child of : Location Type"
+  },
+  "principal_location__geo_location__child_of__spatial_extent": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Polygon",
+    "flatlabel": "principal location : Location : Child of : Polygon"
+  },
+  "principal_location__geo_location__parent_of": {
+    "type": "table",
+    "label": "Geographic Location",
+    "flatlabel": "principal location : Location : Geographic Location"
+  },
+  "principal_location__geo_location__parent_of__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "principal location : Location : Geographic Location : ID"
+  },
+  "principal_location__geo_location__parent_of__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Location name",
+    "flatlabel": "principal location : Location : Geographic Location : Location name"
+  },
+  "principal_location__geo_location__parent_of__longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of Centroid",
+    "flatlabel": "principal location : Location : Geographic Location : Longitude of Centroid"
+  },
+  "principal_location__geo_location__parent_of__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of Centroid",
+    "flatlabel": "principal location : Location : Geographic Location : Latitude of Centroid"
+  },
+  "principal_location__geo_location__parent_of__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "SPSS code",
+    "flatlabel": "principal location : Location : Geographic Location : SPSS code"
+  },
+  "principal_location__geo_location__parent_of__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "principal location : Location : Geographic Location : Trans-atlantic (0), intra-american (1), intra-african (2)"
+  },
+  "principal_location__geo_location__parent_of__show_on_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on map",
+    "flatlabel": "principal location : Location : Geographic Location : Show on map"
+  },
+  "principal_location__geo_location__parent_of__show_on_main_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on main map",
+    "flatlabel": "principal location : Location : Geographic Location : Show on main map"
+  },
+  "principal_location__geo_location__parent_of__show_on_voyage_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on voyage map",
+    "flatlabel": "principal location : Location : Geographic Location : Show on voyage map"
+  },
+  "principal_location__geo_location__parent_of__child_of": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Child of",
+    "flatlabel": "principal location : Location : Geographic Location : Child of"
+  },
+  "principal_location__geo_location__parent_of__location_type": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location Type",
+    "flatlabel": "principal location : Location : Geographic Location : Location Type"
+  },
+  "principal_location__geo_location__parent_of__spatial_extent": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Polygon",
+    "flatlabel": "principal location : Location : Geographic Location : Polygon"
+  },
+  "principal_location__geo_location__spatial_extent": {
+    "type": "table",
+    "label": "Polygon",
+    "flatlabel": "principal location : Location : Polygon"
+  },
+  "principal_location__geo_location__spatial_extent__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "principal location : Location : Polygon : ID"
+  },
+  "principal_location__geo_location__spatial_extent__shape": {
+    "type": "<class 'rest_framework.fields.JSONField'>",
+    "label": "Geojson Polygon",
+    "flatlabel": "principal location : Location : Polygon : Geojson Polygon"
+  },
+  "principal_location__geo_location__location_type": {
+    "type": "table",
+    "label": "Location Type",
+    "flatlabel": "principal location : Location : Location Type"
+  },
+  "principal_location__geo_location__location_type__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "principal location : Location : Location Type : ID"
+  },
+  "principal_location__geo_location__location_type__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Geographic Location Type",
+    "flatlabel": "principal location : Location : Location Type : Geographic Location Type"
+  },
+  "principal_location__geo_location__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Location name",
+    "flatlabel": "principal location : Location : Location name"
+  },
+  "principal_location__geo_location__longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of Centroid",
+    "flatlabel": "principal location : Location : Longitude of Centroid"
+  },
+  "principal_location__geo_location__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of Centroid",
+    "flatlabel": "principal location : Location : Latitude of Centroid"
+  },
+  "principal_location__geo_location__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "SPSS code",
+    "flatlabel": "principal location : Location : SPSS code"
+  },
+  "principal_location__geo_location__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "principal location : Location : Trans-atlantic (0), intra-american (1), intra-african (2)"
+  },
+  "principal_location__geo_location__show_on_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on map",
+    "flatlabel": "principal location : Location : Show on map"
+  },
+  "principal_location__geo_location__show_on_main_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on main map",
+    "flatlabel": "principal location : Location : Show on main map"
+  },
+  "principal_location__geo_location__show_on_voyage_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on voyage map",
+    "flatlabel": "principal location : Location : Show on voyage map"
+  },
+  "principal_alias": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Principal alias",
+    "flatlabel": "Principal alias"
+  },
+  "birth_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth year",
+    "flatlabel": "Birth year"
+  },
+  "birth_month": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth month",
+    "flatlabel": "Birth month"
+  },
+  "birth_day": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth day",
+    "flatlabel": "Birth day"
+  },
+  "birth_place": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Birth place",
+    "flatlabel": "Birth place"
+  },
+  "death_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death year",
+    "flatlabel": "Death year"
+  },
+  "death_month": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death month",
+    "flatlabel": "Death month"
+  },
+  "death_day": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death day",
+    "flatlabel": "Death day"
+  },
+  "death_place": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Death place",
+    "flatlabel": "Death place"
+  },
+  "father_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Father name",
+    "flatlabel": "Father name"
+  },
+  "father_occupation": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Father occupation",
+    "flatlabel": "Father occupation"
+  },
+  "mother_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Mother name",
+    "flatlabel": "Mother name"
+  },
+  "first_spouse_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "First spouse name",
+    "flatlabel": "First spouse name"
+  },
+  "first_marriage_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "First marriage date",
+    "flatlabel": "First marriage date"
+  },
+  "second_spouse_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Second spouse name",
+    "flatlabel": "Second spouse name"
+  },
+  "second_marriage_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Second marriage date",
+    "flatlabel": "Second marriage date"
+  },
+  "probate_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Probate date",
+    "flatlabel": "Probate date"
+  },
+  "will_value_pounds": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will value pounds",
+    "flatlabel": "Will value pounds"
+  },
+  "will_value_dollars": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will value dollars",
+    "flatlabel": "Will value dollars"
+  },
+  "will_court": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will court",
+    "flatlabel": "Will court"
+  },
+  "text_id": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Text id",
+    "flatlabel": "Text id"
+  },
+  "first_active_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "First active year",
+    "flatlabel": "First active year"
+  },
+  "last_active_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Last active year",
+    "flatlabel": "Last active year"
+  },
+  "number_enslaved": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Number enslaved",
+    "flatlabel": "Number enslaved"
+  }
+}

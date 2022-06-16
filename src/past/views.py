@@ -55,7 +55,7 @@ class EnslavedList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	serializer_class=EnslavedSerializer
 	def options(self,request):
-		j=options_handler('past/past_options.json',request)
+		j=options_handler('past/enslaved_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		times=[]
@@ -212,7 +212,7 @@ class EnslaverList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	serializer_class=EnslaverSerializer
 	def options(self,request):
-		j=options_handler('past/past_options.json',request)
+		j=options_handler('past/enslaver_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		times=[]

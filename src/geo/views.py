@@ -30,7 +30,7 @@ class LocationList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	serializer_class=LocationSerializer
 	def options(self,request):
-		j=options_handler('past/location_options.json',request)
+		j=options_handler('geo/location_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		try:

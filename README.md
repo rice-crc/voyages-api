@@ -66,8 +66,8 @@ Note the following project resources:
 
 There are currently 5 major endpoints, which allow you to query on People, Voyages, Places, and Estimates
 
-1. Enslaved: POST http://127.0.0.1:8000/past/enslaved
-1. Enslavers: POST http://127.0.0.1:8000/past/enslavers
+1. Enslaved: POST http://127.0.0.1:8000/past/enslaved/
+1. Enslavers: POST http://127.0.0.1:8000/past/enslavers/
 1. Voyages: POST http://127.0.0.1:8000/voyage/
 1. Places: POST http://127.0.0.1:8000/geo/
 1. Estimates:  POST http://127.0.0.1:8000/assessment/

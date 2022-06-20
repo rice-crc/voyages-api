@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.views.generic.list import ListView
+import networkx as nx
 import urllib
 import json
 import requests
@@ -368,3 +369,152 @@ class DuplicateVoyage(generics.GenericAPIView):
 		new_voyage=existing_voyages.filter(**kwargs)
 		output_dict=VoyageSerializer(duplicated_voyage,many=False).data
 		return JsonResponse(output_dict,safe=False)
+
+class VoyageAggRoutes(generics.GenericAPIView):
+	'''
+	Given
+	1. an aggregation function
+	2. a list of fields
+	2a. the first of which is the field you want to group by
+	2b. the following of which is/are the field(s) you want to get the summary stats on
+	returns
+	Dictionaries, organized by the numeric fields' names, with its' children being k/v pairs of
+	--> k = value of grouped var
+	--> v = aggregated value of numeric var for that grouped var val
+	'''
+	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		params=dict(request.POST)
+		groupby_fields=params.get('groupby_fields')
+		value_field_tuple=params.get('value_field_tuple')
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		ids=[i[0] for i in queryset.values_list('id')]
+		
+		u2=FLASK_BASE_URL+'crosstabs/'
+		d2=params
+		d2['ids']=ids
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		j=json.loads(r.text)
+		
+		abpairs={int(float(k)):{int(float(v)):j[k][v] for v in j[k]} for k in j}
+		
+		
+		pp = pprint.PrettyPrinter(indent=4)
+		print("--post req params--")
+		pp.pprint(abpairs)
+		
+		#THIS WILL BE FRAGILE.
+		#WE WILL ASSUME THAT THE GROUPBY FIELDS ARE GEO CODE VALUE FIELDS
+		
+		#abpairs=params['abwtriples']
+		dataset=int(params['dataset'][0])
+		##third argument: output_format -- can be either
+		####"geojson", which returns just a big featurecollection or
+		####"geosankey", which returns a featurecollection of points only, alongside an edges dump as "links.csv" -- following the specifications here: https://github.com/geodesign/spatialsankey
+		output_format=params['output_format'][0]
+
+		##we fetch all of the adjacencies in specified dataset (trans-atlantic or intra-american)
+		##and prefetch all the places referenced by those adjacencies
+		adjacencies=Adjacency.objects.all()
+		adjacencies=adjacencies.filter(**{'dataset':dataset})
+		for i in ['source','target']:
+			adjacencies=adjacencies.prefetch_related(i)
+		locations=Location.objects.all()		
+
+		##we get all the voyage endpoints (port, region, broad_region)
+		##and let's also make sure that "places" with no long or lat are not in our results
+		qobjstrs=["Q(%s='%s')" %('location_type__name',endpoint_type) for endpoint_type in ["Port","Region","Broad Region"]]
+		qobjstrs.append('Q(latitude__isnull=True)')
+		qobjstrs.append('Q(longitude__isnull=True)')
+		voyage_endpoints=locations.filter(eval('|'.join(qobjstrs)))
+
+		##we then feed those into a networkx graph:
+		## nodes (waypoints and endpoints)
+		## edges (adjacencies)
+		G=nx.Graph()
+		for l in locations:
+			G.add_node(l.id)
+		for a in adjacencies:
+			sv_id=a.source.id
+			tv_id=a.target.id
+			G.add_edge(sv_id,tv_id,edge_id=a.id)
+
+		## we then get all the pk ids of all the adjacencies
+		## and feed these into the networkx graph to find the shortest path between them (live)
+		#### we should almost certainly pre-generate these -- I started that in rebuild_geo_routes.py, but now I'm just running it live b/c I don't think I was doing it efficiently enough
+		#### and weight the edges in the future so the "shortest path" is the GEOGRAPHICALLY shortest path, not the least-hops shortest path)
+		routes_featurecollection={"type":"FeatureCollection","features":[]}
+		edge_weights={}
+
+		for s_id in abpairs:
+			for t_id in abpairs[s_id]:
+				w=abpairs[s_id][t_id]
+	
+				for p_id in [s_id,t_id]:
+					p=locations.filter(**{'id':p_id})[0]
+					p_lat=p.latitude
+					p_lon=p.longitude
+					p_name=p.name
+					geojsonfeature={"type": "Feature", "id":p_id, "geometry":{"type":"Point","coordinates": [float(p_lon), float(p_lat)]},"properties":{"name":p_name}}
+					routes_featurecollection['features'].append(geojsonfeature)
+	
+				try:
+					sp=nx.shortest_path(G,s_id,t_id)
+				except:
+					sp=[]
+	
+				if len(sp)>0:
+					for idx in range(1,len(sp)):
+						a=sp[idx]
+						b=sp[idx-1]
+						e_id=G[a][b]['edge_id']
+						if e_id in edge_weights:
+							edge_weights[e_id]+=w
+						else:
+							edge_weights[e_id]=w
+	
+			if output_format=="geojson":
+				for e in edge_weights:
+					w=edge_weights[e]
+					a=adjacencies.filter(**{'id':e})[0]
+					sv=a.source
+					tv=a.target
+					sv_longlat=(float(sv.longitude),float(sv.latitude))
+					tv_longlat=(float(tv.longitude),float(tv.latitude))
+					routes_featurecollection['features'].append({
+						"type":"Feature",
+						"id":e,
+						"geometry":{
+							"type":"LineString",
+							"coordinates":[sv_longlat,tv_longlat]
+						},
+						"properties":{"weight":w}
+					})
+				output=routes_featurecollection
+			elif output_format=="geosankey":
+				edges=[]
+				for e in edge_weights:
+					w=edge_weights[e]
+					a=adjacencies.filter(**{'id':e})[0]
+					sv=a.source
+					tv=a.target
+					sv_id=sv.id
+					tv_id=tv.id
+					sv_longlat=(float(sv.longitude),float(sv.latitude))
+					tv_longlat=(float(tv.longitude),float(tv.latitude))
+					for p in [[sv_id,sv_longlat],[tv_id,tv_longlat]]:
+						p_id,p_longlat=p
+						geojsonfeature={"type": "Feature", "id":p_id, "geometry": {"type":"Point","coordinates": p_longlat}}
+						routes_featurecollection['features'].append(geojsonfeature)
+					edges.append([sv_id,tv_id,w])
+				output={'links':edges,'nodes':routes_featurecollection}
+
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(output,safe=False)
+			#except:
+			#	return JsonResponse({'status':'false','message':'routes request failed'}, status=500)

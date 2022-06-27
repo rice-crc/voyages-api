@@ -473,6 +473,12 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			#output=routes_featurecollection
 
 			for s_id in abpairs:
+				print(time.time()-st)
+				if time.time()-st > 15:
+					print("STOP")
+					raise Exception("john is stopping this!")
+					
+					
 				for t_id in abpairs[s_id]:
 					w=abpairs[s_id][t_id]
 	
@@ -534,4 +540,4 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output,safe=False)
 		except:
-			return JsonResponse({},safe=False)
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)

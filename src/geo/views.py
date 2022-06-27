@@ -25,6 +25,9 @@ import networkx as nx
 
 location_options=options_handler('geo/location_options.json',hierarchical=False)
 
+
+
+
 class LocationList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -136,16 +139,6 @@ class getRoutes(generics.GenericAPIView):
 			st=time.time()
 
 			params=dict(request.POST)
-	
-			##user requests a/b pairs of port, region, or broad_region --- AND THESE MUST BE WEIGHTED
-			####SO THE FORMAT IS [SOURCE_ID,TARGET_ID,WEIGHT] [INT,INT,INT]
-			##and specifies whether we'll be using the intra-american or trans-atlantic dataset
-			##so this depends on us having
-			### 1. ports, regions, and broad regions as "endpoint" nodes, not assigned to a dataset
-			### 2. oceanic waypoints as "waypoint" nodes, each assigned to a dataset (transatlantic or intra-american)
-			### 3. oceanic waypoints connected together in one network of "adjacencies" per dataset (these are "highways")
-			### 4. all "endpoint" nodes connect to each network via an adjacency (these are "onramps")
-			abpairs=params['abwtriples']
 			dataset=int(params['dataset'][0])
 			##third argument: output_format -- can be either
 			####"geojson", which returns just a big featurecollection or
@@ -162,6 +155,7 @@ class getRoutes(generics.GenericAPIView):
 	
 			##we get all the voyage endpoints (port, region, broad_region)
 			##and let's also make sure that "places" with no long or lat are not in our results
+			##CLEAN UP YOUR DATA, PEOPLE
 			qobjstrs=["Q(%s='%s')" %('location_type__name',endpoint_type) for endpoint_type in ["Port","Region","Broad Region"]]
 			qobjstrs.append('Q(latitude__isnull=True)')
 			qobjstrs.append('Q(longitude__isnull=True)')
@@ -193,7 +187,15 @@ class getRoutes(generics.GenericAPIView):
 					p_lat=p.latitude
 					p_lon=p.longitude
 					p_name=p.name
-					geojsonfeature={"type": "Feature", "id":p_id, "geometry":{"type":"Point","coordinates": [float(p_lon), float(p_lat)]},"properties":{"name":p_name}}
+					geojsonfeature={
+						"type": "Feature",
+						"id":p_id,
+						"geometry":{
+							"type":"Point",
+							"coordinates": [float(p_lon), float(p_lat)]
+						},
+						"properties":{"name":p_name}
+					}
 					routes_featurecollection['features'].append(geojsonfeature)
 		
 				try:
@@ -242,7 +244,14 @@ class getRoutes(generics.GenericAPIView):
 					tv_longlat=(float(tv.longitude),float(tv.latitude))
 					for p in [[sv_id,sv_longlat],[tv_id,tv_longlat]]:
 						p_id,p_longlat=p
-						geojsonfeature={"type": "Feature", "id":p_id, "geometry": {"type":"Point","coordinates": p_longlat}}
+						geojsonfeature={
+							"type":"Feature",
+							"id":p_id,
+							"geometry":{
+								"type":"Point",
+								"coordinates":p_longlat
+							}
+						}
 						routes_featurecollection['features'].append(geojsonfeature)
 					edges.append([sv_id,tv_id,w])
 				output={'links':edges,'nodes':routes_featurecollection}

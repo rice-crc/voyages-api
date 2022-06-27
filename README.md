@@ -296,19 +296,52 @@ Looks like:
 
 ### Routes
 
-Get routes for voyages or aggregations of voyages, by providing a/b pairs of location ids
+Get routes for aggregations of voyages.
 
-This is pretty bare-bones and fragile right now. You have to give it the magnitude for each a/b pair. So requests look like:
+It's a little hairy right now. It piggybacks on the crosstabs endpoint, which means that you have to specify:
+
+* source/target field pair, which must be geo_location__id fields
+	* the first is the source (start) for the route, like the broad region of embarkation
+	* the second is the target (end) for the route, like the region of disembarkation
+* magnitude field and value function, such as number of people embarked and sum
+* the name of the cache where your fields live (should be in voyage_maps)
+
+So a peek under the hood is necessary here, for now. Having run that very specific crosstabs request, it receives back a dictionary in the format ```{geolocation_source_id: {geolocation_target_id: magnitude...}...}```. It then uses NetworkX to find the shortest path from each source to each target via the adjacencies and waypoints in the geo endpoint. In order for this to work properly, then, you ALSO need to specify:
+
+* dataset (trans-atlantic or intra-american)
+* some kind of filter, for now, if you're going to be getting a dense network
+* an output format. options are "geojson" or "geosankey"
+
+Necessary improvements to be built next:
+
+* stitching together multi-leg routes (a,b,c)
+* cached results: it can't handle all regions to all regions or all ports to all ports
+
+Example request:
 
 	POST http://127.0.0.1:8000/geo/Routes
-	
-	{
-		"abwtriples":["2452,2489,10","2407,2782,5"]
-		"dataset":[0]
-		"output_format":["geojson"]		
+
+	geojson_req_payload={
+		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": ["Barbados","Jamaica"],
+		'voyage_dates__imp_arrival_at_port_of_dis_yyyy':[1800,1810],
+		"groupby_fields": [
+			"voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
+			"voyage_itinerary__imp_broad_region_slave_dis__geo_location__id"
+		],
+		"value_field_tuple": [
+			"voyage_slaves_numbers__imp_total_num_slaves_disembarked",
+			"sum"
+		], 
+		"cachename": [
+			"voyage_maps"
+		],
+		"dataset":[0,0],
+		"output_format": [
+			"geojson"
+		]
 	}
 
-This would draw a weight 5 line from Tortola (2407) to Louisiana (2782); and a weight 10 line from West Central Africa and St. Helena (2452) to Tennessee (2489). Where those trips use the same segments of the routes, the edges will have the combined weights of both lines.
+NOTE: THIS IS CRASHING IF YOU ASK FOR TOO MUCH. SO I'M MAKING IT QUIT IF THE RUNNING TIME EXCEEDS 20 SECONDS.
 
 format=geojson
 
@@ -322,12 +355,7 @@ format=geosankey (in the hopes of using this: https://github.com/geodesign/spati
 * points and waypoints are returned as geojson
 * links between them are returned as a source,target,weight triple
 
-So the use-case might look like:
-
-* run a pivot table query to get a/b pairs of embarkation and disembarkation location id's, and the number of people embarked
-* run all the resulting non-zero triples (source_location_id,target_location_id,value) into this routes endpoint
-* render a geosankey network with weighted line segments
-* consider adding event bindings so a person could click on a port and run another query, showing number of people transported in voyages that left or arrived at that place
+An interesting use-case: this would lend itself nicely to visual representations of pivot tables, with barely any alteration to the POST request.
 
 ### Aggregate Numeric Variables (Voyages only)
 

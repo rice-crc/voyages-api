@@ -10,8 +10,6 @@ import re
 from math import sqrt
 import networkx as nx
 
-
-
 class Command(BaseCommand):
 	
 	help = '\
@@ -24,6 +22,8 @@ class Command(BaseCommand):
 	Which distinction is hard-coded in here with the datasest=0,1 filters\
 	'
 	def handle(self, *args, **options):
+		
+		datasets=[0,1]
 		
 		def make_geojson_from_adjacency_ids(fname,adj_keychain,adjacencies):
 
@@ -63,7 +63,7 @@ class Command(BaseCommand):
 		
 		G=nx.Graph()
 		
-		for dataset in [0,1]:
+		for dataset in datasets:
 			
 			for l in locations:
 				G.add_node(l.id)

@@ -1,3 +1,4 @@
+import requests
 import itertools
 from geo.models import *
 from voyage.models import *
@@ -22,81 +23,118 @@ class Command(BaseCommand):
 	Which distinction is hard-coded in here with the datasest=0,1 filters\
 	'
 	def handle(self, *args, **options):
+		st=time.time()
 		
+		print("deleting all existing routes...")
+		locations=Location.objects.all()
+		routes=Route.objects.all()
+		routes.delete()
+		#for route in routes:
+		#	print(route)
+		#	route.delete()
+		
+		print("rebuilding routes...")
+		
+		#start with a list of paired __geo_location__id variables
+		groupby_pairs=[
+			[
+				"voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id",
+				"voyage_itinerary__imp_principal_port_slave_dis__geo_location__id"
+			]
+		]
+		
+		#and of course we need to separate the datasets' for voyages and adjacencies
 		datasets=[0,1]
 		
-		def make_geojson_from_adjacency_ids(fname,adj_keychain,adjacencies):
+		#for each of those paired variables, we're going to need the unique tuple values for each voyage
+		##i don't THINK we need to do this for people, as their itineraries are based on voyages but i could be wrong...
+		
+		url='http://voyages-django:8000/voyage/dataframes'
+		from .app_secrets import headers
 
-			routes_featurecollection={"type":"FeatureCollection","features":[]}
-
-			for adj_id in adj_keychain:
-				a=adjacencies.filter(**{'id':adj_id})[0]
-				sv=a.source
-				tv=a.target
-				sv_longlat=(str(sv.longitude),str(sv.latitude))
-				tv_longlat=(str(tv.longitude),str(tv.latitude))
-		
-				routes_featurecollection['features'].append({
-					"type":"Feature",
-					"geometry":{
-						"type":"LineString",
-						"coordinates":[sv_longlat,tv_longlat]
-					},
-					"properties":{}
-				})
-	
-			print(fname)
-	
-			d=open(fname,'w')
-			d.write(json.dumps(routes_featurecollection))
-			d.close()
-		
-		adjacencies=Adjacency.objects.all()
-		for i in ['source','target','source__location_type']:
-			adjacencies=adjacencies.prefetch_related(i)
-		locations=Location.objects.all()
-		for i in ['location_type']:
-			locations=locations.select_related(i)
-		
-		qobjstrs=["Q(%s='%s')" %('location_type__name',endpoint_type) for endpoint_type in ["Port","Region","Broad Region"]]
-		voyage_endpoints=locations.filter(eval('|'.join(qobjstrs)))
-		
-		G=nx.Graph()
-		
 		for dataset in datasets:
-			
+			print("dataset",dataset)
+
+			#BUILD THE NETWORK TO WALK
+			print("building network for dataset",dataset)
+			adjacencies=Adjacency.objects.all()
+			adjacencies=adjacencies.filter(**{'dataset':dataset})
+			for i in ['source','target']:
+				adjacencies=adjacencies.prefetch_related(i)
+			locations=Location.objects.all()		
+
+			##we get all the voyage endpoints (port, region, broad_region)
+			##and let's also make sure that "places" with no long or lat are not in our results
+			qobjstrs=["Q(%s='%s')" %('location_type__name',endpoint_type) for endpoint_type in ["Port","Region","Broad Region"]]
+			qobjstrs.append('Q(latitude__isnull=True)')
+			qobjstrs.append('Q(longitude__isnull=True)')
+			voyage_endpoints=locations.filter(eval('|'.join(qobjstrs)))
+
+			##we then feed those into a networkx graph:
+			## nodes (waypoints and endpoints)
+			## edges (adjacencies)
+			G=nx.Graph()
 			for l in locations:
 				G.add_node(l.id)
-			for a in adjacencies.filter(**{'dataset':dataset}):
+			for a in adjacencies:
 				sv_id=a.source.id
 				tv_id=a.target.id
 				G.add_edge(sv_id,tv_id,edge_id=a.id)
-		
-			print(G)
-		
-			for st in itertools.combinations(voyage_endpoints,2):
-				s,t=st
-				print(s,t)
-				if s!=t:
-					s_id=s.id
-					t_id=t.id
+			
+			for groupby_pair in groupby_pairs:
+				print("vars",groupby_pair)
+			
+				#pull all the a/b value pairs
+				#on all these a/b variable pairs
+				alice,bob=groupby_pair
+				data={
+					'selected_fields':groupby_pair,
+					'dataset':[dataset,dataset]
+				}
+				r=requests.post(url=url,headers=headers,data=data)
+				columns=json.loads(r.text)
+				#this will return all the a/b value pairs, excluding the nulls
+				rows=[
+					sorted([
+						columns[alice][k],
+						columns[bob][k]
+					])
+					for k in range(len(columns[alice])) if
+					columns[alice][k] is not None and
+					columns[bob][k] is not None
+				]
+				
+				#now dedupe
+				
+				abpairs=[]
+				for row in rows:
+					if row not in abpairs:
+						abpairs.append(row)
+				
+				print("unique a/b pairs",len(abpairs))
+				
+				#now find shortest path in the network for each unique alice/bob pair
+				
+				#routes={}
+				
+				print("finding routes")
+				for abpair in abpairs:
+					s_id,t_id=abpair
 					try:
 						sp=nx.shortest_path(G,s_id,t_id)
-					except:
-						sp=[]
 					
-					if len(sp)>0:
-						
-						adjacency_ids=[]
-						
+						edge_ids=[]
 						for idx in range(1,len(sp)):
-							a=sp[idx]
-							b=sp[idx-1]
-							e_id=G[a][b]['edge_id']
-							#print(a,b,e_id)
-							adjacency_ids.append(e_id)
-						
-						route=Route(source=s,target=t,shortest_route=json.dumps(adjacency_ids),dataset=dataset)
-						route.save()
-						
-						#make_geojson_from_adjacency_ids('tmp/'+str(s)+'__'+str(t)+'.json',adjacency_ids,adjacencies)
+								a=sp[idx]
+								b=sp[idx-1]
+								e_id=G[a][b]['edge_id']
+								edge_ids.append(e_id)
+					except:
+						print('error w following nodes -- drawing a straight line',s_id,t_id)
+						edge_ids=[]
+					
+					source_location=locations.filter(**{'id':s_id})[0]
+					target_location=locations.filter(**{'id':t_id})[0]
+					
+					route=Route(source=source_location,target=target_location,dataset=dataset,shortest_route=json.dumps(edge_ids))
+					route.save()

@@ -474,7 +474,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 					geojson['features'].append(geojsonfeature)
 				output=geojson
 			elif output_format=="geosankey":
-				print("GEOSANKEY")
+				#print("GEOSANKEY")
 				output_edges=[]
 				for e_id in edges:
 					source_id,target_id=edges[e_id]['nodes']

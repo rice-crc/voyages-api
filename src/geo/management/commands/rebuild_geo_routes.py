@@ -66,7 +66,7 @@ class Command(BaseCommand):
 			for b in imp_dis:
 				groupby_pairs.append([a,b])
 		
-		pp.pprint(groupby_pairs)
+		#pp.pprint(groupby_pairs)
 		
 		#and of course we need to separate the datasets' for voyages and adjacencies
 		datasets=[0,1]
@@ -136,7 +136,7 @@ class Command(BaseCommand):
 					if row not in abpairs:
 						abpairs.append(row)
 				
-				print("unique a/b pairs",len(abpairs))
+				#print("unique a/b pairs",len(abpairs))
 				
 				#now find shortest path in the network for each unique alice/bob pair
 				
@@ -155,7 +155,7 @@ class Command(BaseCommand):
 								e_id=G[a][b]['edge_id']
 								edge_ids.append(e_id)
 					except:
-						print('error w following nodes -- drawing a straight line',s_id,t_id)
+						#print('error w following nodes -- drawing a straight line',s_id,t_id)
 						edge_ids=[]
 					
 					source_location=locations.filter(**{'id':s_id})[0]

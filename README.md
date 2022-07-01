@@ -294,36 +294,24 @@ Looks like:
 		"results_count": 8207
 	}
 
-### Routes
+### Routes (voyage/aggroutes)
 
 Get routes for aggregations of voyages.
 
-It's a little hairy right now. It piggybacks on the crosstabs endpoint, which means that you have to specify:
+It's fast now. Still have to calculate "best" paths better, by 1) calculating all Adjacency object lengths using haversine, 2) using those distances to weight my shortest paths requests in networkx. I want to test that rigorously before using it, so for now the routes can look a little jumpy in certain cases. I've tested a few hundred different possible requests and they're all succeeding now, but it's possible I've missed some cases. Error logging is not at all robust right now.
 
-* source/target field pair, which must be geo_location__id fields
-	* the first is the source (start) for the route, like the broad region of embarkation
-	* the second is the target (end) for the route, like the region of disembarkation
-* magnitude field and value function, such as number of people embarked and sum
-* the name of the cache where your fields live (should be in voyage_maps)
+Example Request:
 
-So a peek under the hood is necessary here, for now. Having run that very specific crosstabs request, it receives back a dictionary in the format ```{geolocation_source_id: {geolocation_target_id: magnitude...}...}```. It then uses NetworkX to find the shortest path from each source to each target via the adjacencies and waypoints in the geo endpoint. In order for this to work properly, then, you ALSO need to specify:
+	POST http://127.0.0.1:8000/voyage/aggroutes
 
-* dataset (trans-atlantic or intra-american)
-* some kind of filter, for now, if you're going to be getting a dense network
-* an output format. options are "geojson" or "geosankey"
-
-Necessary improvements to be built next:
-
-* stitching together multi-leg routes (a,b,c)
-* cached results: it can't handle all regions to all regions or all ports to all ports
-
-Example request:
-
-	POST http://127.0.0.1:8000/geo/Routes
-
-	geojson_req_payload={
-		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": ["Barbados","Jamaica"],
-		'voyage_dates__imp_arrival_at_port_of_dis_yyyy':[1800,1810],
+	{
+		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": [
+			"Bahia"
+		],
+		"voyage_dates__imp_arrival_at_port_of_dis_yyyy": [
+			1700,
+			1860
+		],
 		"groupby_fields": [
 			"voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
 			"voyage_itinerary__imp_broad_region_slave_dis__geo_location__id"
@@ -331,17 +319,82 @@ Example request:
 		"value_field_tuple": [
 			"voyage_slaves_numbers__imp_total_num_slaves_disembarked",
 			"sum"
-		], 
+		],
 		"cachename": [
 			"voyage_maps"
 		],
-		"dataset":[0,0],
+		"dataset": [
+			1,
+			1
+		],
 		"output_format": [
 			"geojson"
 		]
 	}
 
-NOTE: THIS IS CRASHING IF YOU ASK FOR TOO MUCH. SO I'M MAKING IT QUIT IF THE RUNNING TIME EXCEEDS 20 SECONDS.
+
+#### how does it work?
+
+And what are the specific requirements of a post request like the above?
+
+Piggybacks on the crosstabs endpoint, which means that you have to specify:
+
+* source/target field pair, which must be geo_location__id fields
+	* the first is the source (start) for the route, like the broad region of embarkation
+	* the second is the target (end) for the route, like the region of disembarkation
+* magnitude field and value function, such as number of people embarked and sum
+* the name of the cache where your fields live (should be in voyage_maps)
+
+Currently (July 1), we're accepting requests for the below a/b itinerary variable pairings -- that is, the "groupby_fields" parameter -- which covers all imputed begin/purchase and purchase/disembarkation pairs:
+
+	[   
+		[   'voyage_itinerary__imp_port_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_port_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_port_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_region_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_region_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_region_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id',
+			'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id'],
+		[   'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id'],
+		[   'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id'],
+		[   'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_broad_region_slave_dis__geo_location__id'],
+		[   'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id'],
+		[   'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id'],
+		[   'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_broad_region_slave_dis__geo_location__id'],
+		[   'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id'],
+		[   'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id'],
+		[   'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id',
+			'voyage_itinerary__imp_broad_region_slave_dis__geo_location__id']
+	]
+
+So a peek under the hood is necessary here, for now.
+
+The custom django management command rebuild_geo_networks has already used NetworkX to find all the "best" a/b routes on the above variable pairings via the adjacencies and waypoints in the geo endpoint, and stored them as "Route" objects. That takes about 5 minutes to run.
+
+The results of the above, highly-specific crosstabs request will be a dictionary in the format of ```{geolocation_source_id: {geolocation_target_id: magnitude...}...}```. With a couple extra parameters, then, the routes can simply be looked up and formatted as either geojson or geosankey outputs:
+
+* dataset (trans-atlantic or intra-american)
+* some kind of filter, for now, if you're going to be getting a dense network
+* an output format. options are "geojson" or "geosankey"
 
 format=geojson
 
@@ -602,3 +655,28 @@ Then, it
 If you don't like the connections it's making ... draw a better map !!!!
 
 Run it with ```python3.9 manage.py rebuild_geo_network```
+
+#### C. rebuild_geo_routes (NEW!)
+
+This must be run for the voyage/aggroutes endpoint to work
+
+Uses NetworkX to find all the "best" a/b routes on the above variable pairings via the adjacencies and waypoints in the geo endpoint, and stored them as "Route" objects. That takes about 5 minutes to run when finding approximately 17,000 valid routes between the following a/b and b/c pairs which I've for the time being hard-coded into the management command:
+
+	a--> imp_begin=[
+		"voyage_itinerary__imp_port_voyage_begin__geo_location__id",
+		"voyage_itinerary__imp_region_voyage_begin__geo_location__id",
+		"voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id"
+	]
+
+	b--> imp_purchase=[
+		"voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id",
+		"voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
+		"voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id"
+	]
+
+	c--> imp_dis=[
+		"voyage_itinerary__imp_principal_port_slave_dis__geo_location__id",
+		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id",
+		"voyage_itinerary__imp_broad_region_slave_dis__geo_location__id"
+	]
+

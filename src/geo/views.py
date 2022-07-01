@@ -127,11 +127,3 @@ class getGeoJsonNetwork(generics.GenericAPIView):
 			return JsonResponse(routes_featurecollection,safe=False)
 		except:
 			return JsonResponse({'status':'false','message':'geo request failed'}, status=500)
-
-class getRoutes(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	serializer_class=LocationSerializer	
-	def post(self,request):
-	
-		return JsonResponse({},safe=False)

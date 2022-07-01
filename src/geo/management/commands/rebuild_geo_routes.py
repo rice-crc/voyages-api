@@ -9,6 +9,7 @@ import time
 import os
 import re
 from math import sqrt
+import pprint
 import networkx as nx
 
 class Command(BaseCommand):
@@ -24,7 +25,7 @@ class Command(BaseCommand):
 	'
 	def handle(self, *args, **options):
 		st=time.time()
-		
+		pp = pprint.PrettyPrinter(indent=4)
 		print("deleting all existing routes...")
 		locations=Location.objects.all()
 		routes=Route.objects.all()
@@ -36,12 +37,36 @@ class Command(BaseCommand):
 		print("rebuilding routes...")
 		
 		#start with a list of paired __geo_location__id variables
-		groupby_pairs=[
-			[
-				"voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id",
-				"voyage_itinerary__imp_principal_port_slave_dis__geo_location__id"
-			]
+		#hard-coding the valid pairings below, for now.
+		imp_begin=[
+			"voyage_itinerary__imp_port_voyage_begin__geo_location__id",
+			"voyage_itinerary__imp_region_voyage_begin__geo_location__id",
+			"voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id"
 		]
+
+		imp_purchase=[
+			"voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id",
+			"voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
+			"voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id"
+		]
+
+		imp_dis=[
+			"voyage_itinerary__imp_principal_port_slave_dis__geo_location__id",
+			"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id",
+			"voyage_itinerary__imp_broad_region_slave_dis__geo_location__id"
+		]
+		
+		groupby_pairs=[]
+		
+		for a in imp_begin:
+			for b in imp_purchase:
+				groupby_pairs.append([a,b])
+		
+		for a in imp_purchase:
+			for b in imp_dis:
+				groupby_pairs.append([a,b])
+		
+		pp.pprint(groupby_pairs)
 		
 		#and of course we need to separate the datasets' for voyages and adjacencies
 		datasets=[0,1]
@@ -138,3 +163,4 @@ class Command(BaseCommand):
 					
 					route=Route(source=source_location,target=target_location,dataset=dataset,shortest_route=json.dumps(edge_ids))
 					route.save()
+		print("finished in %d minutes" %int((time.time()-st)/60))

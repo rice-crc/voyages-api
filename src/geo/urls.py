@@ -4,6 +4,5 @@ from . import views
 
 urlpatterns = [
 	path('', views.LocationList.as_view()),
-    path('GeoJsonNetwork',views.getGeoJsonNetwork.as_view()),
-	path('Routes',views.getRoutes.as_view())
+    path('GeoJsonNetwork',views.getGeoJsonNetwork.as_view())
     ]

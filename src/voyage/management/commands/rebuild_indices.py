@@ -148,6 +148,7 @@ class Command(BaseCommand):
 					'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id',
 					'voyage_itinerary__imp_broad_region_slave_dis__geo_location__id',
 					'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id',
+					"voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id",
 					'voyage_id',
 					'voyage_itinerary__imp_principal_port_slave_dis__id',
 					'voyage_itinerary__imp_principal_port_slave_dis__geo_location__parent_of__id',

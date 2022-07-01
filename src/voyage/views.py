@@ -7,11 +7,13 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.views.generic.list import ListView
+import networkx as nx
 import urllib
 import json
 import requests
 import time
 from .models import *
+from geo.models import *
 import pprint
 from tools.nest import *
 from tools.reqs import *
@@ -368,3 +370,118 @@ class DuplicateVoyage(generics.GenericAPIView):
 		new_voyage=existing_voyages.filter(**kwargs)
 		output_dict=VoyageSerializer(duplicated_voyage,many=False).data
 		return JsonResponse(output_dict,safe=False)
+
+class VoyageAggRoutes(generics.GenericAPIView):
+	'''
+	Given
+	1. an aggregation function
+	2. a list of fields
+	2a. the first of which is the field you want to group by
+	2b. the following of which is/are the field(s) you want to get the summary stats on
+	returns
+	Dictionaries, organized by the numeric fields' names, with its' children being k/v pairs of
+	--> k = value of grouped var
+	--> v = aggregated value of numeric var for that grouped var val
+	'''
+	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		try:
+			st=time.time()
+			print("+++++++\nusername:",request.auth.user)
+			params=dict(request.POST)
+			groupby_fields=params.get('groupby_fields')
+			value_field_tuple=params.get('value_field_tuple')
+			queryset=Voyage.objects.all()
+			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+			ids=[i[0] for i in queryset.values_list('id')]
+
+			u2=FLASK_BASE_URL+'crosstabs/'
+			d2=params
+			d2['ids']=ids
+			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+			j=json.loads(r.text)
+
+			abpairs={int(float(k)):{int(float(v)):j[k][v] for v in j[k]} for k in j}
+			dataset=int(params['dataset'][0])
+			##third argument: output_format -- can be either
+			####"geojson", which returns just a big featurecollection or
+			####"geosankey", which returns a featurecollection of points only, alongside an edges dump as "links.csv" -- following the specifications here: https://github.com/geodesign/spatialsankey
+			output_format=params['output_format'][0]
+			routes=Route.objects.all()
+			routes.prefetch_related('source')
+			routes.prefetch_related('target')
+			adjacencies=Adjacency.objects.all()
+			adjacencies.prefetch_related('source')
+			adjacencies.prefetch_related('target')
+	
+			adjacency_weights={}
+	
+			for s_id in abpairs:
+				for t_id in abpairs[s_id]:
+					source_id=min(s_id,t_id)
+					target_id=max(s_id,t_id)
+					w=abpairs[s_id][t_id]
+					route=json.loads(routes.filter(**{'source__id':source_id,'target__id':target_id})[0].shortest_route)
+					for a_id in route:
+						if a_id in adjacency_weights:
+							adjacency_weights[a_id]+=w
+						else:
+							adjacency_weights[a_id]=w
+	
+			adjacency_ids=[k for k in adjacency_weights.keys()]
+	
+			network_adjacencies=adjacencies.filter(pk__in=adjacency_ids)
+	
+			nodes={}
+			edges={}
+			for a in network_adjacencies:
+				nodes[a.source.id]=[float(a.source.longitude),float(a.source.latitude),a.source.name]
+				nodes[a.target.id]=[float(a.target.longitude),float(a.target.latitude),a.source.name]
+				edges[a.id]={'nodes':[a.source.id,a.target.id],'weight':adjacency_weights[a.id]}
+	
+			geojson={"type": "FeatureCollection", "features": []}
+	
+			for node_id in nodes:
+				longitude,latitude,name=nodes[node_id]
+	
+				geojsonfeature={
+					"type": "Feature",
+					"id":node_id,
+					"geometry": {"type":"Point","coordinates": [longitude,latitude]},
+					"properties":{"name":name}
+				}
+		
+				geojson['features'].append(geojsonfeature)
+	
+			if output_format=="geojson":
+		
+				for e_id in edges:
+					source_id,target_id=edges[e_id]['nodes']
+					sv_longlat=nodes[source_id][0:2]
+					tv_longlat=nodes[target_id][0:2]
+					w=edges[e_id]['weight']
+					geojsonfeature={
+						"type":"Feature",
+						"id":e_id,
+						"geometry":{
+							"type":"LineString",
+							"coordinates":[sv_longlat,tv_longlat]
+						},
+						"properties":{"weight":w}
+					}
+					geojson['features'].append(geojsonfeature)
+				output=geojson
+			elif output_format=="geosankey":
+				#print("GEOSANKEY")
+				output_edges=[]
+				for e_id in edges:
+					source_id,target_id=edges[e_id]['nodes']
+					w=edges[e_id]['weight']
+					output_edges.append([source_id,target_id,w])
+				output={'links':output_edges,'nodes':geojson}
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(output,safe=False)
+		except:
+			return JsonResponse({'status':'false','message':'bad geo_route request'}, status=400)

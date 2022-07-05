@@ -177,6 +177,8 @@ class Command(BaseCommand):
 					'voyage_itinerary__imp_port_voyage_begin__geo_location__name',
 					'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
 					'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
+					'voyage_itinerary__imp_region_voyage_begin__geo_location__name',
+					'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__name',
 					'voyage_itinerary__port_of_departure__geo_location__name',
 					'voyage_itinerary__principal_place_of_slave_purchase__geo_location__name',
 					'voyage_itinerary__principal_port_of_slave_dis__geo_location__name',

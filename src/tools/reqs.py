@@ -11,7 +11,7 @@ from .nest import *
 ##can also just pass an array of prefetch vars
 
 
-def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
+def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,selected_fields_exception=False):
 	
 	errormessages=[]
 	selected_fields=None
@@ -27,8 +27,11 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 		#SELECT SPECIFIC FIELDS TO RETURN
 		selected_fields=params.get('selected_fields')
-	
+		
 		if selected_fields is None:
+			selected_fields=[]
+		
+		if len(selected_fields)>15 and selected_fields_exception==False:
 			selected_fields=[]
 	
 		#INCLUDE AGGREGATION FIELDS

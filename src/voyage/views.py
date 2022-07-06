@@ -236,7 +236,7 @@ class VoyageCaches(generics.GenericAPIView):
 		if 'results_per_page' in params:
 			retrieve_all=False
 		voyageobjects=Voyage.objects
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(voyageobjects,self,request,voyage_options,retrieve_all=retrieve_all)
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(voyageobjects,self,request,voyage_options,retrieve_all=retrieve_all,selected_fields_exception=True)
 		if len(error_messages)==0:
 			ids=[i[0] for i in queryset.values_list('id')]
 			d2=params
@@ -267,7 +267,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 		if 'results_per_page' in params:
 			retrieve_all=False
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,auto_prefetch=False,retrieve_all=retrieve_all)
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,auto_prefetch=False,retrieve_all=retrieve_all,selected_fields_exception=True)
 		if len(error_messages)==0:
 			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 			if selected_fields==[]:

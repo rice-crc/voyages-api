@@ -151,6 +151,8 @@ class VoyageCrossTabs(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
 		params=dict(request.POST)
 		groupby_fields=params.get('groupby_fields')
 		value_field_tuple=params.get('value_field_tuple')
@@ -163,6 +165,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
+				print("Internal Response Time:",time.time()-st,"\n+++++++")
 				return JsonResponse(json.loads(r.text),safe=False)
 			else:
 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
@@ -230,6 +233,7 @@ class VoyageCaches(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		print("+++++++\nusername:",request.auth.user)
+		st=time.time()
 		params=dict(request.POST)
 		u2=FLASK_BASE_URL + 'dataframes/'
 		retrieve_all=True
@@ -243,6 +247,7 @@ class VoyageCaches(generics.GenericAPIView):
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
+				print("Internal Response Time:",time.time()-st,"\n+++++++")
 				return JsonResponse(json.loads(r.text),safe=False,headers={'results_count':results_count})
 			else:
 				print("failed\n+++++++")

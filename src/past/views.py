@@ -58,22 +58,17 @@ class EnslavedList(generics.GenericAPIView):
 		j=options_handler('past/enslaved_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
+		st=time.time()
 		times=[]
 		labels=[]
+		print("+++++++\nusername:",request.auth.user)
 		print("FETCHING...")
-		times.append(time.time())
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,auto_prefetch=True)
 		if len(error_messages)==0:
 			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-			times.append(time.time())
-			labels.append('building query')
 			read_serializer=EnslavedSerializer(queryset,many=True)
-			times.append(time.time())
-			labels.append('serialization')
 			serialized=read_serializer.data
-			times.append(time.time())
-			labels.append('sql execution')
 			
 			outputs=[]
 		
@@ -96,11 +91,7 @@ class EnslavedList(generics.GenericAPIView):
 					outputs.append(d)
 			else:
 				outputs=serialized
-			times.append(time.time())
-			labels.append('flattening...')
-			print('--timings--')
-			for i in range(1,len(times)):
-				print(labels[i-1],times[i]-times[i-1])		
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
@@ -215,22 +206,15 @@ class EnslaverList(generics.GenericAPIView):
 		j=options_handler('past/enslaver_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
-		times=[]
-		labels=[]
+		print("+++++++\nusername:",request.auth.user)
 		print("FETCHING...")
-		times.append(time.time())
+		st=time.time()
 		queryset=EnslaverIdentity.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaver_options,auto_prefetch=True)
 		if len(error_messages)==0:
 			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-			times.append(time.time())
-			labels.append('building query')
 			read_serializer=EnslaverSerializer(queryset,many=True)
-			times.append(time.time())
-			labels.append('serialization')
 			serialized=read_serializer.data
-			times.append(time.time())
-			labels.append('sql execution')
 			
 			outputs=[]
 		
@@ -253,11 +237,7 @@ class EnslaverList(generics.GenericAPIView):
 					outputs.append(d)
 			else:
 				outputs=serialized
-			times.append(time.time())
-			labels.append('flattening...')
-			print('--timings--')
-			for i in range(1,len(times)):
-				print(labels[i-1],times[i]-times[i-1])		
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)

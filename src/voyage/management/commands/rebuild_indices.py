@@ -92,7 +92,7 @@ class Command(BaseCommand):
 					'voyage_slaves_numbers__imp_jamaican_cash_price',
 					'voyage_slaves_numbers__percentage_boys_among_embarked_slaves',
 					'voyage_slaves_numbers__percentage_girls_among_embarked_slaves',
-					'imp_adult_death_middle_passage',
+					'voyage_slaves_numbers__imp_adult_death_middle_passage',
 					'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
 					'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__name',
 					'voyage_itinerary__imp_broad_region_slave_dis__geo_location__name',

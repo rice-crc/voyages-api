@@ -1,4 +1,9 @@
 {
+  "id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "Id"
+  },
   "post_disembark_location": {
     "type": "table",
     "label": "post disembark location",
@@ -21369,11 +21374,6 @@
     "label": "Name",
     "flatlabel": "captive status : Name"
   },
-  "id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Id",
-    "flatlabel": "Id"
-  },
   "documented_name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Documented name",
@@ -21453,6 +21453,16 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Notes",
     "flatlabel": "Notes"
+  },
+  "language_group": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Language group",
+    "flatlabel": "Language group"
+  },
+  "register_country": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Register country",
+    "flatlabel": "Register country"
   },
   "sources": {
     "type": "<class 'rest_framework.relations.ManyRelatedField'>",

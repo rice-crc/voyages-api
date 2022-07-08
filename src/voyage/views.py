@@ -256,7 +256,7 @@ class VoyageCaches(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-#DATAFRAME ENDPOINT (experimental & a resource hog!)
+#DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
 class VoyageDataFrames(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]

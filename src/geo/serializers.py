@@ -23,9 +23,18 @@ class LocationChildSerializer(serializers.ModelSerializer):
 		model=Location
 		fields='__all__'
 
-class LocationSerializer(serializers.ModelSerializer):
+class LocationSerializerDeep(serializers.ModelSerializer):
 	child_of=LocationParentSerializer(many=False)
 	parent_of=LocationChildSerializer(many=True)
+	spatial_extent=PolygonSerializer(many=False)
+	location_type=LocationTypeSerializer(many=False)
+	class Meta:
+		model=Location
+		fields='__all__'
+
+##REMOVING CHILD_OF AND PARENT_OF RECORDS FROM THE MAIN LOCATION SERIALIZER
+##IT HUGELY REDUCES THE OVERHEAD HERE
+class LocationSerializer(serializers.ModelSerializer):
 	spatial_extent=PolygonSerializer(many=False)
 	location_type=LocationTypeSerializer(many=False)
 	class Meta:

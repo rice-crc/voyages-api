@@ -62,6 +62,14 @@ class Adjacency(models.Model):
 		null=True
 	)
 	
+	distance=models.DecimalField(
+		"Distance",
+		null=True,
+		blank=True,
+		max_digits=8,
+		decimal_places=5
+	)
+	
 	class Meta:
 		verbose_name = "Location Adjacency"
 		verbose_name_plural = "Location Adjacencies"

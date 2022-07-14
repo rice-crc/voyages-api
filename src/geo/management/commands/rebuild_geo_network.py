@@ -145,13 +145,21 @@ class Command(BaseCommand):
 			## at the cost of making this an undirected network
 			## i.e., the "source" is always the node with the lower pk
 			for routeedge in route_edges:
-				sv=min(routeedge)
-				tv=max(routeedge)
+				sv,tv=routeedge
 				sv_k=routenode_js_to_db_map[sv]
 				source_location=locations.filter(**{"id":sv_k})[0]
 				tv_k=routenode_js_to_db_map[tv]
 				target_location=locations.filter(**{"id":tv_k})[0]
-				adjacency=Adjacency(source=source_location,target=target_location,dataset=dataset)
+				source_lat=source_location.latitude
+				source_long=source_location.longitude
+				target_lat=target_location.latitude
+				target_long=target_location.longitude
+				distance=sqrt((target_lat-source_lat)**2+(target_long-source_long)**2)
+				adjacency=Adjacency(
+					source=source_location,
+					target=target_location,
+					dataset=dataset,
+					distance=distance)
 				adjacency.save()
 			
 			# 3. CONNECT NON-WAYPOINTS TO THESE OCEANIC NETWORKS
@@ -159,16 +167,17 @@ class Command(BaseCommand):
 			## a. we run through all the ports, regions, and broad regions
 			## b. then IN THAT DATASET (IAM OR TAST) we find the closest waypoint
 			### --> note: currently just using euclidean distance. not technically correct.
-			## c. and create an adjacency between these. i'm calling these "on-ramps"
+			## c. and create an adjacency between these. i'm calling these "on-ramps" and "off-ramps"
 			# so the result is that each region, broad region, and port will have an adjacency to each oceanic network
 			locations=Location.objects.all()
 			print('+++++++\non-ramps: connecting ports, regions, and broad regions to oceanic waypoint network')
 			location_types_names=["Port","Region","Broad Region"]
+			waypoint_location_type=location_types.filter(**{'name':'Oceanic Waypoint'})[0]
 			for location_type_name in location_types_names:
 				print('--->%ss' %location_type_name)
 				location_type=location_types.filter(**{'name':location_type_name})[0]
 				these_locations=locations.filter(**{'location_type':location_type})
-				waypoint_location_type=location_types.filter(**{'name':'Oceanic Waypoint'})[0]
+				
 				waypoints=locations.filter(
 					**{'location_type':waypoint_location_type,'dataset':dataset}
 				)
@@ -186,11 +195,26 @@ class Command(BaseCommand):
 							for waypoint in waypoints
 							]
 						closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
-						if location.id < closest_neighbor.id:
-							source=location
-							target=closest_neighbor
-						else:
-							source=closest_neighbor
-							target=location
-						adjacency=Adjacency(source=source,target=target,dataset=dataset)
+						
+						distance=min([i[0] for i in distances])
+						
+						##create an on ramp and an off ramp
+						
+						adjacency=Adjacency(
+							source=location,
+							target=closest_neighbor,
+							dataset=dataset,
+							distance=distance
+						)
+						
 						adjacency.save()
+						
+						adjacency=Adjacency(
+							source=closest_neighbor,
+							target=location,
+							dataset=dataset,
+							distance=distance
+						)
+						
+						adjacency.save()
+				

@@ -37,9 +37,6 @@ for rc in registered_caches:
 	xl="%s=load_long_df(\"" %rc + DJANGO_STATIC_URL + "customcache/%s.json\")" %rc
 	exec(xl)
 
-
-#voyage_export=load_long_df(DJANGO_STATIC_URL+'customcache/voyage_export.json')
-
 @app.route('/groupby/',methods=['POST'])
 def groupby():
 	

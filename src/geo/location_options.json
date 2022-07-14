@@ -4,136 +4,6 @@
     "label": "ID",
     "flatlabel": "ID"
   },
-  "child_of": {
-    "type": "table",
-    "label": "Child of",
-    "flatlabel": "Child of"
-  },
-  "child_of__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Child of : ID"
-  },
-  "child_of__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "Child of : Location name"
-  },
-  "child_of__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "Child of : Longitude of Centroid"
-  },
-  "child_of__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "Child of : Latitude of Centroid"
-  },
-  "child_of__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "Child of : SPSS code"
-  },
-  "child_of__dataset": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
-    "flatlabel": "Child of : Trans-atlantic (0), intra-american (1), intra-african (2)"
-  },
-  "child_of__show_on_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on map",
-    "flatlabel": "Child of : Show on map"
-  },
-  "child_of__show_on_main_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on main map",
-    "flatlabel": "Child of : Show on main map"
-  },
-  "child_of__show_on_voyage_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on voyage map",
-    "flatlabel": "Child of : Show on voyage map"
-  },
-  "child_of__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "Child of : Child of"
-  },
-  "child_of__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "Child of : Location Type"
-  },
-  "child_of__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "Child of : Polygon"
-  },
-  "parent_of": {
-    "type": "table",
-    "label": "Geographic Location",
-    "flatlabel": "Geographic Location"
-  },
-  "parent_of__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Geographic Location : ID"
-  },
-  "parent_of__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "Geographic Location : Location name"
-  },
-  "parent_of__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "Geographic Location : Longitude of Centroid"
-  },
-  "parent_of__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "Geographic Location : Latitude of Centroid"
-  },
-  "parent_of__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "Geographic Location : SPSS code"
-  },
-  "parent_of__dataset": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
-    "flatlabel": "Geographic Location : Trans-atlantic (0), intra-american (1), intra-african (2)"
-  },
-  "parent_of__show_on_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on map",
-    "flatlabel": "Geographic Location : Show on map"
-  },
-  "parent_of__show_on_main_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on main map",
-    "flatlabel": "Geographic Location : Show on main map"
-  },
-  "parent_of__show_on_voyage_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on voyage map",
-    "flatlabel": "Geographic Location : Show on voyage map"
-  },
-  "parent_of__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "Geographic Location : Child of"
-  },
-  "parent_of__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "Geographic Location : Location Type"
-  },
-  "parent_of__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "Geographic Location : Polygon"
-  },
   "spatial_extent": {
     "type": "table",
     "label": "Polygon",
@@ -203,5 +73,10 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "Show on voyage map"
+  },
+  "child_of": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Child of",
+    "flatlabel": "Child of"
   }
 }

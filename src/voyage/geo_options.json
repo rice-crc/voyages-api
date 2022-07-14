@@ -14,136 +14,6 @@
     "label": "ID",
     "flatlabel": "Location : ID"
   },
-  "geo_location__child_of": {
-    "type": "table",
-    "label": "Child of",
-    "flatlabel": "Location : Child of"
-  },
-  "geo_location__child_of__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Location : Child of : ID"
-  },
-  "geo_location__child_of__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "Location : Child of : Location name"
-  },
-  "geo_location__child_of__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "Location : Child of : Longitude of Centroid"
-  },
-  "geo_location__child_of__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "Location : Child of : Latitude of Centroid"
-  },
-  "geo_location__child_of__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "Location : Child of : SPSS code"
-  },
-  "geo_location__child_of__dataset": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
-    "flatlabel": "Location : Child of : Trans-atlantic (0), intra-american (1), intra-african (2)"
-  },
-  "geo_location__child_of__show_on_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on map",
-    "flatlabel": "Location : Child of : Show on map"
-  },
-  "geo_location__child_of__show_on_main_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on main map",
-    "flatlabel": "Location : Child of : Show on main map"
-  },
-  "geo_location__child_of__show_on_voyage_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on voyage map",
-    "flatlabel": "Location : Child of : Show on voyage map"
-  },
-  "geo_location__child_of__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "Location : Child of : Child of"
-  },
-  "geo_location__child_of__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "Location : Child of : Location Type"
-  },
-  "geo_location__child_of__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "Location : Child of : Polygon"
-  },
-  "geo_location__parent_of": {
-    "type": "table",
-    "label": "Geographic Location",
-    "flatlabel": "Location : Geographic Location"
-  },
-  "geo_location__parent_of__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Location : Geographic Location : ID"
-  },
-  "geo_location__parent_of__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "Location : Geographic Location : Location name"
-  },
-  "geo_location__parent_of__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "Location : Geographic Location : Longitude of Centroid"
-  },
-  "geo_location__parent_of__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "Location : Geographic Location : Latitude of Centroid"
-  },
-  "geo_location__parent_of__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "Location : Geographic Location : SPSS code"
-  },
-  "geo_location__parent_of__dataset": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
-    "flatlabel": "Location : Geographic Location : Trans-atlantic (0), intra-american (1), intra-african (2)"
-  },
-  "geo_location__parent_of__show_on_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on map",
-    "flatlabel": "Location : Geographic Location : Show on map"
-  },
-  "geo_location__parent_of__show_on_main_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on main map",
-    "flatlabel": "Location : Geographic Location : Show on main map"
-  },
-  "geo_location__parent_of__show_on_voyage_map": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Show on voyage map",
-    "flatlabel": "Location : Geographic Location : Show on voyage map"
-  },
-  "geo_location__parent_of__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "Location : Geographic Location : Child of"
-  },
-  "geo_location__parent_of__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "Location : Geographic Location : Location Type"
-  },
-  "geo_location__parent_of__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "Location : Geographic Location : Polygon"
-  },
   "geo_location__spatial_extent": {
     "type": "table",
     "label": "Polygon",
@@ -213,5 +83,10 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Show on voyage map",
     "flatlabel": "Location : Show on voyage map"
+  },
+  "geo_location__child_of": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Child of",
+    "flatlabel": "Location : Child of"
   }
 }

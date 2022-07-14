@@ -26,6 +26,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 voyage_options=options_handler('voyage/voyage_options.json',hierarchical=False)
 geo_options=options_handler('voyage/geo_options.json',hierarchical=False)
+voyage_routes=options_handler('static/customcache/routes.json',hierarchical=False)
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
@@ -347,47 +348,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
 
-class DuplicateVoyage(generics.GenericAPIView):
-	serializer_class=VoyageSerializer
-	def get(self,request):
-		params=request.GET
-		try:
-			voyage_id=int(params['voyage_id'])
-		except:
-			return JsonResponse({"message":"No voyage ID supplied"},safe=False)
-		existing_voyages=Voyage.objects.all()
-		kwargs={'voyage_id':voyage_id}
-		v_queryset=existing_voyages.filter(**kwargs)
-		if len(v_queryset)==0:
-			return JsonResponse({"message":"Error: Voyage %d does not exist" %voyage_id})
-		elif len(v_queryset)>1:
-			return JsonResponse({"message":"Error: Multiple voyages with id %d -- check your database" %voyage_id})
-		else:
-			voyage_to_duplicate=v_queryset[0]
-		max_voyage_id=existing_voyages.order_by('-voyage_id')[0].voyage_id
-		new_voyage_id=max_voyage_id+1
-		duplicated_voyage=voyage_to_duplicate
-		duplicated_voyage.id=new_voyage_id
-		duplicated_voyage.voyage_id=new_voyage_id
-		duplicated_voyage.save()
-		existing_voyages=Voyage.objects.all()
-		kwargs={'voyage_id':new_voyage_id}
-		new_voyage=existing_voyages.filter(**kwargs)
-		output_dict=VoyageSerializer(duplicated_voyage,many=False).data
-		return JsonResponse(output_dict,safe=False)
-
 class VoyageAggRoutes(generics.GenericAPIView):
-	'''
-	Given
-	1. an aggregation function
-	2. a list of fields
-	2a. the first of which is the field you want to group by
-	2b. the following of which is/are the field(s) you want to get the summary stats on
-	returns
-	Dictionaries, organized by the numeric fields' names, with its' children being k/v pairs of
-	--> k = value of grouped var
-	--> v = aggregated value of numeric var for that grouped var val
-	'''
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -410,83 +371,78 @@ class VoyageAggRoutes(generics.GenericAPIView):
 
 			abpairs={int(float(k)):{int(float(v)):j[k][v] for v in j[k]} for k in j}
 			dataset=int(params['dataset'][0])
-			##third argument: output_format -- can be either
-			####"geojson", which returns just a big featurecollection or
-			####"geosankey", which returns a featurecollection of points only, alongside an edges dump as "links.csv" -- following the specifications here: https://github.com/geodesign/spatialsankey
-			output_format=params['output_format'][0]
-			routes=Route.objects.all()
-			routes.prefetch_related('source')
-			routes.prefetch_related('target')
-			adjacencies=Adjacency.objects.all()
-			adjacencies.prefetch_related('source')
-			adjacencies.prefetch_related('target')
 	
-			adjacency_weights={}
+			routes=[]
+			node_ids=[]
+	
+			bad_nodes={}
+			def calControlPoint(points, smoothing=0.3):
+				A, B, C=points[:3]
+				Controlx = B[0] + smoothing*(A[0]-C[0])
+				Controly = B[1] + smoothing*(A[1]-C[1])
+				result = [A, [[Controlx, Controly], B]]
+				for i in range(2, len(points)):
+					if i == len(points)-1:
+						start_point, mid_point, end_point = points[i-1], points[i], points[i]
+					else:
+						start_point, mid_point, end_point = points[i-1], points[i], points[i+1]
+					next_Controlx1 = start_point[0]*2 - Controlx
+					next_Controly1 = start_point[1]*2 - Controly
+	
+					next_Controlx2 = mid_point[0] + smoothing*(start_point[0] - end_point[0])
+					next_Controly2 = mid_point[1] + smoothing*(start_point[1] - end_point[1])
+	
+					result.append([[next_Controlx1, next_Controly1], [next_Controlx2, next_Controly2], mid_point])
+					Controlx, Controly = next_Controlx2, next_Controly2
+				return result
 	
 			for s_id in abpairs:
+				node_ids.append(s_id)
 				for t_id in abpairs[s_id]:
-					source_id=min(s_id,t_id)
-					target_id=max(s_id,t_id)
-					w=abpairs[s_id][t_id]
-					route=json.loads(routes.filter(**{'source__id':source_id,'target__id':target_id})[0].shortest_route)
-					for a_id in route:
-						if a_id in adjacency_weights:
-							adjacency_weights[a_id]+=w
-						else:
-							adjacency_weights[a_id]=w
+					node_ids.append(t_id)
+					w=int(abpairs[s_id][t_id])
+			
+					route=voyage_routes[str(dataset)][str(s_id)][str(t_id)]
+					route=[[i[1],i[0]] for i in route]
+					##Currently suppressing any straight-line routes
+					##As that typically means they've got bad geo data so shouldn't be shown anyways
+					###BUT I need to go back and fix it
+					if len(route)>2:
+						route=[w,calControlPoint(route)	]
+						#print(route)
+						routes.append(route)
 	
-			adjacency_ids=[k for k in adjacency_weights.keys()]
+			for bn in bad_nodes:
+				if bad_nodes[bn]>1:
+					print(bn,bad_nodes[bn])
 	
-			network_adjacencies=adjacencies.filter(pk__in=adjacency_ids)
-	
-			nodes={}
-			edges={}
-			for a in network_adjacencies:
-				nodes[a.source.id]=[float(a.source.longitude),float(a.source.latitude),a.source.name]
-				nodes[a.target.id]=[float(a.target.longitude),float(a.target.latitude),a.source.name]
-				edges[a.id]={'nodes':[a.source.id,a.target.id],'weight':adjacency_weights[a.id]}
+			node_ids=list(set(node_ids))
 	
 			geojson={"type": "FeatureCollection", "features": []}
 	
-			for node_id in nodes:
-				longitude,latitude,name=nodes[node_id]
+			node_ids=list(set(node_ids))
 	
+			locations=Location.objects.all()
+			nodes=locations.filter(pk__in=node_ids)
+			for node in nodes:
+				node_id=node.id
+				longitude=node.longitude
+				latitude=node.latitude
+				name=node.name
+
 				geojsonfeature={
 					"type": "Feature",
 					"id":node_id,
 					"geometry": {"type":"Point","coordinates": [longitude,latitude]},
 					"properties":{"name":name}
 				}
-		
+
 				geojson['features'].append(geojsonfeature)
 	
-			if output_format=="geojson":
-		
-				for e_id in edges:
-					source_id,target_id=edges[e_id]['nodes']
-					sv_longlat=nodes[source_id][0:2]
-					tv_longlat=nodes[target_id][0:2]
-					w=edges[e_id]['weight']
-					geojsonfeature={
-						"type":"Feature",
-						"id":e_id,
-						"geometry":{
-							"type":"LineString",
-							"coordinates":[sv_longlat,tv_longlat]
-						},
-						"properties":{"weight":w}
-					}
-					geojson['features'].append(geojsonfeature)
-				output=geojson
-			elif output_format=="geosankey":
-				#print("GEOSANKEY")
-				output_edges=[]
-				for e_id in edges:
-					source_id,target_id=edges[e_id]['nodes']
-					w=edges[e_id]['weight']
-					output_edges.append([source_id,target_id,w])
-				output={'links':output_edges,'nodes':geojson}
+			output={"points":geojson,"routes":routes}
+	
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output,safe=False)
 		except:
-			return JsonResponse({'status':'false','message':'bad geo_route request'}, status=400)
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)

@@ -371,10 +371,10 @@ class VoyageAggRoutes(generics.GenericAPIView):
 
 			abpairs={int(float(k)):{int(float(v)):j[k][v] for v in j[k]} for k in j}
 			dataset=int(params['dataset'][0])
-	
+
 			routes=[]
 			node_ids=[]
-			
+		
 			def calControlPoint(points, smoothing=0.3):
 				#if i passed this function
 				##not just (x,y) tuples
@@ -393,45 +393,78 @@ class VoyageAggRoutes(generics.GenericAPIView):
 						start_point, mid_point, end_point = points[i-1], points[i], points[i+1]
 					next_Controlx1 = start_point[0]*2 - Controlx
 					next_Controly1 = start_point[1]*2 - Controly
-	
+
 					next_Controlx2 = mid_point[0] + smoothing*(start_point[0] - end_point[0])
 					next_Controly2 = mid_point[1] + smoothing*(start_point[1] - end_point[1])
-	
+
 					result.append([[next_Controlx1, next_Controly1], [next_Controlx2, next_Controly2], mid_point])
 					Controlx, Controly = next_Controlx2, next_Controly2
 				return result
-			
-			
-			
-	
+		
+		
+			route_legs={}
+			route_weights={}
+
 			for s_id in abpairs:
 				node_ids.append(s_id)
 				for t_id in abpairs[s_id]:
 					node_ids.append(t_id)
 					w=int(abpairs[s_id][t_id])
+					try:
+						route=voyage_routes[str(dataset)][str(s_id)][str(t_id)]
+						##Currently suppressing any straight-line routes
+						##As that typically means they've got bad geo data so shouldn't be shown anyways
+						###BUT I need to go back and fix it
+				
+						for e_id in route:
+							if e_id not in route_legs:
+								route_legs[e_id]=[route[e_id]]
+							else:
+								route_legs[e_id].append(route[e_id])
+						
+				
+							if e_id not in route_weights:
+								route_weights[e_id]=w
+							else:
+								route_weights[e_id]+=w
+					except:
+						##LOTS OF FAILED ROUTES CURRENTLY
+						#print("failed on",s_id,t_id)
+						pass
+		
+			routes=[]
+		
+			for e_id in route_legs:
 			
-					route=voyage_routes[str(dataset)][str(s_id)][str(t_id)]
-					route=[[i[1],i[0]] for i in route]
-					##Currently suppressing any straight-line routes
-					##As that typically means they've got bad geo data so shouldn't be shown anyways
-					###BUT I need to go back and fix it
-					if len(route)>2:
-						route=[w,calControlPoint(route)]
-						#If this output could be reformatted, I think we could very easily
-						##link up the different routes
-						##aggregate the flows
-						#and maybe even
-						##even out their conflicting curves at junctures by finding the centroids of the control points
-						##send a sparse matrix or a lookup of edge adjacencies, so that event bindings could highlight flows all the way backwards and forwards in the directed graph
-						#print(route)
-						routes.append(route)
-	
+				legs=route_legs[e_id]
+			
+				#print(legs)
+			
+				controls_x1=[leg[1][0][0] for leg in legs]
+				controls_x2=[leg[1][1][0] for leg in legs]
+
+				controls_y1=[leg[1][0][1] for leg in legs]
+				controls_y2=[leg[1][1][1] for leg in legs]
+			
+			
+				controls_x1=sum(controls_x1)/len(controls_x1)
+				controls_y1=sum(controls_y1)/len(controls_y1)
+				controls_x2=sum(controls_x2)/len(controls_x2)
+				controls_y2=sum(controls_y2)/len(controls_y2)
+			
+				control1=[controls_x1,controls_y1]
+				control2=[controls_x2,controls_y2]
+			
+				consolidated_leg=[[legs[0][0][0],legs[0][0][1]],[control1,control2],route_weights[e_id]]
+			
+				routes.append(consolidated_leg)
+			
 			node_ids=list(set(node_ids))
-	
+
 			geojson={"type": "FeatureCollection", "features": []}
-	
+
 			node_ids=list(set(node_ids))
-	
+
 			locations=Location.objects.all()
 			nodes=locations.filter(pk__in=node_ids)
 			for node in nodes:
@@ -448,9 +481,9 @@ class VoyageAggRoutes(generics.GenericAPIView):
 				}
 
 				geojson['features'].append(geojsonfeature)
-	
+
 			output={"points":geojson,"routes":routes}
-	
+
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output,safe=False)
 		except:

@@ -374,9 +374,14 @@ class VoyageAggRoutes(generics.GenericAPIView):
 	
 			routes=[]
 			node_ids=[]
-	
-			bad_nodes={}
+			
 			def calControlPoint(points, smoothing=0.3):
+				#if i passed this function
+				##not just (x,y) tuples
+				##but (x,y,id) triples
+				###where id was unique for each AB BC CD edge
+				###could we reformat the output to look like [n node_ids],[n-1 edge_ids],[(n-1)*2 control points]
+				### or {edge_id:[[[Ax,Ay],[Bx,By]],[[ctrl1x,ctrl1y],[ctrl2x,ctrl2y]]]}
 				A, B, C=points[:3]
 				Controlx = B[0] + smoothing*(A[0]-C[0])
 				Controly = B[1] + smoothing*(A[1]-C[1])
@@ -395,6 +400,9 @@ class VoyageAggRoutes(generics.GenericAPIView):
 					result.append([[next_Controlx1, next_Controly1], [next_Controlx2, next_Controly2], mid_point])
 					Controlx, Controly = next_Controlx2, next_Controly2
 				return result
+			
+			
+			
 	
 			for s_id in abpairs:
 				node_ids.append(s_id)
@@ -408,13 +416,15 @@ class VoyageAggRoutes(generics.GenericAPIView):
 					##As that typically means they've got bad geo data so shouldn't be shown anyways
 					###BUT I need to go back and fix it
 					if len(route)>2:
-						route=[w,calControlPoint(route)	]
+						route=[w,calControlPoint(route)]
+						#If this output could be reformatted, I think we could very easily
+						##link up the different routes
+						##aggregate the flows
+						#and maybe even
+						##even out their conflicting curves at junctures by finding the centroids of the control points
+						##send a sparse matrix or a lookup of edge adjacencies, so that event bindings could highlight flows all the way backwards and forwards in the directed graph
 						#print(route)
 						routes.append(route)
-	
-			for bn in bad_nodes:
-				if bad_nodes[bn]>1:
-					print(bn,bad_nodes[bn])
 	
 			node_ids=list(set(node_ids))
 	

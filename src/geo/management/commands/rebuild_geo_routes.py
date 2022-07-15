@@ -47,10 +47,8 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 		G.add_edge(sv_id,tv_id,weight=aw,edge_id=a.id)
 	
 	print(G)
-	
 	for groupby_pair in groupby_pairs:
-		print("vars",groupby_pair)
-	
+		routes=[]
 		#pull all the a/b value pairs
 		#on all these a/b variable pairs
 		alice,bob=groupby_pair
@@ -92,13 +90,6 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 			s_id,t_id=abpair
 			try:	
 				sp=nx.shortest_path(G,s_id,t_id,'weight')
-	
-				'''edge_ids=[]
-				for idx in range(1,len(sp)):
-					a=sp[idx]
-					b=sp[idx-1]
-					e_id=G[a][b]['edge_id']
-					edge_ids.append(e_id)'''
 				waypoints=[]
 				for p_id in sp:
 					l=locations.get(pk=p_id)
@@ -121,8 +112,7 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 				routes[s_id]={t_id:waypoints}
 			else:
 				routes[s_id][t_id]=waypoints
-		
-		return routes
+	return routes
 
 
 
@@ -184,9 +174,12 @@ class Command(BaseCommand):
 		groupby_pairs=[
 			["voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id",
 			"voyage_itinerary__imp_principal_port_slave_dis__geo_location__id"
+			],
+			["voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
+			"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id"
 			]
 		]
-		#pp.pprint(groupby_pairs)
+		pp.pprint(groupby_pairs)
 		
 		#and of course we need to separate the datasets' for voyages and adjacencies
 		datasets=[0,1]

@@ -184,7 +184,6 @@ class Command(BaseCommand):
 		
 				for location in these_locations:
 					if location.longitude!=None and location.latitude!= None:
-						#
 						distances=[
 							(
 								sqrt(
@@ -195,7 +194,6 @@ class Command(BaseCommand):
 							for waypoint in waypoints
 							]
 						closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
-						
 						distance=min([i[0] for i in distances])
 						
 						##create an on ramp and an off ramp

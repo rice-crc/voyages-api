@@ -39,13 +39,21 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 	for l in locations:
 		G.add_node(l.id)
 	
-	edges=[]
+	edges={}
 	for a in adjacencies:
 		sv_id=a.source.id
 		tv_id=a.target.id
 		aw=a.distance
-		G.add_edge(sv_id,tv_id,weight=aw,edge_id=a.id)
-	
+		edge_id=a.id
+		G.add_edge(sv_id,tv_id,weight=aw,edge_id=edge_id)
+		if sv_id not in edges:
+			edges[sv_id]={tv_id:edge_id}
+		else:
+			edges[sv_id][tv_id]=edge_id
+		if tv_id not in edges:
+			edges[tv_id]={sv_id:edge_id}
+		else:
+			edges[tv_id][sv_id]=edge_id
 	print(G)
 	for groupby_pair in groupby_pairs:
 		routes=[]
@@ -86,32 +94,69 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 		routes={}
 		
 		print("finding routes")
+		
+		def calControlPoint_new(points, edge_ids, smoothing=0.15):
+			#edge_ids = [i for i in range(len(points)-1)]
+			A, B, C=points[:3]
+			Controlx = B[0] + smoothing*(A[0]-C[0])
+			Controly = B[1] + smoothing*(A[1]-C[1])
+			result={}
+			result[edge_ids[0]] = [[A, B], [[Controlx, Controly], [Controlx, Controly]]]
+			for i in range(2, len(points)):
+				if i == len(points)-1:
+					start_point, mid_point, mid_point = points[i-1], points[i], points[i]
+				else:
+					start_point, mid_point, end_point = points[i-1], points[i], points[i+1]
+				next_Controlx1 = start_point[0]*2 - Controlx
+				next_Controly1 = start_point[1]*2 - Controly
+		
+				next_Controlx2 = mid_point[0] + smoothing*(start_point[0] - end_point[0])
+				next_Controly2 = mid_point[1] + smoothing*(start_point[1] - end_point[1])
+		
+				#result.append([[next_Controlx1, next_Controly1], [next_Controlx2, next_Controly2], mid_point])
+				result[edge_ids[i-1]] = [[start_point, mid_point], [[next_Controlx1, next_Controly1], [next_Controlx2, next_Controly2]]]
+				Controlx, Controly = next_Controlx2, next_Controly2
+	
+			return result
+		
 		for abpair in abpairs:
+			
+			route_edge_ids=[]
+			
 			s_id,t_id=abpair
 			try:	
 				sp=nx.shortest_path(G,s_id,t_id,'weight')
-				waypoints=[]
-				for p_id in sp:
-					l=locations.get(pk=p_id)
-					waypoints.append([float(l.longitude),float(l.latitude)])
 			except:
-				print('error w following nodes -- drawing a straight line',s_id,t_id)
-				sp=locations.get(pk=s_id)
-				tp=locations.get(pk=t_id)
-				try:
-					waypoints=[[float(sp.longitude),float(sp.latitude)],[float(tp.longitude),float(tp.latitude)]]
-				except:
-					print("+++ failed to draw. null lat or long")
-		
-			source_location=locations.filter(**{'id':s_id})[0]
-			target_location=locations.filter(**{'id':t_id})[0]
+				print('no path between',s_id,t_id)
 			
-			#route=Route(source=source_location,target=target_location,dataset=dataset,shortest_route=json.dumps(waypoints))
-			#route.save()
-			if s_id not in routes:
-				routes[s_id]={t_id:waypoints}
-			else:
-				routes[s_id][t_id]=waypoints
+			waypoints=[]
+			
+			c=0
+			
+			for p_id in sp:
+				l=locations.get(pk=p_id)
+				waypoints.append([float(l.latitude),float(l.longitude)])				
+				
+				if c!=0:
+					route_edge_ids.append(edges[sp[c-1]][p_id])
+				c+=1
+			
+			if len(waypoints)>3:
+				#print(waypoints)
+				route=calControlPoint_new(waypoints,route_edge_ids)
+			
+				#source_location=locations.filter(**{'id':s_id})[0]
+				#target_location=locations.filter(**{'id':t_id})[0]
+				'''for k in route:
+					r2=route[k]
+					r2.append(10)
+					print(r2)'''
+				#route=Route(source=source_location,target=target_location,dataset=dataset,shortest_route=json.dumps(waypoints))
+				#route.save()
+				if s_id not in routes:
+					routes[s_id]={t_id:route}
+				else:
+					routes[s_id][t_id]=route
 	return routes
 
 
@@ -179,6 +224,13 @@ class Command(BaseCommand):
 			"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id"
 			]
 		]
+		
+		groupby_pairs=[
+			["voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
+			"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id"
+			]
+		]
+		
 		pp.pprint(groupby_pairs)
 		
 		#and of course we need to separate the datasets' for voyages and adjacencies
@@ -216,11 +268,13 @@ class Command(BaseCommand):
 					
 					#and reverse directions as well just in case?????
 					
+					vk=list(v.keys())
+					vk.reverse()
+					rv=[v[i] for i in vk]
 					if t_id not in routes[dataset]:
-						routes[dataset][t_id]={s_id:v}
+						routes[dataset][t_id]={s_id:rv}
 					else:
-						v.reverse()
-						routes[dataset][t_id][s_id]=v
+						routes[dataset][t_id][s_id]=rv
 					
 			d=open(fpath,'w')
 			d.write(json.dumps(routes))

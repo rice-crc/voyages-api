@@ -38,21 +38,9 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 			self=nest_selected_fields(self,selected_fields_dict)
 
 class EnslaverIdentitySourceConnectionSerializer(DynamicFieldsModelSerializer):
+	source=VoyageSourcesSerializer(many=False)
 	class Meta:
 		model=EnslaverIdentitySourceConnection
-		fields='__all__'
-
-class EnslaverIdentitySerializer(DynamicFieldsModelSerializer):
-	enslaver_sources=EnslaverIdentitySourceConnectionSerializer(many=True,read_only=False)
-	principal_location=PlaceSerializer(many=False)
-	class Meta:
-		model=EnslaverIdentity
-		fields='__all__'
-
-class EnslaverAliasSerializer(DynamicFieldsModelSerializer):
-	identity=EnslaverIdentitySerializer(many=False)
-	class Meta:
-		model=EnslaverAlias
 		fields='__all__'
 
 class EnslaverRoleSerializer(DynamicFieldsModelSerializer):
@@ -60,21 +48,56 @@ class EnslaverRoleSerializer(DynamicFieldsModelSerializer):
 		model=EnslaverRole
 		fields='__all__'
 
-class EnslaverInRelationSerializer(DynamicFieldsModelSerializer):
-	enslaver_alias=EnslaverAliasSerializer(many=False)
-	role=EnslaverRoleSerializer(many=False)
-	class Meta:
-		model=EnslaverInRelation
-		fields='__all__'
-
 class EnslavementRelationTypeSerializer(DynamicFieldsModelSerializer):
 	class Meta:
 		model=EnslavementRelationType
 		fields='__all__'
 
-class EnslavementRelationSerializer(DynamicFieldsModelSerializer):
+class EnslaverEnslavementRelationSerializer(DynamicFieldsModelSerializer):
 	relation_type=EnslavementRelationTypeSerializer(many=False)
-	enslavers=EnslaverInRelationSerializer(many=True,read_only=False)
+	source=VoyageSourcesSerializer(many=False)
+	voyage=VoyageSerializer(many=False)
+	place=PlaceSerializer(many=False)
+	class Meta:
+		model=EnslavementRelation
+		fields='__all__'
+
+class EnslaverInRelationSerializer(DynamicFieldsModelSerializer):
+	transaction=EnslaverEnslavementRelationSerializer(many=False)
+	role=EnslaverRoleSerializer(many=False)
+	class Meta:
+		model=EnslaverInRelation
+		fields='__all__'
+
+class EnslaverAliasSerializer(DynamicFieldsModelSerializer):
+	transactions=EnslaverInRelationSerializer(many=True,read_only=True)
+	class Meta:
+		model=EnslaverAlias
+		fields='__all__'
+
+class EnslavedEnslaverSerializer(DynamicFieldsModelSerializer):
+	principal_location=PlaceSerializer(many=False)
+	enslaver_sources=EnslaverIdentitySourceConnectionSerializer(many=True)
+	class Meta:
+		model=EnslaverIdentity
+		fields='__all__'
+
+class EnslavedEnslaverAliasSerializer(DynamicFieldsModelSerializer):
+	identity=EnslavedEnslaverSerializer(many=False)
+	class Meta:
+		model=EnslaverAlias
+		fields='__all__'
+
+class EnslavedEnslaverInRelationSerializer(DynamicFieldsModelSerializer):
+	enslaver_alias=EnslavedEnslaverAliasSerializer(many=False)
+	role=EnslaverRoleSerializer(many=False)
+	class Meta:
+		model=EnslaverInRelation
+		fields='__all__'
+
+class EnslavedEnslavementRelationSerializer(DynamicFieldsModelSerializer):
+	relation_type=EnslavementRelationTypeSerializer(many=False)
+	enslavers=EnslavedEnslaverInRelationSerializer(many=True,read_only=False)
 	source=VoyageSourcesSerializer(many=False)
 	voyage=VoyageSerializer(many=False)
 	place=PlaceSerializer(many=False)
@@ -83,7 +106,7 @@ class EnslavementRelationSerializer(DynamicFieldsModelSerializer):
 		fields='__all__'
 
 class EnslavedInRelationSerializer(DynamicFieldsModelSerializer):
-	transaction=EnslavementRelationSerializer(many=False)
+	transaction=EnslavedEnslavementRelationSerializer(many=False)
 	class Meta:
 		model=EnslavedInRelation
 		fields='__all__'
@@ -147,6 +170,8 @@ class EnslavedSerializer(DynamicFieldsModelSerializer):
 
 class EnslaverSerializer(DynamicFieldsModelSerializer):
 	principal_location=PlaceSerializer(many=False)
+	alias=EnslaverAliasSerializer(many=False)
+	enslaver_sources=EnslaverIdentitySourceConnectionSerializer(many=True)
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'

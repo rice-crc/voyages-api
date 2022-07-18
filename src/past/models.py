@@ -174,7 +174,11 @@ class EnslaverAlias(models.Model):
     a consolidated identity. The same individual may appear in multiple
     records under different names (aliases).
     """
-    identity = models.ForeignKey(EnslaverIdentity, on_delete=models.CASCADE)
+    identity = models.ForeignKey(
+    		EnslaverIdentity,
+    		on_delete=models.CASCADE,
+    		related_name='alias'
+    		)
     alias = models.CharField(max_length=255)
 
     class Meta:

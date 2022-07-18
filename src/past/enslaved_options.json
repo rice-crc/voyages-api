@@ -5394,36 +5394,6 @@
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : ID"
   },
-  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources": {
-    "type": "table",
-    "label": "enslaver identity source connection",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection"
-  },
-  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : ID"
-  },
-  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__source_order": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Source order",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Source order"
-  },
-  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__text_ref": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Text ref",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Text ref"
-  },
-  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__identity": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Identity",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Identity"
-  },
-  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__source": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Source",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Source"
-  },
   "transactions__transaction__enslavers__enslaver_alias__identity__principal_location": {
     "type": "table",
     "label": "principal location",
@@ -5518,6 +5488,56 @@
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : principal location : Location : Child of"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources": {
+    "type": "table",
+    "label": "enslaver identity source connection",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : ID"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__source": {
+    "type": "table",
+    "label": "Source",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Source"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__source__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Source : ID"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__source__short_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Short reference",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Source : Short reference"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__source__full_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Full reference",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Source : Full reference"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__source__source_type": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Source Type",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Source : Source Type"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__source_order": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Source order",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Source order"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__text_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Text ref",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Text ref"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__enslaver_sources__identity": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Identity",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : enslaver identity source connection : Identity"
   },
   "transactions__transaction__enslavers__enslaver_alias__identity__principal_alias": {
     "type": "<class 'rest_framework.fields.CharField'>",

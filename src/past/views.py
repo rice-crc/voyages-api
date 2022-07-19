@@ -97,7 +97,7 @@ class EnslavedList(generics.GenericAPIView):
 			else:
 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
 		except:
-			return JsonResponse({'status':'false','message':'bad geo_route request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
 #This will only accept one field at a time
 #Should only be a text field
@@ -147,7 +147,7 @@ class EnslavedTextFieldAutoComplete(generics.GenericAPIView):
 			return JsonResponse(output_dict,safe=False)
 		except:
 			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
 class EnslaverTextFieldAutoComplete(generics.GenericAPIView):
 	serializer_class=EnslaverSerializer
@@ -192,7 +192,7 @@ class EnslaverTextFieldAutoComplete(generics.GenericAPIView):
 			return JsonResponse(output_dict,safe=False)
 		except:
 			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
 
 
@@ -242,7 +242,7 @@ class EnslaverList(generics.GenericAPIView):
 			else:
 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
 		except:
-			return JsonResponse({'status':'false','message':'bad geo_route request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
 # Basic statistics
 ## takes a numeric variable
@@ -278,7 +278,7 @@ class EnslavedAggregations(generics.GenericAPIView):
 				print("failed\n+++++++")
 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 		except:
-			return JsonResponse({'status':'false','message':'bad geo_route request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
 #DATAFRAME ENDPOINT (experimental & a resource hog!)
 class EnslavedDataFrames(generics.GenericAPIView):
@@ -323,7 +323,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 				print("failed\n+++++++")
 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 		except:
-			return JsonResponse({'status':'false','message':'bad geo_route request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
 # Basic statistics
 ## takes a numeric variable
@@ -359,4 +359,4 @@ class EnslaverAggregations(generics.GenericAPIView):
 				print("failed\n+++++++")
 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 		except:
-			return JsonResponse({'status':'false','message':'bad geo_route request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)

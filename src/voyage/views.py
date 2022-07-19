@@ -24,9 +24,19 @@ from voyages2021.localsettings import *
 
 pp = pprint.PrettyPrinter(indent=4)
 
-voyage_options=options_handler('voyage/voyage_options.json',hierarchical=False)
-geo_options=options_handler('voyage/geo_options.json',hierarchical=False)
-voyage_routes=options_handler('static/customcache/routes.json',hierarchical=False)
+try:
+	voyage_options=options_handler('voyage/voyage_options.json',hierarchical=False)
+except:
+	print("WARNING. BLANK VOYAGE OPTIONS.")
+	voyage_options={}
+
+try:
+	voyage_routes=options_handler('static/customcache/routes.json',hierarchical=False)
+except:
+	print("WARNING. BLANK VOYAGE ROUTES.")
+	voyage_routes={}		
+
+
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
@@ -429,7 +439,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 								route_weights[e_id]+=w
 					except:
 						#LOTS OF FAILED ROUTES CURRENTLY
-						#print("failed on",s_id,t_id)
+						print("failed on",s_id,t_id)
 						pass
 	
 			routes=[]

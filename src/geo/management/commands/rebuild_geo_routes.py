@@ -55,9 +55,9 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 		else:
 			edges[tv_id][sv_id]=edge_id
 	print(G)
+	routes={}
 	for groupby_pair in groupby_pairs:
 		print(groupby_pair)
-		routes=[]
 		#pull all the a/b value pairs
 		#on all these a/b variable pairs
 		alice,bob=groupby_pair
@@ -91,8 +91,6 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 		print("unique a/b pairs",len(abpairs))
 		
 		#now find shortest path in the network for each unique alice/bob pair
-		
-		routes={}
 		
 		print("finding routes")
 		
@@ -208,12 +206,12 @@ class Command(BaseCommand):
 				groupby_pairs.append([a,b])'''
 		
 		groupby_pairs=[
-			["voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id",
-			"voyage_itinerary__imp_principal_port_slave_dis__geo_location__id"
-			],
 			["voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
 			"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id"
-			]
+			],
+			["voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id",
+"voyage_itinerary__imp_principal_port_slave_dis__geo_location__id"
+]
 		]
 		
 		pp.pprint(groupby_pairs)
@@ -229,7 +227,8 @@ class Command(BaseCommand):
 		os.makedirs(base_filepath,exist_ok=True)
 		fpath=os.path.join(base_filepath,'routes.json')
 		d=open(fpath,'w')
-		d.write(json.dumps({}))
+		blank={}
+		d.write(json.dumps(blank))
 		d.close()
 		
 		def update_routes(newroutes,dataset):
@@ -243,9 +242,19 @@ class Command(BaseCommand):
 			if dataset not in routes:
 				routes[dataset]={}
 			
+			n=0
+			for s in routes[dataset]:
+				for t in routes[dataset][s]:
+					n+=1
+			
+			c=0
+			
+			if dataset not in routes:
+				routes[dataset]={}
+			
 			for s_id in newroutes:
 				for t_id in newroutes[s_id]:
-					print(s_id,t_id)
+					#print(s_id,t_id)
 					v=newroutes[s_id][t_id]
 					if s_id not in routes[dataset]:
 						routes[dataset][s_id]={t_id:v}
@@ -262,6 +271,16 @@ class Command(BaseCommand):
 					else:
 						routes[dataset][t_id][s_id]=rv
 					
+					c+=1
+			
+			n=0
+			
+			for s in routes[dataset]:
+				for t in routes[dataset][s]:
+					n+=1
+			
+			print("total nodes post-add:", n)
+			
 			d=open(fpath,'w')
 			d.write(json.dumps(routes))
 			d.close()

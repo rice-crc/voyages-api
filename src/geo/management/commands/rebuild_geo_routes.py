@@ -56,6 +56,7 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 			edges[tv_id][sv_id]=edge_id
 	print(G)
 	for groupby_pair in groupby_pairs:
+		print(groupby_pair)
 		routes=[]
 		#pull all the a/b value pairs
 		#on all these a/b variable pairs
@@ -142,17 +143,7 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 				c+=1
 			
 			if len(waypoints)>3:
-				#print(waypoints)
 				route=calControlPoint_new(waypoints,route_edge_ids)
-			
-				#source_location=locations.filter(**{'id':s_id})[0]
-				#target_location=locations.filter(**{'id':t_id})[0]
-				'''for k in route:
-					r2=route[k]
-					r2.append(10)
-					print(r2)'''
-				#route=Route(source=source_location,target=target_location,dataset=dataset,shortest_route=json.dumps(waypoints))
-				#route.save()
 				if s_id not in routes:
 					routes[s_id]={t_id:route}
 				else:

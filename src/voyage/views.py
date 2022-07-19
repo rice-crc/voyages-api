@@ -353,139 +353,139 @@ class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		try:
-			st=time.time()
-			print("+++++++\nusername:",request.auth.user)
-			params=dict(request.POST)
-			groupby_fields=params.get('groupby_fields')
-			value_field_tuple=params.get('value_field_tuple')
-			queryset=Voyage.objects.all()
-			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
-			ids=[i[0] for i in queryset.values_list('id')]
+# 		try:
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		params=dict(request.POST)
+		groupby_fields=params.get('groupby_fields')
+		value_field_tuple=params.get('value_field_tuple')
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		ids=[i[0] for i in queryset.values_list('id')]
 
-			u2=FLASK_BASE_URL+'crosstabs/'
-			d2=params
-			d2['ids']=ids
-			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-			j=json.loads(r.text)
+		u2=FLASK_BASE_URL+'crosstabs/'
+		d2=params
+		d2['ids']=ids
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		j=json.loads(r.text)
 
-			abpairs={int(float(k)):{int(float(v)):j[k][v] for v in j[k]} for k in j}
-			dataset=int(params['dataset'][0])
+		abpairs={int(float(k)):{int(float(v)):j[k][v] for v in j[k]} for k in j}
+		dataset=int(params['dataset'][0])
 
-			routes=[]
-			node_ids=[]
+		routes=[]
+		node_ids=[]
+	
+		def calControlPoint(points, smoothing=0.3):
+			#if i passed this function
+			##not just (x,y) tuples
+			##but (x,y,id) triples
+			###where id was unique for each AB BC CD edge
+			###could we reformat the output to look like [n node_ids],[n-1 edge_ids],[(n-1)*2 control points]
+			### or {edge_id:[[[Ax,Ay],[Bx,By]],[[ctrl1x,ctrl1y],[ctrl2x,ctrl2y]]]}
+			A, B, C=points[:3]
+			Controlx = B[0] + smoothing*(A[0]-C[0])
+			Controly = B[1] + smoothing*(A[1]-C[1])
+			result = [A, [[Controlx, Controly], B]]
+			for i in range(2, len(points)):
+				if i == len(points)-1:
+					start_point, mid_point, end_point = points[i-1], points[i], points[i]
+				else:
+					start_point, mid_point, end_point = points[i-1], points[i], points[i+1]
+				next_Controlx1 = start_point[0]*2 - Controlx
+				next_Controly1 = start_point[1]*2 - Controly
+
+				next_Controlx2 = mid_point[0] + smoothing*(start_point[0] - end_point[0])
+				next_Controly2 = mid_point[1] + smoothing*(start_point[1] - end_point[1])
+
+				result.append([[next_Controlx1, next_Controly1], [next_Controlx2, next_Controly2], mid_point])
+				Controlx, Controly = next_Controlx2, next_Controly2
+			return result
+	
+	
+		route_legs={}
+		route_weights={}
+
+		for s_id in abpairs:
+			node_ids.append(s_id)
+			for t_id in abpairs[s_id]:
+				node_ids.append(t_id)
+				w=int(abpairs[s_id][t_id])
+				#try:
+				route=voyage_routes[str(dataset)][str(s_id)][str(t_id)]
+				##Currently suppressing any straight-line routes
+				##As that typically means they've got bad geo data so shouldn't be shown anyways
+				###BUT I need to go back and fix it
 		
-			def calControlPoint(points, smoothing=0.3):
-				#if i passed this function
-				##not just (x,y) tuples
-				##but (x,y,id) triples
-				###where id was unique for each AB BC CD edge
-				###could we reformat the output to look like [n node_ids],[n-1 edge_ids],[(n-1)*2 control points]
-				### or {edge_id:[[[Ax,Ay],[Bx,By]],[[ctrl1x,ctrl1y],[ctrl2x,ctrl2y]]]}
-				A, B, C=points[:3]
-				Controlx = B[0] + smoothing*(A[0]-C[0])
-				Controly = B[1] + smoothing*(A[1]-C[1])
-				result = [A, [[Controlx, Controly], B]]
-				for i in range(2, len(points)):
-					if i == len(points)-1:
-						start_point, mid_point, end_point = points[i-1], points[i], points[i]
+				for e_id in route:
+					if e_id not in route_legs:
+						route_legs[e_id]=[route[e_id]]
 					else:
-						start_point, mid_point, end_point = points[i-1], points[i], points[i+1]
-					next_Controlx1 = start_point[0]*2 - Controlx
-					next_Controly1 = start_point[1]*2 - Controly
-
-					next_Controlx2 = mid_point[0] + smoothing*(start_point[0] - end_point[0])
-					next_Controly2 = mid_point[1] + smoothing*(start_point[1] - end_point[1])
-
-					result.append([[next_Controlx1, next_Controly1], [next_Controlx2, next_Controly2], mid_point])
-					Controlx, Controly = next_Controlx2, next_Controly2
-				return result
-		
-		
-			route_legs={}
-			route_weights={}
-
-			for s_id in abpairs:
-				node_ids.append(s_id)
-				for t_id in abpairs[s_id]:
-					node_ids.append(t_id)
-					w=int(abpairs[s_id][t_id])
-					try:
-						route=voyage_routes[str(dataset)][str(s_id)][str(t_id)]
-						##Currently suppressing any straight-line routes
-						##As that typically means they've got bad geo data so shouldn't be shown anyways
-						###BUT I need to go back and fix it
+						route_legs[e_id].append(route[e_id])
 				
-						for e_id in route:
-							if e_id not in route_legs:
-								route_legs[e_id]=[route[e_id]]
-							else:
-								route_legs[e_id].append(route[e_id])
-						
-				
-							if e_id not in route_weights:
-								route_weights[e_id]=w
-							else:
-								route_weights[e_id]+=w
-					except:
-						##LOTS OF FAILED ROUTES CURRENTLY
-						#print("failed on",s_id,t_id)
-						pass
 		
-			routes=[]
+					if e_id not in route_weights:
+						route_weights[e_id]=w
+					else:
+						route_weights[e_id]+=w
+				#except:
+					##LOTS OF FAILED ROUTES CURRENTLY
+					#print("failed on",s_id,t_id)
+					#pass
+	
+		routes=[]
+	
+		for e_id in route_legs:
 		
-			for e_id in route_legs:
-			
-				legs=route_legs[e_id]
-			
-				#print(legs)
-			
-				controls_x1=[leg[1][0][0] for leg in legs]
-				controls_x2=[leg[1][1][0] for leg in legs]
+			legs=route_legs[e_id]
+		
+			#print(legs)
+		
+			controls_x1=[leg[1][0][0] for leg in legs]
+			controls_x2=[leg[1][1][0] for leg in legs]
 
-				controls_y1=[leg[1][0][1] for leg in legs]
-				controls_y2=[leg[1][1][1] for leg in legs]
-			
-			
-				controls_x1=sum(controls_x1)/len(controls_x1)
-				controls_y1=sum(controls_y1)/len(controls_y1)
-				controls_x2=sum(controls_x2)/len(controls_x2)
-				controls_y2=sum(controls_y2)/len(controls_y2)
-			
-				control1=[controls_x1,controls_y1]
-				control2=[controls_x2,controls_y2]
-			
-				consolidated_leg=[[legs[0][0][0],legs[0][0][1]],[control1,control2],route_weights[e_id]]
-			
-				routes.append(consolidated_leg)
-			
-			node_ids=list(set(node_ids))
+			controls_y1=[leg[1][0][1] for leg in legs]
+			controls_y2=[leg[1][1][1] for leg in legs]
+		
+		
+			controls_x1=sum(controls_x1)/len(controls_x1)
+			controls_y1=sum(controls_y1)/len(controls_y1)
+			controls_x2=sum(controls_x2)/len(controls_x2)
+			controls_y2=sum(controls_y2)/len(controls_y2)
+		
+			control1=[controls_x1,controls_y1]
+			control2=[controls_x2,controls_y2]
+		
+			consolidated_leg=[[legs[0][0][0],legs[0][0][1]],[control1,control2],route_weights[e_id]]
+		
+			routes.append(consolidated_leg)
+		
+		node_ids=list(set(node_ids))
 
-			geojson={"type": "FeatureCollection", "features": []}
+		geojson={"type": "FeatureCollection", "features": []}
 
-			node_ids=list(set(node_ids))
+		node_ids=list(set(node_ids))
 
-			locations=Location.objects.all()
-			nodes=locations.filter(pk__in=node_ids)
-			for node in nodes:
-				node_id=node.id
-				longitude=node.longitude
-				latitude=node.latitude
-				name=node.name
+		locations=Location.objects.all()
+		nodes=locations.filter(pk__in=node_ids)
+		for node in nodes:
+			node_id=node.id
+			longitude=node.longitude
+			latitude=node.latitude
+			name=node.name
 
-				geojsonfeature={
-					"type": "Feature",
-					"id":node_id,
-					"geometry": {"type":"Point","coordinates": [longitude,latitude]},
-					"properties":{"name":name}
-				}
+			geojsonfeature={
+				"type": "Feature",
+				"id":node_id,
+				"geometry": {"type":"Point","coordinates": [longitude,latitude]},
+				"properties":{"name":name}
+			}
 
-				geojson['features'].append(geojsonfeature)
+			geojson['features'].append(geojsonfeature)
 
-			output={"points":geojson,"routes":routes}
+		output={"points":geojson,"routes":routes}
 
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output,safe=False)
-		except:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(output,safe=False)
+		# except:
+# 			print("failed\n+++++++")
+# 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)

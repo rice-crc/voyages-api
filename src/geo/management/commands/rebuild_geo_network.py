@@ -122,7 +122,7 @@ class Command(BaseCommand):
 			## and along the way save the index of each node from the js file
 			## because the edges' source/target values are keyed against these indices
 			routenode_js_to_db_map={}
-			print('+++++++\nhighways: creating new oceanic waypoints and edges based on %s oceanic graph (routeNodes.js)' %network_name)
+			print('+++++++\nhighways: creating new oceanic waypoints and edges based on %s oceanic graph (%s)' %(network_name,network_fname))
 			print('--->oceanic waypoints')
 			for routenode in routenodes_coordinates:
 				latitude,longitude=routenode
@@ -178,12 +178,19 @@ class Command(BaseCommand):
 				location_type=location_types.filter(**{'name':location_type_name})[0]
 				these_locations=locations.filter(**{'location_type':location_type})
 				
+				
+				
 				waypoints=locations.filter(
 					**{'location_type':waypoint_location_type,'dataset':dataset}
 				)
 		
 				for location in these_locations:
+					
+					# if location.id in [3227,2799,3470,2823,3415]:
+# 						print("BAD NODES!!!",location,location.id)
+					
 					if location.longitude!=None and location.latitude!= None:
+
 						distances=[
 							(
 								sqrt(
@@ -195,6 +202,11 @@ class Command(BaseCommand):
 							]
 						closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
 						distance=min([i[0] for i in distances])
+						
+						
+						#if location.id in [3227,2799,3470,2823,3415]:
+# 							print(closest_neighbor)
+						
 						
 						##create an on ramp and an off ramp
 						

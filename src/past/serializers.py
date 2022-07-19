@@ -73,7 +73,8 @@ class EnslaverAliasSerializer(DynamicFieldsModelSerializer):
 	transactions=EnslaverInRelationSerializer(many=True,read_only=True)
 	class Meta:
 		model=EnslaverAlias
-		fields='__all__'
+		#including the 'identity' field here breaks it, so i'm excluding
+		fields=['transactions','id','alias']
 
 class EnslavedEnslaverSerializer(DynamicFieldsModelSerializer):
 	principal_location=PlaceSerializer(many=False)
@@ -138,36 +139,6 @@ class EnslavedSerializer(DynamicFieldsModelSerializer):
 		model=Enslaved
 		fields='__all__'
 
-
-# fields=[
-# 'post_disembark_location',
-# 'voyage',
-# 'captive_fate',
-# 'sources_conn',
-# 'transactions',
-# 'captive_status',
-# 'id',
-# 'documented_name',
-# 'name_first',
-# 'name_second',
-# 'name_third',
-# 'modern_name',
-# 'editor_modern_names_certainty',
-# 'age',
-# 'gender',
-# 'height',
-# 'skin_color',
-# 'last_known_date',
-# 'last_known_date_dd',
-# 'last_known_date_mm',
-# 'last_known_year_yyyy',
-# 'dataset',
-# 'notes',
-# 'sources',
-# ]
-
-
-
 class EnslaverSerializer(DynamicFieldsModelSerializer):
 	principal_location=PlaceSerializer(many=False)
 	alias=EnslaverAliasSerializer(many=False)
@@ -175,34 +146,6 @@ class EnslaverSerializer(DynamicFieldsModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
-		
-'''fields=[
-	'principal_alias',
-	'birth_year ',
-	'birth_month ',
-	'birth_day ',
-	'birth_place',
-	'death_year ',
-	'death_month ',
-	'death_day ',
-	'death_place',
-	'father_name ',
-	'father_occupation ',
-	'mother_name',
-	'first_spouse_name ',
-	'first_marriage_date ',
-	'second_spouse_name ',
-	'second_marriage_date',
-	'probate_date ',
-	'will_value_pounds ',
-	'will_value_dollars ',
-	'will_court ',
-	'text_id',
-	'first_active_year',
-	'last_active_year',
-	'number_enslaved',
-	'principal_location'
-	]'''
 		
 
 

@@ -429,7 +429,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 								route_weights[e_id]+=w
 					except:
 						#LOTS OF FAILED ROUTES CURRENTLY
-						print("failed on",s_id,t_id)
+						#print("failed on",s_id,t_id)
 						pass
 	
 			routes=[]

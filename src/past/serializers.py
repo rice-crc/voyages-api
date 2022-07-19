@@ -69,12 +69,6 @@ class EnslaverInRelationSerializer(DynamicFieldsModelSerializer):
 		model=EnslaverInRelation
 		fields='__all__'
 
-class EnslaverAliasSerializer(DynamicFieldsModelSerializer):
-	transactions=EnslaverInRelationSerializer(many=True,read_only=True)
-	class Meta:
-		model=EnslaverAlias
-		#including the 'identity' field here breaks it, so i'm excluding
-		fields=['transactions','id','alias']
 
 class EnslavedEnslaverSerializer(DynamicFieldsModelSerializer):
 	principal_location=PlaceSerializer(many=False)
@@ -128,6 +122,13 @@ class CaptiveStatusSerializer(DynamicFieldsModelSerializer):
 		model=CaptiveStatus
 		fields='__all__'
 
+class EnslaverVoyageConnectionSerializer(DynamicFieldsModelSerializer):
+	voyage=VoyageSerializer(many=True,read_only=True)
+	role=EnslaverRoleSerializer(many=False)
+	class Meta:
+		model=EnslaverVoyageConnection
+		fields='__all__'
+
 class EnslavedSerializer(DynamicFieldsModelSerializer):
 	post_disembark_location=PlaceSerializer(many=False)
 	voyage=VoyageSerializer(many=False)
@@ -138,6 +139,15 @@ class EnslavedSerializer(DynamicFieldsModelSerializer):
 	class Meta:
 		model=Enslaved
 		fields='__all__'
+
+class EnslaverAliasSerializer(DynamicFieldsModelSerializer):
+	transactions=EnslaverInRelationSerializer(many=True,read_only=True)
+	enslaver_voyage=EnslaverVoyageConnectionSerializer(many=True,read_only=True)
+	class Meta:
+		model=EnslaverAlias
+		#including the 'identity' field here breaks it, so i'm excluding
+		fields=['transactions','id','alias','enslaver_voyage']
+
 
 class EnslaverSerializer(DynamicFieldsModelSerializer):
 	principal_location=PlaceSerializer(many=False)

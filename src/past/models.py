@@ -220,6 +220,7 @@ class EnslaverVoyageConnection(models.Model):
 
     enslaver_alias = models.ForeignKey('EnslaverAlias',
                                        null=False,
+                                       related_name='enslaver_voyage',
                                        on_delete=models.CASCADE)
     voyage = models.ForeignKey('voyage.Voyage',
                                null=False,

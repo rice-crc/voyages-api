@@ -245,6 +245,7 @@ class Command(BaseCommand):
 			
 			for s_id in newroutes:
 				for t_id in newroutes[s_id]:
+					print(s_id,t_id)
 					v=newroutes[s_id][t_id]
 					if s_id not in routes[dataset]:
 						routes[dataset][s_id]={t_id:v}

@@ -9,19 +9,26 @@ import re
 def bottomout(input,keychain):
 	if len(keychain)>0:
 		k=keychain.pop(0)
-		if type(input[k])==collections.OrderedDict:
-			r=bottomout(input[k],list(keychain))
-		##this allows it to return split fields (which occur with many to many relations, like voyage_ship_owner__name)
-		elif type(input[k])==list and len(keychain)>0:
-			k2=keychain.pop(0)
-			#you can use this to test for bad entries in the options file
+		if type(input)==list:
 			r=[]
-			for i in input[k]:
-				keychain2=list(keychain)
-				r.append(bottomout(i[k2],keychain2))
-			return(r)
+			keychain3=list([k]+list(keychain))
+			for i in input:
+				keychain4=list(keychain3)
+				r.append(bottomout(i,keychain4))
 		else:
-			r=input[k]
+			if type(input[k])==collections.OrderedDict:
+				r=bottomout(input[k],list(keychain))
+			##this allows it to return split fields (which occur with many to many relations, like voyage_ship_owner__name)
+			elif type(input[k])==list and len(keychain)>0:
+				k2=keychain.pop(0)
+				#you can use this to test for bad entries in the options file
+				r=[]
+				for i in input[k]:
+					keychain2=list(keychain)
+					r.append(bottomout(i[k2],keychain2))
+				return(r)
+			else:
+				r=input[k]
 	else:
 		r=[]
 	return(r)

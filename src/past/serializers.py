@@ -141,8 +141,8 @@ class EnslavedSerializer(DynamicFieldsModelSerializer):
 
 class EnslaverSerializer(DynamicFieldsModelSerializer):
 	principal_location=PlaceSerializer(many=False)
-	alias=EnslaverAliasSerializer(many=False)
-	enslaver_sources=EnslaverIdentitySourceConnectionSerializer(many=True)
+	alias=EnslaverAliasSerializer(many=True,read_only=True)
+	enslaver_sources=EnslaverIdentitySourceConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'

@@ -85,7 +85,10 @@ class Command(BaseCommand):
 						#this gets the table label from m2m connections on reverse/related field lookups
 						#so, for instance, the reverse lookup from voyagesourceconnections to voyage
 						##gets returns the label "voyage source connection"
-						label=serializer.fields[field].child.Meta.model._meta.verbose_name
+						try:
+							label=serializer.fields[field].child.Meta.model._meta.verbose_name
+						except:
+							label=serializer.child[field].__dict__['_field'].__dict__['label']
 					else:						
 						try:
 							label=serializer.child.fields[field].Meta.model._meta.verbose_name

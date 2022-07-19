@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.views.generic.list import ListView
+from collections import Counter
 import networkx as nx
 import urllib
 import json
@@ -384,7 +385,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 
 			routes=[]
 			node_ids=[]
-	
+
 			def calControlPoint(points, smoothing=0.3):
 				#if i passed this function
 				##not just (x,y) tuples
@@ -410,11 +411,13 @@ class VoyageAggRoutes(generics.GenericAPIView):
 					result.append([[next_Controlx1, next_Controly1], [next_Controlx2, next_Controly2], mid_point])
 					Controlx, Controly = next_Controlx2, next_Controly2
 				return result
-	
-	
+
+
 			route_legs={}
 			route_weights={}
-
+		
+			failedroutes=[]
+		
 			for s_id in abpairs:
 				node_ids.append(s_id)
 				for t_id in abpairs[s_id]:
@@ -425,50 +428,54 @@ class VoyageAggRoutes(generics.GenericAPIView):
 						##Currently suppressing any straight-line routes
 						##As that typically means they've got bad geo data so shouldn't be shown anyways
 						###BUT I need to go back and fix it
-		
+	
 						for e_id in route:
 							if e_id not in route_legs:
 								route_legs[e_id]=[route[e_id]]
 							else:
 								route_legs[e_id].append(route[e_id])
-				
-		
+			
+	
 							if e_id not in route_weights:
 								route_weights[e_id]=w
 							else:
 								route_weights[e_id]+=w
 					except:
 						#LOTS OF FAILED ROUTES CURRENTLY
-						print("failed on",s_id,t_id)
-						pass
-	
+					
+						failedroutes.append(s_id)
+						failedroutes.append(t_id)
+			#print(failedroutes)
+			countedfailures=Counter(failedroutes)
+			print("10 most common failed nodes:",[countedfailures.most_common(10)])
+
 			routes=[]
-	
+
 			for e_id in route_legs:
-		
+	
 				legs=route_legs[e_id]
-		
+	
 				#print(legs)
-		
+	
 				controls_x1=[leg[1][0][0] for leg in legs]
 				controls_x2=[leg[1][1][0] for leg in legs]
 
 				controls_y1=[leg[1][0][1] for leg in legs]
 				controls_y2=[leg[1][1][1] for leg in legs]
-		
-		
+	
+	
 				controls_x1=sum(controls_x1)/len(controls_x1)
 				controls_y1=sum(controls_y1)/len(controls_y1)
 				controls_x2=sum(controls_x2)/len(controls_x2)
 				controls_y2=sum(controls_y2)/len(controls_y2)
-		
+	
 				control1=[controls_x1,controls_y1]
 				control2=[controls_x2,controls_y2]
-		
+	
 				consolidated_leg=[[legs[0][0][0],legs[0][0][1]],[control1,control2],route_weights[e_id]]
-		
+	
 				routes.append(consolidated_leg)
-		
+	
 			node_ids=list(set(node_ids))
 
 			geojson={"type": "FeatureCollection", "features": []}
@@ -498,4 +505,4 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			return JsonResponse(output,safe=False)
 		except:
 			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)

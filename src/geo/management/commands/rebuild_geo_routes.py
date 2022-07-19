@@ -225,12 +225,6 @@ class Command(BaseCommand):
 			]
 		]
 		
-		groupby_pairs=[
-			["voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
-			"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id"
-			]
-		]
-		
 		pp.pprint(groupby_pairs)
 		
 		#and of course we need to separate the datasets' for voyages and adjacencies

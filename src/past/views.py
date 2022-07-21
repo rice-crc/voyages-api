@@ -20,8 +20,6 @@ from tools.nest import *
 from tools.reqs import *
 import collections
 
-enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
-enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
 
 class SingleEnslaved(generics.GenericAPIView):
 	def get(self,request,enslaved_id):
@@ -32,6 +30,7 @@ class SingleEnslaved(generics.GenericAPIView):
 class SingleEnslavedVar(TemplateView):
 	template_name='singlevar.html'
 	def get(self,request,enslaved_id,varname):
+		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
 		enslaved_record=Enslaved.objects.get(pk=enslaved_id)
 		serialized=EnslavedSerializer(enslaved_record,many=False).data
 		keychain=varname.split('__')
@@ -64,6 +63,7 @@ class EnslavedList(generics.GenericAPIView):
 		print("+++++++\nusername:",request.auth.user)
 		print("FETCHING...")
 		try:
+			enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
 			queryset=Enslaved.objects.all()
 			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,auto_prefetch=True)
 			if len(error_messages)==0:
@@ -209,6 +209,7 @@ class EnslaverList(generics.GenericAPIView):
 		print("+++++++\nusername:",request.auth.user)# 
 		try:
 			st=time.time()
+			enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
 			queryset=EnslaverIdentity.objects.all()
 			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaver_options,auto_prefetch=True)
 			if len(error_messages)==0:
@@ -259,7 +260,7 @@ class EnslavedAggregations(generics.GenericAPIView):
 			aggregations=params.get('aggregate_fields')
 			print("aggregations:",aggregations)
 			queryset=Enslaved.objects.all()
-		
+			enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
 			aggregation,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,retrieve_all=True)
 			output_dict={}
 			if len(error_messages)==0 and type(aggregation)==list:
@@ -289,7 +290,9 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		j=options_handler('past/enslaved_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
+		
 		print("+++++++\nusername:",request.auth.user)
+		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
 		try:
 			st=time.time()
 			params=dict(request.POST)
@@ -336,6 +339,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 		st=time.time()
 		print("+++++++\nusername:",request.auth.user)
 		try:
+			enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
 			params=dict(request.POST)
 			aggregations=params.get('aggregate_fields')
 			print("aggregations:",aggregations)

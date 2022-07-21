@@ -119,11 +119,6 @@
     "label": "enslavement relation",
     "flatlabel": "Enslaver alias : Transactions : enslavement relation"
   },
-  "alias__transactions__transaction__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Id",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : Id"
-  },
   "alias__transactions__transaction__relation_type": {
     "type": "table",
     "label": "relation type",
@@ -5424,35 +5419,255 @@
     "label": "Child of",
     "flatlabel": "Enslaver alias : Transactions : enslavement relation : place : Location : Child of"
   },
-  "alias__transactions__transaction__date": {
+  "alias__transactions__transaction__enslaved_person": {
+    "type": "table",
+    "label": "enslaved in relation",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation"
+  },
+  "alias__transactions__transaction__enslaved_person__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : Id"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved": {
+    "type": "table",
+    "label": "enslaved",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Id"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location": {
+    "type": "table",
+    "label": "post disembark location",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : ID"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location": {
+    "type": "table",
+    "label": "Location",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : ID"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__spatial_extent": {
+    "type": "table",
+    "label": "Polygon",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Polygon"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__spatial_extent__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Polygon : ID"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__spatial_extent__shape": {
+    "type": "<class 'rest_framework.fields.JSONField'>",
+    "label": "Geojson Polygon",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Polygon : Geojson Polygon"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__location_type": {
+    "type": "table",
+    "label": "Location Type",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Location Type"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__location_type__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Location Type : ID"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__location_type__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Date",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : Date"
+    "label": "Geographic Location Type",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Location Type : Geographic Location Type"
   },
-  "alias__transactions__transaction__date_dd": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Date dd",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : Date dd"
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Location name",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Location name"
   },
-  "alias__transactions__transaction__date_mm": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Date mm",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : Date mm"
-  },
-  "alias__transactions__transaction__date_yyyy": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Date yyyy",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : Date yyyy"
-  },
-  "alias__transactions__transaction__amount": {
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Amount",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : Amount"
+    "label": "Longitude of Centroid",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Longitude of Centroid"
   },
-  "alias__transactions__transaction__text_ref": {
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of Centroid",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Latitude of Centroid"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "SPSS code",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : SPSS code"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Trans-atlantic (0), intra-american (1), intra-african (2)",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Trans-atlantic (0), intra-american (1), intra-african (2)"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__show_on_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on map",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Show on map"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__show_on_main_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on main map",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Show on main map"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__show_on_voyage_map": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Show on voyage map",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Show on voyage map"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__post_disembark_location__geo_location__child_of": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Child of",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : post disembark location : Location : Child of"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__captive_fate": {
+    "type": "table",
+    "label": "captive fate",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : captive fate"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__captive_fate__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : captive fate : Id"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__captive_fate__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Text ref",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : Text ref"
+    "label": "Name",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : captive fate : Name"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__captive_status": {
+    "type": "table",
+    "label": "captive status",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : captive status"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__captive_status__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : captive status : Id"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__captive_status__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : captive status : Name"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__documented_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Documented name",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Documented name"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__name_first": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name first",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Name first"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__name_second": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name second",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Name second"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__name_third": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name third",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Name third"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__modern_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Modern name",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Modern name"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__editor_modern_names_certainty": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Editor modern names certainty",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Editor modern names certainty"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__age": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Age",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Age"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__gender": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Gender",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Gender"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__height": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Height in inches",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Height in inches"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__skin_color": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Skin color",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Skin color"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__last_known_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Last known date",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Last known date"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__last_known_date_dd": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Last known date dd",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Last known date dd"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__last_known_date_mm": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Last known date mm",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Last known date mm"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__last_known_year_yyyy": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Last known year yyyy",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Last known year yyyy"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__dataset": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Dataset",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Dataset"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__notes": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Notes",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Notes"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__language_group": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Language group",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Language group"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__register_country": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Register country",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Register country"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__voyage": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Voyage",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Voyage"
+  },
+  "alias__transactions__transaction__enslaved_person__enslaved__sources": {
+    "type": "<class 'rest_framework.relations.ManyRelatedField'>",
+    "label": "Sources",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : enslaved : Sources"
+  },
+  "alias__transactions__transaction__enslaved_person__transaction": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Transaction",
+    "flatlabel": "Enslaver alias : Transactions : enslavement relation : enslaved in relation : Transaction"
   },
   "alias__transactions__role": {
     "type": "table",

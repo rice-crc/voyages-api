@@ -37,6 +37,16 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 			pp.pprint(selected_fields_dict)
 			self=nest_selected_fields(self,selected_fields_dict)
 
+class CaptiveFateSerializer(DynamicFieldsModelSerializer):
+	class Meta:
+		model=CaptiveFate
+		fields='__all__'
+
+class CaptiveStatusSerializer(DynamicFieldsModelSerializer):
+	class Meta:
+		model=CaptiveStatus
+		fields='__all__'
+
 class EnslaverIdentitySourceConnectionSerializer(DynamicFieldsModelSerializer):
 	source=VoyageSourcesSerializer(many=False)
 	class Meta:
@@ -53,14 +63,25 @@ class EnslavementRelationTypeSerializer(DynamicFieldsModelSerializer):
 		model=EnslavementRelationType
 		fields='__all__'
 
+class EnslaverEnslavedSerializer(DynamicFieldsModelSerializer):
+	class Meta:
+		model=Enslaved
+		fields=['id','documented_name']
+
+class EnslaverEnslavedInRelationSerializer(DynamicFieldsModelSerializer):
+	enslaved=EnslaverEnslavedSerializer(many=False)
+	class Meta:
+		model=EnslavedInRelation
+		fields='__all__'
+
 class EnslaverEnslavementRelationSerializer(DynamicFieldsModelSerializer):
 	relation_type=EnslavementRelationTypeSerializer(many=False)
 	source=VoyageSourcesSerializer(many=False)
-	voyage=VoyageSerializer(many=False)
 	place=PlaceSerializer(many=False)
+	enslaved_person=EnslaverEnslavedInRelationSerializer(many=True,read_only=True)
 	class Meta:
 		model=EnslavementRelation
-		fields='__all__'
+		fields=['relation_type','source','voyage','place','enslaved_person']
 
 class EnslaverInRelationSerializer(DynamicFieldsModelSerializer):
 	transaction=EnslaverEnslavementRelationSerializer(many=False)
@@ -110,16 +131,6 @@ class EnslavedSourceConnectionSerializer(DynamicFieldsModelSerializer):
 	source=VoyageSourcesSerializer(many=False)
 	class Meta:
 		model=EnslavedSourceConnection
-		fields='__all__'
-
-class CaptiveFateSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=CaptiveFate
-		fields='__all__'
-
-class CaptiveStatusSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=CaptiveStatus
 		fields='__all__'
 
 class EnslaverVoyageConnectionSerializer(DynamicFieldsModelSerializer):

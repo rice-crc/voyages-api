@@ -207,42 +207,42 @@ class EnslaverList(generics.GenericAPIView):
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("+++++++\nusername:",request.auth.user)# 
-# 		try:
-		st=time.time()
-		queryset=EnslaverIdentity.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaver_options,auto_prefetch=True)
-		if len(error_messages)==0:
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-			read_serializer=EnslaverSerializer(queryset,many=True)
-			serialized=read_serializer.data
+		try:
+			st=time.time()
+			queryset=EnslaverIdentity.objects.all()
+			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaver_options,auto_prefetch=True)
+			if len(error_messages)==0:
+				headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+				read_serializer=EnslaverSerializer(queryset,many=True)
+				serialized=read_serializer.data
 		
-			outputs=[]
+				outputs=[]
 	
-			hierarchical=request.POST.get('hierarchical')
-			if str(hierarchical).lower() in ['false','0','f','n']:
-				hierarchical=False
-			else:
-				hierarchical=True
+				hierarchical=request.POST.get('hierarchical')
+				if str(hierarchical).lower() in ['false','0','f','n']:
+					hierarchical=False
+				else:
+					hierarchical=True
 	
-			if hierarchical==False:
-				if selected_fields==[]:
-					selected_fields=[i for i in enslaver_options]
+				if hierarchical==False:
+					if selected_fields==[]:
+						selected_fields=[i for i in enslaver_options]
 		
-				for s in serialized:
-					d={}
-					for selected_field in selected_fields:
-						keychain=selected_field.split('__')
-						bottomval=bottomout(s,list(keychain))
-						d[selected_field]=bottomval
-					outputs.append(d)
+					for s in serialized:
+						d={}
+						for selected_field in selected_fields:
+							keychain=selected_field.split('__')
+							bottomval=bottomout(s,list(keychain))
+							d[selected_field]=bottomval
+						outputs.append(d)
+				else:
+					outputs=serialized
+				print("Internal Response Time:",time.time()-st,"\n+++++++")
+				return JsonResponse(outputs,safe=False,headers=headers)
 			else:
-				outputs=serialized
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(outputs,safe=False,headers=headers)
-		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
-# 		except:
-# 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+		except:
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
 # Basic statistics
 ## takes a numeric variable

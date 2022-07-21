@@ -81,7 +81,7 @@ class EnslaverEnslavementRelationSerializer(DynamicFieldsModelSerializer):
 	enslaved_person=EnslaverEnslavedInRelationSerializer(many=True,read_only=True)
 	class Meta:
 		model=EnslavementRelation
-		fields=['relation_type','source','voyage','place','enslaved_person']
+		fields=['relation_type','source','voyage','place','enslaved_person','amount']
 
 class EnslaverInRelationSerializer(DynamicFieldsModelSerializer):
 	transaction=EnslaverEnslavementRelationSerializer(many=False)

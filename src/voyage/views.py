@@ -415,9 +415,9 @@ class VoyageAggRoutes(generics.GenericAPIView):
 
 			route_legs={}
 			route_weights={}
-	
+
 			failedroutes=[]
-	
+
 			for s_id in abpairs:
 				node_ids.append(s_id)
 				for t_id in abpairs[s_id]:
@@ -428,12 +428,12 @@ class VoyageAggRoutes(generics.GenericAPIView):
 						##Currently suppressing any straight-line routes
 						##As that typically means they've got bad geo data so shouldn't be shown anyways
 						###BUT I need to go back and fix it
-				
+	
 						for e_id in route:
-					
+		
 							if type(e_id)==list:
 								print(s_id,t_id)
-					
+		
 							if e_id not in route_legs:
 								route_legs[e_id]=[route[e_id]]
 							else:
@@ -448,16 +448,9 @@ class VoyageAggRoutes(generics.GenericAPIView):
 						#LOTS OF FAILED ROUTES CURRENTLY
 						if [s_id,t_id] not in failedroutes:
 							failedroutes.append([s_id,t_id])
-		
+
 			print("failed routes (probably nulled lat/longs):",failedroutes)
-		
-	# 		locations=Location.objects.all()
-	# 		for failedroute in failedroutes:
-	# 			s_id,t_id=failedroute
-	# 			s=locations.get(pk=s_id)
-	# 			t=locations.get(pk=t_id)
-	# 			print([s.id,s.name,s.latitude,s.longitude,"//",t.id,t.name,t.latitude,t.longitude])
-		
+
 			routes=[]
 
 			for e_id in route_legs:
@@ -513,6 +506,6 @@ class VoyageAggRoutes(generics.GenericAPIView):
 
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output,safe=False)
- 		except:
- 			print("failed\n+++++++")
- 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+		except:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)

@@ -28,10 +28,10 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 	##we get all the voyage endpoints (port, region, broad_region)
 	##and let's also make sure that "places" with no long or lat are not in our results
 	qobjstrs=["Q(%s='%s')" %('location_type__name',endpoint_type) for endpoint_type in ["Port","Region","Broad Region"]]
-	qobjstrs.append('Q(latitude__isnull=False)')
-	qobjstrs.append('Q(longitude__isnull=False)')
+	#qobjstrs.append('Q(latitude__isnull=False)')
+	#qobjstrs.append('Q(longitude__isnull=False)')
 	voyage_endpoints=locations.filter(eval('|'.join(qobjstrs)))
-
+	
 	##we then feed those into a networkx graph:
 	## nodes (waypoints and endpoints)
 	## edges (adjacencies)
@@ -61,9 +61,11 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 		#pull all the a/b value pairs
 		#on all these a/b variable pairs
 		alice,bob=groupby_pair
+		
+		
 		data={
 			'selected_fields':groupby_pair,
-			'dataset':[dataset,dataset]
+			'dataset':[dataset,dataset],
 		}
 		for sp in extra_search_params:
 			data[sp]=extra_search_params[sp]
@@ -103,7 +105,7 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 			result[edge_ids[0]] = [[A, B], [[Controlx, Controly], [Controlx, Controly]]]
 			for i in range(2, len(points)):
 				if i == len(points)-1:
-					start_point, mid_point, mid_point = points[i-1], points[i], points[i]
+					start_point, mid_point, end_point = points[i-1], points[i], points[i]
 				else:
 					start_point, mid_point, end_point = points[i-1], points[i], points[i+1]
 				next_Controlx1 = start_point[0]*2 - Controlx
@@ -123,29 +125,54 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 			route_edge_ids=[]
 			
 			s_id,t_id=abpair
-			try:	
-				sp=nx.shortest_path(G,s_id,t_id,'weight')
-			except:
-				print('no path between',s_id,t_id)
 			
-			waypoints=[]
+			s=locations.get(pk=s_id)
+			t=locations.get(pk=t_id)
+			if s.latitude is not None and t.latitude is not None and s.longitude is not None and t.longitude is not None:
 			
-			c=0
+				try:	
+					sp=nx.shortest_path(G,s_id,t_id,'weight')
+				except:
+					sp=[s_id,t_id]
 			
-			for p_id in sp:
-				l=locations.get(pk=p_id)
-				waypoints.append([float(l.latitude),float(l.longitude)])				
+				if len(sp)<=2:
 				
-				if c!=0:
-					route_edge_ids.append(edges[sp[c-1]][p_id])
-				c+=1
+					wpa=list(edges[s_id].keys())[0]
+					wpb=list(edges[t_id].keys())[0]
+					
+					if wpa!=wpb:
+						sp=[s_id,wpa,wpb,t_id]
+					else:
+						sp=[s_id,wpa,t_id]
+				
 			
-			if len(waypoints)>3:
+				sname=s.name
+				tname=t.name
+			
+				waypoints=[]
+			
+				c=0
+			
+				for p_id in sp:
+					l=locations.get(pk=p_id)
+					waypoints.append([float(l.latitude),float(l.longitude)])				
+					
+					if c!=0:
+						route_edge_ids.append(edges[sp[c-1]][p_id])
+					c+=1
+				
 				route=calControlPoint_new(waypoints,route_edge_ids)
+				
 				if s_id not in routes:
 					routes[s_id]={t_id:route}
 				else:
 					routes[s_id][t_id]=route
+				
+				
+			#else:
+				#print("lat or long is null for one of these locations:",s_id,t_id)
+				## update geo_location set longitude=Null,latitude=Null where longitude<.1 and longitude>-.1 and latitude<.1 and latitude>-.1 and location_type_id<5;
+			
 	return routes
 
 
@@ -218,7 +245,6 @@ class Command(BaseCommand):
 		
 		#and of course we need to separate the datasets' for voyages and adjacencies
 		datasets=[0,1]
-		
 		#for each of those paired variables, we're going to need the unique tuple values for each voyage
 		##i don't THINK we need to do this for people, as their itineraries are based on voyages but i could be wrong...
 		
@@ -265,7 +291,7 @@ class Command(BaseCommand):
 					
 					vk=list(v.keys())
 					vk.reverse()
-					rv=[v[i] for i in vk]
+					rv={i:v[i] for i in vk}
 					if t_id not in routes[dataset]:
 						routes[dataset][t_id]={s_id:rv}
 					else:

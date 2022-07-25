@@ -415,9 +415,9 @@ class VoyageAggRoutes(generics.GenericAPIView):
 
 			route_legs={}
 			route_weights={}
-		
+	
 			failedroutes=[]
-		
+	
 			for s_id in abpairs:
 				node_ids.append(s_id)
 				for t_id in abpairs[s_id]:
@@ -428,54 +428,63 @@ class VoyageAggRoutes(generics.GenericAPIView):
 						##Currently suppressing any straight-line routes
 						##As that typically means they've got bad geo data so shouldn't be shown anyways
 						###BUT I need to go back and fix it
-	
+				
 						for e_id in route:
+					
+							if type(e_id)==list:
+								print(s_id,t_id)
+					
 							if e_id not in route_legs:
 								route_legs[e_id]=[route[e_id]]
 							else:
 								route_legs[e_id].append(route[e_id])
-			
-	
+
+
 							if e_id not in route_weights:
 								route_weights[e_id]=w
 							else:
 								route_weights[e_id]+=w
 					except:
 						#LOTS OF FAILED ROUTES CURRENTLY
-					
-						failedroutes.append(s_id)
-						failedroutes.append(t_id)
-			#print(failedroutes)
-			countedfailures=Counter(failedroutes)
-			print("10 most common failed nodes:",[countedfailures.most_common(10)])
-
+						if [s_id,t_id] not in failedroutes:
+							failedroutes.append([s_id,t_id])
+		
+			print("failed routes (probably nulled lat/longs):",failedroutes)
+		
+	# 		locations=Location.objects.all()
+	# 		for failedroute in failedroutes:
+	# 			s_id,t_id=failedroute
+	# 			s=locations.get(pk=s_id)
+	# 			t=locations.get(pk=t_id)
+	# 			print([s.id,s.name,s.latitude,s.longitude,"//",t.id,t.name,t.latitude,t.longitude])
+		
 			routes=[]
 
 			for e_id in route_legs:
-	
+
 				legs=route_legs[e_id]
-	
+
 				#print(legs)
-	
+
 				controls_x1=[leg[1][0][0] for leg in legs]
 				controls_x2=[leg[1][1][0] for leg in legs]
 
 				controls_y1=[leg[1][0][1] for leg in legs]
 				controls_y2=[leg[1][1][1] for leg in legs]
-	
-	
+
+
 				controls_x1=sum(controls_x1)/len(controls_x1)
 				controls_y1=sum(controls_y1)/len(controls_y1)
 				controls_x2=sum(controls_x2)/len(controls_x2)
 				controls_y2=sum(controls_y2)/len(controls_y2)
-	
+
 				control1=[controls_x1,controls_y1]
 				control2=[controls_x2,controls_y2]
-	
+
 				consolidated_leg=[[legs[0][0][0],legs[0][0][1]],[control1,control2],route_weights[e_id]]
-	
+
 				routes.append(consolidated_leg)
-	
+
 			node_ids=list(set(node_ids))
 
 			geojson={"type": "FeatureCollection", "features": []}
@@ -488,21 +497,22 @@ class VoyageAggRoutes(generics.GenericAPIView):
 				node_id=node.id
 				longitude=node.longitude
 				latitude=node.latitude
-				name=node.name
+				if longitude is not None and latitude is not None:
+					name=node.name
 
-				geojsonfeature={
-					"type": "Feature",
-					"id":node_id,
-					"geometry": {"type":"Point","coordinates": [longitude,latitude]},
-					"properties":{"name":name}
-				}
+					geojsonfeature={
+						"type": "Feature",
+						"id":node_id,
+						"geometry": {"type":"Point","coordinates": [longitude,latitude]},
+						"properties":{"name":name}
+					}
 
-				geojson['features'].append(geojsonfeature)
+					geojson['features'].append(geojsonfeature)
 
 			output={"points":geojson,"routes":routes}
 
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output,safe=False)
-		except:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+ 		except:
+ 			print("failed\n+++++++")
+ 			return JsonResponse({'status':'false','message':'bad request'}, status=400)

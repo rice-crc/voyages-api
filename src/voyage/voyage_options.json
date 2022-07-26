@@ -5158,5 +5158,15 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Dataset",
     "flatlabel": "Dataset"
+  },
+  "african_info": {
+    "type": "<class 'rest_framework.relations.ManyRelatedField'>",
+    "label": "African info",
+    "flatlabel": "African info"
+  },
+  "cargo": {
+    "type": "<class 'rest_framework.relations.ManyRelatedField'>",
+    "label": "Cargo",
+    "flatlabel": "Cargo"
   }
 }

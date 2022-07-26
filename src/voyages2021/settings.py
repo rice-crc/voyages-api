@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'corsheaders',
 	'voyage',
     'assessment',
+    'docs',
     'geo',
     'past',
     'rest_framework',

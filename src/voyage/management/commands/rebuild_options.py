@@ -9,6 +9,8 @@ from assessment.serializers import EstimateSerializer
 from assessment.models import Estimate
 from geo.serializers import *
 from geo.models import Location,Route
+from docs.models import Doc
+from docs.serializers import DocSerializer
 
 class Command(BaseCommand):
 	help = 'rebuilds the options flatfiles'
@@ -46,6 +48,11 @@ class Command(BaseCommand):
 				'output_filename':'geo/location_options.json',
 				'serializer':LocationSerializer,
 				'objectclass':Location
+			},
+			{
+				'output_filename':'docs/doc_options.json',
+				'serializer':DocSerializer,
+				'objectclass':Doc
 			}
 		]
 

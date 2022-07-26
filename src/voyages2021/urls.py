@@ -25,5 +25,6 @@ urlpatterns = [
     path('past/',include('past.urls')),
     path('assessment/',include('assessment.urls')),
     path('geo/',include('geo.urls')),
+	path('docs/',include('docs.urls')),
     path('voyages2022_auth_endpoint/', views.obtain_auth_token)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

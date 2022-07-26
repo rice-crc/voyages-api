@@ -1,0 +1,12 @@
+{
+  "id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "ID"
+  },
+  "url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Url",
+    "flatlabel": "Url"
+  }
+}

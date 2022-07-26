@@ -6,15 +6,17 @@ import re
 
 
 '''
-THIS SCRIPT PUSHES ALL OF OUR PLACE, REGION, BROADREGION DATA INTO THE GEO APP'S UNIFIED STRUCTURE
-NEXT STEP WILL BE TO PRESENT A GEO ENDPOINT AND SERIALIZE THE OUTPUT
-AND THEN TO POINT THE ITINERARY AND OTHER GEO VARS OVER AT THE GEO APP
+THIS SCRIPT WILL IMPORT ALL OF THE NEW ENSLAVERS:
+1. THE IAM ONES GREG DE-DUPED
+2. HOPEFULLY, ALL OF DAVID'S ENSLAVERS AS WELL
 '''
 
 d=open("dbconf.json","r")
 t=d.read()
 d.close()
 conf=json.loads(t)
+
+conf['database']='voyages'
 
 cnx = mysql.connector.connect(**conf)
 cursor = cnx.cursor()
@@ -23,6 +25,11 @@ conf['database']='voyages_api'
 
 cnx2 = mysql.connector.connect(**conf)
 cursor2 = cnx.cursor()
+
+#compare places and update if necessary
+
+cursor2.execute("select id,value from geo_location")
+resp=cursor2.fetchall()
 
 #first, we need the id's of all enslaver identities that we do not currently have in the api db
 
@@ -34,6 +41,12 @@ identity_ids=[i[0] for i in resp]
 #then iterate over those records and create new ones in the api db, while mapping the new pk's
 
 identity_id_map={}
+
+
+
+
+
+
 
 for id in identity_ids:
 	

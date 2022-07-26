@@ -3,7 +3,6 @@ import time
 import json
 import re				
 
-
 d=open("dbconf.json","r")
 t=d.read()
 d.close()
@@ -57,10 +56,9 @@ def drop_unique_constraints(unique_constraints,db_name):
 			print(q)
 			cursor.execute(q)
 			cnx.commit()
-	
 
-new_db="voyagesapi_mar17"
-old_db="voyagesapi_mar16"
+new_db="voyages_api"
+old_db="voyages"
 
 
 old_foreign_key_constraints,old_unique_constraints=get_fk_constraints(tables,old_db,cursor)
@@ -73,9 +71,7 @@ print(new_foreign_key_constraints)
 
 drop_fk_constraints(old_foreign_key_constraints,old_db)
 drop_fk_constraints(new_foreign_key_constraints,new_db)
-
 drop_unique_constraints(new_unique_constraints,new_db)	
-
 
 
 for table in tables:

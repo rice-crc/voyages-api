@@ -5264,6 +5264,16 @@
     "label": "Dataset",
     "flatlabel": "voyage : Dataset"
   },
+  "voyage__african_info": {
+    "type": "<class 'rest_framework.relations.ManyRelatedField'>",
+    "label": "African info",
+    "flatlabel": "voyage : African info"
+  },
+  "voyage__cargo": {
+    "type": "<class 'rest_framework.relations.ManyRelatedField'>",
+    "label": "Cargo",
+    "flatlabel": "voyage : Cargo"
+  },
   "captive_fate": {
     "type": "table",
     "label": "captive fate",
@@ -5559,11 +5569,6 @@
     "label": "Birth day",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Birth day"
   },
-  "transactions__transaction__enslavers__enslaver_alias__identity__birth_place": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Birth place",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Birth place"
-  },
   "transactions__transaction__enslavers__enslaver_alias__identity__death_year": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Death year",
@@ -5578,11 +5583,6 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Death day",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Death day"
-  },
-  "transactions__transaction__enslavers__enslaver_alias__identity__death_place": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Death place",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Death place"
   },
   "transactions__transaction__enslavers__enslaver_alias__identity__father_name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -5658,6 +5658,16 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Number enslaved",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Number enslaved"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__birth_place": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Birth place",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Birth place"
+  },
+  "transactions__transaction__enslavers__enslaver_alias__identity__death_place": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Death place",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Death place"
   },
   "transactions__transaction__enslavers__enslaver_alias__alias": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -10873,6 +10883,16 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Dataset",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : Dataset"
+  },
+  "transactions__transaction__voyage__african_info": {
+    "type": "<class 'rest_framework.relations.ManyRelatedField'>",
+    "label": "African info",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : African info"
+  },
+  "transactions__transaction__voyage__cargo": {
+    "type": "<class 'rest_framework.relations.ManyRelatedField'>",
+    "label": "Cargo",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : Cargo"
   },
   "transactions__transaction__place": {
     "type": "table",

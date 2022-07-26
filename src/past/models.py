@@ -116,6 +116,8 @@ class NameSearchCache:
             cls._loaded = True
 '''
 
+
+
 class EnslaverInfoAbstractBase(models.Model):
     principal_alias = models.CharField(max_length=255)
 
@@ -123,12 +125,20 @@ class EnslaverInfoAbstractBase(models.Model):
     birth_year = models.IntegerField(null=True)
     birth_month = models.IntegerField(null=True)
     birth_day = models.IntegerField(null=True)
-    birth_place = models.CharField(max_length=255, null=True)
+    birth_place = models.ForeignKey(Place,
+		on_delete=models.SET_NULL,
+    	related_name='+',
+    	null=True,
+		db_index=True)
 
     death_year = models.IntegerField(null=True)
     death_month = models.IntegerField(null=True)
     death_day = models.IntegerField(null=True)
-    death_place = models.CharField(max_length=255, null=True)
+    death_place = models.ForeignKey(Place,
+		on_delete=models.SET_NULL,
+    	related_name='+',
+    	null=True,
+		db_index=True)
 
     father_name = models.CharField(max_length=255, null=True)
     father_occupation = models.CharField(max_length=255, null=True)
@@ -147,9 +157,11 @@ class EnslaverInfoAbstractBase(models.Model):
     first_active_year=models.IntegerField(null=True)
     last_active_year=models.IntegerField(null=True)
     number_enslaved=models.IntegerField(null=True)
-    principal_location=models.ForeignKey(Place, null=True,
-                                                on_delete=models.CASCADE,
-                                                db_index=True)
+    principal_location=models.ForeignKey(Place,
+    	on_delete=models.SET_NULL,
+    	related_name='+',
+    	null=True,
+		db_index=True)
 	 
     class Meta:
         abstract = True
@@ -465,3 +477,16 @@ class EnslaverInRelation(models.Model):
     	on_delete=models.CASCADE)
     role = models.ForeignKey(EnslaverRole,null=True, help_text="The role of the enslaver in this relation",on_delete=models.CASCADE)
 
+class external_links(models.Model):
+	
+	url=models.URLField(max_length=500)
+	enslaver=models.ForeignKey(
+		EnslaverIdentity,
+		null=True,
+		on_delete=models.DO_NOTHING,
+		related_name="enslaver_bio")
+	enslaved=models.ForeignKey(
+		Enslaved,
+		null=True,
+		on_delete=models.DO_NOTHING,
+		related_name="enslaved_bio")

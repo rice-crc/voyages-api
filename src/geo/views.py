@@ -83,6 +83,9 @@ class LocationList(generics.GenericAPIView):
 		except:
 			return JsonResponse({'status':'false','message':'geo request failed'}, status=500)
 
+##2 changes to make:
+# 1. Let's find a way to switch to this serializer in the above view: LocationSerializerDeep -- so that a person can see the whole tree of locations
+# 2. And let's get rid of the below and kill the react app (eventually)
 
 class getGeoJsonNetwork(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

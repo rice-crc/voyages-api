@@ -171,7 +171,6 @@ def make_networks(dataset,groupby_pairs,url,extra_search_params=[]):
 				
 			#else:
 				#print("lat or long is null for one of these locations:",s_id,t_id)
-				## update geo_location set longitude=Null,latitude=Null where longitude<.1 and longitude>-.1 and latitude<.1 and latitude>-.1 and location_type_id<5;
 			
 	return routes
 

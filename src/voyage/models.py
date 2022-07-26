@@ -7,6 +7,46 @@ from django.db.models import Prefetch
 from geo.models import Location
 #from django.utils.translation import gettext_lazy as _
 
+
+class NamedModelAbstractBase(models.Model):
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        return str(self.id) + ", " + self.name
+
+    class Meta:
+        abstract = True
+
+class AfricanInfo(NamedModelAbstractBase):
+    """
+    Used to capture information about the ethnicity or background of the
+    captives on a ship if found in merchants records or newspaper ads
+    """
+    pass
+    possibly_offensive = models.BooleanField(
+        default=False,
+        help_text="Indicates that the wording used in this label might be offensive to readers")
+
+
+
+
+class CargoType(NamedModelAbstractBase):
+    """
+    Types of cargo that were shipped on the voyage along with captives.
+    """
+    pass
+    
+class CargoUnit(NamedModelAbstractBase):
+    """
+    A unit of measure associated with cargo (weight/volume etc).
+    """
+    pass
+
+
 # Voyage Regions and Places
 class BroadRegion(models.Model):
 	"""
@@ -245,6 +285,20 @@ class VoyageShipOwnerConnection(models.Model):
 	def __str__(self):
 		return "Ship owner:"
 
+
+class VoyageCargoConnection(models.Model):
+    """
+    Specifies cargo that was shipped together with captives.
+    """
+    cargo = models.ForeignKey(CargoType, related_name="+",
+                              on_delete=models.CASCADE)
+    voyage = models.ForeignKey('Voyage', related_name="+",
+                               on_delete=models.CASCADE)
+    unit = models.ForeignKey(CargoUnit, related_name="+", null=True,on_delete=models.CASCADE)
+    amount = models.FloatField("The amount of cargo according to the unit", null=True)
+
+    class Meta:
+        unique_together = ['voyage', 'cargo']
 
 # Voyage Outcome
 class ParticularOutcome(models.Model):
@@ -1884,6 +1938,10 @@ class Voyage(models.Model):
 		
 	last_update = models.DateTimeField(auto_now=True)
 	
+	african_info = models.ManyToManyField(AfricanInfo, related_name='african_info', blank=True)
+	
+	cargo = models.ManyToManyField(CargoType, through='VoyageCargoConnection', blank=True)
+	
 	dataset = models.IntegerField(
 		null=False,
 		default=VoyageDataset.Transatlantic,
@@ -1912,3 +1970,5 @@ class Voyage(models.Model):
 
 	def __str__(self):
 		return "Voyage #%s" % str(self.voyage_id)
+
+

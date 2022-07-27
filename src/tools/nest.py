@@ -25,12 +25,16 @@ def bottomout(input,keychain):
 				r=[]
 				for i in input[k]:
 					keychain2=list(keychain)
-					r.append(bottomout(i[k2],keychain2))
+					if len(keychain)==0:
+						r.append(i[k2])					
+					else:
+						r.append(bottomout(i[k2],keychain2))
 				return(r)
 			else:
 				r=input[k]
 	else:
 		r=[]
+
 	return(r)
 
 ##RECURSIVE NEST-BUILDERS

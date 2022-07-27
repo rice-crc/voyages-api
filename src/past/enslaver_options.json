@@ -144,26 +144,6 @@
     "label": "ID",
     "flatlabel": "Enslaver alias : Transactions : enslavement relation : source : ID"
   },
-  "alias__transactions__transaction__source__doc": {
-    "type": "table",
-    "label": "doc",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : source : doc"
-  },
-  "alias__transactions__transaction__source__doc__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : source : doc : ID"
-  },
-  "alias__transactions__transaction__source__doc__url": {
-    "type": "<class 'rest_framework.fields.URLField'>",
-    "label": "Url",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : source : doc : Url"
-  },
-  "alias__transactions__transaction__source__doc__source": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Source",
-    "flatlabel": "Enslaver alias : Transactions : enslavement relation : source : doc : Source"
-  },
   "alias__transactions__transaction__source__short_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Short reference",
@@ -5474,26 +5454,6 @@
     "label": "ID",
     "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : Source : ID"
   },
-  "alias__enslaver_voyage__voyage__voyage_sourceconnection__source__doc": {
-    "type": "table",
-    "label": "doc",
-    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : Source : doc"
-  },
-  "alias__enslaver_voyage__voyage__voyage_sourceconnection__source__doc__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : Source : doc : ID"
-  },
-  "alias__enslaver_voyage__voyage__voyage_sourceconnection__source__doc__url": {
-    "type": "<class 'rest_framework.fields.URLField'>",
-    "label": "Url",
-    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : Source : doc : Url"
-  },
-  "alias__enslaver_voyage__voyage__voyage_sourceconnection__source__doc__source": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Source",
-    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : Source : doc : Source"
-  },
   "alias__enslaver_voyage__voyage__voyage_sourceconnection__source__short_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Short reference",
@@ -5508,6 +5468,26 @@
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Source Type",
     "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : Source : Source Type"
+  },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc": {
+    "type": "table",
+    "label": "doc",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc"
+  },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : ID"
+  },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Url",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : Url"
+  },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__citation": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Citation",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : Citation"
   },
   "alias__enslaver_voyage__voyage__voyage_sourceconnection__text_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -5593,26 +5573,6 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "enslaver identity source connection : Source : ID"
-  },
-  "enslaver_sources__source__doc": {
-    "type": "table",
-    "label": "doc",
-    "flatlabel": "enslaver identity source connection : Source : doc"
-  },
-  "enslaver_sources__source__doc__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "enslaver identity source connection : Source : doc : ID"
-  },
-  "enslaver_sources__source__doc__url": {
-    "type": "<class 'rest_framework.fields.URLField'>",
-    "label": "Url",
-    "flatlabel": "enslaver identity source connection : Source : doc : Url"
-  },
-  "enslaver_sources__source__doc__source": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Source",
-    "flatlabel": "enslaver identity source connection : Source : doc : Source"
   },
   "enslaver_sources__source__short_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",

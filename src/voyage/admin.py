@@ -169,6 +169,7 @@ class VoyageItineraryInline(admin.StackedInline):
 class VoyageSourcesConnectionInline(admin.StackedInline):
 	model=VoyageSourcesConnection
 	autocomplete_fields=['source']
+	fields=['source','text_ref','doc']
 	classes = ['collapse']
 
 class VoyageSourcesAdmin(admin.ModelAdmin):

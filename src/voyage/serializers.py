@@ -146,7 +146,6 @@ class VoyageItinerarySerializer(serializers.ModelSerializer):
 ##### SOURCES ##### 
 
 class VoyageSourcesSerializer(serializers.ModelSerializer):
-	doc=DocSerializer(many=True,read_only=True)
 	class Meta:
 		model=VoyageSources
 		fields='__all__'
@@ -236,6 +235,7 @@ class VoyageDatesSerializer(serializers.ModelSerializer):
 
 class VoyageSourcesConnectionSerializer(serializers.ModelSerializer):
 	source=VoyageSourcesSerializer(many=False)
+	doc=DocSerializer(many=False)
 	class Meta:
 		model=VoyageSourcesConnection
 		fields='__all__'

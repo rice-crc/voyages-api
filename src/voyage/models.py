@@ -1822,7 +1822,7 @@ class VoyageSources(models.Model):
 		ordering = ['short_ref', 'full_ref']
 
 	def __str__(self):
-		return self.full_ref
+		return self.short_ref
 
 
 class VoyageSourcesConnection(models.Model):

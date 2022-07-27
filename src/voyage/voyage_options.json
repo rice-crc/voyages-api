@@ -5114,6 +5114,26 @@
     "label": "ID",
     "flatlabel": "voyage sources connection : Source : ID"
   },
+  "voyage_sourceconnection__source__doc": {
+    "type": "table",
+    "label": "doc",
+    "flatlabel": "voyage sources connection : Source : doc"
+  },
+  "voyage_sourceconnection__source__doc__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage sources connection : Source : doc : ID"
+  },
+  "voyage_sourceconnection__source__doc__url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Url",
+    "flatlabel": "voyage sources connection : Source : doc : Url"
+  },
+  "voyage_sourceconnection__source__doc__source": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Source",
+    "flatlabel": "voyage sources connection : Source : doc : Source"
+  },
   "voyage_sourceconnection__source__short_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Short reference",

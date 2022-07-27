@@ -8,5 +8,10 @@
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Url",
     "flatlabel": "Url"
+  },
+  "source": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Source",
+    "flatlabel": "Source"
   }
 }

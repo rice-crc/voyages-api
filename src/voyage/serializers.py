@@ -6,6 +6,7 @@ import pprint
 import gc
 from tools.nest import nest_selected_fields
 from geo.serializers import *
+from docs.serializers import *
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 	def __init__(self, *args, **kwargs):
@@ -145,6 +146,7 @@ class VoyageItinerarySerializer(serializers.ModelSerializer):
 ##### SOURCES ##### 
 
 class VoyageSourcesSerializer(serializers.ModelSerializer):
+	doc=DocSerializer(many=True,read_only=True)
 	class Meta:
 		model=VoyageSources
 		fields='__all__'

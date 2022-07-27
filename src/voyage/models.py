@@ -5,6 +5,7 @@ from builtins import str
 from django.db import models
 from django.db.models import Prefetch
 from geo.models import Location
+from docs.models import Doc
 #from django.utils.translation import gettext_lazy as _
 
 
@@ -1840,6 +1841,8 @@ class VoyageSourcesConnection(models.Model):
 	#source_order = models.IntegerField()
 	text_ref = models.CharField('Text reference(citation)',
 								max_length=255, null=False, blank=True)
+	doc = models.ForeignKey( 	Doc,
+								on_delete=models.CASCADE,null=True,blank=True)
 
 class VoyageDatasetManager(models.Manager):
 

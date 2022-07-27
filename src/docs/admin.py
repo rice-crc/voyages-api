@@ -10,7 +10,7 @@ class DocAdmin(admin.ModelAdmin):
 		'source',]
 	fields=['url','source']
 	list_display=('id','url','source')
-	search_fields=('id','url','source')
+	search_fields=('id','url')
 	model=Doc
 
 # Voyage (main section)

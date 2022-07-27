@@ -7,7 +7,7 @@ import re
 ##and: OrderedDict([('imp_principal_region_slave_dis', None), ('imp_port_voyage_begin', OrderedDict([('place', 'Baltimore'), ('longitude', '-76.6125000')]))])
 #this will drill down to the value (assuming that this path is in the ordered dict)
 def bottomout(input,keychain):
-	if len(keychain)>0:
+	if len(keychain)>0 and input is not None:
 		k=keychain.pop(0)
 		if type(input)==list:
 			r=[]

@@ -9,4 +9,4 @@ class Doc(models.Model):
 		return self.__unicode__()
 
 	def __unicode__(self):
-		return str(self.citation)
+		return str(self.url)

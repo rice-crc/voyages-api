@@ -168,12 +168,13 @@ class VoyageItineraryInline(admin.StackedInline):
 
 class VoyageSourcesConnectionInline(admin.StackedInline):
 	model=VoyageSourcesConnection
-	autocomplete_fields=['source']
+	autocomplete_fields=['source','doc']
 	fields=['source','text_ref','doc']
 	classes = ['collapse']
 
 class VoyageSourcesAdmin(admin.ModelAdmin):
-	search_fields=['full_ref']
+	search_fields=['full_ref',]
+	list_display=['full_ref','short_ref']
 	model=VoyageSources
 
 class VoyageShipOwnerConnectionInline(admin.StackedInline):

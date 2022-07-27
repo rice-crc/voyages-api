@@ -29,11 +29,13 @@ def bottomout(input,keychain):
 						r.append(i[k2])					
 					else:
 						r.append(bottomout(i[k2],keychain2))
+				if len(r)==0:
+					r=None
 				return(r)
 			else:
 				r=input[k]
 	else:
-		r=[]
+		r=None
 
 	return(r)
 

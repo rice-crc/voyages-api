@@ -4,7 +4,7 @@ import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
 from .nest import *
-
+import html
 #GENERIC FUNCTION TO RUN A CALL ON REST SERIALIZERS
 ##Default is to auto prefetch, but need to be able to turn it off.
 ##For instance, on our PAST graph-like data, the prefetch can overwhelm the system if you try to get everything
@@ -47,16 +47,16 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 	except:
 		errormessages.append("error parsing parameters")
 	
-	try:
+ 	try:
 		all_fields={i:options_dict[i] for i in options_dict if 'type' in options_dict[i]}
 		active_fields=list(set([i for i in params]+selected_fields+aggregation_fields).intersection(set(all_fields)))
-	
+
 		###FILTER RESULTS
 		##select text and numeric fields, ignoring those without a type
 		text_fields=[i for i in all_fields if 'CharField' in all_fields[i]['type']]
 		numeric_fields=[i for i in all_fields if 'IntegerField' in all_fields[i]['type'] or 'DecimalField' in all_fields[i]['type'] or 'FloatField' in all_fields[i]['type']]
 		boolean_fields=[i for i in all_fields if 'BooleanField' in all_fields[i]['type']]
-	
+
 		##build filters
 		kwargs={}
 		###numeric filters -- only accepting one range per field right now
@@ -75,8 +75,10 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 		if len(active_text_search_fields)>0:
 			for field in active_text_search_fields:
 				vals=params.get(field)
-				qobjstrs=["Q(%s='%s')" %(field,val) for val in vals]
+				qobjstrs=["Q({0}={1})".format(field,json.dumps(re.sub("\\\\+","",val))) for val in vals]
+				#print(vals,qobjstrs)
 				queryset=queryset.filter(eval('|'.join(qobjstrs)))
+				print(queryset)
 		##boolean filters -- only accepting one range per field right now
 		active_boolean_search_fields=[i for i in set(params).intersection(set(boolean_fields))]
 		if len(active_boolean_search_fields)>0:
@@ -86,17 +88,17 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 					searchstring=True
 				elif searchstring.lower() in ["false","f","0","no"]:
 					searchstring=False
-			
+	
 				if searchstring in [True,False]:
 					kwargs[field]=searchstring
-	
+
 		###apply filters
 		queryset=queryset.filter(**kwargs)
 		results_count=queryset.count()
 		print('--counts--')
 		print("resultset size:",results_count)
-	except:
-		errormessages.append("search/filter error")
+ 	except:
+ 		errormessages.append("search/filter error")
 	
 	try:
 		#PREFETCH REQUISITE FIELDS

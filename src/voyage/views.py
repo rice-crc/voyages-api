@@ -22,6 +22,7 @@ import collections
 import gc
 from .serializers import *
 from voyages2021.localsettings import *
+import re
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -50,52 +51,52 @@ class VoyageList(generics.GenericAPIView):
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("+++++++\nusername:",request.auth.user)
-		try:
-			queryset=Voyage.objects.all()
-			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options)
-			if len(error_messages)==0:
-				st=time.time()
-				headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-				#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
-				read_serializer=VoyageSerializer(queryset,many=True)
-				serialized=read_serializer.data
-				#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
-				if selected_fields==[]:
-					selected_fields=list(voyage_options.keys())
-				else:
-					selected_fields=[i for i in selected_fields if i in list(voyage_options.keys())]
-				outputs=[]
-				hierarchical=request.POST.get('hierarchical')
-				if str(hierarchical).lower() in ['false','0','f','n']:
-					hierarchical=False
-				else:
-					hierarchical=True
-			
-			
-				if hierarchical==False:
-					for s in serialized:
-					
-						d={}
-						for selected_field in selected_fields:
-							#In this flattened view, the reverse relationship breaks the references to the outcome variables in the serializer
-							#not badly -- you just get some repeat, nested data -- but that's unhelpful
-							#The fix will be to make it a through table relationship
-							keychain=selected_field.split('__')
-							bottomval=bottomout(s,list(keychain))
-							d[selected_field]=bottomval
-						outputs.append(d)
-				else:
-					outputs=serialized
-			
-				resp=JsonResponse(outputs,safe=False,headers=headers)
-				resp.headers['total_results_count']=headers['total_results_count']
-				print("Internal Response Time:",time.time()-st,"\n+++++++")
-				return resp
+# 		try:
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options)
+		if len(error_messages)==0:
+			st=time.time()
+			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
+			read_serializer=VoyageSerializer(queryset,many=True)
+			serialized=read_serializer.data
+			#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
+			if selected_fields==[]:
+				selected_fields=list(voyage_options.keys())
 			else:
-				print("failed\n+++++++")
-				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-		except:
-			pass
+				selected_fields=[i for i in selected_fields if i in list(voyage_options.keys())]
+			outputs=[]
+			hierarchical=request.POST.get('hierarchical')
+			if str(hierarchical).lower() in ['false','0','f','n']:
+				hierarchical=False
+			else:
+				hierarchical=True
+		
+		
+			if hierarchical==False:
+				for s in serialized:
+				
+					d={}
+					for selected_field in selected_fields:
+						#In this flattened view, the reverse relationship breaks the references to the outcome variables in the serializer
+						#not badly -- you just get some repeat, nested data -- but that's unhelpful
+						#The fix will be to make it a through table relationship
+						keychain=selected_field.split('__')
+						bottomval=bottomout(s,list(keychain))
+						d[selected_field]=bottomval
+					outputs.append(d)
+			else:
+				outputs=serialized
+		
+			resp=JsonResponse(outputs,safe=False,headers=headers)
+			resp.headers['total_results_count']=headers['total_results_count']
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return resp
+		else:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+# 		except:
+# 			pass
 
 class SingleVoyage(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
@@ -328,7 +329,9 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 			k=next(iter(params))
 			v=params[k][0]
 			retrieve_all=True
-			queryset=Voyage.objects.all()		
+			queryset=Voyage.objects.all()
+			#print("------->",k,v,re.sub("\\\\+","",v),"<---------")
+			v=re.sub("\\\\+","",v)
 			kwargs={'{0}__{1}'.format(k, 'icontains'):v}
 			queryset=queryset.filter(**kwargs)
 			queryset=queryset.prefetch_related(k)

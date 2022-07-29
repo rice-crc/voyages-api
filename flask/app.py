@@ -6,6 +6,7 @@ import json
 import math
 import requests
 from localsettings import *
+import re
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -13,12 +14,20 @@ app.config['JSON_SORT_KEYS'] = False
 def load_long_df(idx_url):
 	r=requests.get(idx_url)
 	j=json.loads(r.text)
-	headers=j['ordered_keys']
-	d2={h:[] for h in headers}
-	for h in headers:
+	
+	voyage_url=re.sub("/static/","/voyage/?hierarchical=False",DJANGO_STATIC_URL)
+	r=requests.options(url=voyage_url,headers=headers)
+	voyage_options=json.loads(r.text)
+	colnames=j['ordered_keys']
+	d2={h:[] for h in colnames}
+	for h in colnames:
 		for item in j['items']:
-			d2[h].append(j['items'][item][headers.index(h)])
+			thisitem=j['items'][item][colnames.index(h)]
+			if "DecimalField" in voyage_options[h]['type'] and thisitem is not None:
+				thisitem=float(thisitem)
+			d2[h].append(thisitem)
 	df=pd.DataFrame.from_dict(d2)
+	
 	return(df)
 
 #on initialization, load every index as a dataframe, via a call to the django api's static assets

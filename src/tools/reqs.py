@@ -47,7 +47,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 	except:
 		errormessages.append("error parsing parameters")
 	
- 	try:
+	try:
 		all_fields={i:options_dict[i] for i in options_dict if 'type' in options_dict[i]}
 		active_fields=list(set([i for i in params]+selected_fields+aggregation_fields).intersection(set(all_fields)))
 
@@ -97,7 +97,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 		results_count=queryset.count()
 		print('--counts--')
 		print("resultset size:",results_count)
- 	except:
+	except:
  		errormessages.append("search/filter error")
 	
 	try:

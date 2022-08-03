@@ -53,7 +53,6 @@ def groupby():
 	Implements the pandas groupby function and returns the sparse summary.
 	Excellent for bar & pie charts.
 	'''
-	
 	try:
 		st=time.time()
 		rdata=request.json
@@ -61,7 +60,8 @@ def groupby():
 		ids=rdata['ids']
 		groupby_fields=rdata['groupby_fields']
 		groupby_row=groupby_fields[0]
-		groupby_cols=groupby_fields[1:len(groupby_fields)]
+		groupby_cols=[i for i in groupby_fields[1:len(groupby_fields)]]
+		#print("COLS-->",groupby_cols)
 		agg_fn=rdata['agg_fn'][0]
 		df=eval(dfname)
 		df2=df[df['id'].isin(ids)]

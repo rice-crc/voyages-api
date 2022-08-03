@@ -78,7 +78,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 				qobjstrs=["Q({0}={1})".format(field,json.dumps(re.sub("\\\\+","",val))) for val in vals]
 				#print(vals,qobjstrs)
 				queryset=queryset.filter(eval('|'.join(qobjstrs)))
-				print(queryset)
+				#print(queryset)
 		##boolean filters -- only accepting one range per field right now
 		active_boolean_search_fields=[i for i in set(params).intersection(set(boolean_fields))]
 		if len(active_boolean_search_fields)>0:

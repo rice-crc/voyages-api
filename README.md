@@ -296,25 +296,64 @@ Looks like:
 
 ### Routes (voyage/aggroutes)
 
-Get routes for aggregations of voyages.
+Get routes for aggregations of voyages, while performing searches. Routes come back in the format of bezier curves. May reintroduce a geojson option down the line so we can build an "export to storymaps" option.
 
-It's fast now. Still have to calculate "best" paths better, by 1) calculating all Adjacency object lengths using haversine, 2) using those distances to weight my shortest paths requests in networkx. I want to test that rigorously before using it, so for now the routes can look a little jumpy in certain cases. I've tested a few hundred different possible requests and they're all succeeding now, but it's possible I've missed some cases. Error logging is not at all robust right now.
+Required fields:
 
-Example Request:
+1. GROUPBY FIELDS. 2 VALID OPTIONS RIGHT NOW
+
+A. PORTS source/target geo id var pair:
+	"groupby_fields": [
+		"voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
+		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id"
+	]
+		
+B. REGIONS source/target geo id var par:
+
+	'groupby_fields': [
+		'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+		'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id'
+	]
+
+2. DATASET. 2 VALID OPTIONS RIGHT NOW:
+
+(this lets the system to know which route network it will use to generate the map)
+
+A. [0,0] --> TRANSATLANTIC
+
+B. [1,1] --> INTRA-AMERICAN
+
+3. VALUE FIELD TUPLE:
+
+(the numerical )
+
+
+--post req params--
+{   'cachename': ['voyage_maps'],
+    'dataset': ['0', '0'],
+    'groupby_fields': [   'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+                          'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id'],
+    'output_format': ['geosankey'],
+    'value_field_tuple': [   'voyage_slaves_numbers__imp_total_num_slaves_embarked',
+                             'sum']}
+
+#### ROUTES EXAMPLE REQUEST
+
+Showing the REGIONAL routes of the numbers of people who disembarked from Trans-Atlantic voyages that are believed [imputed] to have landed in Barbados between 1790 and 1800):
 
 	POST http://127.0.0.1:8000/voyage/aggroutes
 
 	{
 		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": [
-			"Bahia"
+			"Barbados"
 		],
 		"voyage_dates__imp_arrival_at_port_of_dis_yyyy": [
-			1700,
-			1860
+			1790,
+			1800
 		],
 		"groupby_fields": [
 			"voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
-			"voyage_itinerary__imp_broad_region_slave_dis__geo_location__id"
+			"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id"
 		],
 		"value_field_tuple": [
 			"voyage_slaves_numbers__imp_total_num_slaves_disembarked",
@@ -324,14 +363,80 @@ Example Request:
 			"voyage_maps"
 		],
 		"dataset": [
-			1,
-			1
-		],
-		"output_format": [
-			"geojson"
+			0,
+			0
 		]
 	}
 
+#### ROUTES EXAMPLE RESPONSE 
+
+The above will result in a two-part response:
+
+* "points": First a geojson feature collection of points (here, regional lat/long/name/id quads)
+* and after those points, a collection of connected splined line segments with various weights and the edge_id corresponding to the database's internal id for the connection between two points on the map (which I'm not currently hooking into but could be used later)
+
+	{"points": {
+			"type": "FeatureCollection",
+			"features": [
+				{
+					"type": "Feature",
+					"id": 2391,
+					"geometry": {
+						"type": "Point",
+						"coordinates": [
+							"-66.2374610",
+							"14.5017080"
+						]
+					},
+					"properties": {
+						"name": "Caribbean"
+					}
+				},
+			...
+			]
+		},
+		"routes": [
+			[
+				[
+					[
+						17.881263,
+						-76.522778
+					],
+					[
+						17.6858952,
+						-76.8273926
+					]
+				],
+				[
+					[
+						17.774928285,
+						-76.84761837500001
+					],
+					[
+						17.774928285,
+						-76.84761837500001
+					]
+				],
+				931574
+			],
+		]
+	}
+	
+#### EXAMPLE JS RENDERING OF RESPONSE CURVES ON LEAFLET
+
+AS OF AUG. 4, THE REACT APP IS HANDLING THOSE SPLINED CURVES WITH CODE LIKE THE BELOW
+(FROM https://github.com/ZhihaoWan/Integ_CRC/blob/main/src/Component/VoyagePage/mapping/Spatial.js#L335-L344)
+
+	routes.map((route) => {
+		var commands = [];
+
+		commands.push("M", route[0][0]);
+		commands.push("C", route[1][0], route[1][1], route[0][1]);
+
+		L.curve(commands, { color: "blue", weight: valueScale(route[2]) })
+		  .bindPopup("Sum of slaves: " + route[2])
+		  .addTo(map);
+	  });
 
 #### how does it work?
 
@@ -345,45 +450,16 @@ Piggybacks on the crosstabs endpoint, which means that you have to specify:
 * magnitude field and value function, such as number of people embarked and sum
 * the name of the cache where your fields live (should be in voyage_maps)
 
-Currently (July 1), we're accepting requests for the below a/b itinerary variable pairings -- that is, the "groupby_fields" parameter -- which covers all imputed begin/purchase and purchase/disembarkation pairs:
+Currently (July 1), we're accepting requests for the below a/b itinerary variable pairings -- that is, the "groupby_fields" parameter -- covering region-level and port-level embarkations/disembarkations:
 
-	[   
-		[   'voyage_itinerary__imp_port_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_port_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_port_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_region_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_region_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_region_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id',
-			'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id'],
-		[   'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id'],
-		[   'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id'],
-		[   'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_broad_region_slave_dis__geo_location__id'],
-		[   'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id'],
-		[   'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id'],
-		[   'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_broad_region_slave_dis__geo_location__id'],
-		[   'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id'],
-		[   'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id'],
-		[   'voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id',
-			'voyage_itinerary__imp_broad_region_slave_dis__geo_location__id']
+	[
+		"voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id",
+		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id"
+	]
+	
+	[
+		'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+		'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id']
 	]
 
 So a peek under the hood is necessary here, for now.
@@ -448,8 +524,8 @@ Looks like:
 
 ### GroupBy (Voyages only)
 
-Using Pandas-like syntax, we can also run searches and then perform groupings on categorical variables.
- 
+Using Pandas-like syntax, we can also run searches and then find the aggregated values of numerical variables, grouped by a categorical variable.
+
 For instance:
 
 	POST "http://127.0.0.1:8000/voyage/groupby"
@@ -459,25 +535,39 @@ For instance:
 			"Jamaica"
 		],
 		'groupby_fields':['voyage_itinerary__imp_broad_region_slave_dis__geo_location__name',
-		                  'voyage_slaves_numbers__imp_total_num_slaves_disembarked'],
-		'agg_fn':['sum'],
+		                  'voyage_dates__imp_length_home_to_disembark',
+		                  voyage_slaves_numbers__imp_jamaican_cash_price],
+		'agg_fn':['mean'],
 		'cachename':['voyage_bar_and_donut_charts']
 	}
-
-
+	
 ... would return the following:
 
 	{
-		"voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
-			"Africa": 146224.0,
-			"Brazil": 3254758.0,
-			"Caribbean": 4585846.0,
-			"Europe": 7616.0,
-			"Mainland North America": 421929.0,
-			"Other": 174668.0,
-			"Spanish Mainland Americas": 691717.0
+		"voyage_dates__imp_length_home_to_disembark": {
+			"Africa": 204.75903614457832,
+			"Brazil": 261.37118868758284,
+			"Caribbean": 292.67427568042143,
+			"Europe": 346.45454545454544,
+			"Mainland North America": 272.14159292035396,
+			"Other": 340.63157894736844,
+			"Spanish Mainland Americas": 501.7817258883249
+		},
+		"voyage_slaves_numbers__imp_jamaican_cash_price": {
+			"Africa": 0.0,
+			"Brazil": 0.0,
+			"Caribbean": 38.931458094144666,
+			"Europe": 0.0,
+			"Mainland North America": 39.5338596491228,
+			"Other": 0.0,
+			"Spanish Mainland Americas": 37.36666666666667
 		}
 	}
+
+Acceptable values for "agg_fn":
+
+* "mean"
+* "sum"
 
 It uses Pandas syntax and relies on the indexing functionality outlined below as well as a Flask app running alongside this Django app.
 

@@ -105,30 +105,17 @@ class EnslavedList(generics.GenericAPIView):
 #It will therefore serve as an autocomplete endpoint
 #I should make all text queries into 'or' queries
 class EnslavedTextFieldAutoComplete(generics.GenericAPIView):
-	serializer_class=EnslavedSerializer
 	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	permission_classes=[IsAuthenticated]				
 	def post(self,request):
 		print("+++++++\nusername:",request.auth.user)
 		try:
 			st=time.time()
 			params=dict(request.POST)
-			k=next(iter(params))
-			v=params[k][0]
-			retrieve_all=True
-			queryset=Enslaved.objects.all()		
-			kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-			queryset=queryset.filter(**kwargs)
-			queryset=queryset.prefetch_related(k)
-			queryset=queryset.order_by(k)
-			results_count=queryset.count()
-			fetchcount=20
-			vals=[]
-			for v in queryset.values_list(k).iterator():
-				if v not in vals:
-					vals.append(v)
-				if len(vals)>=fetchcount:
-					break
+			acfieldparam=next(iter(params))
+			v=params[acfieldparam][0]
+			print("past/enslaved/autocomplete",acfieldparam,v)
+			klist=acfieldparam.split(',')
 			def flattenthis(l):
 				fl=[]
 				for i in l:
@@ -138,19 +125,39 @@ class EnslavedTextFieldAutoComplete(generics.GenericAPIView):
 					else:
 						fl.append(i)
 				return fl
-			val_list=flattenthis(l=vals)
+			retrieve_all=True
+			total_results_count=0
+			fetchcount=20
+			candidates=[]
+			for k in klist:
+				#print(k)
+				queryset=Enslaved.objects.all()
+				#print("------->",k,v,re.sub("\\\\+","",v),"<---------")
+				kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+				queryset=queryset.filter(**kwargs)
+				queryset=queryset.prefetch_related(k)
+				queryset=queryset.order_by(k)
+				total_results_count+=queryset.count()
+				vals=[]
+				for v in queryset.values_list(k).iterator():
+					if v not in vals:
+						vals.append(v)
+					if len(vals)>=fetchcount:
+						break
+				candidates += [i for i in flattenthis(l=vals)]
+			val_list=[sorted(candidates)][:fetchcount]
 			output_dict={
-				k:val_list,
-				"results_count":results_count
+				"results":val_list,
+				"total_results_count":total_results_count
 			}
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dict,safe=False)
 		except:
 			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+
 
 class EnslaverTextFieldAutoComplete(generics.GenericAPIView):
-	serializer_class=EnslaverSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
@@ -158,22 +165,10 @@ class EnslaverTextFieldAutoComplete(generics.GenericAPIView):
 		try:
 			st=time.time()
 			params=dict(request.POST)
-			k=next(iter(params))
-			v=params[k][0]
-			retrieve_all=True
-			queryset=EnslaverIdentity.objects.all()		
-			kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-			queryset=queryset.filter(**kwargs)
-			queryset=queryset.prefetch_related(k)
-			queryset=queryset.order_by(k)
-			results_count=queryset.count()
-			fetchcount=20
-			vals=[]
-			for v in queryset.values_list(k).iterator():
-				if v not in vals:
-					vals.append(v)
-				if len(vals)>=fetchcount:
-					break
+			acfieldparam=next(iter(params))
+			v=params[acfieldparam][0]
+			print("past/enslavers/autocomplete",acfieldparam,v)
+			klist=acfieldparam.split(',')
 			def flattenthis(l):
 				fl=[]
 				for i in l:
@@ -183,16 +178,36 @@ class EnslaverTextFieldAutoComplete(generics.GenericAPIView):
 					else:
 						fl.append(i)
 				return fl
-			val_list=flattenthis(l=vals)
+			retrieve_all=True
+			total_results_count=0
+			fetchcount=20
+			candidates=[]
+			for k in klist:
+				#print(k)
+				queryset=EnslaverIdentity.objects.all()
+				#print("------->",k,v,re.sub("\\\\+","",v),"<---------")
+				kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+				queryset=queryset.filter(**kwargs)
+				queryset=queryset.prefetch_related(k)
+				queryset=queryset.order_by(k)
+				total_results_count+=queryset.count()
+				vals=[]
+				for v in queryset.values_list(k).iterator():
+					if v not in vals:
+						vals.append(v)
+					if len(vals)>=fetchcount:
+						break
+				candidates += [i for i in flattenthis(l=vals)]
+			val_list=[sorted(candidates)][:fetchcount]
 			output_dict={
-				k:val_list,
-				"results_count":results_count
+				"results":val_list,
+				"total_results_count":total_results_count
 			}
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dict,safe=False)
 		except:
 			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
 
 
 

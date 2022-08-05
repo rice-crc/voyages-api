@@ -318,7 +318,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 #It will therefore serve as an autocomplete endpoint
 #I should make all text queries into 'or' queries
 class VoyageTextFieldAutoComplete(generics.GenericAPIView):
-	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
@@ -328,7 +327,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 			params=dict(request.POST)
 			acfieldparam=next(iter(params))
 			v=params[acfieldparam][0]
-			print("/autocomplete",acfieldparam,v)
+			print("voyage/autocomplete",acfieldparam,v)
 			klist=acfieldparam.split(',')
 			def flattenthis(l):
 				fl=[]

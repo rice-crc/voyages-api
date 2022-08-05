@@ -326,24 +326,10 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		try:
 			st=time.time()
 			params=dict(request.POST)
-			k=next(iter(params))
-			v=params[k][0]
-			retrieve_all=True
-			queryset=Voyage.objects.all()
-			#print("------->",k,v,re.sub("\\\\+","",v),"<---------")
-			v=re.sub("\\\\+","",v)
-			kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-			queryset=queryset.filter(**kwargs)
-			queryset=queryset.prefetch_related(k)
-			queryset=queryset.order_by(k)
-			results_count=queryset.count()
-			fetchcount=20
-			vals=[]
-			for v in queryset.values_list(k).iterator():
-				if v not in vals:
-					vals.append(v)
-				if len(vals)>=fetchcount:
-					break
+			acfieldparam=next(iter(params))
+			v=params[acfieldparam][0]
+			print("/autocomplete",acfieldparam,v)
+			klist=acfieldparam.split(',')
 			def flattenthis(l):
 				fl=[]
 				for i in l:
@@ -353,10 +339,30 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 					else:
 						fl.append(i)
 				return fl
-			val_list=flattenthis(l=vals)
+			retrieve_all=True
+			total_results_count=0
+			fetchcount=20
+			candidates=[]
+			for k in klist:
+				#print(k)
+				queryset=Voyage.objects.all()
+				#print("------->",k,v,re.sub("\\\\+","",v),"<---------")
+				kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+				queryset=queryset.filter(**kwargs)
+				queryset=queryset.prefetch_related(k)
+				queryset=queryset.order_by(k)
+				total_results_count+=queryset.count()
+				vals=[]
+				for v in queryset.values_list(k).iterator():
+					if v not in vals:
+						vals.append(v)
+					if len(vals)>=fetchcount:
+						break
+				candidates += [i for i in flattenthis(l=vals)]
+			val_list=[sorted(candidates)][:fetchcount]
 			output_dict={
-				k:val_list,
-				"results_count":results_count
+				"results":val_list,
+				"total_results_count":total_results_count
 			}
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dict,safe=False)

@@ -111,9 +111,21 @@ class EnslavedEnslaverInRelationSerializer(DynamicFieldsModelSerializer):
 		model=EnslaverInRelation
 		fields='__all__'
 
+class EnslavedEnslavedInRelationEnslavedSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=Enslaved
+		fields=('documented_name',)
+
+class EnslavedEnslavedInRelationSerializer(DynamicFieldsModelSerializer):
+	enslaved=EnslavedEnslavedInRelationEnslavedSerializer(many=False)
+	class Meta:
+		model=EnslavedInRelation
+		fields='__all__'
+
 class EnslavedEnslavementRelationSerializer(DynamicFieldsModelSerializer):
 	relation_type=EnslavementRelationTypeSerializer(many=False)
 	enslavers=EnslavedEnslaverInRelationSerializer(many=True,read_only=False)
+	enslaved_person=EnslavedEnslavedInRelationSerializer(many=True,read_only=False)
 	source=VoyageSourcesSerializer(many=False)
 	voyage=VoyageSerializer(many=False)
 	place=PlaceSerializer(many=False)

@@ -114,7 +114,7 @@ class EnslavedEnslaverInRelationSerializer(DynamicFieldsModelSerializer):
 class EnslavedEnslavedInRelationEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
-		fields=('documented_name',)
+		fields=('documented_name','id')
 
 class EnslavedEnslavedInRelationSerializer(DynamicFieldsModelSerializer):
 	enslaved=EnslavedEnslavedInRelationEnslavedSerializer(many=False)

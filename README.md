@@ -1,4 +1,4 @@
-# Voyages REST API 2021
+# Voyages REST API 2022
 
 This is an attempt to rebuild the Voyages API with as few dependencies as possible in the latest versions of django and python
 

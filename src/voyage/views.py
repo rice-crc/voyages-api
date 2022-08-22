@@ -458,16 +458,27 @@ class VoyageAggRoutes(generics.GenericAPIView):
 						#LOTS OF FAILED ROUTES CURRENTLY
 						if [s_id,t_id] not in failedroutes:
 							failedroutes.append([s_id,t_id])
-
-			print("failed routes (probably nulled lat/longs):",failedroutes)
+			
+			locations=Location.objects.all()
+			
+			verbose_mode=params.get('verbose_mode') or 'f'
+			if verbose_mode.lower() in ['t','true']:
+				print('******\nfailed routes:')
+				for r in failedroutes:
+					s_id,t_id=r
+					s=locations.get(pk=s_id)
+					t=locations.get(pk=t_id)
+					print("{0} ({1},{2}) --> {3} ({4},{5})".format(s.name,s.latitude,s.longitude,t.name,t.latitude,t.longitude))
+				print('******')
+			else:
+				print("failed routes (probably nulled lat/longs):",failedroutes)
 
 			routes=[]
 
 			for e_id in route_legs:
 
 				legs=route_legs[e_id]
-
-				#print(legs)
+				
 
 				controls_x1=[leg[1][0][0] for leg in legs]
 				controls_x2=[leg[1][1][0] for leg in legs]
@@ -494,7 +505,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 
 			node_ids=list(set(node_ids))
 
-			locations=Location.objects.all()
+			
 			nodes=locations.filter(pk__in=node_ids)
 			for node in nodes:
 				node_id=node.id

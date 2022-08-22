@@ -298,6 +298,32 @@ Looks like:
 
 Get routes for aggregations of voyages, while performing searches. Routes come back in the format of bezier curves. May reintroduce a geojson option down the line so we can build an "export to storymaps" option.
 
+*brief update, august 22*
+
+It was observed to me that there appear to be fewer routes than expected on the map with certain searches. I've added an option for more verbose server logging of failed routes by passing the parameter verbose_mode = True. Running this myself, I find that the list of failed A/B routes for voyages comes entirely from pairs where the source or destination of a voyage has null lat/long coords.
+
+Specifically, in my current version of the API db, I have 390 total locations with null lat/longs:
+
+* 1 broad region
+* 23 regions
+* 366 ports
+
+Whereas on prod, I see the following breakdown:
+
+* 0 broad regions
+* 1 region
+* 57 ports
+
+This is great -- it means that some major cleanup has been done on production. A quick sync will make a world of difference. Having done that (see sync_locations.py), and then sifting through for intra-american voyages that actually belong in the trans-atlantic database, the only bad routes we have are the ones that the researchers entered without proper lat/long data for that port or region.
+
+IAM voyages that should be TASTDB (visually, at least): 
+102468,102744,107315,107352,107368,107400
+104692,104693,104694,104695,104698,104699,104700,104701,104702
+
+Madeira needs a different region in the system as well (at least, visually)
+
+*end brief update*
+
 Required fields:
 
 1. GROUPBY FIELDS. 2 VALID OPTIONS RIGHT NOW

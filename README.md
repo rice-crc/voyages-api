@@ -114,13 +114,12 @@ The full authentication workflow would look like:
 
 ### 1. Using POST Requests
 
-A request to PAST asking for people transported on voyages with Voyage ID's between 2314 and 2500 would look like
+NUMERIC RANGES: A request to PAST asking for people transported on voyages with Voyage ID's between 2314 and 2500 would look like
 	
-	POST http://127.0.0.1:8000/past/
+	POST http://127.0.0.1:8000/past/enslaved/
 	
 	Body:
 	{
-		'hierarchical': ['false'],
 		'results_page': ['3'],
 		'results_per_page': ['20'],
 		'voyage__voyage_id': ['2314,2500']
@@ -128,15 +127,27 @@ A request to PAST asking for people transported on voyages with Voyage ID's betw
 	
 And would return results 60-79 of 21,867 total records.
 
+DISCRETE INTEGER VALUES: You can now send a request for a list of specific values on an integer field by including an asterisk in your list.
 
-Or, to use the exact text with autocomplete, you might send the following request
+	POST http://127.0.0.1:8000/past/enslaved/
+	
+	Body:
+	{
+		'voyage__voyage_id': ['*,2314,2500']
+	}
+
+Would return results for 353 total records.
+
+AUTOCOMPLETE w. TEXT FIELDS: You can search for inexact matches on strings and receive a list of the 20 first alphabetically sorted matches:
+
+This request
 
 	POST http://127.0.0.1:8000/voyage/autocomplete
 
 	Body:
 	{'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name': ['jam']}
 
-And get back
+Would return
 
 	{
 		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": [
@@ -144,7 +155,7 @@ And get back
 		]
 	}
 
-Then feed that precise value into that variable:
+Which is useful because text fields take only precise matches on other endpoints. So you might run a couple autocomplete searches to let the user find an exact match, which they then select, and then allow them to do it again as they pick all the matches that they want, like so:
 
 	POST http://127.0.0.1:8000/voyage/
 	

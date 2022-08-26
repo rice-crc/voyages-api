@@ -63,12 +63,16 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 		active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
 		if len(active_numeric_search_fields)>0:
 			for field in active_numeric_search_fields:
-				range=params.get(field)
-				vals=[float(i) for i in range]
-				vals.sort()
-				min,max=vals
-				kwargs['{0}__{1}'.format(field, 'lte')]=max
-				kwargs['{0}__{1}'.format(field, 'gte')]=min
+				fieldvals=params.get(field)
+				if '*' in fieldvals:
+					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
+				else:
+					range=fieldvals
+					vals=[float(i) for i in range]
+					vals.sort()
+					min,max=vals
+					kwargs['{0}__{1}'.format(field, 'lte')]=max
+					kwargs['{0}__{1}'.format(field, 'gte')]=min
 		###text filters (exact match, and allow for multiple entries joined by an or)
 		###this hard eval is not ideal but I can't quite see how else to do it just now?
 		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
@@ -91,7 +95,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 	
 				if searchstring in [True,False]:
 					kwargs[field]=searchstring
-
+		#print(kwargs)
 		###apply filters
 		queryset=queryset.filter(**kwargs)
 		results_count=queryset.count()

@@ -53,18 +53,13 @@ class VoyageList(generics.GenericAPIView):
 		print("+++++++\nusername:",request.auth.user)
 # 		try:
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options)
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-			#read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
 			read_serializer=VoyageSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
-			if selected_fields==[]:
-				selected_fields=list(voyage_options.keys())
-			else:
-				selected_fields=[i for i in selected_fields if i in list(voyage_options.keys())]
 			outputs=[]
 			hierarchical=request.POST.get('hierarchical')
 			if str(hierarchical).lower() in ['false','0','f','n']:
@@ -178,6 +173,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			u2=FLASK_BASE_URL+'crosstabs/'
 			d2=params
 			d2['ids']=ids
+			d2['selected_fields']=selected_fields
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -215,6 +211,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 			u2=FLASK_BASE_URL+'groupby/'
 			d2=params
 			d2['ids']=ids
+			d2['selected_fields']=selected_fields
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -255,11 +252,12 @@ class VoyageCaches(generics.GenericAPIView):
 		if 'results_per_page' in params:
 			retrieve_all=False
 		voyageobjects=Voyage.objects
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(voyageobjects,self,request,voyage_options,retrieve_all=retrieve_all,selected_fields_exception=True)
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(voyageobjects,self,request,voyage_options,retrieve_all=retrieve_all)
 		if len(error_messages)==0:
 			ids=[i[0] for i in queryset.values_list('id')]
 			d2=params
 			d2['ids']=ids
+			d2['selected_fields']=selected_fields
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -283,21 +281,15 @@ class VoyageDataFrames(generics.GenericAPIView):
 		print("+++++++\nusername:",request.auth.user)
 		st=time.time()
 		params=dict(request.POST)
-		retrieve_all=True
-		if 'results_per_page' in params:
-			retrieve_all=False
+		retrieve_all=False
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,auto_prefetch=False,retrieve_all=retrieve_all,selected_fields_exception=True)
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,auto_prefetch=False,retrieve_all=True)
+		sf=list(selected_fields)
 		if len(error_messages)==0:
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-			if selected_fields==[]:
-				sf=list(voyage_options.keys())
-			else:
-				sf=[i for i in selected_fields if i in list(voyage_options.keys())]
-			
-			serialized=VoyageSerializer(queryset,many=True,selected_fields=selected_fields)
-			serialized=serialized.data
 			output_dicts={}
+			#print("----->",selected_fields)
+			serialized=VoyageSerializer(queryset,many=True,dynamicfieldsserializermode=True,selected_fields=selected_fields)
+			serialized=serialized.data
 			for selected_field in sf:
 				keychain=selected_field.split('__')
 				for s in serialized:
@@ -307,7 +299,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 					else:
 						output_dicts[selected_field]=[bottomval]
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output_dicts,safe=False,headers=headers)
+			return JsonResponse(output_dicts,safe=False)
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
@@ -387,6 +379,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			u2=FLASK_BASE_URL+'crosstabs/'
 			d2=params
 			d2['ids']=ids
+			d2['selected_fields']=selected_fields
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			j=json.loads(r.text)
 

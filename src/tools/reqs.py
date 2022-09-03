@@ -11,13 +11,13 @@ import html
 ##can also just pass an array of prefetch vars
 
 
-def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,selected_fields_exception=False):
+def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	errormessages=[]
-	selected_fields=None
 	next_uri=None
 	prev_uri=None
 	results_count=None
+	all_fields={i:options_dict[i] for i in options_dict if 'type' in options_dict[i]}
 	
 	try:
 		params=dict(r.POST)
@@ -25,32 +25,23 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 		print("--post req params--")
 		pp.pprint(params)
 	
-		#SELECT SPECIFIC FIELDS TO RETURN
-		selected_fields=params.get('selected_fields')
-		
-		if selected_fields is None:
-			selected_fields=[]
-		
-		if len(selected_fields)>15 and selected_fields_exception==False:
-			selected_fields=[]
-	
 		#INCLUDE AGGREGATION FIELDS
 		aggregations_param=params.get('aggregate_fields')
 	
 		if aggregations_param is not None:
 			valid_aggregation_fields=[f for f in options_dict if 'Integer' in options_dict[f]['type'] or 'Decimal' in options_dict[f]['type']]
-			aggregation_fields=[f for f in aggregations_param if f in valid_aggregation_fields]
-			selected_fields=[]
-			auto_prefetch=False
+			auto_prefetch=True
 		else:
 			aggregation_fields=[]
 	except:
 		errormessages.append("error parsing parameters")
 	
+	selected_fields=params.get('selected_fields') or all_fields
+	bad_fields=[f for f in selected_fields if f not in all_fields]
+	if len(bad_fields)>0:
+		errormessages.append("the following fields are not in the models: %s" %', '.join(bad_fields))
+	
 	try:
-		all_fields={i:options_dict[i] for i in options_dict if 'type' in options_dict[i]}
-		active_fields=list(set([i for i in params]+selected_fields+aggregation_fields).intersection(set(all_fields)))
-
 		###FILTER RESULTS
 		##select text and numeric fields, ignoring those without a type
 		text_fields=[i for i in all_fields if 'CharField' in all_fields[i]['type']]
@@ -106,15 +97,16 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 	
 	try:
 		#PREFETCH REQUISITE FIELDS
+		
 		if auto_prefetch:
-			prefetch_keys=list(options_dict.keys())
+			prefetch_fields=all_fields
 		else:
-			prefetch_keys = active_fields
-	
+			prefetch_fields=selected_fields
+		
 		#print(prefetch_keys)
 		##ideally, I'd run this list against the model and see
 		##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
-		prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_keys if '__' in i]))
+		prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
 		for p in prefetch_vars:
 			queryset=queryset.prefetch_related(p)	
 	
@@ -132,13 +124,12 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False,sel
 		aggregations_param=params.get('aggregate_fields')
 		if aggregation_fields != []:
 			aggqueryset=[]
-			selected_fields=[]
 			for aggfield in aggregation_fields:
 				for aggsuffix in ["min","max"]:
 					selected_fields.append(aggfield+"_"+aggsuffix)
 				aggqueryset.append(queryset.aggregate(Min(aggfield)))
 				aggqueryset.append(queryset.aggregate(Max(aggfield)))
-			queryset=aggqueryset
+			queryset=aggqueryset			
 	except:
 		errormessages.append("aggregation error")
 	

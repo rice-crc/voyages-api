@@ -5714,6 +5714,36 @@
     "label": "Transaction",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Transaction"
   },
+  "transactions__transaction__enslaved_person": {
+    "type": "table",
+    "label": "enslaved in relation",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaved in relation"
+  },
+  "transactions__transaction__enslaved_person__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaved in relation : Id"
+  },
+  "transactions__transaction__enslaved_person__enslaved": {
+    "type": "table",
+    "label": "enslaved",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaved in relation : enslaved"
+  },
+  "transactions__transaction__enslaved_person__enslaved__documented_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Documented name",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaved in relation : enslaved : Documented name"
+  },
+  "transactions__transaction__enslaved_person__enslaved__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaved in relation : enslaved : Id"
+  },
+  "transactions__transaction__enslaved_person__transaction": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Transaction",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaved in relation : Transaction"
+  },
   "transactions__transaction__source": {
     "type": "table",
     "label": "source",

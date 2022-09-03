@@ -10,10 +10,12 @@ from docs.serializers import *
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 	def __init__(self, *args, **kwargs):
+		dynamicfieldsserializermode=kwargs.pop('dynamicfieldsserializermode',None)
 		selected_fields = kwargs.pop('selected_fields', None)
+	
 		super().__init__(*args, **kwargs)
 		pp = pprint.PrettyPrinter(indent=4)
-		if selected_fields is not None:
+		if selected_fields is not None and dynamicfieldsserializermode:
 			def nestthis(keychain,thisdict={}):
 				while keychain:
 					k=keychain.pop(0)
@@ -24,7 +26,7 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 							thisdict[i][v]={}
 						else:
 							thisdict[i]={v:{}}
-					
+				
 					elif len(kvs)==1:
 						thisdict[kvs[0]]={}
 					else:
@@ -35,7 +37,7 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 						else:
 							thisdict[i]=nestthis(j,{})
 				return thisdict
-			
+		
 			selected_fields_dict=nestthis(selected_fields)
 			print("--selected fields--")
 			pp.pprint(selected_fields_dict)

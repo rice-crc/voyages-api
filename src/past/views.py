@@ -80,8 +80,6 @@ class EnslavedList(generics.GenericAPIView):
 					hierarchical=True
 		
 				if hierarchical==False:
-					if selected_fields==[]:
-						selected_fields=[i for i in enslaved_options]
 			
 					for s in serialized:
 						d={}
@@ -241,8 +239,6 @@ class EnslaverList(generics.GenericAPIView):
 					hierarchical=True
 	
 				if hierarchical==False:
-					if selected_fields==[]:
-						selected_fields=[i for i in enslaver_options]
 		
 					for s in serialized:
 						d={}
@@ -318,10 +314,6 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,auto_prefetch=False,retrieve_all=retrieve_all,selected_fields_exception=True)
 			if len(error_messages)==0:
 				headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-				if selected_fields==[]:
-					sf=list(enslaved_options.keys())
-				else:
-					sf=[i for i in selected_fields if i in list(enslaved_options.keys())]
 			
 				serialized=EnslavedSerializer(queryset,many=True,selected_fields=selected_fields)
 			

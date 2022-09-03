@@ -61,8 +61,6 @@ class LocationList(generics.GenericAPIView):
 					hierarchical=True
 		
 				if hierarchical==False:
-					if selected_fields==[]:
-						selected_fields=[i for i in location_options]
 			
 					for s in serialized:
 						d={}

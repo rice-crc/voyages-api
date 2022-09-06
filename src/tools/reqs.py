@@ -24,19 +24,10 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		pp = pprint.PrettyPrinter(indent=4)
 		print("--post req params--")
 		pp.pprint(params)
-	
-		#INCLUDE AGGREGATION FIELDS
-		aggregations_param=params.get('aggregate_fields')
-	
-		if aggregations_param is not None:
-			valid_aggregation_fields=[f for f in options_dict if 'Integer' in options_dict[f]['type'] or 'Decimal' in options_dict[f]['type']]
-			auto_prefetch=True
-		else:
-			aggregation_fields=[]
 	except:
 		errormessages.append("error parsing parameters")
 	
-	selected_fields=params.get('selected_fields') or all_fields
+	selected_fields=params.get('selected_fields') or list(all_fields.keys())
 	bad_fields=[f for f in selected_fields if f not in all_fields]
 	if len(bad_fields)>0:
 		errormessages.append("the following fields are not in the models: %s" %', '.join(bad_fields))
@@ -94,7 +85,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		print("resultset size:",results_count)
 	except:
  		errormessages.append("search/filter error")
-	
+	 
 	try:
 		#PREFETCH REQUISITE FIELDS
 		
@@ -115,23 +106,33 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	except:
 		errormessages.append("prefetch error")
 	
-	#AGGREGATIONS
+	
+	 	#AGGREGATIONS
 	##e.g. voyage_slaves_numbers__imp_total_num_slaves_embarked__sum
 	##This *SHOULD* aggregate on the filtered queryset, which means
 	###you could filter the dataset and then update your rangeslider's min & max
 	
-	try:
-		aggregations_param=params.get('aggregate_fields')
-		if aggregation_fields != []:
-			aggqueryset=[]
-			for aggfield in aggregation_fields:
-				for aggsuffix in ["min","max"]:
-					selected_fields.append(aggfield+"_"+aggsuffix)
-				aggqueryset.append(queryset.aggregate(Min(aggfield)))
-				aggqueryset.append(queryset.aggregate(Max(aggfield)))
-			queryset=aggqueryset			
-	except:
-		errormessages.append("aggregation error")
+	#INCLUDE AGGREGATION FIELDS
+	aggregation_fields=params.get('aggregate_fields')
+
+	if aggregation_fields is not None:
+		valid_aggregation_fields=[f for f in options_dict if 'Integer' in options_dict[f]['type'] or 'Decimal' in options_dict[f]['type']]
+		bad_aggregation_fields=[f for f in aggregation_fields if f not in valid_aggregation_fields]
+		if bad_aggregation_fields!=[]:
+			errormessages.append("bad aggregation fields:",",".join(bad_aggregation_fields))
+			print(errormessages)
+		else:
+			try:
+				aggqueryset=[]
+				for aggfield in aggregation_fields:
+					for aggsuffix in ["min","max"]:
+						selected_fields.append(aggfield+"_"+aggsuffix)
+					aggqueryset.append(queryset.aggregate(Min(aggfield)))
+					aggqueryset.append(queryset.aggregate(Max(aggfield)))
+				queryset=aggqueryset
+				auto_prefetch=True		
+			except:
+				errormessages.append("aggregation error")
 	
 	try:
 		#ORDER RESULTS

@@ -146,7 +146,7 @@ class VoyageAggregations(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dict,safe=False)
 		else:
-			print("failed\n+++++++")
+			print("failed\n",' | '.join(error_messages),"\n+++++++",)
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 class VoyageCrossTabs(generics.GenericAPIView):

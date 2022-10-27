@@ -5244,6 +5244,21 @@
     "label": "ID",
     "flatlabel": "voyage : voyage sources connection : doc : ID"
   },
+  "voyage__voyage_sourceconnection__doc__tag": {
+    "type": "table",
+    "label": "doc tag",
+    "flatlabel": "voyage : voyage sources connection : doc : doc tag"
+  },
+  "voyage__voyage_sourceconnection__doc__tag__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : voyage sources connection : doc : doc tag : ID"
+  },
+  "voyage__voyage_sourceconnection__doc__tag__tag": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Tag",
+    "flatlabel": "voyage : voyage sources connection : doc : doc tag : Tag"
+  },
   "voyage__voyage_sourceconnection__doc__url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Url",
@@ -5253,6 +5268,16 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Citation",
     "flatlabel": "voyage : voyage sources connection : doc : Citation"
+  },
+  "voyage__voyage_sourceconnection__doc__title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Title",
+    "flatlabel": "voyage : voyage sources connection : doc : Title"
+  },
+  "voyage__voyage_sourceconnection__doc__pub_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Pub year",
+    "flatlabel": "voyage : voyage sources connection : doc : Pub year"
   },
   "voyage__voyage_sourceconnection__text_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -10914,6 +10939,21 @@
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage sources connection : doc : ID"
   },
+  "transactions__transaction__voyage__voyage_sourceconnection__doc__tag": {
+    "type": "table",
+    "label": "doc tag",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage sources connection : doc : doc tag"
+  },
+  "transactions__transaction__voyage__voyage_sourceconnection__doc__tag__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage sources connection : doc : doc tag : ID"
+  },
+  "transactions__transaction__voyage__voyage_sourceconnection__doc__tag__tag": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Tag",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage sources connection : doc : doc tag : Tag"
+  },
   "transactions__transaction__voyage__voyage_sourceconnection__doc__url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Url",
@@ -10923,6 +10963,16 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Citation",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage sources connection : doc : Citation"
+  },
+  "transactions__transaction__voyage__voyage_sourceconnection__doc__title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Title",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage sources connection : doc : Title"
+  },
+  "transactions__transaction__voyage__voyage_sourceconnection__doc__pub_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Pub year",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage sources connection : doc : Pub year"
   },
   "transactions__transaction__voyage__voyage_sourceconnection__text_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",

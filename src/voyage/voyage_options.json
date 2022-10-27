@@ -5139,6 +5139,21 @@
     "label": "ID",
     "flatlabel": "voyage sources connection : doc : ID"
   },
+  "voyage_sourceconnection__doc__tag": {
+    "type": "table",
+    "label": "doc tag",
+    "flatlabel": "voyage sources connection : doc : doc tag"
+  },
+  "voyage_sourceconnection__doc__tag__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage sources connection : doc : doc tag : ID"
+  },
+  "voyage_sourceconnection__doc__tag__tag": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Tag",
+    "flatlabel": "voyage sources connection : doc : doc tag : Tag"
+  },
   "voyage_sourceconnection__doc__url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Url",
@@ -5148,6 +5163,16 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Citation",
     "flatlabel": "voyage sources connection : doc : Citation"
+  },
+  "voyage_sourceconnection__doc__title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Title",
+    "flatlabel": "voyage sources connection : doc : Title"
+  },
+  "voyage_sourceconnection__doc__pub_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Pub year",
+    "flatlabel": "voyage sources connection : doc : Pub year"
   },
   "voyage_sourceconnection__text_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",

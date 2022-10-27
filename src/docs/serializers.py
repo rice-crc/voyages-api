@@ -39,8 +39,13 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 			pp.pprint(selected_fields_dict)
 			self=nest_selected_fields(self,selected_fields_dict)
 
+class DocTagSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=DocTag
+		fields='__all__'
+
 class DocSerializer(DynamicFieldsModelSerializer):
-	
+	tag=DocTagSerializer(many=True,read_only=True)
 	class Meta:
 		model=Doc
 		fields='__all__'

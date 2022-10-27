@@ -119,7 +119,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		valid_aggregation_fields=[f for f in options_dict if 'Integer' in options_dict[f]['type'] or 'Decimal' in options_dict[f]['type']]
 		bad_aggregation_fields=[f for f in aggregation_fields if f not in valid_aggregation_fields]
 		if bad_aggregation_fields!=[]:
-			errormessages.append("bad aggregation fields:",",".join(bad_aggregation_fields))
+			errormessages.append("bad aggregation fields: "+",".join(bad_aggregation_fields))
 			print(errormessages)
 		else:
 			try:

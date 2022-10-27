@@ -4,6 +4,21 @@
     "label": "ID",
     "flatlabel": "ID"
   },
+  "tag": {
+    "type": "table",
+    "label": "doc tag",
+    "flatlabel": "doc tag"
+  },
+  "tag__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "doc tag : ID"
+  },
+  "tag__tag": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Tag",
+    "flatlabel": "doc tag : Tag"
+  },
   "url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Url",
@@ -13,5 +28,15 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Citation",
     "flatlabel": "Citation"
+  },
+  "title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Title",
+    "flatlabel": "Title"
+  },
+  "pub_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Pub year",
+    "flatlabel": "Pub year"
   }
 }

@@ -5479,6 +5479,21 @@
     "label": "ID",
     "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : ID"
   },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__tag": {
+    "type": "table",
+    "label": "doc tag",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : doc tag"
+  },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__tag__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : doc tag : ID"
+  },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__tag__tag": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Tag",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : doc tag : Tag"
+  },
   "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Url",
@@ -5488,6 +5503,16 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Citation",
     "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : Citation"
+  },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Title",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : Title"
+  },
+  "alias__enslaver_voyage__voyage__voyage_sourceconnection__doc__pub_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Pub year",
+    "flatlabel": "Enslaver alias : Enslaver voyage : Voyage : Voyage sourceconnection : doc : Pub year"
   },
   "alias__enslaver_voyage__voyage__voyage_sourceconnection__text_ref": {
     "type": "<class 'rest_framework.fields.CharField'>",

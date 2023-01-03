@@ -19,3 +19,5 @@ urllib3==1.26.8
 django-cors-headers
 networkx
 haversine
+bezier
+numpy

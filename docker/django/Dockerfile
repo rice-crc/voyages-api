@@ -12,6 +12,8 @@ RUN apt-get update -y \
     mysql-client \
     python3.9 \
     python3-pip \
+    python3.9-dev \
+    libpq-dev \
   && apt-get clean \
   && rm -rf \
     /tmp/* \
@@ -43,7 +45,8 @@ RUN python3.9 -m pip install --user --no-cache-dir --upgrade \
     setuptools \
     wheel
 
-COPY src/requirements.txt .
+COPY django/requirements.txt .
+
 RUN python3.9 -m pip install --user --no-cache-dir -r ./requirements.txt
 
 # -- Release --
@@ -57,7 +60,6 @@ ENV PYTHONUNBUFFERED=1
 ENV PATH=/root/.local/bin:$PATH
 
 COPY --from=build /root/.local /root/.local
-COPY . .
 
 ARG GUNICORN_PORT="8000"
 ARG GUNICORN_OPTS="--reload --workers 3 --threads 2 --worker-class gthread"

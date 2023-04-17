@@ -41,10 +41,11 @@ registered_caches=[
 	'voyage_export'
 ]
 
-for rc in registered_caches:
-	print("loading %s" %rc)
-	xl="%s=load_long_df(\"" %rc + DJANGO_STATIC_URL + "customcache/%s.json\")" %rc
-	exec(xl)
+# DISABLED FOR TESTING DOCKER REFACTORIZATION
+# for rc in registered_caches:
+# 	print("loading %s" %rc)
+# 	xl="%s=load_long_df(\"" %rc + DJANGO_STATIC_URL + "customcache/%s.json\")" %rc
+# 	exec(xl)
 
 @app.route('/groupby/',methods=['POST'])
 def groupby():

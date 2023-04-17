@@ -2,29 +2,52 @@
 version: "3.7"
 
 services:
-  voyages-mysql:
-    image: "mysql:latest"
-    container_name: "voyages-mysql"
-    hostname: "voyages-mysql"
+  voyages-solr:
+    image: "solr:8.5.2"
+    container_name: "voyages-solr"
+    hostname: "voyages-solr"
     restart: "on-failure"
     ports:
-      - "3306:3306"
+      - "8983:8983"
+    networks:
+      - "voyages"
     volumes:
-      - "mysql_volume:/var/lib/mysql"
+      - "solr_volume:/var/solr"
+      - "./solr:/srv/dspace-django/solr"
     environment:
-      MYSQL_ROOT_PASSWORD: "voyages"
+      SOLR_JAVA_MEM: "-Xms1g -Xmx1g"
+
+  voyages-postgres:
+    image: "postgres:latest"
+    container_name: "voyages-postgres"
+    hostname: "voyages-postgres"
+    networks:
+      - "voyages"
+    volumes:
+       - postgres:/data/postgres
+       - ./pg_conf:/docker-entrypoint-initdb.d
+    ports:
+      - "15432:5432"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "voyages"
+      POSTGRES_PASSWORD: "voyages"
+      PGDATA: "/data/postgres"
 
   voyages-django:
     image: "voyages-django"
     container_name: "voyages-django"
     hostname: "voyages-django"
     restart: "on-failure"
+    networks:
+      - "voyages"
     depends_on:
-      - "voyages-mysql"
+      - "voyages-postgres"
+      - "voyages-solr"
     ports:
       - "8000:8000"
     volumes:
-      - "./src/:/srv/voyages-api"
+      - "./django/:/srv/voyages-api"
     build:
       context: "."
       dockerfile: "./docker/django/Dockerfile"
@@ -34,6 +57,8 @@ services:
     container_name: "voyages-flask"
     hostname: "voyages-flask"
     restart: "on-failure"
+    networks:
+      - "voyages"
     ports:
       - "5000:5000"
     volumes:
@@ -41,20 +66,18 @@ services:
     build:
       context: "."
       dockerfile: "./docker/flask/Dockerfile"
-
-  voyages-adminer:
-    image: "adminer:latest"
-    container_name: "voyages-adminer"
-    hostname: "voyages-adminer"
-    restart: "on-failure"
-    depends_on:
-      - "voyages-mysql"
-    ports:
-      - "8080:8080"
-
+            
 networks:
-  default:
-    name: voyages
+  voyages:
+    driver: "bridge"
+    ipam:
+      driver: "default"
+      config:
+        - subnet: "172.20.0.0/16"
+
+
 
 volumes:
-  mysql_volume: {}
+#per https://github.com/asaikali/docker-compose-postgres/blob/master/README.md
+  postgres:
+  solr_volume: {}

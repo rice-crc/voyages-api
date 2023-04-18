@@ -1,7 +1,6 @@
-
+django/static/
 
 *.DS_Store
-src/static/
 *.sql
 dbconf.json
 src/voyages2021/localsettings.py

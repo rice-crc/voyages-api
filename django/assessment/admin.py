@@ -1,3 +1,5 @@
 from django.contrib import admin
+from doc.models import *
 
-# Register your models here.
+admin.site.register(DocTag)
+admin.site.register(Doc)

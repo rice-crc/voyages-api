@@ -80,7 +80,7 @@ class Adjacency(models.Model):
 		verbose_name_plural = "Location Adjacencies"
 
 # Voyage Regions and Places
-class LocationType(NamedModelAbstractBase):
+class PlaceType(NamedModelAbstractBase):
 	"""
 	Geographic Location Type
 	We will default to points, but open up onto a polygons model for when we want to show countries etc
@@ -90,7 +90,7 @@ class LocationType(NamedModelAbstractBase):
 		verbose_name_plural = "Geographic Location Types"
 
 # Voyage Regions and Places
-class Place(models.Model):
+class Place(NamedModelAbstractBase):
 	"""
 	Place. Unifying:
 		* Ports, Regions, Broad Regions
@@ -120,12 +120,12 @@ class Place(models.Model):
 		related_name='parent_of'
 	)
 	
-	location_type = models.ForeignKey(
-		'LocationType',
+	place_type = models.ForeignKey(
+		'PlaceType',
 		verbose_name="Location Type",
 		null=True,
 		on_delete=models.CASCADE,
-		related_name='type_location'
+		related_name='type_place'
 	)
 	
 	spatial_extent = models.JSONField(

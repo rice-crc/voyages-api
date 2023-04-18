@@ -8,12 +8,11 @@ class NamedModelAbstractBase(models.Model):
 		abstract = True
 
 class DocTag(NamedModelAbstractBase):
-	tag=models.CharField(max_length=20,null=False,blank=False,unique=True)
 	class Meta:
 		verbose_name = "Document Tag"
 		verbose_name_plural = "Document Tags"
 	def __str__(self):
-		return self.tag
+		return self.name
 
 #UIDs in the doc app should come from zotero I think
 class Doc(NamedModelAbstractBase):

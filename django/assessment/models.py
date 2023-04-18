@@ -1,45 +1,55 @@
 from django.db import models
+from geo.models import Place
 
-class NamedModelAbstractBase(models.Model):
-	name = models.CharField(max_length=255,blank=False,null=False)
-	def __str__(self):
-		return self.name
-	class Meta:
-		abstract = True
+class ExportArea(Place):
+	"""
+	Class represents Export area entity.
+	"""
+	order_num = models.IntegerField()
+	show_at_zoom = models.IntegerField()
+	show_on_map = models.BooleanField()
 
-class DocTag(NamedModelAbstractBase):
-	class Meta:
-		verbose_name = "Document Tag"
-		verbose_name_plural = "Document Tags"
-	def __str__(self):
-		return self.name
+class ExportRegion(Place):
+	"""
+	Class represents Export region entity.
+	"""
+	order_num = models.IntegerField()
+	show_at_zoom = models.IntegerField()
+	show_on_map = models.BooleanField()
+	export_area = models.ForeignKey(ExportArea, on_delete=models.CASCADE)
 
-#UIDs in the doc app should come from zotero I think
-class Doc(NamedModelAbstractBase):
-	doc_title=models.CharField(max_length=150,null=True,blank=True)
-	pub_year=models.IntegerField(null=True,blank=True)
-	tags=models.ManyToManyField(DocTag)
-	zotero_uri=models.URLField(max_length=500,null=False,blank=False)
-	full_ref = models.CharField(max_length=1000, null=False, blank=False)
-	uid = models.CharField(max_length=100, null=False, blank=False, unique=True)
-	class Meta:
-		verbose_name = "Source Authority"
-		verbose_name_plural = "Source Authorities"
-	def __str__(self):
-		return self.doc_title
 
-class Reference(NamedModelAbstractBase):
-	doc = models.ForeignKey(Doc,
-		on_delete=models.CASCADE,
-		related_name='source_refs',
-		null=False,
-		blank=False)
-	iiif_manifest_uri=models.URLField(max_length=500,null=True,blank=True)
-	zotero_uri=models.URLField(max_length=500,null=False,blank=False)
-	text_ref = models.CharField(max_length=255, null=False, blank=True)
-	uid = models.CharField(max_length=100, null=False, blank=False, unique=True)
-	class Meta:
-		verbose_name = "Reference"
-		verbose_name_plural = "References"
-	def __str__(self):
-		return self.text_ref
+class ImportArea(Place):
+	"""
+	Class represents Import area entity.
+	"""
+	order_num = models.IntegerField()
+	show_at_zoom = models.IntegerField()
+	show_on_map = models.BooleanField()
+
+
+class ImportRegion(Place):
+	"""
+	Class represents Import region entity.
+	"""
+	order_num = models.IntegerField()
+	show_at_zoom = models.IntegerField()
+	show_on_map = models.BooleanField()
+	import_area = models.ForeignKey(ImportArea, on_delete=models.CASCADE)
+
+
+class Nation(Place):
+	order_num = models.IntegerField()
+
+class Estimate(models.Model):
+	"""
+	Class represents Estimate entity
+	"""
+	nation = models.ForeignKey(Nation, on_delete=models.CASCADE)
+	year = models.IntegerField()
+	embarkation_region = models.ForeignKey(
+		ExportRegion, null=True, blank=True, on_delete=models.CASCADE)
+	disembarkation_region = models.ForeignKey(
+		ImportRegion, null=True, blank=True, on_delete=models.CASCADE)
+	embarked_slaves = models.FloatField(null=True, blank=True)
+	disembarked_slaves = models.FloatField(null=True, blank=True)

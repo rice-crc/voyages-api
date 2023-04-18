@@ -20,6 +20,41 @@
 	1. Write custom serializers for PAST
 		1. Too much data being shipped right now
 
+## PG setup
+
+This is all scripted right now in pg_conf/docker_postgres_init.sql, which is kicked off by docker-compose:
+
+* docker-compose
+	* creates a root user w/ pw "voyages"
+	* kicks off: docker_postgres_init.sql
+* docker_postgres_init.sql
+	* creates user voyages
+	* creates db "voyages"
+
+Manual CLI setup/teardown:
+
+	#create user voyages
+	docker exec -i voyages-postgres psql -c "create user voyages with password 'voyages';"
+	
+	#log in as user voyages
+	docker exec -it voyages-postgres psql -Uvoyages
+
+	#drop db (as user "root")
+	docker exec -i voyages-postgres psql -c "drop database voyages;"
+	
+	#create voyages db
+	docker exec -i voyages-postgres psql -c "CREATE DATABASE voyages
+		WITH
+		OWNER = voyages
+		ENCODING = 'UTF8'
+		LC_COLLATE = 'en_US.utf8'
+		LC_CTYPE = 'en_US.utf8'
+		TABLESPACE = pg_default
+		CONNECTION LIMIT = -1;"
+
+
+
+
 # Voyages REST API 2022
 
 This is an attempt to rebuild the Voyages API with as few dependencies as possible in the latest versions of django and python

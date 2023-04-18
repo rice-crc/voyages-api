@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
 	'voyage',
+	'common',
     'assessment',
     'docs',
     'geo',

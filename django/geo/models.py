@@ -4,7 +4,12 @@ from builtins import str
 
 from django.db import models
 from django.db.models import Prefetch
+# from voyage.models import NamedModelAbstractBase
 #from django.utils.translation import gettext_lazy as _
+
+class GeoUid(models.Model):
+    id = models.IntegerField(primary_key=True)
+    uid = models.CharField(max_length=1000, null=False, blank=False, unique=True)
 
 class Route(models.Model):
 	"""
@@ -26,16 +31,15 @@ class Route(models.Model):
 	)
 	dataset= models.IntegerField(
 		"Dataset",
-		null=True
+		null=False,
+		blank=False
 	)
-	
 	shortest_route=models.JSONField(
 		"Endpoint to endpoint route",
 		null=True
 	)
-
-	
 	class Meta:
+		unique_together=(['source','target','dataset'])
 		verbose_name = "Route"
 		verbose_name_plural = "Routes"
 
@@ -71,6 +75,7 @@ class Adjacency(models.Model):
 	)
 	
 	class Meta:
+		unique_together=(['source','target','dataset'])
 		verbose_name = "Location Adjacency"
 		verbose_name_plural = "Location Adjacencies"
 	
@@ -78,7 +83,6 @@ class Polygon(models.Model):
 	"""
 	Shape of a spatial entity (optional for the locations that link to these)
 	"""
-	
 	shape=models.JSONField(
 		"Geojson Polygon",
 		null=True
@@ -90,15 +94,15 @@ class LocationType(models.Model):
 	Geographic Location Type
 	We will default to points, but open up onto a polygons model for when we want to show countries etc
 	"""
-
 	name = models.CharField(
 		"Geographic Location Type",
 		max_length=255,
-		unique=True
+		unique=True,
+		blank=False,
+		null=False
 	)
 	def __str__(self):
 		return self.name
-
 	class Meta:
 		verbose_name = "Geographic Location Type"
 		verbose_name_plural = "Geographic Location Types"
@@ -130,11 +134,9 @@ class Location(models.Model):
 	
 	child_of = models.ForeignKey(
 		'self',
-		verbose_name="Child of",
 		null=True,
 		on_delete=models.CASCADE,
-		related_name='parent_of',
-		related_query_name='Parent of'
+		related_name='parent_of'
 	)
 	
 	location_type = models.ForeignKey(
@@ -152,24 +154,14 @@ class Location(models.Model):
 		on_delete=models.CASCADE
 	)
 	
-	value = models.IntegerField(
-		"SPSS code",
-		unique=True
+	uid = models.OneToOneField(
+		GeoUid,
+		null=False,
+		blank=False,
+		on_delete=models.CASCADE,
+		related_name='uid_place'
 	)
-	
-	dataset= models.IntegerField(
-		"trans-atlantic (0), intra-american (1), intra-african (2)",
-		null=True
-	)
-	
-	show_on_map = models.BooleanField(default=True,null=True)
-	show_on_main_map = models.BooleanField(default=True,null=True)
-	show_on_voyage_map = models.BooleanField(default=True,null=True)
-
-	def __str__(self):
-		return self.name
 
 	class Meta:
 		verbose_name = "Geographic Location"
 		verbose_name_plural = "Geographic Locations"
-		ordering = ['value']

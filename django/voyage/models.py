@@ -6,21 +6,10 @@ from django.db import models
 from django.db.models import Prefetch
 from geo.models import Location
 from docs.models import Doc
+from common.models import *
 #from django.utils.translation import gettext_lazy as _
 
 
-class NamedModelAbstractBase(models.Model):
-    id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.__unicode__()
-
-    def __unicode__(self):
-        return str(self.id) + ", " + self.name
-
-    class Meta:
-        abstract = True
 
 class AfricanInfo(NamedModelAbstractBase):
     """
@@ -58,10 +47,8 @@ class BroadRegion(models.Model):
 									on_delete=models.CASCADE,
 									verbose_name="Location",
 									null=True)
-
 	def __str__(self):
 		return self.geo_location.name
-
 	class Meta:
 		verbose_name = "Broad region (area)"
 		verbose_name_plural = "Broad regions (areas)"

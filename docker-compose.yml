@@ -30,7 +30,7 @@ services:
       - "15432:5432"
     restart: unless-stopped
     environment:
-      POSTGRES_USER: "voyages"
+      POSTGRES_USER: "root"
       POSTGRES_PASSWORD: "voyages"
       PGDATA: "/data/postgres"
 

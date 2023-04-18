@@ -33,12 +33,11 @@ class PersonEventConnection(models.Model):
 		related_name='people_with_role'
 	)
 	class Meta:
-		verbose_name = "Enslaved Person in event"
-		verbose_name_plural = "Enslaved People in events"
+		verbose_name = "Person in event"
+		verbose_name_plural = "People in events"
 
 class EnslaverInfoAbstractBase(models.Model):
 	principal_alias = models.CharField(max_length=255)
-
 	birth=models.ForeignKey(
 		PersonEventConnection,
 		on_delete=models.CASCADE,
@@ -74,7 +73,8 @@ class EnslaverInfoAbstractBase(models.Model):
 
 class EnslaverIdentity(EnslaverInfoAbstractBase):
 	class Meta:
-		verbose_name = 'Enslaver unique identity and personal info'
+		verbose_name = 'Enslaver Identity'
+		verbose_name_plural = 'Enslaver Identities'
 
 class EnslaverAlias(models.Model):
 	"""
@@ -92,6 +92,7 @@ class EnslaverAlias(models.Model):
 	uid = models.IntegerField(null=False,blank=False,unique=True)
 	class Meta:
 		verbose_name = 'Enslaver alias'
+		verbose_name_plural = 'Enslaver aliases'
 
 class LanguageGroup(Place):
 	class Meta:

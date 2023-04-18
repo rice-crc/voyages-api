@@ -1,7 +1,7 @@
-# from django.urls import path
-# 
-# from . import views
-# 
+from django.urls import path
+
+from . import views
+
 # urlpatterns = [
 #     path('enslaved/', views.EnslavedList.as_view()),
 #     path('enslaved/dataframes', views.EnslavedDataFrames.as_view()),

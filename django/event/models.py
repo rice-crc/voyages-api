@@ -44,11 +44,12 @@ class Date(models.Model):
 			MinValueValidator(24)
 		]
 	)
-	imputed = models.BooleanField()
+	imputed = models.BooleanField(default=False)
 	def __str__(self):
 		return " ".join([
 			"/".join([str(i) if i is not None else '' for i in [m,d,y]]),
-			[str(h)+":00" if h is not None else ""]
+			[str(h)+":00" if h is not None else ""],
+			['**' if self.imputed else ""]
 		])
 
 class EventType(NamedModelAbstractBase):

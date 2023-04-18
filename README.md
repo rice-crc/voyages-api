@@ -52,6 +52,13 @@ Manual CLI setup/teardown:
 		TABLESPACE = pg_default
 		CONNECTION LIMIT = -1;"
 
+## Model rewrites
+
+* Named entities
+	* names are not unique
+	* routed through one table (in the common app)
+	* and tagged
+* Dates
 
 
 

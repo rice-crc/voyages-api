@@ -5,7 +5,7 @@ import time
 import os
 from geo.models import *
 from voyage.models import *
-from voyages2021.settings import STATIC_ROOT
+from voyages3.settings import STATIC_ROOT
 import bezier
 import numpy as np
 import math

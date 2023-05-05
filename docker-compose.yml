@@ -2,20 +2,6 @@
 version: "3.7"
 
 services:
-  voyages-solr:
-    image: "solr:8.5.2"
-    container_name: "voyages-solr"
-    hostname: "voyages-solr"
-    restart: "on-failure"
-    ports:
-      - "8983:8983"
-    networks:
-      - "voyages"
-    volumes:
-      - "solr_volume:/var/solr"
-      - "./solr:/srv/dspace-django/solr"
-    environment:
-      SOLR_JAVA_MEM: "-Xms1g -Xmx1g"
 
   voyages-postgres:
     image: "postgres:latest"
@@ -43,7 +29,6 @@ services:
       - "voyages"
     depends_on:
       - "voyages-postgres"
-      - "voyages-solr"
     ports:
       - "8000:8000"
     volumes:
@@ -79,5 +64,4 @@ networks:
 
 volumes:
 #per https://github.com/asaikali/docker-compose-postgres/blob/master/README.md
-  postgres:
-  solr_volume: {}
+  postgres: {}

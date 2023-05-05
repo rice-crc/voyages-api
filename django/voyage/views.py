@@ -16,8 +16,8 @@
 # from .models import *
 # from geo.models import *
 # import pprint
-# from tools.nest import *
-# from tools.reqs import *
+# from common.nest import *
+# from common.reqs import *
 # import collections
 # import gc
 # from .serializers import *

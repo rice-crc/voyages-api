@@ -3,20 +3,8 @@ from __future__ import unicode_literals
 from builtins import str
 from django.db import models
 from django.db.models import Prefetch
-# from voyages.apps.common.models import NamedModelAbstractBase
+from common.models import NamedModelAbstractBase,SparseDate
 
-class NamedModelAbstractBase(models.Model):
-	id = models.IntegerField(primary_key=True)
-	name = models.CharField(max_length=255)
-
-	def __str__(self):
-		return self.__unicode__()
-
-	def __unicode__(self):
-		return str(self.id) + ", " + self.name
-
-	class Meta:
-		abstract = True
 
 class AfricanInfo(NamedModelAbstractBase):
 	"""
@@ -827,7 +815,6 @@ class VoyageItinerary(models.Model):
 		verbose_name = "Itinerary"
 		verbose_name_plural = "Itineraries"
 
-
 # Voyage Dates
 class VoyageDates(models.Model):
 	"""
@@ -839,103 +826,119 @@ class VoyageDates(models.Model):
 	years_start = {5: 1525, 10: 1500, 25: 1500, 100: 1500}
 
 	# Data variables
-	voyage_began = models.CharField("Date that voyage began (DATEDEPB,A,C)",
-									max_length=10,
-									blank=True,
-									null=True,
-									help_text="Date in format: MM,DD,YYYY")
-	slave_purchase_began = models.CharField(
-		"Date that slave purchase began (D1SLATRB,A,C)",
-		max_length=10,
-		blank=True,
+	voyage_began = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
-	vessel_left_port = models.CharField(
-		"Date that vessel left last slaving port (DLSLATRB,A,C)",
-		max_length=10,
-		blank=True,
+		on_delete=models.CASCADE,
+		verbose_name="Date that voyage began (DATEDEPB,A,C)",
+		related_name="voyage_began_voyagedate"
+	)
+	
+	slave_purchase_began = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
-	first_dis_of_slaves = models.CharField(
-		"Date of first disembarkation of slaves (DATARR33,32,34)",
-		max_length=10,
-		blank=True,
+		on_delete=models.CASCADE,
+		verbose_name="Date that slave purchase began (D1SLATRB,A,C)",
+		related_name="slave_purchase_began_voyagedate"
+	)
+	
+	vessel_left_port = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
+		on_delete=models.CASCADE,
+		verbose_name="Date that vessel left last slaving port (DLSLATRB,A,C)",
+		related_name="vessel_left_port_voyagedate"
+	)
+	
+	first_dis_of_slaves = models.ForeignKey(
+		SparseDate,
+		null=True,
+		on_delete=models.CASCADE,
+		verbose_name="Date of first disembarkation of slaves (DATARR33,32,34)",
+		related_name="first_dis_of_slaves_voyagedate"
+	)
 
-	date_departed_africa = models.CharField(
-		"Date vessel departed Africa (DATELEFTAFR)",
-		max_length=10,
-
-		blank=True,
+	date_departed_africa = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
+		on_delete=models.CASCADE,
+		verbose_name="Date vessel departed Africa (DATELEFTAFR)",
+		related_name="date_departed_africa_voyagedate"
+	)
 
-	arrival_at_second_place_landing = models.CharField(
-		"Date of arrival at second place of landing (DATARR37,36,38)",
-		max_length=10,
-
-		blank=True,
+	arrival_at_second_place_landing = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
-	third_dis_of_slaves = models.CharField(
-		"Date of third disembarkation of slaves (DATARR40,39,41)",
-		max_length=10,
-
-		blank=True,
+		on_delete=models.CASCADE,
+		verbose_name="Date of arrival at second place of landing (DATARR37,36,38)",
+		related_name="arrival_at_second_place_landing_voyagedate"
+	)
+	
+	third_dis_of_slaves = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
-	departure_last_place_of_landing = models.CharField(
-		"Date of departure from last place of landing (DDEPAMB,*,C)",
-		max_length=10,
-
-		blank=True,
+		on_delete=models.CASCADE,
+		verbose_name="Date of third disembarkation of slaves (DATARR40,39,41)",
+		related_name="third_dis_of_slaves_voyagedate"
+	)
+	
+	departure_last_place_of_landing = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
-	voyage_completed = models.CharField(
-		"Date on which slave voyage completed (DATARR44,43,45)",
-		max_length=10,
-
-		blank=True,
+		on_delete=models.CASCADE,
+		verbose_name="Date of departure from last place of landing (DDEPAMB,*,C)",
+		related_name="departure_last_place_of_landing_voyagedate"
+	)
+	
+	voyage_completed = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
+		on_delete=models.CASCADE,
+		verbose_name="Date on which slave voyage completed (DATARR44,43,45)",
+		related_name="voyage_completed_voyagedate"
+	)
 
 	# Later this can become just a property/ can be calculated
 	length_middle_passage_days = models.IntegerField(
 		"Length of Middle Passage in (days) (VOYAGE)", null=True, blank=True)
 
 	# Imputed variables
-	imp_voyage_began = models.CharField("Year voyage began",
-										max_length=10,
-
-										blank=True,
-										null=True,
-										help_text="Date in format: MM,DD,YYYY")
-	imp_departed_africa = models.CharField(
-		"Year departed Africa",
-		max_length=10,
-
-		blank=True,
+	imp_voyage_began = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
-	imp_arrival_at_port_of_dis = models.CharField(
-		"Year of arrival at port of disembarkation (YEARAM)",
-		max_length=10,
-		blank=True,
+		on_delete=models.CASCADE,
+		verbose_name="Year voyage began",
+		related_name="imp_voyage_began_voyagedate"
+	)
+	
+	imp_departed_africa = models.ForeignKey(
+		SparseDate,
 		null=True,
+		on_delete=models.CASCADE,
+		verbose_name="Year departed Africa",
+		related_name="imp_departed_africa_voyagedate"
+	)
+	
+	imp_arrival_at_port_of_dis = models.ForeignKey(
+		SparseDate,
+		null=True,
+		on_delete=models.CASCADE,
+		verbose_name="Year of arrival at port of disembarkation (YEARAM)",
+		related_name="imp_arrival_at_port_of_dis_voyagedate"
+	)
 
-		help_text="Date in format: MM,DD,YYYY")
-
-	# Later this can become just a property/ can be calculated
 	imp_length_home_to_disembark = models.IntegerField(
 		"Voyage length from home port to disembarkation (days) (VOY1IMP)",
 		null=True,
-		blank=True)
+		blank=True
+	)
+		
 	imp_length_leaving_africa_to_disembark = models.IntegerField(
 		"Voyage length from last slave embarkation to first disembarkation "
 		"(days) (VOY2IMP)",
 		null=True,
-		blank=True)
+		blank=True
+	)
 
 	voyage = models.ForeignKey('Voyage',
 							   null=True,
@@ -943,77 +946,9 @@ class VoyageDates(models.Model):
 							   related_name="voyage_name_dates",
 							   on_delete=models.CASCADE)
 
-	@classmethod
-	def get_date_year(cls, value):
-		"""
-		Returns year value from CommaSeparatedField, or None if undefined
-		"""
-		if not value:
-			return None
-		strval = value.split(',')[2]
-		if len(strval) < 1:
-			return None
-		try:
-			return int(strval)
-		except Exception:
-			return None
-
-	@classmethod
-	def get_date_month(cls, value):
-		"""
-		Returns month value from CommaSeparatedField, or 0 if undefined
-		"""
-		if not value:
-			return 0
-		strval = value.split(',')[1]
-		if len(strval) < 1:
-			return 0
-		try:
-			return int(strval)
-		except Exception:
-			return None
-
-	@classmethod
-	def get_date_day(cls, value):
-		"""
-		Returns date value from CommaSeparatedField, or 0 if undefined
-		"""
-		if not value:
-			return 0
-		strval = value.split(',')[0]
-		if len(strval) < 1:
-			return 0
-		try:
-			return int(strval)
-		except Exception:
-			return None
-
-	# don't think this is being used anywhere
-#	def calculate_year_period(self, period):
-#		"""
-#		Function to calculate proper period.
-#
-#		Keyword arguments:
-#		period -- which period to calculate
-#		"""
-#
-#		if (period != 100):
-#			if ((self.get_date_year(self.imp_arrival_at_port_of_dis) -
-#			self.years_start[period]) % period != 0):
-#				return ((self.get_date_year(self.imp_arrival_at_port_of_dis) -
-#				self.years_start[period]) / period +1)
-#			else:
-#				return
-#				(self.get_date_year(self.imp_arrival_at_port_of_dis) -
-#				self.years_start[period]) \ / period
-#		else:
-#			return ((self.get_date_year(self.imp_arrival_at_port_of_dis))/100
-#			+ 100)
-
 	class Meta:
 		verbose_name = 'Date'
 		verbose_name_plural = 'Dates'
-
 
 # Voyage Captain and Crew
 class VoyageCaptain(models.Model):

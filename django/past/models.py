@@ -14,21 +14,7 @@ from django.db.models.functions import Coalesce, Concat, Length, Substr
 from django.db.models.sql import RawQuery
 from voyage.models import Place, Voyage, VoyageDataset, VoyageSources
 import re
-# from voyages.apps.common.models import NamedModelAbstractBase
-
-class NamedModelAbstractBase(models.Model):
-	id = models.IntegerField(primary_key=True)
-	name = models.CharField(max_length=255)
-
-	def __str__(self):
-		return self.__unicode__()
-
-	def __unicode__(self):
-		return str(self.id) + ", " + self.name
-
-	class Meta:
-		abstract = True
-
+from common.models import NamedModelAbstractBase,SparseDate
 
 class SourceConnectionAbstractBase(models.Model):
 	# Sources are shared with Voyages.
@@ -237,11 +223,14 @@ class Enslaved(models.Model):
 												on_delete=models.CASCADE,
 												db_index=True,
 												related_name='+')
-	last_known_date = models.CharField(
-		max_length=10,
-		blank=True,
+	last_known_date = models.ForeignKey(
+		SparseDate,
 		null=True,
-		help_text="Date in format: MM,DD,YYYY")
+		on_delete=models.CASCADE,
+		verbose_name="Last known date",
+		related_name="enslaver_last_known_date_pastdate"
+	)
+	
 	captive_fate = models.ForeignKey(CaptiveFate, null=True, on_delete=models.SET_NULL, db_index=True)
 	captive_status = models.ForeignKey(CaptiveStatus, null=True, on_delete=models.SET_NULL, db_index=True)
 	voyage = models.ForeignKey(Voyage, null=False, on_delete=models.CASCADE, db_index=True)
@@ -315,8 +304,14 @@ class EnslavementRelation(models.Model):
 	id = models.IntegerField(primary_key=True)
 	relation_type = models.ForeignKey(EnslavementRelationType, null=False, on_delete=models.CASCADE)
 	place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+')
-	date = models.CharField(max_length=12, null=True,
-		help_text="Date in MM,DD,YYYY format with optional fields.")
+	date = models.ForeignKey(
+		SparseDate,
+		null=True,
+		on_delete=models.CASCADE,
+		verbose_name="Enslavement relation date",
+		related_name="enslavement_relation_last_known_date_pastdate"
+	)
+	
 	amount = models.DecimalField(null=True, decimal_places=2, max_digits=6)
 	unnamed_enslaved_count = models.IntegerField(null=True)
 	voyage = models.ForeignKey(Voyage, related_name="+",

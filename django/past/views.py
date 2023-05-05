@@ -16,8 +16,8 @@
 # from .models import *
 # from .serializers import *
 # import pprint
-# from tools.nest import *
-# from tools.reqs import *
+# from common.nest import *
+# from common.reqs import *
 # import collections
 # 
 # 

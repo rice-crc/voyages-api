@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'past',
     'common',
     'blog',
+    'tinymce',
     'rest_framework',
     'rest_framework.authtoken'
 ]

@@ -829,73 +829,82 @@ class VoyageDates(models.Model):
 	voyage_began = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date that voyage began (DATEDEPB,A,C)",
-		related_name="voyage_began_voyagedate"
+		related_name="+"
 	)
 	
 	slave_purchase_began = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date that slave purchase began (D1SLATRB,A,C)",
-		related_name="slave_purchase_began_voyagedate"
+		related_name="+"
 	)
 	
 	vessel_left_port = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date that vessel left last slaving port (DLSLATRB,A,C)",
-		related_name="vessel_left_port_voyagedate"
+		related_name="+"
 	)
 	
 	first_dis_of_slaves = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date of first disembarkation of slaves (DATARR33,32,34)",
-		related_name="first_dis_of_slaves_voyagedate"
+		related_name="+"
 	)
 
 	date_departed_africa = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date vessel departed Africa (DATELEFTAFR)",
-		related_name="date_departed_africa_voyagedate"
+		related_name="+"
 	)
 
 	arrival_at_second_place_landing = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date of arrival at second place of landing (DATARR37,36,38)",
-		related_name="arrival_at_second_place_landing_voyagedate"
+		related_name="+"
 	)
 	
 	third_dis_of_slaves = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date of third disembarkation of slaves (DATARR40,39,41)",
-		related_name="third_dis_of_slaves_voyagedate"
+		related_name="+"
 	)
 	
 	departure_last_place_of_landing = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date of departure from last place of landing (DDEPAMB,*,C)",
-		related_name="departure_last_place_of_landing_voyagedate"
+		related_name="+"
 	)
 	
 	voyage_completed = models.ForeignKey(
 		SparseDate,
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		verbose_name="Date on which slave voyage completed (DATARR44,43,45)",
-		related_name="voyage_completed_voyagedate"
+		related_name="+"
 	)
 
 	# Later this can become just a property/ can be calculated
@@ -903,28 +912,22 @@ class VoyageDates(models.Model):
 		"Length of Middle Passage in (days) (VOYAGE)", null=True, blank=True)
 
 	# Imputed variables
-	imp_voyage_began = models.ForeignKey(
-		SparseDate,
+	imp_voyage_began = models.IntegerField(
 		null=True,
-		on_delete=models.CASCADE,
+		blank=True,
 		verbose_name="Year voyage began",
-		related_name="imp_voyage_began_voyagedate"
 	)
 	
-	imp_departed_africa = models.ForeignKey(
-		SparseDate,
+	imp_departed_africa = models.IntegerField(
 		null=True,
-		on_delete=models.CASCADE,
-		verbose_name="Year departed Africa",
-		related_name="imp_departed_africa_voyagedate"
+		blank=True,
+		verbose_name="Year departed Africa"
 	)
 	
-	imp_arrival_at_port_of_dis = models.ForeignKey(
-		SparseDate,
+	imp_arrival_at_port_of_dis = models.IntegerField(
 		null=True,
-		on_delete=models.CASCADE,
-		verbose_name="Year of arrival at port of disembarkation (YEARAM)",
-		related_name="imp_arrival_at_port_of_dis_voyagedate"
+		blank=True,
+		verbose_name="Year of arrival at port of disembarkation (YEARAM)"
 	)
 
 	imp_length_home_to_disembark = models.IntegerField(

@@ -21,3 +21,4 @@ psycopg
 filebrowser
 Pillow
 django-storages
+django-tinymce

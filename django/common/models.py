@@ -25,7 +25,22 @@ class SparseDate(models.Model):
 	text=models.CharField(max_length=12, null=True, help_text="Date in MM,DD,YYYY format with optional fields.")
 	
 	def __str__(self):
-		return self.text
+		if self.mm is not None and self.hh is not None:
+			tstr=':'.join(['00' if i is None else str(i) for i in [self.hh,self.mm]])
+		else:
+			tstr=[]
+		
+		def intbuffer(i):
+			i=str(i)
+			if len(i)==0 or i==None:
+				return ''
+			if len(i)==1:
+				return '0'+i
+			else:
+				return i
+		
+		dstr=','.join([intbuffer(i) for i in [self.m,self.d,self.y]])
+		return ' '.join([dstr,tstr])
 
 	class Meta:
 		unique_together=[['m','d','y'],['m','d','y','hh','mm']]

@@ -21,6 +21,7 @@ from rest_framework.authtoken import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('tinymce/', include('tinymce.urls')),
 #     path('voyage/',include('voyage.urls')),
 #     path('past/',include('past.urls')),
 #     path('assessment/',include('assessment.urls')),

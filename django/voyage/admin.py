@@ -185,7 +185,7 @@ class VoyageSourcesConnectionInline(admin.StackedInline):
 # 
 class VoyageSourcesAdmin(admin.ModelAdmin):
 	search_fields=['full_ref']
-	list_display=['full_ref','short_ref']
+	list_display=['id','full_ref','short_ref']
 	model=VoyageSources
 
 class VoyageOutcomeInline(admin.StackedInline):

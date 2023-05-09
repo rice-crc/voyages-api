@@ -11,6 +11,7 @@ services:
       - "voyages"
     volumes:
        - postgres:/data/postgres
+       - ./pg_dataloader:/pg_dataloader
        - ./pg_conf:/docker-entrypoint-initdb.d
     ports:
       - "15432:5432"

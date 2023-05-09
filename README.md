@@ -52,6 +52,25 @@ Manual CLI setup/teardown:
 		TABLESPACE = pg_default
 		CONNECTION LIMIT = -1;"
 
+## bogus db migrations
+
+I finally got mysql working on my M1, though it's a janky setup.
+
+I can now kick it off with 
+	
+	sudo /usr/local/mysql/support-files/mysql.server start
+	mysqlsh localhost -uroot -p
+	\sql
+	use voyages_may9;
+	select * from voyage_voyagesources into outfile 'voyage_voyagesources.csv' fields terminated by '|';
+
+But it gets dumped into the sql data directory, so I move it out with
+
+	sudo mv /usr/local/mysql/data/voyages_may9/voyage_voyagesources.csv ~/Documents
+	docker exec -i voyages-postgres psql -U root voyages -c "COPY voyage_voyagesources FROM '/pg_dataloader/voyage_voyagesources.csv' DELIMITER '|' ";  
+	
+(text mode not csv mode)
+
 ## Model rewrites
 
 * Named entities

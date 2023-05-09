@@ -1722,7 +1722,7 @@ class VoyageSources(models.Model):
 								 unique=True)
 	# Might contain HTML text formatting
 	full_ref = models.CharField('Full reference',
-								max_length=2550, null=False, blank=True)
+								max_length=100000, null=False, blank=True)
 	source_type = models.ForeignKey('VoyageSourcesType', null=False,
 									on_delete=models.CASCADE)
 

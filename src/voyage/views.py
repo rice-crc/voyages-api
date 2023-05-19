@@ -361,6 +361,69 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
 
+
+#This will only accept one field at a time
+#Should only be a text field
+#And it will only return max 10 results
+#It will therefore serve as an autocomplete endpoint
+#I should make all text queries into 'or' queries
+class VoyageTextFieldAutoComplete2(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
+		try:
+			st=time.time()
+			params=dict(request.POST)
+			acfieldparam=next(iter(params))
+			v=params[acfieldparam][0]
+			print("voyage/autocomplete",acfieldparam,v)
+			klist=acfieldparam.split(',')
+			def flattenthis(l):
+				fl=[]
+				for i in l:
+					if len(i)>1:
+						for e in i:
+							fl.append(e)
+					else:
+						fl.append(i)
+				return fl
+			retrieve_all=True
+			total_results_count=0
+			fetchcount=20
+			candidates=[]
+			for k in klist:
+				#print(k)
+				queryset=Voyage.objects.all()
+				#print("------->",k,v,re.sub("\\\\+","",v),"<---------")
+				kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+				queryset=queryset.filter(**kwargs)
+				queryset=queryset.prefetch_related(k)
+				queryset=queryset.order_by(k)
+				total_results_count+=queryset.count()
+				vals=[]
+				for v in queryset.values_list('id',k).iterator():
+					if v not in vals:
+						vals.append(v)
+					if len(vals)>=fetchcount:
+						break
+			val_list=[
+				{
+					"id":int(i[0]),
+					"label":i[1]
+				} for i in vals
+			]
+			output_dict={
+				"results":val_list,
+				"total_results_count":total_results_count
+			}
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(output_dict,safe=False)
+		except:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+
+
 class VoyageAggRoutes(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]

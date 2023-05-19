@@ -1,0 +1,14 @@
+{
+   "voyage_slaves_numbers__imp_total_num_slaves_embarked": {
+      "min": 0,
+      "max": 2024
+   },
+   "voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
+      "min": 0,
+      "max": 1700
+   },
+   "voyage_dates__imp_arrival_at_port_of_dis_yyyy": {
+      "min": 1514,
+      "max": 1866
+   }
+}

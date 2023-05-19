@@ -1,16 +1,19 @@
 import requests
 import json
 from django.core.management.base import BaseCommand, CommandError
-from voyage.serializers import VoyageSerializer,PlaceSerializer
-from voyage.models import Voyage,Place
+from voyage.serializers import VoyageSerializer
+from voyage.models import Voyage
+from common.serializers import SparseDateSerializer
+from common.models import SparseDate
+
 from past.serializers import EnslavedSerializer,EnslaverSerializer
 from past.models import *
-from assessment.serializers import EstimateSerializer
-from assessment.models import Estimate
+# from assessment.serializers import EstimateSerializer
+# from assessment.models import Estimate
 from geo.serializers import *
-from geo.models import Location,Route
-from docs.models import Doc
-from docs.serializers import DocSerializer
+from geo.models import Location
+# from docs.models import Doc
+# from docs.serializers import DocSerializer
 
 class Command(BaseCommand):
 	help = 'rebuilds the options flatfiles'
@@ -25,9 +28,14 @@ class Command(BaseCommand):
 				'objectclass':Voyage
 			},
 			{
-				'output_filename':'voyage/geo_options.json',
-				'serializer':PlaceSerializer,
-				'objectclass':Place
+				'output_filename':'common/sparse_date_options.json',
+				'serializer':SparseDateSerializer,
+				'objectclass':SparseDate
+			},
+			{
+				'output_filename':'geo/geo_options.json',
+				'serializer':LocationSerializer,
+				'objectclass':Location
 			},
 			{
 				'output_filename':'past/enslaved_options.json',
@@ -39,21 +47,11 @@ class Command(BaseCommand):
 				'serializer':EnslaverSerializer,
 				'objectclass':EnslaverIdentity
 			},
-			{
-				'output_filename':'assessment/assessment_options.json',
-				'serializer':EstimateSerializer,
-				'objectclass':Estimate
-			},
-			{
-				'output_filename':'geo/location_options.json',
-				'serializer':LocationSerializer,
-				'objectclass':Location
-			},
-			{
-				'output_filename':'docs/doc_options.json',
-				'serializer':DocSerializer,
-				'objectclass':Doc
-			}
+# 			{
+# 				'output_filename':'assessment/assessment_options.json',
+# 				'serializer':EstimateSerializer,
+# 				'objectclass':Estimate
+# 			},
 		]
 
 		def addlevel(thisdict,keychain,payload):

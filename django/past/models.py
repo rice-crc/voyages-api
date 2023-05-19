@@ -12,9 +12,10 @@ from django.db.models.expressions import Subquery, OuterRef
 from django.db.models.fields import TextField
 from django.db.models.functions import Coalesce, Concat, Length, Substr
 from django.db.models.sql import RawQuery
-from voyage.models import Place, Voyage, VoyageDataset, VoyageSources
+from voyage.models import Voyage, VoyageDataset, VoyageSources
 import re
 from common.models import NamedModelAbstractBase,SparseDate
+from geo.models import Location
 
 class SourceConnectionAbstractBase(models.Model):
 	# Sources are shared with Voyages.
@@ -33,12 +34,12 @@ class EnslaverInfoAbstractBase(models.Model):
 	birth_year = models.IntegerField(null=True,blank=True)
 	birth_month = models.IntegerField(null=True,blank=True)
 	birth_day = models.IntegerField(null=True,blank=True)
-	birth_place = models.ForeignKey(Place, null=True,blank=True, on_delete=models.SET_NULL, related_name='+')
+	birth_place = models.ForeignKey(Location, null=True,blank=True, on_delete=models.SET_NULL, related_name='+')
 
 	death_year = models.IntegerField(null=True,blank=True)
 	death_month = models.IntegerField(null=True,blank=True)
 	death_day = models.IntegerField(null=True,blank=True)
-	death_place = models.ForeignKey(Place, null=True,blank=True, on_delete=models.SET_NULL, related_name='+')
+	death_place = models.ForeignKey(Location, null=True,blank=True, on_delete=models.SET_NULL, related_name='+')
 
 	father_name = models.CharField(max_length=255, null=True,blank=True)
 	father_occupation = models.CharField(max_length=255, null=True,blank=True)
@@ -56,7 +57,7 @@ class EnslaverInfoAbstractBase(models.Model):
 	will_value_pounds = models.CharField(max_length=12, null=True,blank=True)
 	will_value_dollars = models.CharField(max_length=12, null=True,blank=True)
 	will_court = models.CharField(max_length=12, null=True,blank=True)
-	principal_location = models.ForeignKey(Place, null=True,
+	principal_location = models.ForeignKey(Location, null=True,
 												on_delete=models.CASCADE,
 												db_index=True,blank=True)
 	notes = models.CharField(null=True,blank=True, max_length=8192)
@@ -279,7 +280,7 @@ class Enslaved(models.Model):
 	)
 	# For Kinfolk, this is the Last known location field.
 	post_disembark_location = models.ForeignKey(
-		Place,
+		Location,
 		null=True,
 		blank=True,
 		on_delete=models.CASCADE,
@@ -372,7 +373,7 @@ class EnslavementRelation(models.Model):
 	"""
 	
 	relation_type = models.ForeignKey(EnslavementRelationType, null=False, on_delete=models.CASCADE)
-	place = models.ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
+	place = models.ForeignKey(Location, null=True, blank=True, on_delete=models.SET_NULL, related_name='+')
 	date = models.ForeignKey(
 		SparseDate,
 		null=True,

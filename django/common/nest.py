@@ -73,6 +73,11 @@ def addlevel(thisdict,keychain,payload):
 		if thiskey not in thisdict:
 			thisdict[thiskey]=payload
 		else:
+# 			print("-----------")
+# 			print(thiskey)
+# 			print(thisdict)
+# 			print(payload)
+# 			print("-----------")
 			if type(payload)==dict:
 				for p in payload:
 					thisdict[thiskey][p]=payload[p]

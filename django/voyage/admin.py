@@ -13,24 +13,6 @@ class VoyageCrewInline(admin.StackedInline):
 class VoyageSourcesTypeAdmin(admin.ModelAdmin):
 	list_fields=['group_name']
 
-class BroadRegionAdmin(admin.ModelAdmin):
-	search_fields=['broad_region']
-	list_fields=['broad_region','value']
-	ordering = ['value']
-
-class RegionAdmin(admin.ModelAdmin):
-	search_fields=['region']
-	list_fields=['region','value']
-	autocomplete_fields = ('broad_region',)
-	ordering = ['value']
-
-class PlaceAdmin(admin.ModelAdmin):
-	search_fields=['place']
-	list_fields=['place','value']
-	autocomplete_fields = ('region',)
-	ordering = ['value']
-
-
 class VoyageDatesInline(admin.StackedInline):
 	model = VoyageDates
 	autocomplete_fields=[
@@ -54,38 +36,38 @@ class VoyageSlavesNumbersInline(admin.StackedInline):
 	max_num=1
 
 class ParticularOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=ParticularOutcome
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 
 class SlavesOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=SlavesOutcome
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 	
 class VesselCapturedOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=VesselCapturedOutcome
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 
 class OwnerOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=OwnerOutcome
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 
 class ResistanceAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=Resistance
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 # 
 # ##Autocomplete won't work on this
@@ -105,16 +87,16 @@ class VoyageOutcomeInline(admin.StackedInline):
 	model=VoyageOutcome
 
 class NationalityAdmin(admin.ModelAdmin):
-	search_fields=['label']
+	search_fields=['name']
 	model=Nationality
 
 class TonTypeAdmin(admin.ModelAdmin):
-	search_fields=['label']
+	search_fields=['name']
 	model=TonType
 
 class RigOfVesselAdmin(admin.ModelAdmin):
 	model=RigOfVessel
-	search_fields=['label']
+	search_fields=['name']
 
 
 class VoyageShipInline(admin.StackedInline):
@@ -226,9 +208,6 @@ class VoyageAdmin(admin.ModelAdmin):
 admin.site.register(Voyage, VoyageAdmin)
 admin.site.register(VoyageDates)
 admin.site.register(VoyageSources, VoyageSourcesAdmin)
-admin.site.register(BroadRegion,BroadRegionAdmin)
-admin.site.register(Region,RegionAdmin)
-admin.site.register(Place,PlaceAdmin)
 admin.site.register(VoyageSourcesType,VoyageSourcesTypeAdmin)
 admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
 admin.site.register(SlavesOutcome, SlavesOutcomeAdmin)

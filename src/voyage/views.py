@@ -402,7 +402,12 @@ class VoyageTextFieldAutoComplete2(generics.GenericAPIView):
 				queryset=queryset.order_by(k)
 				total_results_count+=queryset.count()
 				vals=[]
-				for v in queryset.values_list('id',k).iterator():
+				if '__' in k:
+					k_id=re.sub("_[^_]+?$","_id",k)
+				else:
+					k_id='id'
+				print(k_id,k)
+				for v in queryset.values_list(k_id,k).iterator():
 					if v not in vals:
 						vals.append(v)
 					if len(vals)>=fetchcount:

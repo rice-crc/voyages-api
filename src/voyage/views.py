@@ -224,6 +224,28 @@ class VoyageGroupBy(generics.GenericAPIView):
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 
+class VoyageGroupBy2(generics.GenericAPIView):
+		serializer_class=VoyageSerializer
+		authentication_classes=[TokenAuthentication]
+		permission_classes=[IsAuthenticated]
+		def post(self,request):
+				st=time.time()
+				print("+++++++\nusername:",request.auth.user)
+				params=dict(request.POST)
+				groupby_by=params.get('groupby_by')
+				groupby_cols=params.get('groupby_cols')
+				value_field_tuple=params.get('value_field_tuple')
+				queryset=Voyage.objects.all()
+				queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+				ids=[i[0] for i in queryset.values_list('id')]
+				u2=FLASK_BASE_URL+'groupby2/'
+				d2=params
+				d2['ids']=ids
+				d2['selected_fields']=selected_fields
+				r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+				return JsonResponse(json.loads(r.text),safe=False)
+
+
 class VoyageCaches(generics.GenericAPIView):
 	'''
 	This view takes:

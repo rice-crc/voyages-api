@@ -10,6 +10,7 @@ urlpatterns = [
 	path('autocomplete',views.VoyageTextFieldAutoComplete.as_view()),
 	path('autocomplete2',views.VoyageTextFieldAutoComplete2.as_view()),
 	path('groupby',views.VoyageGroupBy.as_view()),
+	path('groupby2',views.VoyageGroupBy2.as_view()),
 	path('crosstabs',views.VoyageCrossTabs.as_view()),
 	path('aggroutes',views.VoyageAggRoutes.as_view()),
 	path('<int:voyage_id>/',views.SingleVoyage.as_view()),

@@ -66,7 +66,7 @@ def groupby2():
 	ct=ct.fillna(0)
 	resp={groupby_by:list(ct.index)}
 	for gbc in groupby_cols:
-		resp[gbc]={gbc:list(ct[gbc])}
+		resp[gbc]=list(ct[gbc])
 	return json.dumps(resp)
 
 

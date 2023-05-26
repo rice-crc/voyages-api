@@ -46,6 +46,30 @@ for rc in registered_caches:
 	xl="%s=load_long_df(\"" %rc + DJANGO_STATIC_URL + "customcache/%s.json\")" %rc
 	exec(xl)
 
+@app.route('/groupby2/',methods=['POST'])
+def groupby2():
+
+	'''
+	Implements the pandas groupby function and returns the sparse summary.
+	Excellent for bar & pie charts.
+	'''
+	st=time.time()
+	rdata=request.json
+	dfname=rdata['cachename'][0]
+	ids=rdata['ids']
+	groupby_by=rdata['groupby_by'][0]
+	groupby_cols=rdata['groupby_cols']
+	agg_fn=rdata['agg_fn'][0]
+	df=eval(dfname)
+	df2=df[df['id'].isin(ids)]
+	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
+	ct=ct.fillna(0)
+	resp={groupby_by:list(ct.index)}
+	for gbc in groupby_cols:
+		resp[gbc]={gbc:list(ct[gbc])}
+	return json.dumps(resp)
+
+
 @app.route('/groupby/',methods=['POST'])
 def groupby():
 	

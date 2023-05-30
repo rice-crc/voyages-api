@@ -25,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Application definition
 
 INSTALLED_APPS = [
+	'filebrowser',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -37,7 +38,7 @@ INSTALLED_APPS = [
     'past',
     'common',
     'blog',
-    'geo',
+#     'geo',
     'tinymce',
     'rest_framework',
     'rest_framework.authtoken'
@@ -47,14 +48,14 @@ INSTALLED_APPS = [
 #i couldn't figure out how to make the .pg_pass file work in docker
 #and it seemed that if i did, it might not translate to production deployment seamlessly anyways
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-		'NAME': pg_dbname,
-		'USER': pg_user,
-		'PASSWORD': pg_password,
-		'HOST': pg_host,
-		'PORT': pg_port
-	}
+    'default': {
+        'ENGINE':'django.db.backends.mysql',
+        'NAME':'voyages-api',
+        'USER':'voyages',
+        'PASSWORD':'voyages',
+        'HOST':'voyages-mysql',
+        'PORT':'3306'
+    }
 }
 
 #DRF settings

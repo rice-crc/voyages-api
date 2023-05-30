@@ -4,7 +4,7 @@ from tinymce.models import HTMLField
 
 from django.contrib.auth.models import User
 
-# from filebrowser.fields import FileBrowseField
+from filebrowser.fields import FileBrowseField
 
 from django.utils import timezone
 
@@ -12,73 +12,80 @@ DRAFT_STATUS = 0
 PUBLISH_STATUS = 1
 
 STATUS = (
-	(DRAFT_STATUS,"Draft"),
-	(PUBLISH_STATUS, "Publish")
+    (DRAFT_STATUS,"Draft"),
+    (PUBLISH_STATUS, "Publish")
 )
 
 
 
 class Institution(models.Model):
-	name = models.CharField(max_length=200, unique=True)
-	description = models.CharField(max_length=600,null=True, blank=True)
-	slug = models.SlugField(max_length=200, unique=True)
-	image = models.ImageField(upload_to='images',null=True, blank=True)
+    name = models.CharField(max_length=200, unique=True)
+    description = models.CharField(max_length=600,null=True, blank=True)
+    slug = models.SlugField(max_length=200, unique=True)
+    image = models.ImageField(upload_to='images',null=True, blank=True)
 
-	def __str__(self):
-		return self.name
+    def __str__(self):
+        return self.name
 
 
 class Author(models.Model):
-	name = models.CharField(max_length=200, unique=True)
-	description = models.CharField(max_length=600,null=True, blank=True)
-	slug = models.SlugField(max_length=200, unique=True)
-	role = models.CharField(max_length=200)
-	photo = models.ImageField(upload_to='images',null=True, blank=True)
-	institution = models.ForeignKey(Institution, on_delete= models.CASCADE)
+    name = models.CharField(max_length=200, unique=True)
+    description = models.CharField(max_length=600,null=True, blank=True)
+    slug = models.SlugField(max_length=200, unique=True)
+    role = models.CharField(max_length=200)
+    photo = models.ImageField(upload_to='images',null=True, blank=True)
+    institution = models.ForeignKey(Institution, on_delete= models.CASCADE)
 
-	def __str__(self):
-		return self.name
+    def __str__(self):
+        return self.name
 
 
 
 class Tag(models.Model):
-	name = models.CharField(max_length=200,unique=True)
-	slug = models.SlugField(max_length=200, unique=True)
+    name = models.CharField(max_length=200,unique=True)
+    slug = models.SlugField(max_length=200, unique=True)
 
-	intro = models.TextField(blank=True)
+    intro = models.TextField(blank=True)
 
-	class Meta:
-		ordering = ['name']
-	
-	def __str__(self):
-		return self.name
+    class Meta:
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
 
 class Post(models.Model):
-	title = models.CharField(max_length=200, unique=False)
-	language = models.CharField(max_length=5, null = True, blank=False, default='en', choices=settings.LANGUAGES)
-	subtitle = models.CharField(max_length=200, null = True, blank = True)
-	slug = models.SlugField(max_length=200)
-	authors = models.ManyToManyField(Author)
-	updated_on = models.DateTimeField(auto_now= True)
-	content = HTMLField()
-	created_on = models.DateTimeField(default=timezone.now)
-	status = models.IntegerField(choices=STATUS, default=0)
-	
-	tags = models.ManyToManyField(Tag)
-	
-# 	thumbnail = FileBrowseField("Thumbnail", format="Image", max_length=300,directory="images/", extensions=[".jpg",".png",".wep", ".gif"], blank=True)
+    title = models.CharField(max_length=200, unique=False)
+    language = models.CharField(max_length=2, null = True, blank=False, default='en', choices=settings.LANGUAGES)
+    subtitle = models.CharField(max_length=200, null = True, blank = True)
+    slug = models.SlugField(max_length=200)
+    authors = models.ManyToManyField(Author)
+    updated_on = models.DateTimeField(auto_now= True)
+    content = models.TextField()
+    created_on = models.DateTimeField(default=timezone.now)
+    status = models.IntegerField(choices=STATUS, default=0)
+    
+    tags = models.ManyToManyField(Tag)
+    
+    thumbnail = FileBrowseField(
+    	"Thumbnail",
+    	format="Image",
+    	max_length=300,
+    	directory="images/",
+    	extensions=[".jpg",".png",".wep", ".gif"],
+    	blank=True
+    )
 
-	class Meta:
-		ordering = ['-created_on']
-		unique_together = ['slug', 'language']
+    class Meta:
+        ordering = ['-created_on']
+        unique_together = ['slug', 'language']
 
-	def __str__(self):
-		return self.title
+    def __str__(self):
+        return self.title
 
-	def get_snippet(self):
+    def get_snippet(self):
 
-		page_break = self.content.find('<!-- pagebreak -->')
-		if page_break != -1:
-			return self.content[:page_break]
+        page_break = self.content.find('<!-- pagebreak -->')
+        if page_break != -1:
+            return self.content[:page_break]
 
-		return self.content
+        return self.content

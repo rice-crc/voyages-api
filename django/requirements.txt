@@ -15,10 +15,10 @@ sqlparse
 urllib3
 django-cors-headers
 networkx
-haversine
 numpy
-psycopg
+mysqlclient
 filebrowser
 Pillow
 django-storages
 django-tinymce
+django-filebrowser

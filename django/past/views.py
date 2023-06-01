@@ -14,7 +14,7 @@ import json
 import requests
 import time
 from .models import *
-from .serializers import *
+# from .serializers import *
 import pprint
 from common.nest import *
 from common.reqs import *
@@ -53,7 +53,7 @@ import collections
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=EnslavedSerializer
+# 	serializer_class=EnslavedSerializer
 	def options(self,request):
 		j=options_handler('past/enslaved_options.json',request)
 		return JsonResponse(j,safe=False)

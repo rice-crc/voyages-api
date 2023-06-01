@@ -50,7 +50,7 @@ INSTALLED_APPS = [
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.mysql',
-        'NAME':'voyages-api',
+        'NAME':'voyages_api',
         'USER':'voyages',
         'PASSWORD':'voyages',
         'HOST':'voyages-mysql',

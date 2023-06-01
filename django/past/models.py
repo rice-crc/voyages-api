@@ -570,8 +570,10 @@ class EnslavedName(models.Model):
     language = models.CharField(max_length=3, null=False, blank=False)
     recordings_count = models.IntegerField()
 
-    class Meta:
-        unique_together = ('name', 'language')
+#this was causing a conflict in the migration to the new db
+#i think a unicode issue
+#     class Meta:
+#         unique_together = ('name', 'language')
 
 
 class EnslavementRelationType(NamedModelAbstractBase):
@@ -1462,7 +1464,7 @@ class EnslaverContribution(models.Model):
     # keep the contribution (it might even be the reason the identity was
     # deleted, say in the case of a merge).
     enslaver = models.ForeignKey(EnslaverIdentity, null=True, on_delete=models.SET_NULL)
-    contributor = models.ForeignKey(User,on_delete=models.SET_NULL)
+    contributor = models.ForeignKey(User,null=True,on_delete=models.SET_NULL)
     created = models.DateTimeField(auto_now_add=True)
     status = models.IntegerField(null=False)
     data = models.TextField(null=False)

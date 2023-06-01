@@ -55,7 +55,7 @@ class Tag(models.Model):
 
 class Post(models.Model):
     title = models.CharField(max_length=200, unique=False)
-    language = models.CharField(max_length=2, null = True, blank=False, default='en', choices=settings.LANGUAGES)
+    language = models.CharField(max_length=5, null = True, blank=False, default='en', choices=settings.LANGUAGES)
     subtitle = models.CharField(max_length=200, null = True, blank = True)
     slug = models.SlugField(max_length=200)
     authors = models.ManyToManyField(Author)

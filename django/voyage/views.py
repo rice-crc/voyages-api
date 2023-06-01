@@ -31,7 +31,7 @@ except:
 
 # #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 class VoyageList(generics.GenericAPIView):
-	serializer_class=VoyageSerializer
+	# serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):

@@ -3,10 +3,12 @@ from past.models import *
 # 
 class EnslaverVoyageConnectionAdmin(admin.ModelAdmin):
 	model=EnslaverVoyageConnection
+	
 	search_fields=['enslaver_alias','voyage','role']
 
 class EnslaverVoyageConnectionInline(admin.StackedInline):
 	model=EnslaverVoyageConnection
+	autocomplete_fields=['voyage']
 	classes = ['collapse']
 	extra=0
 
@@ -48,16 +50,16 @@ class RegisterCountryAdmin(admin.ModelAdmin):
 class ModernCountryAdmin(admin.ModelAdmin):
 	search_fields=['name']
 # 
-# class EnslavedAdmin(admin.ModelAdmin):
-# 	autocomplete_fields=[
-# 		'post_disembark_location',
-# 		'register_country',
-# 		'language_group',
-# 		'voyage',
-# 		'captive_fate',
-# 		'captive_status'
-# 	]
-# 	search_fields=['documented_name']
+class EnslavedAdmin(admin.ModelAdmin):
+	autocomplete_fields=[
+		'post_disembark_location',
+		'register_country',
+		'language_group',
+		'voyage',
+		'captive_fate',
+		'captive_status'
+	]
+	search_fields=['documented_name']
 # 
 # class EnslaverRoleAdmin(admin.ModelAdmin):
 # 	search_fields=['name']
@@ -65,22 +67,21 @@ class ModernCountryAdmin(admin.ModelAdmin):
 # class EnslavementRelationTypeAdmin(admin.ModelAdmin):
 # 	search_fields=['name']
 # 
-# class EnslavedInRelationInline(admin.StackedInline):
-# 	model=EnslavedInRelation
-# 	fields=['enslaved']
-# 	autocomplete_fields=['enslaved']
-# 	classes = ['collapse']
-# 	extra=0
+class EnslavedInRelationInline(admin.StackedInline):
+	model=EnslavedInRelation
+	fields=['enslaved']
+	autocomplete_fields=['enslaved']
+	classes = ['collapse']
+	extra=0
 # 
-# class EnslaverInRelationInline(admin.StackedInline):
-# 	model=EnslaverInRelation
-# 	fields=['id','enslaver_alias','role']
-# 	autocomplete_fields=[
-# 		'enslaver_alias',
-# 		'role'
-# 	]
-# 	classes = ['collapse']
-# 	extra=0
+class EnslaverInRelationInline(admin.StackedInline):
+	model=EnslaverInRelation
+	fields=['id','enslaver_alias','role']
+	autocomplete_fields=[
+		'enslaver_alias'
+	]
+	classes = ['collapse']
+	extra=0
 # 
 # class EnslavementRelationAdmin(admin.ModelAdmin):
 # 	inlines=[
@@ -105,5 +106,5 @@ admin.site.register(ModernCountry,ModernCountryAdmin)
 # admin.site.register(AltLanguageGroupName)
 admin.site.register(CaptiveFate,CaptiveFateAdmin)
 admin.site.register(CaptiveStatus,CaptiveStatusAdmin)
-# admin.site.register(Enslaved,EnslavedAdmin)
+admin.site.register(Enslaved,EnslavedAdmin)
 admin.site.register(RegisterCountry,RegisterCountryAdmin)

@@ -156,15 +156,6 @@ class Location(models.Model):
 		"SPSS code",
 		unique=True
 	)
-	
-	dataset= models.IntegerField(
-		"trans-atlantic (0), intra-american (1), intra-african (2)",
-		null=True
-	)
-	
-	show_on_map = models.BooleanField(default=True,null=True)
-	show_on_main_map = models.BooleanField(default=True,null=True)
-	show_on_voyage_map = models.BooleanField(default=True,null=True)
 
 	def __str__(self):
 		return self.name

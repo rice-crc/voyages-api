@@ -3,7 +3,7 @@ import re
 import json
 
 target_db_name="voyages_api"
-source_db_name="test2"
+source_db_name="voyages_voyages_past_merge"
 
 db=MySQLdb.connect("voyages-mysql","voyages","voyages",target_db_name)
 

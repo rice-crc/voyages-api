@@ -406,6 +406,7 @@
       "will_value_dollars",
       "will_court",
       "notes",
+      "is_natural_person",
       "birth_place_id",
       "death_place_id",
       "principal_location_id"

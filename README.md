@@ -1,3 +1,86 @@
+# APRIL 2023 REFACTOR NOTES:
+
+1. Dropping bezier package from Django until the below 2 issues are resolved:
+	1. https://github.com/dhermes/bezier/issues/276 (can't build it on my mac)
+	1. https://github.com/dhermes/bezier/issues/283 (problems using python beyond 3.9)
+	1. tried switching my flask app to alpine, but switched back
+		1. slow build
+		1. i don't think it's up to the math-heavy work i'm tasking it with
+1. Re-including:
+	1. Solr for a universal search -- but it requires a hacky setup currently
+1. Switched from MySQL to Postgres
+	1. Setting this up got a little funky.
+	1. I decided to define the connection settings in localsettings.py
+	1. And to put a postgres db init file in the pg_conf directory
+1. Next:
+	1. Rewrite the models
+		1. Above all, itineraries & geo data
+			1. This will break trans-atlantic imputation
+			1. But it will allow for incredibly flexible routes & mapping
+	1. Write custom serializers for PAST
+		1. Too much data being shipped right now
+
+## PG setup
+
+This is all scripted right now in pg_conf/docker_postgres_init.sql, which is kicked off by docker-compose:
+
+* docker-compose
+	* creates a root user w/ pw "voyages"
+	* kicks off: docker_postgres_init.sql
+* docker_postgres_init.sql
+	* creates user voyages
+	* creates db "voyages"
+
+Manual CLI setup/teardown:
+
+	#create user voyages
+	docker exec -i voyages-postgres psql -c "create user voyages with password 'voyages';"
+	
+	#log in as user voyages
+	docker exec -it voyages-postgres psql -Uvoyages
+
+	#drop db (as user "root")
+	docker exec -i voyages-postgres psql -c "drop database voyages;"
+	
+	#create voyages db
+	docker exec -i voyages-postgres psql -c "CREATE DATABASE voyages
+		WITH
+		OWNER = voyages
+		ENCODING = 'UTF8'
+		LC_COLLATE = 'en_US.utf8'
+		LC_CTYPE = 'en_US.utf8'
+		TABLESPACE = pg_default
+		CONNECTION LIMIT = -1;"
+
+## bogus db migrations
+
+I finally got mysql working on my M1, though it's a janky setup.
+
+I can now kick it off with 
+	
+	sudo /usr/local/mysql/support-files/mysql.server start
+	mysqlsh localhost -uroot -p
+	\sql
+	use voyages_may9;
+	select * from voyage_voyagesources into outfile 'voyage_voyagesources.csv' fields terminated by '|';
+
+But it gets dumped into the sql data directory, so I move it out with
+
+	sudo mv /usr/local/mysql/data/voyages_may9/voyage_voyagesources.csv ~/Documents
+	docker exec -i voyages-postgres psql -U root voyages -c "COPY voyage_voyagesources FROM '/pg_dataloader/voyage_voyagesources.csv' DELIMITER '|' ";  
+	
+(text mode not csv mode)
+
+## Model rewrites
+
+* Named entities
+	* names are not unique
+	* routed through one table (in the common app)
+	* and tagged
+* Dates
+
+
+
 # Voyages REST API 2022
 
 This is an attempt to rebuild the Voyages API with as few dependencies as possible in the latest versions of django and python
@@ -6,29 +89,15 @@ THIS REQUIRES AN EXTERNAL SQL DUMP. CONTACT JCM FOR THIS.
 
 ## Local Deployment
 
-Create an external Docker network.
-
-```bash
-host:~/Projects/voyagesapi$ docker network create voyages
-```
-
 Build and run the containers.
 
 ```bash
 host:~/Projects/voyagesapi$ docker-compose up -d --build
 ```
 
-Create the database.
+*n.b. the new postgres db creation is now being run through docker-compose. however, once the models change, it will become necessary to update all the db-related commands below, as well as to rewrite all the scripts for importing from the old mysql. we probably want to set up pgadminer as well, now that i've removed the old adminer container*
 
-```bash
-host:~/Projects/voyagesapi$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create database voyages"
-```
-
-Import the database dump to MySQL.
-
-```bash
-host:~/Projects/voyagesapi$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages < data/voyagesapi.sql
-```
+*also, i need djk's feeback on the current docker-compose configs i've got running, especially for postgres & solr*
 
 Run the custom management commands (see bottom of this doc) -- and it's a good idea to run them in this order:
 
@@ -39,22 +108,18 @@ View container logs.
 
 ```bash
 host:~/Projects/voyagesapi$ docker logs voyages-django
-host:~/Projects/voyagesapi$ docker logs voyages-mysql
+host:~/Projects/voyagesapi$ docker logs voyages-postgres
 host:~/Projects/voyagesapi$ docker logs voyages-flask
 ```
-
-*The Adminer app is provided as an additional way to work with the database.*
 
 Note the following project resources:
 
 * Voyages API: http://127.0.0.1:8000/
-* Adminer: http://127.0.0.1:8080
 
 ## Cleanup
 
 	bash
 	host:~/Projects/voyagesapi$ docker-compose down
-
 	host:~/Projects/voyagesapi$ docker container prune
 	host:~/Projects/voyagesapi$ docker image prune
 	host:~/Projects/voyagesapi$ docker volume prune
@@ -806,4 +871,6 @@ Uses NetworkX to find all the "best" a/b routes on the above variable pairings v
 		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id",
 		"voyage_itinerary__imp_broad_region_slave_dis__geo_location__id"
 	]
+
+-----------------
 

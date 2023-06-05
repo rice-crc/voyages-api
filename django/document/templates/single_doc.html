@@ -1,0 +1,44 @@
+<h2>{{ zs.zotero_title }}</h2>
+<h3>{{ zs.zotero_date }}</h3>
+<p>Zotero link: <a href="{{ zs.zotero_web_page_url }}">{{ zs.zotero_web_page_url }}</a></p>
+<hr/>
+<h4>Legacy Voyages Source Data</h4>
+<p>
+{{ zs.legacy_source.short_ref }}
+<br/>
+{{ zs.legacy_source.full_ref }}
+</p>
+<hr/>
+<h4>Pages</h4>
+
+<ol>
+
+{% for spc in zs.page_connection.all %}
+
+	<li><a href="{{ spc.source_page.item_url }}">Item page
+
+	{% if spc.source_page.iiif_baseimage_url %}
+		<ul><li>Link to full image: <a href="{{ spc.source_page.iiif_baseimage_url }}" target="blank"><img src="{{ spc.source_page.square_thumbnail }}"></a></li></ul>
+	{% endif %}
+	
+	</li>
+
+{% endfor %}
+
+</ol>
+<hr/>
+<h4>Linked entities</h4>
+
+<ol>
+{% for v in zs.source_voyages.all %}
+	<li>Voyage #{{ v.id }} : {{ v.ship.ship_name}} --> <a href="http://127.0.0.1:8000/admin/voyage/voyage/{{ v.id }}/change/" target="blank">Edit</a></li>
+{% endfor %}
+</ol>
+
+<ol>
+{% for v in zs.source_voyages.all %}
+	{% for e in v.voyage_enslaved_people.all %}
+		<li>Person: {{ e.enslaved_id }} : {{ e.documented_name }} --> <a href="http://127.0.0.1:8000/admin/past/enslaved/{{ v.id }}/change/" target="blank">Edit</a></li>
+	{% endfor %}
+{% endfor %}
+</ol>

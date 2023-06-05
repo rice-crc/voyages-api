@@ -26,7 +26,8 @@ class ZoteroSourceAdmin(admin.ModelAdmin):
 # # 		SourceVoyageInline
 # 	)
 	search_fields=('zotero_url','zotero_title')
-# 	autocomplete_fields=('legacy_source',)
+	autocomplete_fields=('legacy_source','voyages','enslaved_people','enslavers')
+	exclude=('source_cnx',)
 # 	fields=[
 # 		'zotero_url',
 # 		'zotero_title',

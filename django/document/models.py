@@ -1,6 +1,9 @@
 from django.db import models
 import re
 
+from voyage.models import VoyageSources,Voyage
+from past.models import Enslaved,EnslaverIdentity
+
 class SourcePage(models.Model):
 	"""
 	Voyage sources.
@@ -62,7 +65,32 @@ class ZoteroSource(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
 	
-	zotero_url=models.URLField(unique=True,max_length=400)
+	zotero_url=models.URLField(max_length=400)
+	
+	legacy_source=models.ForeignKey(
+		VoyageSources,
+		related_name="source_zotero_refs",
+		null=True,
+		on_delete=models.CASCADE
+	)
+	
+	voyages=models.ManyToManyField(
+		Voyage,
+		related_name="voyage_zoterorefs",
+		null=True
+	)
+	
+	enslaved_people=models.ManyToManyField(
+		Enslaved,
+		related_name="enslaved_zoterorefs",
+		null=True
+	)
+	
+	enslavers=models.ManyToManyField(
+		EnslaverIdentity,
+		related_name="enslaver_zoterorefs",
+		null=True
+	)
 	
 	zotero_title=models.CharField(
 		max_length=255,
@@ -76,6 +104,11 @@ class ZoteroSource(models.Model):
 		null=False,
 		blank=False
 	)
+	
+	class Meta:
+		unique_together=[
+			['zotero_title','zotero_date']
+		]
 	
 	def __str__(self):
 		return self.zotero_title + " " + self.zotero_date

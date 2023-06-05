@@ -69,22 +69,24 @@ class Command(BaseCommand):
 			zotero_title="Manifest of the %s" %shipname_str
 			zotero_title=zotero_title[:240] + " " + date_str
 			parseddate="-".join([str(i) for i in [yyyy,mm,dd]])
+# 			vsc,vsc_isnew=VoyageSourcesConnection.objects.get_or_create(
+# 				source=legacy_source,
+# 				group=voyage,
+# 				text_ref=zotero_title,
+# 				source_order=0
+# 			)
+
 			django_zotero_object,django_zotero_object_isnew=ZoteroSource.objects.get_or_create(
 				zotero_date=parseddate,
-				zotero_title=zotero_title
+				zotero_title=zotero_title,
+				legacy_source=legacy_source,
 			)
 			
-			vsc,vsc_isnew=VoyageSourcesConnection.objects.get_or_create(
-				source=legacy_source,
-				group=voyage,
-				text_ref=zotero_title,
-				zotero_source=django_zotero_object,
-				source_order=0
-			)
-
+			django_zotero_object.voyages.add(voyage)
+			django_zotero_object.enslaved_people.add(enslaved)
 			
-			
-			
+# 			django_zotero_object.source_cnx.add(vsc)
+			django_zotero_object.save()
 			
 # 			voyage.sources.add(django_zotero_object)
 # 			voyage.save()

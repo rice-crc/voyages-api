@@ -4,9 +4,8 @@ django/static/
 *.sql
 dbconf.json
 
-django/documents/management/commands/*.txt
-django/documents/management/commands/*.csv
-
+django/document/management/commands/*.txt
+django/document/management/commands/*.csv
 
 app_secrets.py
 

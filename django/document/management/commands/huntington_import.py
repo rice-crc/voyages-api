@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from document.models import *
 from past.models import *
 from voyage.models import *
-from SSC.settings import *
+from voyages3.settings import *
 import requests
 import json
 import os
@@ -13,8 +13,6 @@ import os
 class Command(BaseCommand):
 	help = 'imports michigan collections -- purpose-built'
 	def handle(self, *args, **options):
-
-		THIS WAS WRITTEN FOR A DIFFERENT, STANDALONE VERSION OF THE DOCS APP. UPDATE IT BEFORE RUNNING.
 
 		basepath="document/management/commands/"
 		tsvs=[i for i in os.listdir(basepath) if "mssST" in i]
@@ -104,44 +102,49 @@ class Command(BaseCommand):
 							"(Huntington)"
 						]
 					)
-# 					
-# 					template["callNumber"]=call_no
-# 					template["title"]=doc_title
-# 					template["libraryCatalog"]=digital_collection
-# 					template["rights"]=rights
-# 					template["archive"]=physical_collection
-# 					template["archiveLocation"]=part_of_object
-# 					template["shortTitle"]=short_ref
-# 					template["url"]=reference_url
-# 					template["date"]=doc_date
-# 					
-# 					
-# 					legacy_source,lc_isnew=LegacySource.objects.get_or_create(
-# 						full_ref=full_ref,
-# 						short_ref=short_ref
-# 					)
-# 					
-# 					django_zotero_object,django_zotero_object_isnew=ZoteroSource.objects.get_or_create(
-# 						legacy_source=legacy_source,
-# 						zotero_title=doc_title,
-# 						zotero_date=doc_date
-# 					)
-# 					
-# 					if django_zotero_object_isnew:
-# 						resp = zot.create_items([template])
-# 						zotero_url=resp['successful']['0']['links']['self']['href']
-# 						django_zotero_object.zotero_url=zotero_url
-# 						django_zotero_object.save()
-# 							
-# 
-# 					sp,sp_isnew=SourcePage.objects.get_or_create(
-# 						item_url=iiif_manifest_url,
-# 						iiif_baseimage_url=iiif_page_url
-# 					)
-# 					print(sp,django_zotero_object)
-# # 					print(sp.id,sp)
-# # 					print(django_zotero_object.id,django_zotero_object)
-# 					spc,spc_isnew=SourcePageConnection.objects.get_or_create(
-# 						zotero_source=django_zotero_object,
-# 						source_page=sp
-# 					)
+					
+# 					doc_title=" ".join([doc_title,doc_date])
+					
+					template["callNumber"]=call_no
+					template["title"]=doc_title
+					template["libraryCatalog"]=digital_collection
+					template["rights"]=rights
+					template["archive"]=physical_collection
+					template["archiveLocation"]=part_of_object
+					template["shortTitle"]=short_ref
+					template["url"]=reference_url
+					template["date"]=doc_date
+					
+					source_type,source_type_isnew=VoyageSourcesType.objects.get_or_create(
+						group_name="Manuscript"
+					)
+
+					legacy_source,lc_isnew=VoyageSources.objects.get_or_create(
+						full_ref=full_ref,
+						short_ref=short_ref,
+						source_type=source_type
+					)
+
+					django_zotero_object,django_zotero_object_isnew=ZoteroSource.objects.get_or_create(
+						zotero_title=doc_title,
+						legacy_source=legacy_source
+					)
+					
+					if django_zotero_object_isnew:
+						resp = zot.create_items([template])
+						zotero_url=resp['successful']['0']['links']['self']['href']
+						django_zotero_object.zotero_url=zotero_url
+						django_zotero_object.zotero_date=doc_date
+						django_zotero_object.save()
+					
+					sp,sp_isnew=SourcePage.objects.get_or_create(
+						item_url=iiif_manifest_url,
+						iiif_baseimage_url=iiif_page_url
+					)
+					print(sp,django_zotero_object)
+# 					print(sp.id,sp)
+# 					print(django_zotero_object.id,django_zotero_object)
+					spc,spc_isnew=SourcePageConnection.objects.get_or_create(
+						zotero_source=django_zotero_object,
+						source_page=sp
+					)

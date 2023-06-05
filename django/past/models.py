@@ -769,7 +769,7 @@ class Enslaved(models.Model):
 									 related_name='+')
 
 	def __str__(self):
-		return ": ".join([i for i in [self.documented_name,str(self.enslaved_id)," ".join(["voyage:", str(self.voyage_id)])] if i not in [""," ",None]])
+		return ": ".join([i for i in [self.documented_name,str(self.id)," ".join(["voyage:", str(self.voyage_id)])] if i not in [""," ",None]])
 
 
 class EnslavedSourceConnection(SourceConnectionAbstractBase):

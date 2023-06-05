@@ -182,11 +182,10 @@ class VoyageItineraryInline(admin.StackedInline):
 
 class VoyageSourcesConnectionInline(admin.StackedInline):
 	model=VoyageSourcesConnection
-	autocomplete_fields=['source','zotero_source']
+	autocomplete_fields=['source']
 	fields=[
 		'source',
-		'text_ref',
-		'zotero_source'
+		'text_ref'
 	]
 	classes = ['collapse']
 	extra=0

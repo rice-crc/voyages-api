@@ -3,7 +3,10 @@ django/static/
 *.DS_Store
 *.sql
 dbconf.json
-src/voyages3/localsettings.py
+
+django/documents/management/commands/*.txt
+django/documents/management/commands/*.csv
+
 
 app_secrets.py
 

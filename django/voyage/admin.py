@@ -11,10 +11,24 @@ class VoyageCrewInline(admin.StackedInline):
 
 # 
 
-class VoyageDatesInline(admin.TabularInline):
+class VoyageDatesInline(admin.StackedInline):
 	model = VoyageDates
 	max_num=1
 	classes = ['collapse']
+	exclude = [
+		'voyage_began_sparsedate',
+		'slave_purchase_began_sparsedate',
+		'vessel_left_port_sparsedate',
+		'first_dis_of_slaves_sparsedate',
+		'date_departed_africa_sparsedate',
+		'arrival_at_second_place_landing_sparsedate',
+		'third_dis_of_slaves_sparsedate',
+		'departure_last_place_of_landing_sparsedate',
+		'voyage_completed_sparsedate',
+		'imp_voyage_began_sparsedate',
+		'imp_departed_africa_sparsedate',
+		'imp_arrival_at_port_of_dis_sparsedate'
+	]
 	verbose_name_plural="Voyage Dates"
 
 class PlaceAdmin(admin.ModelAdmin):
@@ -33,7 +47,7 @@ class BroadRegionAdmin(admin.ModelAdmin):
 
 
 # # 
-class VoyageSlavesNumbersInline(admin.TabularInline):
+class VoyageSlavesNumbersInline(admin.StackedInline):
 	model=VoyageSlavesNumbers
 	classes = ['collapse']
 	max_num=1
@@ -102,7 +116,7 @@ class RigOfVesselAdmin(admin.ModelAdmin):
 	search_fields=['name']
 
 # 
-class VoyageShipInline(admin.TabularInline):
+class VoyageShipInline(admin.StackedInline):
 	model = VoyageShip
 	max_num = 1
 	autocomplete_fields=[
@@ -168,14 +182,18 @@ class VoyageItineraryInline(admin.StackedInline):
 
 class VoyageSourcesConnectionInline(admin.StackedInline):
 	model=VoyageSourcesConnection
-	autocomplete_fields=['source']
-	fields=['source','text_ref']
+	autocomplete_fields=['source','zotero_source']
+	fields=[
+		'source',
+		'text_ref',
+		'zotero_source'
+	]
 	classes = ['collapse']
 	extra=0
 # # 
 class VoyageSourcesAdmin(admin.ModelAdmin):
-	search_fields=['full_ref']
-	list_display=['id','full_ref','short_ref']
+	search_fields=['full_ref','short_ref']
+	list_display=['short_ref','full_ref']
 	model=VoyageSources
 # 
 class VoyageOutcomeInline(admin.StackedInline):

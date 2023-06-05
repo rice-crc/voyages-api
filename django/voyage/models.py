@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import Prefetch
 from geo.models import *
 from common.models import NamedModelAbstractBase,SparseDate
+from document.models import ZoteroSource
 
 class AfricanInfo(NamedModelAbstractBase):
 	"""
@@ -1911,6 +1912,12 @@ class VoyageSourcesConnection(models.Model):
 	source_order = models.IntegerField()
 	text_ref = models.CharField('Text reference(citation)',
 								max_length=255, null=False, blank=True)
+	zotero_source=models.ForeignKey(
+		ZoteroSource,
+		related_name="z_voys_cnx",
+		null=True,
+		on_delete=models.CASCADE
+	)
 
 
 # class VoyageDatasetManager(models.Manager):

@@ -76,27 +76,23 @@ class ZoteroSource(models.Model):
 	
 	voyages=models.ManyToManyField(
 		Voyage,
-		related_name="voyage_zoterorefs",
-		null=True
+		related_name="voyage_zoterorefs"
 	)
 	
 	enslaved_people=models.ManyToManyField(
 		Enslaved,
-		related_name="enslaved_zoterorefs",
-		null=True
+		related_name="enslaved_zoterorefs"
 	)
 	
 	enslavers=models.ManyToManyField(
 		EnslaverIdentity,
-		related_name="enslaver_zoterorefs",
-		null=True
+		related_name="enslaver_zoterorefs"
 	)
 	
 	zotero_title=models.CharField(
 		max_length=255,
 		null=False,
 		blank=False,
-		unique=True
 	)
 	
 	zotero_date=models.CharField(
@@ -107,7 +103,7 @@ class ZoteroSource(models.Model):
 	
 	class Meta:
 		unique_together=[
-			['zotero_title','zotero_date']
+			['zotero_title','zotero_url','legacy_source']
 		]
 	
 	def __str__(self):

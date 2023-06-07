@@ -76,12 +76,21 @@ class Command(BaseCommand):
 # 				source_order=0
 # 			)
 
-			django_zotero_object,django_zotero_object_isnew=ZoteroSource.objects.get_or_create(
-				zotero_date=parseddate,
-				zotero_title=zotero_title,
-				legacy_source=legacy_source,
-			)
+
+			dupcount=1
+			while True:
+				try:
+					django_zotero_object,django_zotero_object_isnew=ZoteroSource.objects.get_or_create(
+						zotero_title=zotero_title,
+						legacy_source=legacy_source
+					)
+					break
+				except:
+					zotero_title += " (duplicate %d)" %dupcount
+					
+					dupcount+=1
 			
+			django_zotero_object.zotero_date=parseddate
 			django_zotero_object.voyages.add(voyage)
 			django_zotero_object.enslaved_people.add(enslaved)
 			

@@ -118,29 +118,55 @@ class Command(BaseCommand):
 					source_type,source_type_isnew=VoyageSourcesType.objects.get_or_create(
 						group_name="Manuscript"
 					)
-
+					
 					legacy_source,lc_isnew=VoyageSources.objects.get_or_create(
 						full_ref=full_ref,
 						short_ref=short_ref,
 						source_type=source_type
 					)
-
-					django_zotero_object,django_zotero_object_isnew=ZoteroSource.objects.get_or_create(
-						zotero_title=doc_title,
-						legacy_source=legacy_source
-					)
 					
-					if django_zotero_object_isnew:
+					dupcount=1
+					while True:
+						try:
+							django_zotero_object,django_zotero_object_isnew=ZoteroSource.objects.get_or_create(
+								zotero_title=doc_title,
+								legacy_source=legacy_source
+							)
+							break
+						except:
+							doc_title += " (duplicate %d)" %dupcount
+							
+							dupcount+=1
+					
+					django_zotero_object.zotero_date=doc_date
+					django_zotero_object.save()
+					
+					dzurl=django_zotero_object.zotero_url
+				
+					if dzurl not in ('',None):
+						item_id=re.search("(?<=items/)[A-Z|0-9]+",dzurl).group(0)
+						try:
+							resp=zot.item(item_id)
+							zotero_item_exists=True
+							print("zotero item exists:",item_id)
+						except:
+							zotero_item_exists=False
+					else:
+						zotero_item_exists=False
+					
+					if not zotero_item_exists:
 						resp = zot.create_items([template])
 						zotero_url=resp['successful']['0']['links']['self']['href']
 						django_zotero_object.zotero_url=zotero_url
-						django_zotero_object.zotero_date=doc_date
 						django_zotero_object.save()
+						print("created zotero object:",zotero_url)
+					
 					
 					sp,sp_isnew=SourcePage.objects.get_or_create(
 						item_url=iiif_manifest_url,
 						iiif_baseimage_url=iiif_page_url
 					)
+					
 					print(sp,django_zotero_object)
 # 					print(sp.id,sp)
 # 					print(django_zotero_object.id,django_zotero_object)

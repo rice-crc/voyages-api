@@ -10,14 +10,13 @@ class SourcePage(models.Model):
 	Representing the original variables SOURCEA, SOURCEB, SOURCEC
 	and etc to SOURCER
 	"""
-	
-	item_url=models.URLField(null=True,blank=True)
+	page_url=models.URLField(max_length=400,null=True)
 	iiif_manifest_url=models.URLField(null=True,blank=True,max_length=400)
 	iiif_baseimage_url=models.URLField(null=True,blank=True,max_length=400)
 	
 	def __str__(self):
 		nonnulls=[i for i in [
-				self.item_url,
+				self.page_url,
 				self.iiif_manifest_url,
 				self.iiif_baseimage_url
 			]
@@ -64,6 +63,8 @@ class ZoteroSource(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.VoyageSources`
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
+	
+	item_url=models.URLField(max_length=400,null=True)
 	
 	zotero_url=models.URLField(max_length=400)
 	

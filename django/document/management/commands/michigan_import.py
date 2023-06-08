@@ -150,7 +150,7 @@ class Command(BaseCommand):
 				
 				for iu in iiif_base_urls:
 					sp,sp_isnew=SourcePage.objects.get_or_create(
-						item_url=iu+"/info.json",
+						page_url=iu+"/info.json",
 						iiif_baseimage_url=iu+"/full/max/0/default.jpg"
 					)
 					

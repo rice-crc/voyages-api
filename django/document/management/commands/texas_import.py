@@ -142,7 +142,7 @@ class Command(BaseCommand):
 	
 				print(row)
 				sp,sp_isnew=SourcePage.objects.get_or_create(
-					item_url=p,
+					page_url=p,
 					iiif_baseimage_url=iiif_baseimage_url
 				)
 				print(sp,django_zotero_object)

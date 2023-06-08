@@ -13,7 +13,7 @@ from document.models import *
 # 
 # class SourcePageAdmin(admin.ModelAdmin):
 # 	inlines=(SourcePageConnectionInlineS,)
-# 	search_fields=['iiif_baseimage_url','item_url']
+# 	search_fields=['iiif_baseimage_url','page_url']
 # 	
 # # class SourceVoyageInline(admin.TabularInline):
 # # 	model=ZoteroSource.source_voyages.through

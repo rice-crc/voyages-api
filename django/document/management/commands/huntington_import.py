@@ -138,6 +138,7 @@ class Command(BaseCommand):
 							
 							dupcount+=1
 					
+					django_zotero_object.item_url=reference_url
 					django_zotero_object.zotero_date=doc_date
 					django_zotero_object.save()
 					
@@ -163,7 +164,7 @@ class Command(BaseCommand):
 					
 					
 					sp,sp_isnew=SourcePage.objects.get_or_create(
-						item_url=iiif_manifest_url,
+						page_url=iiif_manifest_url,
 						iiif_baseimage_url=iiif_page_url
 					)
 					

@@ -15,7 +15,7 @@
 
 {% for spc in zs.page_connection.all %}
 
-	<li><a href="{{ spc.source_page.item_url }}">Item page
+	<li><a href="{{ spc.source_page.page_url }}">Item page
 
 	{% if spc.source_page.iiif_baseimage_url %}
 		<ul><li>Link to full image: <a href="{{ spc.source_page.iiif_baseimage_url }}" target="_blank"><img src="{{ spc.source_page.square_thumbnail }}"></a></li></ul>

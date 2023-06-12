@@ -86,48 +86,48 @@
   },
   "voyage_itinerary__port_of_departure__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping"
   },
   "voyage_itinerary__port_of_departure__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__port_of_departure__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__port_of_departure__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__port_of_departure__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__port_of_departure__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__port_of_departure__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__port_of_departure__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__port_of_departure__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__int_first_port_emb": {
     "type": "table",
@@ -136,48 +136,48 @@
   },
   "voyage_itinerary__int_first_port_emb__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__int_second_port_emb": {
     "type": "table",
@@ -186,48 +186,48 @@
   },
   "voyage_itinerary__int_second_port_emb__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping"
   },
   "voyage_itinerary__int_second_port_emb__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__int_second_port_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__int_second_port_emb__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__int_second_port_emb__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__int_second_port_emb__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__int_second_port_emb__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__int_second_port_emb__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__int_second_port_emb__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__int_first_region_purchase_slaves": {
     "type": "table",
@@ -236,48 +236,48 @@
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__int_second_region_purchase_slaves": {
     "type": "table",
@@ -286,48 +286,48 @@
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping"
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__int_first_port_dis": {
     "type": "table",
@@ -336,48 +336,48 @@
   },
   "voyage_itinerary__int_first_port_dis__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__int_second_port_dis": {
     "type": "table",
@@ -386,48 +386,48 @@
   },
   "voyage_itinerary__int_second_port_dis__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping"
   },
   "voyage_itinerary__int_second_port_dis__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__int_second_port_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__int_second_port_dis__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__int_second_port_dis__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__int_second_port_dis__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__int_second_port_dis__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__int_second_port_dis__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__int_second_port_dis__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__int_first_region_slave_landing": {
     "type": "table",
@@ -436,48 +436,48 @@
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_principal_region_slave_dis": {
     "type": "table",
@@ -486,48 +486,48 @@
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__int_second_place_region_slave_landing": {
     "type": "table",
@@ -536,48 +536,48 @@
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__first_place_slave_purchase": {
     "type": "table",
@@ -586,48 +586,48 @@
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping"
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__first_place_slave_purchase__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__second_place_slave_purchase": {
     "type": "table",
@@ -636,48 +636,48 @@
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__third_place_slave_purchase": {
     "type": "table",
@@ -686,48 +686,48 @@
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping"
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__third_place_slave_purchase__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__first_region_slave_emb": {
     "type": "table",
@@ -736,48 +736,48 @@
   },
   "voyage_itinerary__first_region_slave_emb__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__second_region_slave_emb": {
     "type": "table",
@@ -786,48 +786,48 @@
   },
   "voyage_itinerary__second_region_slave_emb__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping"
   },
   "voyage_itinerary__second_region_slave_emb__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__second_region_slave_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__second_region_slave_emb__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__second_region_slave_emb__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__second_region_slave_emb__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__second_region_slave_emb__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__second_region_slave_emb__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__second_region_slave_emb__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__third_region_slave_emb": {
     "type": "table",
@@ -836,48 +836,48 @@
   },
   "voyage_itinerary__third_region_slave_emb__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing": {
     "type": "table",
@@ -886,48 +886,48 @@
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__first_landing_place": {
     "type": "table",
@@ -936,48 +936,48 @@
   },
   "voyage_itinerary__first_landing_place__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping"
   },
   "voyage_itinerary__first_landing_place__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__first_landing_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__first_landing_place__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__first_landing_place__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__first_landing_place__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__first_landing_place__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__first_landing_place__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__first_landing_place__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__second_landing_place": {
     "type": "table",
@@ -986,48 +986,48 @@
   },
   "voyage_itinerary__second_landing_place__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping"
   },
   "voyage_itinerary__second_landing_place__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__second_landing_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__second_landing_place__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__second_landing_place__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__second_landing_place__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__second_landing_place__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__second_landing_place__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__second_landing_place__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__third_landing_place": {
     "type": "table",
@@ -1036,48 +1036,48 @@
   },
   "voyage_itinerary__third_landing_place__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping"
   },
   "voyage_itinerary__third_landing_place__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__third_landing_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__third_landing_place__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__third_landing_place__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__third_landing_place__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__third_landing_place__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__third_landing_place__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__third_landing_place__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__first_landing_region": {
     "type": "table",
@@ -1086,48 +1086,48 @@
   },
   "voyage_itinerary__first_landing_region__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping"
   },
   "voyage_itinerary__first_landing_region__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__first_landing_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__first_landing_region__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__first_landing_region__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__first_landing_region__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__first_landing_region__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__first_landing_region__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__first_landing_region__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__second_landing_region": {
     "type": "table",
@@ -1136,48 +1136,48 @@
   },
   "voyage_itinerary__second_landing_region__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping"
   },
   "voyage_itinerary__second_landing_region__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__second_landing_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__second_landing_region__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__second_landing_region__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__second_landing_region__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__second_landing_region__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__second_landing_region__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__second_landing_region__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__third_landing_region": {
     "type": "table",
@@ -1186,48 +1186,48 @@
   },
   "voyage_itinerary__third_landing_region__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping"
   },
   "voyage_itinerary__third_landing_region__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__third_landing_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__third_landing_region__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__third_landing_region__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__third_landing_region__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__third_landing_region__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__third_landing_region__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__third_landing_region__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__place_voyage_ended": {
     "type": "table",
@@ -1236,48 +1236,48 @@
   },
   "voyage_itinerary__place_voyage_ended__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__region_of_return": {
     "type": "table",
@@ -1286,48 +1286,48 @@
   },
   "voyage_itinerary__region_of_return__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping"
   },
   "voyage_itinerary__region_of_return__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__region_of_return__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__region_of_return__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__region_of_return__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__region_of_return__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__region_of_return__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__region_of_return__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__region_of_return__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__broad_region_of_return": {
     "type": "table",
@@ -1336,48 +1336,48 @@
   },
   "voyage_itinerary__broad_region_of_return__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_port_voyage_begin": {
     "type": "table",
@@ -1386,48 +1386,48 @@
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_region_voyage_begin": {
     "type": "table",
@@ -1436,48 +1436,48 @@
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin": {
     "type": "table",
@@ -1486,48 +1486,48 @@
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__principal_place_of_slave_purchase": {
     "type": "table",
@@ -1536,48 +1536,48 @@
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase": {
     "type": "table",
@@ -1586,48 +1586,48 @@
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase": {
     "type": "table",
@@ -1636,48 +1636,48 @@
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase": {
     "type": "table",
@@ -1686,48 +1686,48 @@
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__principal_port_of_slave_dis": {
     "type": "table",
@@ -1736,48 +1736,48 @@
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_principal_port_slave_dis": {
     "type": "table",
@@ -1786,48 +1786,48 @@
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__imp_broad_region_slave_dis": {
     "type": "table",
@@ -1836,48 +1836,48 @@
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location": {
     "type": "table",
-    "label": "Broad Region Location",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location"
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location : ID"
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : ID"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location : Location name"
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : Location name"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location : Longitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : Longitude of Centroid"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location : Latitude of Centroid"
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : Latitude of Centroid"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location : SPSS code"
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : SPSS code"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location : Child of"
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : Child of"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location : Location Type"
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : Location Type"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : Broad Region Location : Polygon"
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : Polygon"
   },
   "voyage_itinerary__ports_called_buying_slaves": {
     "type": "<class 'rest_framework.fields.IntegerField'>",

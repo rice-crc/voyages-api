@@ -52,7 +52,7 @@ class BroadRegion(models.Model):
 
 	geo_location = models.OneToOneField(
 		Location,
-		verbose_name="Broad Region Location",
+		verbose_name="New Location Fieldmapping",
 		on_delete=models.CASCADE,
 		null=True
 	)
@@ -94,7 +94,7 @@ class Region(models.Model):
 
 	geo_location = models.OneToOneField(
 		Location,
-		verbose_name="Broad Region Location",
+		verbose_name="New Location Fieldmapping",
 		on_delete=models.CASCADE,
 		null=True
 	)
@@ -135,7 +135,7 @@ class Place(models.Model):
 
 	geo_location = models.OneToOneField(
 		Location,
-		verbose_name="Broad Region Location",
+		verbose_name="New Location Fieldmapping",
 		on_delete=models.CASCADE,
 		null=True
 	)

@@ -3,15 +3,14 @@ from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
 from .models import *
 from document.models import *
-# import pprint
-# import gc
+from geo.models import *
 from common.nest import nest_selected_fields
 from common.models import SparseDate
 from past.models import *
 
 #### GEO
 
-class LocationSerializer(serializers.ModelSerializer):
+class VoyageLocationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Location
 		fields='__all__'
@@ -37,10 +36,10 @@ class VoyageShipSerializer(serializers.ModelSerializer):
 	rig_of_vessel=RigOfVesselSerializer(many=False)
 	imputed_nationality=NationalitySerializer(many=False)
 	ton_type=TonTypeSerializer(many=False)
-	vessel_construction_place=LocationSerializer(many=False)
-	vessel_construction_region=LocationSerializer(many=False)
-	registered_place=LocationSerializer(many=False)
-	registered_region=LocationSerializer(many=False)
+	vessel_construction_place=VoyageLocationSerializer(many=False)
+	vessel_construction_region=VoyageLocationSerializer(many=False)
+	registered_place=VoyageLocationSerializer(many=False)
+	registered_region=VoyageLocationSerializer(many=False)
 	
 	class Meta:
 		model=VoyageShip
@@ -60,8 +59,6 @@ class VoyageCrewSerializer(serializers.ModelSerializer):
 		model=VoyageCrew
 		fields='__all__'
 
-
-
 ##### ITINERARY #####
 # I TRIED TO USE THE LEGACY VOYAGES GEO MODELS
 # BUT HAVING UNIQUE ID'S DISTRIBUTED ACROSS 3 NESTED TABLES IS SUCH A BRAIN-BREAKINGLY BAD DESIGN THAT IT'S NOT GOING TO FLY
@@ -69,19 +66,19 @@ class VoyageCrewSerializer(serializers.ModelSerializer):
 # I HOPE THIS DOESN'T BREAK IMPUTATIONS (IT WILL)
 
 class PlaceSerializer(serializers.ModelSerializer):
-	geo_location=LocationSerializer(many=False)
+	geo_location=VoyageLocationSerializer(many=False)
 	class Meta:
 		model=Place
 		fields=['geo_location',]
 
 class RegionSerializer(serializers.ModelSerializer):
-	geo_location=LocationSerializer(many=False)
+	geo_location=VoyageLocationSerializer(many=False)
 	class Meta:
 		model=Region
 		fields=['geo_location',]
 
 class BroadRegionSerializer(serializers.ModelSerializer):
-	geo_location=LocationSerializer(many=False)
+	geo_location=VoyageLocationSerializer(many=False)
 	class Meta:
 		model=BroadRegion
 		fields=['geo_location',]
@@ -134,7 +131,6 @@ class ParticularOutcomeSerializer(serializers.ModelSerializer):
 		model=ParticularOutcome
 		fields='__all__'
 
-
 class SlavesOutcomeSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=SlavesOutcome
@@ -167,7 +163,7 @@ class VoyageOutcomeSerializer(serializers.ModelSerializer):
 
 #### ENSLAVERS
 
-class EnslaverRoleSerializer(serializers.ModelSerializer):
+class VoyageEnslaverRoleSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverRole
 		fields='__all__'
@@ -177,31 +173,31 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 		model=EnslaverAlias
 		fields='__all__'
 
-class EnslaverVoyageConnectionSerializer(serializers.ModelSerializer):
+class VoyageEnslaverConnectionSerializer(serializers.ModelSerializer):
 	enslaver_alias=EnslaverAliasSerializer(many=False)
-	role=EnslaverRoleSerializer(many=False)
+	role=VoyageEnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverVoyageConnection
 		fields=['enslaver_alias','role']
 
-class SparseDateSerializer(serializers.ModelSerializer):
+class VoyageSparseDateSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=SparseDate
 		exclude=['id',]
 
 class VoyageDatesSerializer(serializers.ModelSerializer):
-	voyage_began_sparsedate=SparseDateSerializer(many=False)
-	slave_purchase_began_sparsedate=SparseDateSerializer(many=False)
-	vessel_left_port_sparsedate=SparseDateSerializer(many=False)
-	first_dis_of_slaves_sparsedate=SparseDateSerializer(many=False)
-	date_departed_africa_sparsedate=SparseDateSerializer(many=False)
-	arrival_at_second_place_landing_sparsedate=SparseDateSerializer(many=False)
-	third_dis_of_slaves_sparsedate=SparseDateSerializer(many=False)
-	departure_last_place_of_landing_sparsedate=SparseDateSerializer(many=False)
-	voyage_completed_sparsedate=SparseDateSerializer(many=False)
-	imp_voyage_began_sparsedate=SparseDateSerializer(many=False)
-	imp_departed_africa_sparsedate=SparseDateSerializer(many=False)
-	imp_arrival_at_port_of_dis_sparsedate=SparseDateSerializer(many=False)
+	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False)
+	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False)
+	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False)
+	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False)
+	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False)
+	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False)
+	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False)
+	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False)
+	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False)
+	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False)
+	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False)
+	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False)
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
@@ -227,7 +223,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 	voyage_zoterorefs=VoyageZoteroSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False)
 	voyage_dates=VoyageDatesSerializer(many=False)
-	voyage_enslaver_connection=EnslaverVoyageConnectionSerializer(many=True,read_only=True)
+	voyage_enslaver_connection=VoyageEnslaverConnectionSerializer(many=True,read_only=True)
 	voyage_crew=VoyageCrewSerializer(many=False)
 	voyage_ship=VoyageShipSerializer(many=False)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)

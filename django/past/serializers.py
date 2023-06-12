@@ -1,9 +1,12 @@
-# from rest_framework import serializers
-# from rest_framework.fields import SerializerMethodField,IntegerField,CharField
-# import re
-# from .models import *
-# from geo.models import *
-# from voyage.serializers import *
+from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField
+import re
+from .models import *
+from geo.models import *
+from voyage.models import *
+from voyage.serializers import VoyageSerializer,PlaceSerializer
+
+
 # 
 # class CaptiveFateSerializer(serializers.ModelSerializer):
 # 	class Meta:
@@ -21,10 +24,10 @@
 # 		model=EnslaverIdentitySourceConnection
 # 		fields='__all__'
 # 
-# class EnslaverRoleSerializer(serializers.ModelSerializer):
-# 	class Meta:
-# 		model=EnslaverRole
-# 		fields='__all__'
+class EnslaverRoleSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=EnslaverRole
+		fields='__all__'
 # 
 # class EnslavementRelationTypeSerializer(serializers.ModelSerializer):
 # 	class Meta:
@@ -114,13 +117,14 @@
 # 		model=EnslavedSourceConnection
 # 		fields='__all__'
 # 
-# class EnslaverVoyageConnectionSerializer(serializers.ModelSerializer):
-# 	voyage=VoyageSerializer(many=True,read_only=True)
-# 	role=EnslaverRoleSerializer(many=False)
-# 	class Meta:
-# 		model=EnslaverVoyageConnection
-# 		fields='__all__'
-# 
+
+class EnslaverVoyageConnectionSerializer(serializers.ModelSerializer):
+	voyage=VoyageSerializer(many=True,read_only=True)
+	role=EnslaverRoleSerializer(many=False)
+	class Meta:
+		model=EnslaverVoyageConnection
+		fields='__all__'
+
 # class EnslavedSerializer(serializers.ModelSerializer):
 # 	post_disembark_location=LocationSerializer(many=False)
 # 	voyage=VoyageSerializer(many=False)
@@ -130,26 +134,25 @@
 # 	captive_status=CaptiveStatusSerializer(many=False)
 # 	class Meta:
 # 		model=Enslaved
-# 		fields='__all__'
-# 
-# class EnslaverAliasSerializer(serializers.ModelSerializer):
+# 		fields='__all__' 
+
+class EnslaverAliasSerializer(serializers.ModelSerializer):
 # 	transactions=EnslaverInRelationSerializer(many=True,read_only=True)
-# 	enslaver_voyage=EnslaverVoyageConnectionSerializer(many=True,read_only=True)
-# 	class Meta:
-# 		model=EnslaverAlias
-# 		#including the 'identity' field here breaks it, so i'm excluding
-# 		fields=['transactions','id','alias','enslaver_voyage']
+	enslaver_voyage_connection=EnslaverVoyageConnectionSerializer(
+		many=True,
+		read_only=True
+	)
+	class Meta:
+		model=EnslaverAlias
+		#including the 'identity' field here breaks it, so i'm excluding
+		fields='__all__'
 # 
 # 
-# class EnslaverSerializer(serializers.ModelSerializer):
-# 	principal_location=LocationSerializer(many=False)
-# 	alias=EnslaverAliasSerializer(many=True,read_only=True)
+
+class EnslaverSerializer(serializers.ModelSerializer):
+	principal_location=PlaceSerializer(many=False)
+	aliases=EnslaverAliasSerializer(many=True,read_only=True)
 # 	enslaver_sources=EnslaverIdentitySourceConnectionSerializer(many=True,read_only=True)
-# 	class Meta:
-# 		model=EnslaverIdentity
-# 		fields='__all__'
-# 		
-# 
-# 
-# 
-# 
+	class Meta:
+		model=EnslaverIdentity
+		fields='__all__'

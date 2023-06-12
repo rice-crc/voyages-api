@@ -365,7 +365,6 @@ class VoyageCargoConnection(models.Model):
 							   on_delete=models.CASCADE)
 	unit = models.ForeignKey(CargoUnit, related_name="+", null=True,on_delete=models.SET_NULL)
 	amount = models.FloatField("The amount of cargo according to the unit", null=True)
-
 	class Meta:
 		unique_together = ['voyage', 'cargo']
 
@@ -377,18 +376,14 @@ class ParticularOutcome(models.Model):
 	"""
 	label = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-
 	def __str__(self):
 		return self.__unicode__()
-
 	def __unicode__(self):
 		return self.label
-
 	class Meta:
 		ordering = ['value']
 		verbose_name = 'Fate (particular outcome of voyage)'
 		verbose_name_plural = 'Fates (particular outcomes of voyages)'
-
 
 class SlavesOutcome(models.Model):
 	"""
@@ -396,13 +391,10 @@ class SlavesOutcome(models.Model):
 	"""
 	label = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-
 	def __str__(self):
 		return self.__unicode__()
-
 	def __unicode__(self):
 		return self.label
-
 	class Meta:
 		ordering = ['value']
 
@@ -413,10 +405,8 @@ class VesselCapturedOutcome(models.Model):
 	"""
 	label = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
-
 	def __str__(self):
 		return self.__unicode__()
-
 	def __unicode__(self):
 		return self.label
 

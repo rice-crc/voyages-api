@@ -570,7 +570,7 @@ class EnslaverAlias(models.Model):
 
 	class Meta:
 		verbose_name = 'Enslaver alias'
-
+	
 
 class EnslaverRole(NamedModelAbstractBase):
 	pass
@@ -580,13 +580,18 @@ class EnslaverVoyageConnection(models.Model):
 	"""
 	Associates an enslaver with a voyage at some particular role.
 	"""
-
-	enslaver_alias = models.ForeignKey(EnslaverAlias,
-									   null=False,
-									   on_delete=models.CASCADE)
-	voyage = models.ForeignKey('voyage.Voyage',
-							   null=False,
-							   on_delete=models.CASCADE)
+	enslaver_alias = models.ForeignKey(
+		EnslaverAlias,
+		related_name='enslaver_voyage_connection',
+		null=False,
+		on_delete=models.CASCADE
+	)
+	voyage = models.ForeignKey(
+		'voyage.Voyage',
+		related_name='voyage_enslaver_connection',
+		null=False,
+		on_delete=models.CASCADE
+	)
 	role = models.ForeignKey(EnslaverRole, null=False, on_delete=models.CASCADE)
 	# There might be multiple persons with the same role for the same voyage
 	# and they can be ordered (ranked) using the following field.

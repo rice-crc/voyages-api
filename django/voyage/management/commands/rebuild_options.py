@@ -3,15 +3,15 @@ import json
 from django.core.management.base import BaseCommand, CommandError
 from voyage.serializers import VoyageSerializer
 from voyage.models import Voyage
-from common.serializers import SparseDateSerializer
-from common.models import SparseDate
+# from common.serializers import SparseDateSerializer
+# from common.models import SparseDate
 
-from past.serializers import EnslavedSerializer,EnslaverSerializer
-from past.models import *
+# from past.serializers import EnslavedSerializer,EnslaverSerializer
+# from past.models import *
 # from assessment.serializers import EstimateSerializer
 # from assessment.models import Estimate
-from geo.serializers import *
-from geo.models import Location
+# from geo.serializers import *
+# from geo.models import Location
 # from docs.models import Doc
 # from docs.serializers import DocSerializer
 
@@ -27,27 +27,27 @@ class Command(BaseCommand):
 				'serializer':VoyageSerializer,
 				'objectclass':Voyage
 			},
-			{
-				'output_filename':'common/sparse_date_options.json',
-				'serializer':SparseDateSerializer,
-				'objectclass':SparseDate
-			},
-			{
-				'output_filename':'geo/geo_options.json',
-				'serializer':LocationSerializer,
-				'objectclass':Location
-			},
-			{
-				'output_filename':'past/enslaved_options.json',
-				'serializer':EnslavedSerializer,
-				'objectclass':Enslaved
-			},
-			{
-				'output_filename':'past/enslaver_options.json',
-				'serializer':EnslaverSerializer,
-				'objectclass':EnslaverIdentity
-			},
 # 			{
+# 				'output_filename':'common/sparse_date_options.json',
+# 				'serializer':SparseDateSerializer,
+# 				'objectclass':SparseDate
+# 			},
+# 			{
+# 				'output_filename':'geo/geo_options.json',
+# 				'serializer':LocationSerializer,
+# 				'objectclass':Location
+# 			},
+# 			{
+# 				'output_filename':'past/enslaved_options.json',
+# 				'serializer':EnslavedSerializer,
+# 				'objectclass':Enslaved
+# 			},
+# 			{
+# 				'output_filename':'past/enslaver_options.json',
+# 				'serializer':EnslaverSerializer,
+# 				'objectclass':EnslaverIdentity
+# 			},
+# # 			{
 # 				'output_filename':'assessment/assessment_options.json',
 # 				'serializer':EstimateSerializer,
 # 				'objectclass':Estimate

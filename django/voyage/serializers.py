@@ -178,16 +178,16 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class EnslaverVoyageConnectionSerializer(serializers.ModelSerializer):
-	alias=EnslaverAliasSerializer(many=False)
+	enslaver_alias=EnslaverAliasSerializer(many=False)
 	role=EnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverVoyageConnection
-		fields=['alias','role']
+		fields=['enslaver_alias','role']
 
 class SparseDateSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=SparseDate
-		fields='__all__'
+		exclude=['id',]
 
 class VoyageDatesSerializer(serializers.ModelSerializer):
 	voyage_began_sparsedate=SparseDateSerializer(many=False)
@@ -227,11 +227,12 @@ class VoyageSerializer(serializers.ModelSerializer):
 	voyage_zoterorefs=VoyageZoteroSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False)
 	voyage_dates=VoyageDatesSerializer(many=False)
-	voyage_enslavers=EnslaverVoyageConnectionSerializer(many=True,read_only=True)
+	voyage_enslaver_connection=EnslaverVoyageConnectionSerializer(many=True,read_only=True)
 	voyage_crew=VoyageCrewSerializer(many=False)
 	voyage_ship=VoyageShipSerializer(many=False)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)
-	voyage_name_outcome=VoyageOutcomeSerializer(many=False)
+	#WHY! WHY??? THERE'S ONLY ONE OUTCOME PER VOYAGE! WHY??????
+	voyage_name_outcome=VoyageOutcomeSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
 		fields='__all__'

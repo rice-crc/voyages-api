@@ -30,13 +30,15 @@ class Command(BaseCommand):
 				name="Broad Region"
 			)
 			
-			thislocation=Location.objects.get_or_create(
+			thislocation,thislocation_isnew=Location.objects.get_or_create(
 				longitude=br.longitude,
 				latitude=br.latitude,
 				name=br.broad_region,
 				location_type=LT,
 				value=br.value
 			)
+			br.geo_location=thislocation
+			br.save()
 		
 		for r in regions:
 			
@@ -46,7 +48,7 @@ class Command(BaseCommand):
 			
 			parent=Location.objects.get(value=r.broad_region.value)
 			
-			thislocation=Location.objects.get_or_create(
+			thislocation,thislocation_isnew=Location.objects.get_or_create(
 				longitude=r.longitude,
 				latitude=r.latitude,
 				name=r.region,
@@ -54,6 +56,9 @@ class Command(BaseCommand):
 				value=r.value,
 				child_of=parent
 			)
+			
+			r.geo_location=thislocation
+			r.save()
 			
 		for p in places:
 			
@@ -74,7 +79,7 @@ class Command(BaseCommand):
 			else:
 				pvalue=p.value
 			
-			thislocation=Location.objects.get_or_create(
+			thislocation,thislocation_isnew=Location.objects.get_or_create(
 				longitude=p.longitude,
 				latitude=p.latitude,
 				name=p.place,
@@ -82,3 +87,5 @@ class Command(BaseCommand):
 				value=pvalue,
 				child_of=parent
 			)
+			p.geo_location=thislocation
+			p.save()

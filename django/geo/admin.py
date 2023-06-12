@@ -1,6 +1,6 @@
-# from django.contrib import admin
-# from django import forms
-# from geo.models import *
+from django.contrib import admin
+from django import forms
+from geo.models import *
 # 
 # class PolygonAdmin(admin.ModelAdmin):
 #     list_display = ('shape',)
@@ -59,5 +59,5 @@
 # admin.site.register(Adjacency, AdjacencyAdmin)
 # admin.site.register(Polygon, PolygonAdmin)
 # admin.site.register(LocationType,LocationTypeAdmin)
-# admin.site.register(Location, LocationAdmin)
+admin.site.register(Location)
 # 

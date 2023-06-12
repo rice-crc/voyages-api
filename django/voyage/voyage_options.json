@@ -1929,11 +1929,6 @@
     "label": "Date that voyage began (DATEDEPB,A,C)",
     "flatlabel": "voyage dates : Date that voyage began (DATEDEPB,A,C)"
   },
-  "voyage_dates__voyage_began_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date that voyage began (DATEDEPB,A,C) : ID"
-  },
   "voyage_dates__voyage_began_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Day",
@@ -1953,11 +1948,6 @@
     "type": "table",
     "label": "Date that slave purchase began (D1SLATRB,A,C)",
     "flatlabel": "voyage dates : Date that slave purchase began (D1SLATRB,A,C)"
-  },
-  "voyage_dates__slave_purchase_began_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date that slave purchase began (D1SLATRB,A,C) : ID"
   },
   "voyage_dates__slave_purchase_began_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -1979,11 +1969,6 @@
     "label": "Date that vessel left last slaving port (DLSLATRB,A,C)",
     "flatlabel": "voyage dates : Date that vessel left last slaving port (DLSLATRB,A,C)"
   },
-  "voyage_dates__vessel_left_port_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date that vessel left last slaving port (DLSLATRB,A,C) : ID"
-  },
   "voyage_dates__vessel_left_port_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Day",
@@ -2003,11 +1988,6 @@
     "type": "table",
     "label": "Date of first disembarkation of slaves (DATARR33,32,34)",
     "flatlabel": "voyage dates : Date of first disembarkation of slaves (DATARR33,32,34)"
-  },
-  "voyage_dates__first_dis_of_slaves_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date of first disembarkation of slaves (DATARR33,32,34) : ID"
   },
   "voyage_dates__first_dis_of_slaves_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -2029,11 +2009,6 @@
     "label": "Date vessel departed Africa (DATELEFTAFR)",
     "flatlabel": "voyage dates : Date vessel departed Africa (DATELEFTAFR)"
   },
-  "voyage_dates__date_departed_africa_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date vessel departed Africa (DATELEFTAFR) : ID"
-  },
   "voyage_dates__date_departed_africa_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Day",
@@ -2053,11 +2028,6 @@
     "type": "table",
     "label": "Date of arrival at second place of landing (DATARR37,36,38)",
     "flatlabel": "voyage dates : Date of arrival at second place of landing (DATARR37,36,38)"
-  },
-  "voyage_dates__arrival_at_second_place_landing_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date of arrival at second place of landing (DATARR37,36,38) : ID"
   },
   "voyage_dates__arrival_at_second_place_landing_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -2079,11 +2049,6 @@
     "label": "Date of third disembarkation of slaves (DATARR40,39,41)",
     "flatlabel": "voyage dates : Date of third disembarkation of slaves (DATARR40,39,41)"
   },
-  "voyage_dates__third_dis_of_slaves_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date of third disembarkation of slaves (DATARR40,39,41) : ID"
-  },
   "voyage_dates__third_dis_of_slaves_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Day",
@@ -2103,11 +2068,6 @@
     "type": "table",
     "label": "Date of departure from last place of landing (DDEPAMB,*,C)",
     "flatlabel": "voyage dates : Date of departure from last place of landing (DDEPAMB,*,C)"
-  },
-  "voyage_dates__departure_last_place_of_landing_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date of departure from last place of landing (DDEPAMB,*,C) : ID"
   },
   "voyage_dates__departure_last_place_of_landing_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -2129,11 +2089,6 @@
     "label": "Date on which slave voyage completed (DATARR44,43,45)",
     "flatlabel": "voyage dates : Date on which slave voyage completed (DATARR44,43,45)"
   },
-  "voyage_dates__voyage_completed_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Date on which slave voyage completed (DATARR44,43,45) : ID"
-  },
   "voyage_dates__voyage_completed_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Day",
@@ -2153,11 +2108,6 @@
     "type": "table",
     "label": "Year voyage began",
     "flatlabel": "voyage dates : Year voyage began"
-  },
-  "voyage_dates__imp_voyage_began_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Year voyage began : ID"
   },
   "voyage_dates__imp_voyage_began_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -2179,11 +2129,6 @@
     "label": "Year departed Africa",
     "flatlabel": "voyage dates : Year departed Africa"
   },
-  "voyage_dates__imp_departed_africa_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Year departed Africa : ID"
-  },
   "voyage_dates__imp_departed_africa_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Day",
@@ -2203,11 +2148,6 @@
     "type": "table",
     "label": "Year of arrival at port of disembarkation (YEARAM)",
     "flatlabel": "voyage dates : Year of arrival at port of disembarkation (YEARAM)"
-  },
-  "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "voyage dates : Year of arrival at port of disembarkation (YEARAM) : ID"
   },
   "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__day": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -2304,47 +2244,47 @@
     "label": "Voyage",
     "flatlabel": "voyage dates : Voyage"
   },
-  "voyage_enslavers": {
+  "voyage_enslaver_connection": {
     "type": "table",
     "label": "enslaver voyage connection",
     "flatlabel": "enslaver voyage connection"
   },
-  "voyage_enslavers__alias": {
+  "voyage_enslaver_connection__enslaver_alias": {
     "type": "table",
     "label": "Enslaver alias",
     "flatlabel": "enslaver voyage connection : Enslaver alias"
   },
-  "voyage_enslavers__alias__id": {
+  "voyage_enslaver_connection__enslaver_alias__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "enslaver voyage connection : Enslaver alias : ID"
   },
-  "voyage_enslavers__alias__alias": {
+  "voyage_enslaver_connection__enslaver_alias__alias": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Alias",
     "flatlabel": "enslaver voyage connection : Enslaver alias : Alias"
   },
-  "voyage_enslavers__alias__manual_id": {
+  "voyage_enslaver_connection__enslaver_alias__manual_id": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Manual id",
     "flatlabel": "enslaver voyage connection : Enslaver alias : Manual id"
   },
-  "voyage_enslavers__alias__identity": {
+  "voyage_enslaver_connection__enslaver_alias__identity": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Identity",
     "flatlabel": "enslaver voyage connection : Enslaver alias : Identity"
   },
-  "voyage_enslavers__role": {
+  "voyage_enslaver_connection__role": {
     "type": "table",
     "label": "enslaver role",
     "flatlabel": "enslaver voyage connection : enslaver role"
   },
-  "voyage_enslavers__role__id": {
+  "voyage_enslaver_connection__role__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "enslaver voyage connection : enslaver role : ID"
   },
-  "voyage_enslavers__role__name": {
+  "voyage_enslaver_connection__role__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name",
     "flatlabel": "enslaver voyage connection : enslaver role : Name"
@@ -3351,118 +3291,118 @@
   },
   "voyage_name_outcome": {
     "type": "table",
-    "label": "voyage",
-    "flatlabel": "voyage"
+    "label": "Outcome",
+    "flatlabel": "Outcome"
   },
   "voyage_name_outcome__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage : ID"
+    "flatlabel": "Outcome : ID"
   },
   "voyage_name_outcome__outcome_owner": {
     "type": "table",
-    "label": "Owner Outcome",
-    "flatlabel": "voyage : Owner Outcome"
+    "label": "owner outcome",
+    "flatlabel": "Outcome : owner outcome"
   },
   "voyage_name_outcome__outcome_owner__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage : Owner Outcome : ID"
+    "flatlabel": "Outcome : owner outcome : ID"
   },
   "voyage_name_outcome__outcome_owner__label": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Outcome label",
-    "flatlabel": "voyage : Owner Outcome : Outcome label"
+    "flatlabel": "Outcome : owner outcome : Outcome label"
   },
   "voyage_name_outcome__outcome_owner__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Code of outcome",
-    "flatlabel": "voyage : Owner Outcome : Code of outcome"
+    "flatlabel": "Outcome : owner outcome : Code of outcome"
   },
   "voyage_name_outcome__outcome_slaves": {
     "type": "table",
-    "label": "Slaves Outcome",
-    "flatlabel": "voyage : Slaves Outcome"
+    "label": "slaves outcome",
+    "flatlabel": "Outcome : slaves outcome"
   },
   "voyage_name_outcome__outcome_slaves__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage : Slaves Outcome : ID"
+    "flatlabel": "Outcome : slaves outcome : ID"
   },
   "voyage_name_outcome__outcome_slaves__label": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Outcome label",
-    "flatlabel": "voyage : Slaves Outcome : Outcome label"
+    "flatlabel": "Outcome : slaves outcome : Outcome label"
   },
   "voyage_name_outcome__outcome_slaves__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Code of outcome",
-    "flatlabel": "voyage : Slaves Outcome : Code of outcome"
+    "flatlabel": "Outcome : slaves outcome : Code of outcome"
   },
   "voyage_name_outcome__particular_outcome": {
     "type": "table",
-    "label": "Particular Outcome",
-    "flatlabel": "voyage : Particular Outcome"
+    "label": "Fate (particular outcome of voyage)",
+    "flatlabel": "Outcome : Fate (particular outcome of voyage)"
   },
   "voyage_name_outcome__particular_outcome__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage : Particular Outcome : ID"
+    "flatlabel": "Outcome : Fate (particular outcome of voyage) : ID"
   },
   "voyage_name_outcome__particular_outcome__label": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Outcome label",
-    "flatlabel": "voyage : Particular Outcome : Outcome label"
+    "flatlabel": "Outcome : Fate (particular outcome of voyage) : Outcome label"
   },
   "voyage_name_outcome__particular_outcome__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Code of outcome",
-    "flatlabel": "voyage : Particular Outcome : Code of outcome"
+    "flatlabel": "Outcome : Fate (particular outcome of voyage) : Code of outcome"
   },
   "voyage_name_outcome__resistance": {
     "type": "table",
-    "label": "Resistance",
-    "flatlabel": "voyage : Resistance"
+    "label": "resistance",
+    "flatlabel": "Outcome : resistance"
   },
   "voyage_name_outcome__resistance__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage : Resistance : ID"
+    "flatlabel": "Outcome : resistance : ID"
   },
   "voyage_name_outcome__resistance__label": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Resistance label",
-    "flatlabel": "voyage : Resistance : Resistance label"
+    "flatlabel": "Outcome : resistance : Resistance label"
   },
   "voyage_name_outcome__resistance__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Code of resistance",
-    "flatlabel": "voyage : Resistance : Code of resistance"
+    "flatlabel": "Outcome : resistance : Code of resistance"
   },
   "voyage_name_outcome__vessel_captured_outcome": {
     "type": "table",
-    "label": "Vessel Captured Outcome",
-    "flatlabel": "voyage : Vessel Captured Outcome"
+    "label": "vessel captured outcome",
+    "flatlabel": "Outcome : vessel captured outcome"
   },
   "voyage_name_outcome__vessel_captured_outcome__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage : Vessel Captured Outcome : ID"
+    "flatlabel": "Outcome : vessel captured outcome : ID"
   },
   "voyage_name_outcome__vessel_captured_outcome__label": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Outcome label",
-    "flatlabel": "voyage : Vessel Captured Outcome : Outcome label"
+    "flatlabel": "Outcome : vessel captured outcome : Outcome label"
   },
   "voyage_name_outcome__vessel_captured_outcome__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Code of outcome",
-    "flatlabel": "voyage : Vessel Captured Outcome : Code of outcome"
+    "flatlabel": "Outcome : vessel captured outcome : Code of outcome"
   },
   "voyage_name_outcome__voyage": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Voyage",
-    "flatlabel": "voyage : Voyage"
+    "flatlabel": "Outcome : Voyage"
   },
   "voyage_id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",

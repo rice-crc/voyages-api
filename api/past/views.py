@@ -61,7 +61,7 @@ class EnslavedList(generics.GenericAPIView):
 		st=time.time()
 		times=[]
 		labels=[]
-		print("+++++++\nusername:",request.auth.user)
+		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
 		print("FETCHING...")
 # 		try:
 		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
@@ -220,7 +220,7 @@ class EnslaverList(generics.GenericAPIView):
 		j=options_handler('past/enslaver_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
-		print("+++++++\nusername:",request.auth.user)# 
+		print("ENSLAVER LIST+++++++\nusername:",request.auth.user)# 
 # 		try:
 		st=time.time()
 		enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)

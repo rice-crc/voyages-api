@@ -38,7 +38,7 @@ class VoyageList(generics.GenericAPIView):
 		j=options_handler('voyage/voyage_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
-		print("+++++++\nusername:",request.auth.user)
+		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 # 		try:
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=False)

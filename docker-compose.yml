@@ -20,10 +20,10 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "voyages"
       
-  voyages-django:
-    image: "voyages-django"
-    container_name: "voyages-django"
-    hostname: "voyages-django"
+  voyages-api:
+    image: "voyages-api"
+    container_name: "voyages-api"
+    hostname: "voyages-api"
     restart: "on-failure"
     networks:
       - "voyages"
@@ -32,10 +32,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - "./django/:/srv/voyages-api"
+      - "./api/:/srv/voyages-api"
     build:
       context: "."
-      dockerfile: "./docker/django/Dockerfile"
+      dockerfile: "./docker/api/Dockerfile"
 
   voyages-adminer:
     image: "adminer:latest"
@@ -50,20 +50,20 @@ services:
       - "voyages"
 
 
-  voyages-flask:
-    image: "voyages-flask"
-    container_name: "voyages-flask"
-    hostname: "voyages-flask"
+  voyages-stats:
+    image: "voyages-stats"
+    container_name: "voyages-stats"
+    hostname: "voyages-stats"
     restart: "on-failure"
     networks:
       - "voyages"
     ports:
       - "5000:5000"
     volumes:
-      - "./flask/:/srv/voyages-flask"
+      - "./stats/:/srv/voyages-stats"
     build:
       context: "."
-      dockerfile: "./docker/flask/Dockerfile"
+      dockerfile: "./docker/stats/Dockerfile"
             
 networks:
   voyages:

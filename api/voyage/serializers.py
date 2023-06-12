@@ -15,6 +15,25 @@ class VoyageLocationSerializer(serializers.ModelSerializer):
 		model=Location
 		fields='__all__'
 
+class PlaceSerializer(serializers.ModelSerializer):
+	geo_location=VoyageLocationSerializer(many=False)
+	class Meta:
+		model=Place
+		fields=['geo_location',]
+
+class RegionSerializer(serializers.ModelSerializer):
+	geo_location=VoyageLocationSerializer(many=False)
+	class Meta:
+		model=Region
+		fields=['geo_location',]
+
+class BroadRegionSerializer(serializers.ModelSerializer):
+	geo_location=VoyageLocationSerializer(many=False)
+	class Meta:
+		model=BroadRegion
+		fields=['geo_location',]
+	
+
 # ##### VESSEL VARIABLES ##### 
 # 
 class RigOfVesselSerializer(serializers.ModelSerializer):
@@ -36,10 +55,10 @@ class VoyageShipSerializer(serializers.ModelSerializer):
 	rig_of_vessel=RigOfVesselSerializer(many=False)
 	imputed_nationality=NationalitySerializer(many=False)
 	ton_type=TonTypeSerializer(many=False)
-	vessel_construction_place=VoyageLocationSerializer(many=False)
-	vessel_construction_region=VoyageLocationSerializer(many=False)
-	registered_place=VoyageLocationSerializer(many=False)
-	registered_region=VoyageLocationSerializer(many=False)
+	vessel_construction_place=PlaceSerializer(many=False)
+	vessel_construction_region=RegionSerializer(many=False)
+	registered_place=PlaceSerializer(many=False)
+	registered_region=PlaceSerializer(many=False)
 	
 	class Meta:
 		model=VoyageShip
@@ -64,24 +83,6 @@ class VoyageCrewSerializer(serializers.ModelSerializer):
 # BUT HAVING UNIQUE ID'S DISTRIBUTED ACROSS 3 NESTED TABLES IS SUCH A BRAIN-BREAKINGLY BAD DESIGN THAT IT'S NOT GOING TO FLY
 # WE NOW HAVE A UNIFIED LOCATION OBJECT
 # I HOPE THIS DOESN'T BREAK IMPUTATIONS (IT WILL)
-
-class PlaceSerializer(serializers.ModelSerializer):
-	geo_location=VoyageLocationSerializer(many=False)
-	class Meta:
-		model=Place
-		fields=['geo_location',]
-
-class RegionSerializer(serializers.ModelSerializer):
-	geo_location=VoyageLocationSerializer(many=False)
-	class Meta:
-		model=Region
-		fields=['geo_location',]
-
-class BroadRegionSerializer(serializers.ModelSerializer):
-	geo_location=VoyageLocationSerializer(many=False)
-	class Meta:
-		model=BroadRegion
-		fields=['geo_location',]
 
 class VoyageItinerarySerializer(serializers.ModelSerializer):
 	port_of_departure=PlaceSerializer(many=False)

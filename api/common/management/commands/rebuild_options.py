@@ -6,7 +6,7 @@ from voyage.models import Voyage
 # from common.serializers import SparseDateSerializer
 # from common.models import SparseDate
 
-from past.serializers import EnslaverSerializer
+from past.serializers import EnslaverSerializer,EnslavedSerializer
 from past.models import *
 # from assessment.serializers import EstimateSerializer
 # from assessment.models import Estimate
@@ -37,11 +37,11 @@ class Command(BaseCommand):
 # 				'serializer':LocationSerializer,
 # 				'objectclass':Location
 # 			},
-# 			{
-# 				'output_filename':'past/enslaved_options.json',
-# 				'serializer':EnslavedSerializer,
-# 				'objectclass':Enslaved
-# 			},
+			{
+				'output_filename':'past/enslaved_options.json',
+				'serializer':EnslavedSerializer,
+				'objectclass':Enslaved
+			},
 			{
 				'output_filename':'past/enslaver_options.json',
 				'serializer':EnslaverSerializer,

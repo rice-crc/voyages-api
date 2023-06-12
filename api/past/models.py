@@ -827,17 +827,14 @@ class EnslavedName(models.Model):
 # 	class Meta:
 # 		unique_together = ('name', 'language')
 
-
 class EnslavementRelationType(NamedModelAbstractBase):
 	pass
-
 
 class EnslavementRelation(models.Model):
 	"""
 	Represents a relation involving any number of enslavers and enslaved
 	individuals.
 	"""
-	
 	id = models.IntegerField(primary_key=True)
 	relation_type = models.ForeignKey(EnslavementRelationType, null=False, on_delete=models.CASCADE)
 	place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+')
@@ -851,7 +848,6 @@ class EnslavementRelation(models.Model):
 							   null=True, on_delete=models.CASCADE)
 	text_ref = models.CharField(max_length=255, null=False, blank=True, help_text="Source text reference")
 
-
 class EnslavedInRelation(models.Model):
 	"""
 	Associates an enslaved in a slave relation.
@@ -860,14 +856,13 @@ class EnslavedInRelation(models.Model):
 	id = models.IntegerField(primary_key=True)
 	relation = models.ForeignKey(
 		EnslavementRelation,
-		related_name="enslaved",
+		related_name="enslaved_in_relation",
 		null=False,
 		on_delete=models.CASCADE)
 	enslaved = models.ForeignKey(Enslaved,
-		related_name="relations",
+		related_name="enslaved_relations",
 		null=False,
 		on_delete=models.CASCADE)
-
 
 class EnslaverInRelation(models.Model):
 	"""
@@ -877,12 +872,16 @@ class EnslaverInRelation(models.Model):
 	id = models.IntegerField(primary_key=True)
 	relation = models.ForeignKey(
 		EnslavementRelation,
-		related_name="enslavers",
+		related_name="relation_enslavers",
 		null=False,
 		on_delete=models.CASCADE)
-	enslaver_alias = models.ForeignKey(EnslaverAlias, null=False, on_delete=models.CASCADE)
+	enslaver_alias = models.ForeignKey(
+		EnslaverAlias,
+		related_name="enslaver_relations",
+		null=False,
+		on_delete=models.CASCADE
+	)
 	role = models.ForeignKey(EnslaverRole, null=False, on_delete=models.CASCADE, help_text="The role of the enslaver in this relation")
-
 
 # class EnslavementBipartiteGraph:
 # 	"""

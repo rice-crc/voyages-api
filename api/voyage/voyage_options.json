@@ -2444,180 +2444,200 @@
     "label": "Place where vessel constructed",
     "flatlabel": "voyage ship : Place where vessel constructed"
   },
-  "voyage_ship__vessel_construction_place__id": {
+  "voyage_ship__vessel_construction_place__geo_location": {
+    "type": "table",
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping"
+  },
+  "voyage_ship__vessel_construction_place__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage ship : Place where vessel constructed : ID"
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : ID"
   },
-  "voyage_ship__vessel_construction_place__name": {
+  "voyage_ship__vessel_construction_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage ship : Place where vessel constructed : Location name"
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : Location name"
   },
-  "voyage_ship__vessel_construction_place__longitude": {
+  "voyage_ship__vessel_construction_place__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage ship : Place where vessel constructed : Longitude of Centroid"
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : Longitude of Centroid"
   },
-  "voyage_ship__vessel_construction_place__latitude": {
+  "voyage_ship__vessel_construction_place__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage ship : Place where vessel constructed : Latitude of Centroid"
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : Latitude of Centroid"
   },
-  "voyage_ship__vessel_construction_place__value": {
+  "voyage_ship__vessel_construction_place__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage ship : Place where vessel constructed : SPSS code"
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : SPSS code"
   },
-  "voyage_ship__vessel_construction_place__child_of": {
+  "voyage_ship__vessel_construction_place__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage ship : Place where vessel constructed : Child of"
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : Child of"
   },
-  "voyage_ship__vessel_construction_place__location_type": {
+  "voyage_ship__vessel_construction_place__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage ship : Place where vessel constructed : Location Type"
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : Location Type"
   },
-  "voyage_ship__vessel_construction_place__spatial_extent": {
+  "voyage_ship__vessel_construction_place__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage ship : Place where vessel constructed : Polygon"
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : Polygon"
   },
   "voyage_ship__vessel_construction_region": {
     "type": "table",
     "label": "Region where vessel constructed",
     "flatlabel": "voyage ship : Region where vessel constructed"
   },
-  "voyage_ship__vessel_construction_region__id": {
+  "voyage_ship__vessel_construction_region__geo_location": {
+    "type": "table",
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping"
+  },
+  "voyage_ship__vessel_construction_region__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage ship : Region where vessel constructed : ID"
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : ID"
   },
-  "voyage_ship__vessel_construction_region__name": {
+  "voyage_ship__vessel_construction_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage ship : Region where vessel constructed : Location name"
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : Location name"
   },
-  "voyage_ship__vessel_construction_region__longitude": {
+  "voyage_ship__vessel_construction_region__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage ship : Region where vessel constructed : Longitude of Centroid"
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : Longitude of Centroid"
   },
-  "voyage_ship__vessel_construction_region__latitude": {
+  "voyage_ship__vessel_construction_region__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage ship : Region where vessel constructed : Latitude of Centroid"
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : Latitude of Centroid"
   },
-  "voyage_ship__vessel_construction_region__value": {
+  "voyage_ship__vessel_construction_region__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage ship : Region where vessel constructed : SPSS code"
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : SPSS code"
   },
-  "voyage_ship__vessel_construction_region__child_of": {
+  "voyage_ship__vessel_construction_region__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage ship : Region where vessel constructed : Child of"
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : Child of"
   },
-  "voyage_ship__vessel_construction_region__location_type": {
+  "voyage_ship__vessel_construction_region__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage ship : Region where vessel constructed : Location Type"
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : Location Type"
   },
-  "voyage_ship__vessel_construction_region__spatial_extent": {
+  "voyage_ship__vessel_construction_region__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage ship : Region where vessel constructed : Polygon"
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : Polygon"
   },
   "voyage_ship__registered_place": {
     "type": "table",
     "label": "Place where vessel registered",
     "flatlabel": "voyage ship : Place where vessel registered"
   },
-  "voyage_ship__registered_place__id": {
+  "voyage_ship__registered_place__geo_location": {
+    "type": "table",
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping"
+  },
+  "voyage_ship__registered_place__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage ship : Place where vessel registered : ID"
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : ID"
   },
-  "voyage_ship__registered_place__name": {
+  "voyage_ship__registered_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage ship : Place where vessel registered : Location name"
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : Location name"
   },
-  "voyage_ship__registered_place__longitude": {
+  "voyage_ship__registered_place__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage ship : Place where vessel registered : Longitude of Centroid"
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : Longitude of Centroid"
   },
-  "voyage_ship__registered_place__latitude": {
+  "voyage_ship__registered_place__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage ship : Place where vessel registered : Latitude of Centroid"
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : Latitude of Centroid"
   },
-  "voyage_ship__registered_place__value": {
+  "voyage_ship__registered_place__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage ship : Place where vessel registered : SPSS code"
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : SPSS code"
   },
-  "voyage_ship__registered_place__child_of": {
+  "voyage_ship__registered_place__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage ship : Place where vessel registered : Child of"
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : Child of"
   },
-  "voyage_ship__registered_place__location_type": {
+  "voyage_ship__registered_place__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage ship : Place where vessel registered : Location Type"
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : Location Type"
   },
-  "voyage_ship__registered_place__spatial_extent": {
+  "voyage_ship__registered_place__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage ship : Place where vessel registered : Polygon"
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : Polygon"
   },
   "voyage_ship__registered_region": {
     "type": "table",
     "label": "Region where vessel registered",
     "flatlabel": "voyage ship : Region where vessel registered"
   },
-  "voyage_ship__registered_region__id": {
+  "voyage_ship__registered_region__geo_location": {
+    "type": "table",
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping"
+  },
+  "voyage_ship__registered_region__geo_location__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage ship : Region where vessel registered : ID"
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : ID"
   },
-  "voyage_ship__registered_region__name": {
+  "voyage_ship__registered_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
-    "flatlabel": "voyage ship : Region where vessel registered : Location name"
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : Location name"
   },
-  "voyage_ship__registered_region__longitude": {
+  "voyage_ship__registered_region__geo_location__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Longitude of Centroid",
-    "flatlabel": "voyage ship : Region where vessel registered : Longitude of Centroid"
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : Longitude of Centroid"
   },
-  "voyage_ship__registered_region__latitude": {
+  "voyage_ship__registered_region__geo_location__latitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Latitude of Centroid",
-    "flatlabel": "voyage ship : Region where vessel registered : Latitude of Centroid"
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : Latitude of Centroid"
   },
-  "voyage_ship__registered_region__value": {
+  "voyage_ship__registered_region__geo_location__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "SPSS code",
-    "flatlabel": "voyage ship : Region where vessel registered : SPSS code"
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : SPSS code"
   },
-  "voyage_ship__registered_region__child_of": {
+  "voyage_ship__registered_region__geo_location__child_of": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Child of",
-    "flatlabel": "voyage ship : Region where vessel registered : Child of"
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : Child of"
   },
-  "voyage_ship__registered_region__location_type": {
+  "voyage_ship__registered_region__geo_location__location_type": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Location Type",
-    "flatlabel": "voyage ship : Region where vessel registered : Location Type"
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : Location Type"
   },
-  "voyage_ship__registered_region__spatial_extent": {
+  "voyage_ship__registered_region__geo_location__spatial_extent": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Polygon",
-    "flatlabel": "voyage ship : Region where vessel registered : Polygon"
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : Polygon"
   },
   "voyage_ship__ship_name": {
     "type": "<class 'rest_framework.fields.CharField'>",

@@ -63,40 +63,40 @@ class EnslavedList(generics.GenericAPIView):
 		labels=[]
 		print("+++++++\nusername:",request.auth.user)
 		print("FETCHING...")
-		try:
-			enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
-			queryset=Enslaved.objects.all()
-			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,auto_prefetch=True)
-			if len(error_messages)==0:
-				headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-				read_serializer=EnslavedSerializer(queryset,many=True)
-				serialized=read_serializer.data
-			
-				outputs=[]
+# 		try:
+		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+		queryset=Enslaved.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,auto_prefetch=True)
+		if len(error_messages)==0:
+			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			read_serializer=EnslavedSerializer(queryset,many=True)
+			serialized=read_serializer.data
 		
-				hierarchical=request.POST.get('hierarchical')
-				if str(hierarchical).lower() in ['false','0','f','n']:
-					hierarchical=False
-				else:
-					hierarchical=True
-		
-				if hierarchical==False:
-			
-					for s in serialized:
-						d={}
-						for selected_field in selected_fields:
-							keychain=selected_field.split('__')
-							bottomval=bottomout(s,list(keychain))
-							d[selected_field]=bottomval
-						outputs.append(d)
-				else:
-					outputs=serialized
-				print("Internal Response Time:",time.time()-st,"\n+++++++")
-				return JsonResponse(outputs,safe=False,headers=headers)
+			outputs=[]
+	
+			hierarchical=request.POST.get('hierarchical')
+			if str(hierarchical).lower() in ['false','0','f','n']:
+				hierarchical=False
 			else:
-				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
-		except:
-			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+				hierarchical=True
+	
+			if hierarchical==False:
+		
+				for s in serialized:
+					d={}
+					for selected_field in selected_fields:
+						keychain=selected_field.split('__')
+						bottomval=bottomout(s,list(keychain))
+						d[selected_field]=bottomval
+					outputs.append(d)
+			else:
+				outputs=serialized
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(outputs,safe=False,headers=headers)
+		else:
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+# 		except:
+# 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
 # #This will only accept one field at a time
 # #Should only be a text field

@@ -256,7 +256,9 @@ class EnslaverList(generics.GenericAPIView):
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
 # 		except:
 # 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
-# 
+
+
+
 # Basic statistics
 ## takes a numeric variable
 ## returns its sum, average, max, min, and stdv
@@ -292,50 +294,8 @@ class EnslavedAggregations(generics.GenericAPIView):
 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 		except:
 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
-# 
-# #DATAFRAME ENDPOINT (experimental & a resource hog!)
-# class EnslavedDataFrames(generics.GenericAPIView):
-# # 	serializer_class=EnslavedSerializer
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def options(self,request):
-# 		j=options_handler('past/enslaved_options.json',request)
-# 		return JsonResponse(j,safe=False)
-# 	def post(self,request):
-# 		
-# 		print("+++++++\nusername:",request.auth.user)
-# 		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
-# 		try:
-# 			st=time.time()
-# 			params=dict(request.POST)
-# 			retrieve_all=True
-# 			if 'results_per_page' in params:
-# 				retrieve_all=False
-# 			queryset=Enslaved.objects.all()
-# 			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,auto_prefetch=False,retrieve_all=retrieve_all,selected_fields_exception=True)
-# 			if len(error_messages)==0:
-# 				headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
-# 			
-# 				serialized=EnslavedSerializer(queryset,many=True,selected_fields=selected_fields)
-# 			
-# 				serialized=serialized.data
-# 				output_dicts={}
-# 				for selected_field in sf:
-# 					keychain=selected_field.split('__')
-# 					for s in serialized:
-# 						bottomval=bottomout(s,list(keychain))
-# 						if selected_field in output_dicts:
-# 							output_dicts[selected_field].append(bottomval)
-# 						else:
-# 							output_dicts[selected_field]=[bottomval]
-# 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 				return JsonResponse(output_dicts,safe=False,headers=headers)
-# 			else:
-# 				print("failed\n+++++++")
-# 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-# 		except:
-# 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
-# 
+
+
 # # Basic statistics
 # ## takes a numeric variable
 # ## returns its sum, average, max, min, and stdv

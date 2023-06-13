@@ -6,49 +6,41 @@ import json
 import math
 import requests
 from localsettings import *
+from index_vars import *
 import re
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
-def load_long_df(idx_url):
-	r=requests.get(idx_url)
+def load_long_df(endpoint,variables):
+	r=requests.post(
+		url=DJANGO_STATIC_URL+endpoint,
+		headers={'Authorization':DJANGO_AUTH_KEY},
+		data={'selected_fields':variables}
+	)
 	j=json.loads(r.text)
-	
-	voyage_url=re.sub("/static/","/voyage/?hierarchical=False",DJANGO_STATIC_URL)
-	r=requests.options(url=voyage_url,headers=headers)
-	voyage_options=json.loads(r.text)
-	colnames=j['ordered_keys']
-	d2={h:[] for h in colnames}
-	for h in colnames:
-		for item in j['items']:
-			thisitem=j['items'][item][colnames.index(h)]
-			if "DecimalField" in voyage_options[h]['type'] and thisitem is not None:
-				thisitem=float(thisitem)
-			d2[h].append(thisitem)
-	df=pd.DataFrame.from_dict(d2)
+	df=pd.DataFrame.from_dict(j)
 	
 	return(df)
 
-#on initialization, load every index as a dataframe, via a call to the django api's static assets
-
+#on initialization, load every index as a dataframe, via a call to the django api
 registered_caches=[
-	'voyage_bar_and_donut_charts',
-	'voyage_maps',
-	'voyage_summary_statistics',
-	'voyage_pivot_tables',
-	'voyage_xyscatter',
-	'voyage_export'
+	voyage_bar_and_donut_charts,
+# 	'voyage_maps',
+# 	'voyage_summary_statistics',
+# 	'voyage_pivot_tables',
+	voyage_xyscatter,
+# 	'voyage_export'
 ]
 
-# DISABLED FOR TESTING DOCKER REFACTORIZATION
-# for rc in registered_caches:
-# 	print("loading %s" %rc)
-# 	xl="%s=load_long_df(\"" %rc + DJANGO_STATIC_URL + "customcache/%s.json\")" %rc
-# 	exec(xl)
+for rc in registered_caches:
+# 	try:
+	endpoint=rc['endpoint']
+	variables=rc['variables']
+	rc['df']=load_long_df(endpoint,variables)
 
-@app.route('/groupby2/',methods=['POST'])
-def groupby2():
+@app.route('/groupby/',methods=['POST'])
+def groupby():
 
 	'''
 	Implements the pandas groupby function and returns the sparse summary.
@@ -61,43 +53,14 @@ def groupby2():
 	groupby_by=rdata['groupby_by'][0]
 	groupby_cols=rdata['groupby_cols']
 	agg_fn=rdata['agg_fn'][0]
-	df=eval(dfname)
+	df=eval(dfname)['df']
 	df2=df[df['id'].isin(ids)]
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
-	ct=ct.fillna(0)
+# 	ct=ct.fillna(0)
 	resp={groupby_by:list(ct.index)}
 	for gbc in groupby_cols:
 		resp[gbc]=list(ct[gbc])
 	return json.dumps(resp)
-
-
-@app.route('/groupby/',methods=['POST'])
-def groupby():
-	
-	'''
-	Implements the pandas groupby function and returns the sparse summary.
-	Excellent for bar & pie charts.
-	'''
-	try:
-		st=time.time()
-		rdata=request.json
-		dfname=rdata['cachename'][0]
-		ids=rdata['ids']
-		groupby_fields=rdata['groupby_fields']
-		groupby_row=groupby_fields[0]
-		groupby_cols=[i for i in groupby_fields[1:len(groupby_fields)]]
-		#print("COLS-->",groupby_cols)
-		agg_fn=rdata['agg_fn'][0]
-		df=eval(dfname)
-		df2=df[df['id'].isin(ids)]
-		ct=df2.groupby(groupby_row)[groupby_cols].agg(agg_fn)
-		#js doesn't like nulls/nan's
-		#changing at Zhihao's request
-		ct=ct.fillna(0)
-		ctd=ct.to_dict()
-		return jsonify(ctd)
-	except:
-		abort(400)
 
 @app.route('/crosstabs/',methods=['POST'])
 def crosstabs():

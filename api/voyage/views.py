@@ -144,46 +144,28 @@ class VoyageAggregations(generics.GenericAPIView):
 # 		else:
 # 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 # 
-# class VoyageGroupBy(generics.GenericAPIView):
-# 	'''
-# 	Given
-# 	1. an aggregation function
-# 	2. a list of fields
-# 	2a. the first of which is the field you want to group by
-# 	2b. the following of which is/are the field(s) you want to get the summary stats on
-# 	returns
-# 	Dictionaries, organized by the numeric fields' names, with its' children being k/v pairs of
-# 	--> k = value of grouped var
-# 	--> v = aggregated value of numeric var for that grouped var val
-# 	'''
-# # 	serializer_class=VoyageSerializer
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def post(self,request):
-# 		st=time.time()
-# 		print("+++++++\nusername:",request.auth.user)
-# 		params=dict(request.POST)
-# 		groupby_fields=params.get('groupby_fields')
-# 		value_field_tuple=params.get('value_field_tuple')
-# 		queryset=Voyage.objects.all()
-# 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
-# 		if len(error_messages)==0:
-# 			ids=[i[0] for i in queryset.values_list('id')]
-# 			u2=FLASK_BASE_URL+'groupby/'
-# 			d2=params
-# 			d2['ids']=ids
-# 			d2['selected_fields']=selected_fields
-# 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-# 			if r.ok:
-# 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 				return JsonResponse(json.loads(r.text),safe=False)
-# 			else:
-# 				print("failed\n+++++++")
-# 				return JsonResponse({'status':'false','message':'bad crosstabs request'}, status=400)
-# 		else:
-# 			print("failed\n+++++++")
-# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-# 
+
+class VoyageGroupBy(generics.GenericAPIView):
+	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		params=dict(request.POST)
+		print(params)
+		groupby_by=params.get('groupby_by')
+		groupby_cols=params.get('groupby_cols')
+		value_field_tuple=params.get('value_field_tuple')
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		ids=[i[0] for i in queryset.values_list('id')]
+		u2=FLASK_BASE_URL+'groupby/'
+		d2=params
+		d2['ids']=ids
+		d2['selected_fields']=selected_fields
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		return JsonResponse(json.loads(r.text),safe=False)# 
 # 
 # class VoyageCaches(generics.GenericAPIView):
 # 	'''
@@ -230,40 +212,38 @@ class VoyageAggregations(generics.GenericAPIView):
 # 			print("failed\n+++++++")
 # 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 # 
-# #DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
-# class VoyageDataFrames(generics.GenericAPIView):
-# # 	serializer_class=VoyageSerializer
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def options(self,request):
-# 		j=options_handler('voyage/voyage_options.json',request)
-# 		return JsonResponse(j,safe=False)
-# 	def post(self,request):
-# 		print("+++++++\nusername:",request.auth.user)
-# 		st=time.time()
-# 		params=dict(request.POST)
-# 		retrieve_all=False
-# 		queryset=Voyage.objects.all()
-# 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,auto_prefetch=False,retrieve_all=True)
-# 		sf=list(selected_fields)
-# 		if len(error_messages)==0:
-# 			output_dicts={}
-# 			#print("----->",selected_fields)
-# 			serialized=VoyageSerializer(queryset,many=True,dynamicfieldsserializermode=True,selected_fields=selected_fields)
-# 			serialized=serialized.data
-# 			for selected_field in sf:
-# 				keychain=selected_field.split('__')
-# 				for s in serialized:
-# 					bottomval=bottomout(s,list(keychain))
-# 					if selected_field in output_dicts:
-# 						output_dicts[selected_field].append(bottomval)
-# 					else:
-# 						output_dicts[selected_field]=[bottomval]
-# 			print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 			return JsonResponse(output_dicts,safe=False)
-# 		else:
-# 			print("failed\n+++++++")
-# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+#DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
+class VoyageDataFrames(generics.GenericAPIView):
+# 	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('voyage/voyage_options.json',request)
+		return JsonResponse(j,safe=False)
+	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
+		st=time.time()
+		params=dict(request.POST)
+		retrieve_all=True
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			voyage_options,
+			auto_prefetch=False,
+			retrieve_all=True
+		)
+		sf=list(selected_fields)
+		if len(error_messages)==0:
+			output_dicts={}
+			for s in sf:
+				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(output_dicts,safe=False)
+		else:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 # 
 # #This will only accept one field at a time
 # #Should only be a text field

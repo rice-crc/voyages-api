@@ -157,17 +157,18 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	if retrieve_all==False:
 		results_per_page=params.get('results_per_page',[10])
 		results_page=params.get('results_page',[1])
+		paginator=Paginator(queryset, results_per_page[0])
+		page=paginator.get_page(results_page[0])
+		print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
 	else:
-		results_per_page=[results_count]
-		results_page=[1]
-	print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
-	paginator=Paginator(queryset, results_per_page[0])
-	page=paginator.get_page(results_page[0])
+		res=queryset
+	
+	
 	
 # 	except:
 # 		errormessages.append("ordering or pagination error")
 	
-	return page,selected_fields,next_uri,prev_uri,results_count,errormessages
+	return res,selected_fields,next_uri,prev_uri,results_count,errormessages
 
 def options_handler(flatfilepath,request=None,hierarchical=True):
 	if request is not None:

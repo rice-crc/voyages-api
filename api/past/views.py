@@ -257,41 +257,41 @@ class EnslaverList(generics.GenericAPIView):
 # 		except:
 # 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 # 
-# # Basic statistics
-# ## takes a numeric variable
-# ## returns its sum, average, max, min, and stdv
-# class EnslavedAggregations(generics.GenericAPIView):
-# # 	serializer_class=EnslavedSerializer
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def post(self,request):
-# 		try:
-# 			st=time.time()
-# 			print("+++++++\nusername:",request.auth.user)
-# 			params=dict(request.POST)
-# 			aggregations=params.get('aggregate_fields')
-# 			print("aggregations:",aggregations)
-# 			queryset=Enslaved.objects.all()
-# 			enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
-# 			aggregation,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,retrieve_all=True)
-# 			output_dict={}
-# 			if len(error_messages)==0 and type(aggregation)==list:
-# 				for a in aggregation:
-# 					for k in a:
-# 						v=a[k]
-# 						fn=k.split('__')[-1]
-# 						varname=k[:-len(fn)-2]
-# 						if varname in output_dict:
-# 							output_dict[varname][fn]=a[k]
-# 						else:
-# 							output_dict[varname]={fn:a[k]}
-# 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 				return JsonResponse(output_dict,safe=False)
-# 			else:
-# 				print("failed\n+++++++")
-# 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-# 		except:
-# 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+# Basic statistics
+## takes a numeric variable
+## returns its sum, average, max, min, and stdv
+class EnslavedAggregations(generics.GenericAPIView):
+# 	serializer_class=EnslavedSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		try:
+			st=time.time()
+			print("+++++++\nusername:",request.auth.user)
+			params=dict(request.POST)
+			aggregations=params.get('aggregate_fields')
+			print("aggregations:",aggregations)
+			queryset=Enslaved.objects.all()
+			enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+			aggregation,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaved_options,retrieve_all=True)
+			output_dict={}
+			if len(error_messages)==0:
+				for a in aggregation:
+					for k in a:
+						v=a[k]
+						fn=k.split('__')[-1]
+						varname=k[:-len(fn)-2]
+						if varname in output_dict:
+							output_dict[varname][fn]=a[k]
+						else:
+							output_dict[varname]={fn:a[k]}
+				print("Internal Response Time:",time.time()-st,"\n+++++++")
+				return JsonResponse(output_dict,safe=False)
+			else:
+				print("failed\n+++++++")
+				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+		except:
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 # 
 # #DATAFRAME ENDPOINT (experimental & a resource hog!)
 # class EnslavedDataFrames(generics.GenericAPIView):
@@ -339,36 +339,36 @@ class EnslaverList(generics.GenericAPIView):
 # # Basic statistics
 # ## takes a numeric variable
 # ## returns its sum, average, max, min, and stdv
-# class EnslaverAggregations(generics.GenericAPIView):
-# # 	serializer_class=EnslaverSerializer
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def post(self,request):
-# 		st=time.time()
-# 		print("+++++++\nusername:",request.auth.user)
-# 		try:
-# 			enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
-# 			params=dict(request.POST)
-# 			aggregations=params.get('aggregate_fields')
-# 			print("aggregations:",aggregations)
-# 			queryset=EnslaverIdentity.objects.all()
-# 		
-# 			aggregation,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaver_options,retrieve_all=True)
-# 			output_dict={}
-# 			if len(error_messages)==0 and type(aggregation)==list:
-# 				for a in aggregation:
-# 					for k in a:
-# 						v=a[k]
-# 						fn=k.split('__')[-1]
-# 						varname=k[:-len(fn)-2]
-# 						if varname in output_dict:
-# 							output_dict[varname][fn]=a[k]
-# 						else:
-# 							output_dict[varname]={fn:a[k]}
-# 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 				return JsonResponse(output_dict,safe=False)
-# 			else:
-# 				print("failed\n+++++++")
-# 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-# 		except:
-# 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+class EnslaverAggregations(generics.GenericAPIView):
+# 	serializer_class=EnslaverSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		try:
+			enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
+			params=dict(request.POST)
+			aggregations=params.get('aggregate_fields')
+			print("aggregations:",aggregations)
+			queryset=EnslaverIdentity.objects.all()
+		
+			aggregation,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaver_options,retrieve_all=True)
+			output_dict={}
+			if len(error_messages)==0:
+				for a in aggregation:
+					for k in a:
+						v=a[k]
+						fn=k.split('__')[-1]
+						varname=k[:-len(fn)-2]
+						if varname in output_dict:
+							output_dict[varname][fn]=a[k]
+						else:
+							output_dict[varname]={fn:a[k]}
+				print("Internal Response Time:",time.time()-st,"\n+++++++")
+				return JsonResponse(output_dict,safe=False)
+			else:
+				print("failed\n+++++++")
+				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+		except:
+			return JsonResponse({'status':'false','message':'bad request'}, status=400)

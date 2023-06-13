@@ -154,17 +154,15 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	#PAGINATION/LIMITS
 # 	try:
-# 	if retrieve_all==False:
-	results_per_page=params.get('results_per_page',[10])
-	results_page=params.get('results_page',[1])
-# 	else:
-# 		results_per_page=results_count
-# 		results_page=1
-	print(results_per_page,results_page[0])
+	if retrieve_all==False:
+		results_per_page=params.get('results_per_page',[10])
+		results_page=params.get('results_page',[1])
+	else:
+		results_per_page=[results_count]
+		results_page=[1]
+	print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
 	paginator=Paginator(queryset, results_per_page[0])
-	print(paginator)
 	page=paginator.get_page(results_page[0])
-	
 	
 # 	except:
 # 		errormessages.append("ordering or pagination error")

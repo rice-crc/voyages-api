@@ -23,6 +23,9 @@ I'll try to keep track, here, of all the changes that
 	* Caching
 		* NO! NO!
 		* See "Infrastructure"
+	* RESERVED MODEL FIELD NAMES
+		* For the sake of my "exposing the ORM" strategy, we're going to reserve "label"
+			* This necessitates 9 changes to the Voyages model (see June 13 commit)
 * Prelim DB Migrations
 	* As of June 1, db state has 2 layers of migrations
 		* A. Migrate june-1-2023-dellamonica-enslaversmerge for May 24 staging dump

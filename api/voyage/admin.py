@@ -53,38 +53,38 @@ class VoyageSlavesNumbersInline(admin.StackedInline):
 	max_num=1
 # 
 class ParticularOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=ParticularOutcome
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 
 class SlavesOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=SlavesOutcome
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 	
 class VesselCapturedOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=VesselCapturedOutcome
 	search_fields=['name']
 	classes = ['collapse']
 
 class OwnerOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=OwnerOutcome
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 
 class ResistanceAdmin(admin.ModelAdmin):
-	list_display = ('label','value')
-	list_display_links = ('label',)
+	list_display = ('name','value')
+	list_display_links = ('name',)
 	model=Resistance
-	search_fields=['label']
+	search_fields=['name']
 	classes = ['collapse']
 # # 
 # # ##Autocomplete won't work on this

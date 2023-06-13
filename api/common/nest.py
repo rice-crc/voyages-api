@@ -75,8 +75,8 @@ def addlevel(thisdict,keychain,payload):
 		else:
 # 			print("-----------")
 # 			print(thiskey)
-# 			print(thisdict)
-# 			print(payload)
+# 			print(type(thisdict),thisdict)
+# 			print(type(thisdict),payload)
 # 			print("-----------")
 			if type(payload)==dict:
 				for p in payload:

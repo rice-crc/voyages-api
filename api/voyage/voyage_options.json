@@ -2389,10 +2389,10 @@
     "label": "ID",
     "flatlabel": "voyage ship : rig of vessel : ID"
   },
-  "voyage_ship__rig_of_vessel__label": {
+  "voyage_ship__rig_of_vessel__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Label",
-    "flatlabel": "voyage ship : rig of vessel : Label"
+    "label": "Name",
+    "flatlabel": "voyage ship : rig of vessel : Name"
   },
   "voyage_ship__rig_of_vessel__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -2409,10 +2409,10 @@
     "label": "ID",
     "flatlabel": "voyage ship : imputed nationality : ID"
   },
-  "voyage_ship__imputed_nationality__label": {
+  "voyage_ship__imputed_nationality__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Label",
-    "flatlabel": "voyage ship : imputed nationality : Label"
+    "label": "Name",
+    "flatlabel": "voyage ship : imputed nationality : Name"
   },
   "voyage_ship__imputed_nationality__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -2429,10 +2429,10 @@
     "label": "ID",
     "flatlabel": "voyage ship : ton type : ID"
   },
-  "voyage_ship__ton_type__label": {
+  "voyage_ship__ton_type__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Label",
-    "flatlabel": "voyage ship : ton type : Label"
+    "label": "Name",
+    "flatlabel": "voyage ship : ton type : Name"
   },
   "voyage_ship__ton_type__value": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
@@ -3329,7 +3329,7 @@
     "label": "ID",
     "flatlabel": "Outcome : owner outcome : ID"
   },
-  "voyage_name_outcome__outcome_owner__label": {
+  "voyage_name_outcome__outcome_owner__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Outcome label",
     "flatlabel": "Outcome : owner outcome : Outcome label"
@@ -3349,7 +3349,7 @@
     "label": "ID",
     "flatlabel": "Outcome : slaves outcome : ID"
   },
-  "voyage_name_outcome__outcome_slaves__label": {
+  "voyage_name_outcome__outcome_slaves__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Outcome label",
     "flatlabel": "Outcome : slaves outcome : Outcome label"
@@ -3369,7 +3369,7 @@
     "label": "ID",
     "flatlabel": "Outcome : Fate (particular outcome of voyage) : ID"
   },
-  "voyage_name_outcome__particular_outcome__label": {
+  "voyage_name_outcome__particular_outcome__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Outcome label",
     "flatlabel": "Outcome : Fate (particular outcome of voyage) : Outcome label"
@@ -3389,7 +3389,7 @@
     "label": "ID",
     "flatlabel": "Outcome : resistance : ID"
   },
-  "voyage_name_outcome__resistance__label": {
+  "voyage_name_outcome__resistance__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Resistance label",
     "flatlabel": "Outcome : resistance : Resistance label"
@@ -3409,7 +3409,7 @@
     "label": "ID",
     "flatlabel": "Outcome : vessel captured outcome : ID"
   },
-  "voyage_name_outcome__vessel_captured_outcome__label": {
+  "voyage_name_outcome__vessel_captured_outcome__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Outcome label",
     "flatlabel": "Outcome : vessel captured outcome : Outcome label"

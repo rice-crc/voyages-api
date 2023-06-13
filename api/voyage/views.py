@@ -22,7 +22,7 @@ import gc
 from .serializers import *
 from voyages3.localsettings import *
 import re
-# 
+
 try:
 	voyage_options=options_handler('voyage/voyage_options.json',hierarchical=False)
 except:
@@ -39,7 +39,6 @@ class VoyageList(generics.GenericAPIView):
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
-# 		try:
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=False)
 		if len(error_messages)==0:
@@ -47,40 +46,14 @@ class VoyageList(generics.GenericAPIView):
 			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 			read_serializer=VoyageSerializer(queryset,many=True)
 			serialized=read_serializer.data
-			#if the user hasn't selected any fields (default), then get the fully-qualified var names as the full list
-			outputs=[]
-			hierarchical=request.POST.get('hierarchical')
-			if str(hierarchical).lower() in ['false','0','f','n']:
-				hierarchical=False
-			else:
-				hierarchical=True
-		
-		
-			if hierarchical==False:
-				for s in serialized:
-				
-					d={}
-					for selected_field in selected_fields:
-						#In this flattened view, the reverse relationship breaks the references to the outcome variables in the serializer
-						#not badly -- you just get some repeat, nested data -- but that's unhelpful
-						#The fix will be to make it a through table relationship
-						keychain=selected_field.split('__')
-						bottomval=bottomout(s,list(keychain))
-						d[selected_field]=bottomval
-					outputs.append(d)
-			else:
-				outputs=serialized
-		
-			resp=JsonResponse(outputs,safe=False,headers=headers)
+			resp=JsonResponse(serialized,safe=False,headers=headers)
 			resp.headers['total_results_count']=headers['total_results_count']
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return resp
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-# 		except:
-# 			pass
-# 
+
 # class SingleVoyage(generics.GenericAPIView):
 # # 	serializer_class=VoyageSerializer
 # 	def get(self,request,voyage_id):

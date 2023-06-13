@@ -157,7 +157,7 @@ class VoyageGroupings(models.Model):
 	"""
 	Labels for groupings names.
 	"""
-	label = models.CharField(max_length=30)
+	name = models.CharField(max_length=30)
 	value = models.IntegerField()
 
 	class Meta:
@@ -176,7 +176,7 @@ class Nationality(models.Model):
 	"""
 	Nationality of ships.
 	"""
-	label = models.CharField(max_length=255)
+	name = models.CharField(max_length=255)
 	value = models.IntegerField()
 
 	class Meta:
@@ -195,7 +195,7 @@ class TonType(models.Model):
 	"""
 	Types of tonnage.
 	"""
-	label = models.CharField(max_length=255)
+	name = models.CharField(max_length=255)
 	value = models.IntegerField()
 
 	class Meta:
@@ -214,7 +214,7 @@ class RigOfVessel(models.Model):
 	"""
 	Rig of Vessel.
 	"""
-	label = models.CharField(max_length=25)
+	name = models.CharField(max_length=25)
 	value = models.IntegerField()
 
 	class Meta:
@@ -374,7 +374,7 @@ class ParticularOutcome(models.Model):
 	"""
 	Particular outcome.
 	"""
-	label = models.CharField("Outcome label", max_length=200)
+	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
 	def __str__(self):
 		return self.__unicode__()
@@ -389,7 +389,7 @@ class SlavesOutcome(models.Model):
 	"""
 	Outcome of voyage for slaves.
 	"""
-	label = models.CharField("Outcome label", max_length=200)
+	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
 	def __str__(self):
 		return self.__unicode__()
@@ -403,7 +403,7 @@ class VesselCapturedOutcome(models.Model):
 	"""
 	Outcome of voyage if vessel captured.
 	"""
-	label = models.CharField("Outcome label", max_length=200)
+	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
 	def __str__(self):
 		return self.__unicode__()
@@ -418,7 +418,7 @@ class OwnerOutcome(models.Model):
 	"""
 	Outcome of voyage for owner.
 	"""
-	label = models.CharField("Outcome label", max_length=200)
+	name = models.CharField("Outcome label", max_length=200)
 	value = models.IntegerField("Code of outcome")
 
 	def __str__(self):
@@ -435,7 +435,7 @@ class Resistance(models.Model):
 	"""
 	Resistance labels
 	"""
-	label = models.CharField("Resistance label", max_length=255)
+	name = models.CharField("Resistance label", max_length=255)
 	value = models.IntegerField("Code of resistance")
 
 	def __str__(self):

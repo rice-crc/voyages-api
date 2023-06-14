@@ -13,7 +13,6 @@ import json
 import requests
 import time
 from .models import *
-# from geo.models import *
 import pprint
 from common.nest import *
 from common.reqs import *
@@ -53,30 +52,6 @@ class VoyageList(generics.GenericAPIView):
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
-# class SingleVoyage(generics.GenericAPIView):
-# # 	serializer_class=VoyageSerializer
-# 	def get(self,request,voyage_id):
-# 		thisvoyage=Voyage.objects.get(pk=voyage_id)
-# 		serialized=VoyageSerializer(thisvoyage,many=False).data
-# 		return JsonResponse(serialized,safe=False)
-# 
-# class SingleVoyageVar(generics.GenericAPIView):
-# 	def get(self,request,voyage_id,varname):
-# 		thisvoyage=Voyage.objects.get(pk=voyage_id)
-# 		serialized=VoyageSerializer(thisvoyage,many=False).data
-# 		keychain=varname.split('__')
-# 		bottomval=bottomout(serialized,list(keychain))
-# 		var_options=voyage_options[varname]
-# 		output={
-# 			'voyage_id':voyage_id,
-# 			'variable_api_name':varname,
-# 			'variable_label':var_options['flatlabel'],
-# 			'variable_type':var_options['type'],
-# 			'value':bottomval
-# 		}
-# 		return JsonResponse(output,safe=False)
-
 
 # # Basic statistics
 # ## takes a numeric variable
@@ -125,8 +100,6 @@ class VoyageStatsOptions(generics.GenericAPIView):
 		r=requests.get(url=u2,headers={"Content-type":"application/json"})
 		return JsonResponse(json.loads(r.text),safe=False)
 
-
-
 class VoyageCrossTabs(generics.GenericAPIView):
 	'''
 	Think of this as a pivot table (but it will generalize later)
@@ -159,7 +132,6 @@ class VoyageCrossTabs(generics.GenericAPIView):
 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
 
 class VoyageGroupBy(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
@@ -215,64 +187,71 @@ class VoyageDataFrames(generics.GenericAPIView):
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-# 
-# #This will only accept one field at a time
-# #Should only be a text field
-# #And it will only return max 10 results
-# #It will therefore serve as an autocomplete endpoint
-# #I should make all text queries into 'or' queries
-# class VoyageTextFieldAutoComplete(generics.GenericAPIView):
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def post(self,request):
-# 		print("+++++++\nusername:",request.auth.user)
+
+#This will only accept one field at a time
+#Should only be a text field
+#And it will only return max 10 results
+#It will therefore serve as an autocomplete endpoint
+#I should make all text queries into 'or' queries
+class VoyageTextFieldAutoComplete(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
 # 		try:
-# 			st=time.time()
-# 			params=dict(request.POST)
-# 			acfieldparam=next(iter(params))
-# 			v=params[acfieldparam][0]
-# 			print("voyage/autocomplete",acfieldparam,v)
-# 			klist=acfieldparam.split(',')
-# 			def flattenthis(l):
-# 				fl=[]
-# 				for i in l:
-# 					if type(i)==tuple:
-# 						for e in i:
-# 							fl.append(e)
-# 					else:
-# 						fl.append(i)
-# 				return fl
-# 			retrieve_all=True
-# 			total_results_count=0
-# 			fetchcount=20
-# 			candidates=[]
-# 			for k in klist:
-# 				#print(k)
-# 				queryset=Voyage.objects.all()
-# 				#print("------->",k,v,re.sub("\\\\+","",v),"<---------")
-# 				kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-# 				queryset=queryset.filter(**kwargs)
-# 				queryset=queryset.prefetch_related(k)
-# 				queryset=queryset.order_by(k)
-# 				total_results_count+=queryset.count()
-# 				vals=[]
-# 				for v in queryset.values_list(k).iterator():
-# 					if v not in vals:
-# 						vals.append(v)
-# 					if len(vals)>=fetchcount:
-# 						break
-# 				candidates += [i for i in flattenthis(l=vals)]
-# 			val_list=[sorted(candidates)][:fetchcount]
-# 			output_dict={
-# 				"results":val_list,
-# 				"total_results_count":total_results_count
-# 			}
-# 			print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 			return JsonResponse(output_dict,safe=False)
+		st=time.time()
+		params=dict(request.POST)
+		k=params.get('ac_field')
+		v=params.get('ac_val')
+		if k is None or v is None:
+			return JsonResponse(
+				{
+					'status':'false',
+					'message':'ac_field and ac_val params are required'
+				},
+				status=400
+			)
+		else:
+			k=k[0]
+			v=v[0]
+		
+		print("voyage/autocomplete",k,v)
+		queryset=Voyage.objects.all()
+		kstub=re.sub("__[^__]+?$","",k)
+		if '__' in k:
+			k_id_field=kstub+"__id"
+		else:
+			k_id_field="id"
+		queryset=queryset.prefetch_related(kstub)
+		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+		queryset=queryset.filter(**kwargs)
+		queryset=queryset.order_by(k)
+		total_results_count=queryset.count()
+		candidates=[]
+		fetchcount=30
+		## Have to use this ugliness b/c we're not in postgres
+		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
+		for v in queryset.values_list(k_id_field,k).iterator():
+			if v not in candidates:
+				candidates.append(v)
+			if len(candidates)>=fetchcount:
+				break
+		res={
+			"total_results_count":total_results_count,
+			"results":[
+				{
+					"id":c[0],
+					"label":c[1]
+				} for c in candidates
+			]
+		}
+		
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(res,safe=False)
 # 		except:
 # 			print("failed\n+++++++")
 # 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
-# 
+
 # class VoyageAggRoutes(generics.GenericAPIView):
 # # 	serializer_class=VoyageSerializer
 # 	authentication_classes=[TokenAuthentication]

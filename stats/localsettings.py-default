@@ -1,1 +1,2 @@
-DJANGO_STATIC_URL="http://voyages-django:8000/static/"
+DJANGO_STATIC_URL="http://voyages-api:8000/static/"
+DJANGO_AUTH_KEY="Token ABCDEFG"

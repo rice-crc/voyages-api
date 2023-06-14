@@ -110,40 +110,56 @@ class VoyageAggregations(generics.GenericAPIView):
 			print("failed\n",' | '.join(error_messages),"\n+++++++",)
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-# class VoyageCrossTabs(generics.GenericAPIView):
-# 	'''
-# 	Think of this as a pivot table (but it will generalize later)
-# 	This view takes:
-# 		a groupby tuple (row, col)
-# 		a value field tuple (cellvalue,aggregationfunction)
-# 		any search parameters you want!
-# 	'''
-# # 	serializer_class=VoyageSerializer
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def post(self,request):
-# 		st=time.time()
-# 		print("+++++++\nusername:",request.auth.user)
-# 		params=dict(request.POST)
-# 		groupby_fields=params.get('groupby_fields')
-# 		value_field_tuple=params.get('value_field_tuple')
-# 		queryset=Voyage.objects.all()
-# 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
-# 		if len(error_messages)==0:
-# 			ids=[i[0] for i in queryset.values_list('id')]
-# 			u2=FLASK_BASE_URL+'crosstabs/'
-# 			d2=params
-# 			d2['ids']=ids
-# 			d2['selected_fields']=selected_fields
-# 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-# 			if r.ok:
-# 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 				return JsonResponse(json.loads(r.text),safe=False)
-# 			else:
-# 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
-# 		else:
-# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-# 
+class VoyageStatsOptions(generics.GenericAPIView):
+	'''
+	Need to make the stats engine's indexed variables transparent to the user
+	'''
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		u2=FLASK_BASE_URL+'get_indices/'
+		r=requests.get(url=u2,headers={"Content-type":"application/json"})
+		return JsonResponse(json.loads(r.text),safe=False)
+	def options(self,request):
+		u2=FLASK_BASE_URL+'get_indices/'
+		r=requests.get(url=u2,headers={"Content-type":"application/json"})
+		return JsonResponse(json.loads(r.text),safe=False)
+
+
+
+class VoyageCrossTabs(generics.GenericAPIView):
+	'''
+	Think of this as a pivot table (but it will generalize later)
+	This view takes:
+		a groupby tuple (row, col)
+		a value field tuple (cellvalue,aggregationfunction)
+		any search parameters you want!
+	'''
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		params=dict(request.POST)
+		groupby_fields=params.get('groupby_fields')
+		value_field_tuple=params.get('value_field_tuple')
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		if len(error_messages)==0:
+			ids=[i[0] for i in queryset.values_list('id')]
+			u2=FLASK_BASE_URL+'crosstabs/'
+			d2=params
+			d2['ids']=ids
+			d2['selected_fields']=selected_fields
+			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+			if r.ok:
+				print("Internal Response Time:",time.time()-st,"\n+++++++")
+				return JsonResponse(json.loads(r.text),safe=False)
+			else:
+				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
+		else:
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
 
 class VoyageGroupBy(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
@@ -166,52 +182,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 		d2['selected_fields']=selected_fields
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 		return JsonResponse(json.loads(r.text),safe=False)# 
-# 
-# class VoyageCaches(generics.GenericAPIView):
-# 	'''
-# 	This view takes:
-# 		All the search arguments you can pass to dataframes or voyage list endpoints
-# 		A specified "cachename" argument -- currently valid values are:
-# 			"voyage_export" --> for csv exports -- cached 67 variables
-# 			"voyage_animation" --> for the timelapse animation -- cached 11 variables
-# 			"voyage_maps" --> for aggregating some geo & numbers vars
-# 			"voyage_pivot_tables"
-# 			"voyage_summary_statistics"
-# 			"voyage_xyscatter"
-# 		And returns a dataframes-style response -- a dictionary with:
-# 			keys are fully-qualified var names
-# 			values are equal-length arrays, each corresponding to a single entity
-# 				(use voyage_id or id column as your index if you're going to load it into pandas)
-# 		List view is highly inefficient because of the repetitive var names for each voyage
-# 	'''
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def post(self,request):
-# 		print("+++++++\nusername:",request.auth.user)
-# 		st=time.time()
-# 		params=dict(request.POST)
-# 		u2=FLASK_BASE_URL + 'dataframes/'
-# 		retrieve_all=True
-# 		if 'results_per_page' in params:
-# 			retrieve_all=False
-# 		voyageobjects=Voyage.objects
-# 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(voyageobjects,self,request,voyage_options,retrieve_all=retrieve_all)
-# 		if len(error_messages)==0:
-# 			ids=[i[0] for i in queryset.values_list('id')]
-# 			d2=params
-# 			d2['ids']=ids
-# 			d2['selected_fields']=selected_fields
-# 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-# 			if r.ok:
-# 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 				return JsonResponse(json.loads(r.text),safe=False,headers={'results_count':results_count})
-# 			else:
-# 				print("failed\n+++++++")
-# 				return JsonResponse({'status':'false','message':'bad request to cache'}, status=400)
-# 		else:
-# 			print("failed\n+++++++")
-# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-# 
+
 #DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
 class VoyageDataFrames(generics.GenericAPIView):
 # 	serializer_class=VoyageSerializer

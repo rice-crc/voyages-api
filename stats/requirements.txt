@@ -9,7 +9,6 @@ Jinja2
 MarkupSafe
 protobuf
 requests
-selenium
 urllib3
 Werkzeug
 pandas

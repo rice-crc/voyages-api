@@ -13,9 +13,13 @@ app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
 def load_long_df(endpoint,variables):
+	headers={'Authorization':DJANGO_AUTH_KEY}
+	r=requests.options(url=DJANGO_STATIC_URL,headers=headers)
+	print("OPTIONS----->",r.status_code)
+	
 	r=requests.post(
 		url=DJANGO_STATIC_URL+endpoint,
-		headers={'Authorization':DJANGO_AUTH_KEY},
+		headers=headers,
 		data={'selected_fields':variables}
 	)
 	j=json.loads(r.text)
@@ -26,18 +30,28 @@ def load_long_df(endpoint,variables):
 #on initialization, load every index as a dataframe, via a call to the django api
 registered_caches=[
 	voyage_bar_and_donut_charts,
-# 	'voyage_maps',
-# 	'voyage_summary_statistics',
-# 	'voyage_pivot_tables',
-	voyage_xyscatter,
-# 	'voyage_export'
+	#JUNE 14: I don't think we're going to use the maps cache but i don't want to destroy that work until i'm sure
+	voyage_maps,
+	voyage_summary_statistics,
+	voyage_pivot_tables,
+	voyage_xyscatter
 ]
 
 for rc in registered_caches:
-# 	try:
-	endpoint=rc['endpoint']
-	variables=rc['variables']
-	rc['df']=load_long_df(endpoint,variables)
+	try:
+		endpoint=rc['endpoint']
+		variables=rc['variables']
+		rc['df']=load_long_df(endpoint,variables)
+	except:
+		print("failed on cache:",rc['name'])
+
+#we need to make the indices' contents visible
+@app.route('/get_indices/')
+def get_indices():
+	resp={}
+	for rc in registered_caches:
+		resp[rc['name']]=rc['variables']
+	return json.dumps(resp)
 
 @app.route('/groupby/',methods=['POST'])
 def groupby():
@@ -80,7 +94,8 @@ def crosstabs():
 
 		#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
 		columns,rows=rdata['groupby_fields']
-		val,fn=rdata['value_field_tuple']
+		val=rdata['value_field'][0]
+		fn=rdata['agg_fn'][0]
 
 		normalize=rdata.get('normalize')
 		if normalize is not None:
@@ -88,7 +103,7 @@ def crosstabs():
 		if normalize not in ["columns","index"]:
 			normalize=False
 
-		df=eval(dfname)
+		df=eval(dfname)['df']
 
 		df2=df[df['id'].isin(ids)]
 

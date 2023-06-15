@@ -2,7 +2,7 @@ FROM python:3.9-slim AS base
 
 RUN apt-get update -y \
   && apt-get install --yes --no-upgrade --no-install-recommends \
-    python3.9 \
+    python3 \
     python3-pip \
   && apt-get clean \
   && rm -rf \

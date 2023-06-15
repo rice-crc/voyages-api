@@ -8,61 +8,24 @@ FROM python:3.9-slim AS base
 
 RUN apt-get update -y
 
-# 
-#   && apt-get install --yes --no-install-recommends \
-#     build-essential \
-#   && apt-get clean \
-#   && rm -rf \
-#     /tmp/* \
-#     /usr/share/doc/* \
-#     /var/cache/apt/* \
-#     /var/lib/apt/lists/* \
-#     /var/tmp/*
-
-# 
-# FROM ubuntu:20.04 AS base
-# 
-# RUN apt-get update -y \
-#   && apt-get install --yes --no-upgrade --no-install-recommends \
-#     libmysqlclient-dev \
-#     mysql-client \
-#     python3.9 \
-#     python3-pip \
-#     python3.9-dev \
-#     libpq-dev \
-#   && apt-get clean \
-#   && rm -rf \
-#     /tmp/* \
-#     /usr/share/doc/* \
-#     /var/cache/apt/* \
-#     /var/lib/apt/lists/* \
-#     /var/tmp/*
-
 # -- Build --
 
 FROM base AS build
 
-RUN apt-get install -y  --no-install-recommends \
-    gcc \
-	default-libmysqlclient-dev
-#   && apt-get clean 
-#   && rm -rf \
-#     /tmp/* \
-#     /usr/share/doc/* \
-#     /var/cache/apt/* \
-#     /var/lib/apt/lists/* \
-#     /var/tmp/*
+RUN apt-get install -y \
+	default-libmysqlclient-dev \
+	gcc
 
 WORKDIR /srv/voyages-api
 
-RUN python3.9 -m pip install --user --no-cache-dir --upgrade \
+RUN python3 -m pip install --user --no-cache-dir --upgrade \
     pip \
     setuptools \
     wheel
 
 COPY api/requirements.txt .
 
-RUN python3.9 -m pip install --user --no-cache-dir -r ./requirements.txt
+RUN pip install --user --no-cache-dir -r ./requirements.txt
 
 # -- Release --
 

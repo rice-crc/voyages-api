@@ -6,13 +6,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'USER': 'root',
-        'NAME': 'voyagesapi',
-        'PASSWORD': 'voyages',
-        'HOST':'voyagesapi-mysql',
-        'PORT':'3306'
-    }
+# STATIC_URL="http://voyages-django:8000/static/"
+FLASK_BASE_URL="http://voyages-stats:5000/"
+
+zotero_credentials={
+	'abc':'def'
 }
+
+michigan_collection_manifests=[
+	'ghi',
+	'jkl'
+]

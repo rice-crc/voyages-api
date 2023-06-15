@@ -1,133 +1,107 @@
-# APRIL 2023 REFACTOR NOTES:
+# VOYAGES API
 
-1. Dropping bezier package from Django until the below 2 issues are resolved:
-	1. https://github.com/dhermes/bezier/issues/276 (can't build it on my mac)
-	1. https://github.com/dhermes/bezier/issues/283 (problems using python beyond 3.9)
-	1. tried switching my flask app to alpine, but switched back
-		1. slow build
-		1. i don't think it's up to the math-heavy work i'm tasking it with
-1. Re-including:
-	1. Solr for a universal search -- but it requires a hacky setup currently
-1. Switched from MySQL to Postgres
-	1. Setting this up got a little funky.
-	1. I decided to define the connection settings in localsettings.py
-	1. And to put a postgres db init file in the pg_conf directory
-1. Next:
-	1. Rewrite the models
-		1. Above all, itineraries & geo data
-			1. This will break trans-atlantic imputation
-			1. But it will allow for incredibly flexible routes & mapping
-	1. Write custom serializers for PAST
-		1. Too much data being shipped right now
+## Setup
 
-## PG setup
+N.B. Only tested on an M1 mac thus far
 
-This is all scripted right now in pg_conf/docker_postgres_init.sql, which is kicked off by docker-compose:
+### Docker Installation
 
-* docker-compose
-	* creates a root user w/ pw "voyages"
-	* kicks off: docker_postgres_init.sql
-* docker_postgres_init.sql
-	* creates user voyages
-	* creates db "voyages"
-
-Manual CLI setup/teardown:
-
-	#create user voyages
-	docker exec -i voyages-postgres psql -c "create user voyages with password 'voyages';"
-	
-	#log in as user voyages
-	docker exec -it voyages-postgres psql -Uvoyages
-
-	#drop db (as user "root")
-	docker exec -i voyages-postgres psql -c "drop database voyages;"
-	
-	#create voyages db
-	docker exec -i voyages-postgres psql -c "CREATE DATABASE voyages
-		WITH
-		OWNER = voyages
-		ENCODING = 'UTF8'
-		LC_COLLATE = 'en_US.utf8'
-		LC_CTYPE = 'en_US.utf8'
-		TABLESPACE = pg_default
-		CONNECTION LIMIT = -1;"
-
-## bogus db migrations
-
-I finally got mysql working on my M1, though it's a janky setup.
-
-I can now kick it off with 
-	
-	sudo /usr/local/mysql/support-files/mysql.server start
-	mysqlsh localhost -uroot -p
-	\sql
-	use voyages_may9;
-	select * from voyage_voyagesources into outfile 'voyage_voyagesources.csv' fields terminated by '|';
-
-But it gets dumped into the sql data directory, so I move it out with
-
-	sudo mv /usr/local/mysql/data/voyages_may9/voyage_voyagesources.csv ~/Documents
-	docker exec -i voyages-postgres psql -U root voyages -c "COPY voyage_voyagesources FROM '/pg_dataloader/voyage_voyagesources.csv' DELIMITER '|' ";  
-	
-(text mode not csv mode)
-
-## Model rewrites
-
-* Named entities
-	* names are not unique
-	* routed through one table (in the common app)
-	* and tagged
-* Dates
-
-
-
-# Voyages REST API 2022
-
-This is an attempt to rebuild the Voyages API with as few dependencies as possible in the latest versions of django and python
-
-THIS REQUIRES AN EXTERNAL SQL DUMP. CONTACT JCM FOR THIS.
-
-## Local Deployment
-
-Build and run the containers.
+Copy and rename the default localsettings file for local environments.
 
 ```bash
-host:~/Projects/voyagesapi$ docker-compose up -d --build
+host:~/Projects/voyages-api$ cp api/voyages3/localsettings.py-default api/voyages3/localsettings.py
 ```
 
-*n.b. the new postgres db creation is now being run through docker-compose. however, once the models change, it will become necessary to update all the db-related commands below, as well as to rewrite all the scripts for importing from the old mysql. we probably want to set up pgadminer as well, now that i've removed the old adminer container*
+Build and run the containers necessary to work on the project.
 
-*also, i need djk's feeback on the current docker-compose configs i've got running, especially for postgres & solr*
-
-Run the custom management commands (see bottom of this doc) -- and it's a good idea to run them in this order:
-
-	docker exec -i voyages-django bash -c "python3.9 manage.py rebuild_options"
-	docker exec -i voyages-django bash -c "python3.9 manage.py rebuild_indices"
-
-View container logs.
+For details, see `docker-compose.yml`.
 
 ```bash
-host:~/Projects/voyagesapi$ docker logs voyages-django
-host:~/Projects/voyagesapi$ docker logs voyages-postgres
-host:~/Projects/voyagesapi$ docker logs voyages-flask
+# With Apple Silicon
+#
+# Go to Docker Desktop settings > Features in Development > Enable "Use Rosetta" > Click "Apply & Restart"
+host:~/Projects/voyages-api docker-compose -f docker-compose up --build
 ```
 
-Note the following project resources:
+Do the other steps in another window. I like to have two terminals up so I can spot errors in the workflow.
 
-* Voyages API: http://127.0.0.1:8000/
+Create the database. Note: append a suffix for the branch (e.g.
+voyages_develop).
 
-## Cleanup
+```bash
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create database voyages_api"
+```
 
-	bash
-	host:~/Projects/voyagesapi$ docker-compose down
-	host:~/Projects/voyagesapi$ docker container prune
-	host:~/Projects/voyagesapi$ docker image prune
-	host:~/Projects/voyagesapi$ docker volume prune
-	host:~/Projects/voyagesapi$ docker network prune
+Create the database user and grant privileges. Note: append a suffix for the
+branch (e.g. voyages_develop).
+
+```bash
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create user 'voyages'@'%' identified by 'voyages'"
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "grant all on voyages_api.* to 'voyages'@'%'"
+```
+
+Download the latest `voyage_api.sql.tgz` MySQL dump from the Google Drive share and expand into the `voyages_prod.sql` file.
+
+Import the database dump to MySQL.
+
+```bash
+host:~/Downloads$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages_api < voyages_prod.sql
+```
+
+Verify the data import.
+
+```mysql
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "show databases"
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "show tables from voyages_api"
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "select * from voyages_api.voyage_voyage limit 1"
+```
+
+### Post-Install Setup Tasks
+
+Run media asset tasks.
+
+```bash
+host:~/Projects/voyages-api docker exec -i voyages-django bash -c 'python3 manage.py collectstatic --noinput'
+```
+
+#### Set up the stats engine (flask app):
+
+Copy the stats / flask localsettings over:
+
+```bash
+host:~/Projects/voyages-api$ cp stats/localsettings.py-default stats/localsettings.py
+```
+
+Enter the django contariner and create a new superuser
+
+	docker exec -it voyages-api /bin/bash
+	python3 manage.py createsuperuser
+
+Log in to the admin interface at [http://127.0.0.1:8100/admin](http://127.0.0.1:8000/admin) with those credentials, and create an api token for yourself.
+
+Update your new file at ```stats/localsettings.py``` with this token.
+
+Restart the flask engine.
+
+```bash
+host:~/Projects/voyages-api$ docker restart voyages-stats
+```
+
+### Cleanup
+
+If you want to tear it down:
+
+```bash
+host:~/Projects/voyagesapi$ docker-compose down
+host:~/Projects/voyagesapi$ docker container prune
+host:~/Projects/voyagesapi$ docker image prune
+host:~/Projects/voyagesapi$ docker volume prune
+host:~/Projects/voyagesapi$ docker network prune
+```
 
 ----------------------
 
-## Using the API
+## Using the API --> NEEDS AN UPDATE
 
 There are currently 5 major endpoints, which allow you to query on People, Voyages, Places, and Estimates
 

@@ -40,9 +40,11 @@ INSTALLED_APPS = [
     'blog',
     'geo',
     'document',
+	'contribute',
     'tinymce',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+    'captcha'
 ]
 
 #the below are defined in localsettings.

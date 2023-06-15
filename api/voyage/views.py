@@ -414,3 +414,46 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 # 		except:
 # 			print("failed\n+++++++")
 # 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+
+
+
+def voyage_variables_data(voyage_id, show_imputed=True):
+    voyagenum = int(voyage_id)
+    voyage = first_match(
+        get_voyages_search_query_set().filter(var_voyage_id=voyagenum))
+    if voyage is None:
+        return None, []
+    # Apply the matching method (if there is one) in the display_method_details
+    # dict for each variable value in the voyage and return a dict of varname:
+    # varvalue
+    voyagevariables = voyage.get_stored_fields()
+    # for vname, vvalue in voyage.get_stored_fields().items():
+    #    voyagevariables[vname] = display_methods_details.get(vname,
+    #    no_mangle)(vvalue, voyagenum)
+    allvargroups = groupby(var_dict, key=lambda x: x['var_category'])
+    allvars = []
+    for i in allvargroups:
+        group = i[0]
+        glist = list(
+            x for x in i[1]
+            if show_imputed or not x['var_full_name'].endswith('*')
+        )
+        for idx, j in enumerate(glist):
+            val = str("")
+            if voyagevariables[j['var_name']]:
+                mangle_method = display_unmangle_methods.get(
+                    j['var_name'], default_prettifier(j['var_name']))
+                val = str(
+                    mangle_method(voyagevariables[j['var_name']], voyagenum))
+            if val == u'[]':
+                val = u''
+            if idx == 0:
+                # For the first variable, give the number of variables in the
+                # group, and give the name of the group as a tuple in the first
+                # entry of the triple for the row
+                newvar = (len(glist), str(group))
+            else:
+                newvar = (None, None)
+            allvars.append((newvar,
+                            str(j['var_full_name']), val, j['var_name']))
+    return voyage, allvars

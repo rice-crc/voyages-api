@@ -12,14 +12,15 @@ c.execute("show tables;")
 tables={i[0]:{'constraints':[],'columns':[]} for i in c.fetchall()}
 
 exclude_table_prefixes=[
-	'account',
-	'auth',
-	'captcha',
-	'django',
-	'socialaccount',
-	'thumbnail',
-	'past_enslavedcontribut',
-	'past_enslavercontribution'
+# 	'account',
+# 	'auth',
+# 	'authtoken',
+# 	'captcha',
+# 	'django',
+# 	'socialaccount',
+# 	'thumbnail',
+# 	'past_enslavedcontribut',
+# 	'past_enslavercontribution'
 ]
 
 def excludetable(tablename):

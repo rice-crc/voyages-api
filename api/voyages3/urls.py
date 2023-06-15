@@ -26,6 +26,8 @@ urlpatterns = [
     path('past/',include('past.urls')),
     path('docs/',include('document.urls')),
     path('assessment/',include('assessment.urls')),
-    path('geo/',include('geo.urls'))
+    path('geo/',include('geo.urls')),
+#     path('contribute/',include('contribute.urls')),
+    path('captcha/', include('captcha.urls'))
 #     path('voyages_auth_endpoint/', views.obtain_auth_token)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

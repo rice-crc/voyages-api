@@ -168,7 +168,7 @@ class VoyageGroupings(models.Model):
 		return self.__unicode__()
 
 	def __unicode__(self):
-		return self.label
+		return self.name
 
 
 # Voyage Ship, Nation, Owners
@@ -188,7 +188,7 @@ class Nationality(models.Model):
 		return self.__unicode__()
 
 	def __unicode__(self):
-		return self.label
+		return self.name
 
 
 class TonType(models.Model):
@@ -207,7 +207,7 @@ class TonType(models.Model):
 		return self.__unicode__()
 
 	def __unicode__(self):
-		return self.label
+		return self.name
 
 
 class RigOfVessel(models.Model):
@@ -226,7 +226,7 @@ class RigOfVessel(models.Model):
 		return self.__unicode__()
 
 	def __unicode__(self):
-		return self.label
+		return self.name
 
 
 class VoyageShip(models.Model):
@@ -379,7 +379,7 @@ class ParticularOutcome(models.Model):
 	def __str__(self):
 		return self.__unicode__()
 	def __unicode__(self):
-		return self.label
+		return self.name
 	class Meta:
 		ordering = ['value']
 		verbose_name = 'Fate (particular outcome of voyage)'
@@ -394,7 +394,7 @@ class SlavesOutcome(models.Model):
 	def __str__(self):
 		return self.__unicode__()
 	def __unicode__(self):
-		return self.label
+		return self.name
 	class Meta:
 		ordering = ['value']
 
@@ -408,7 +408,7 @@ class VesselCapturedOutcome(models.Model):
 	def __str__(self):
 		return self.__unicode__()
 	def __unicode__(self):
-		return self.label
+		return self.name
 
 	class Meta:
 		ordering = ['value']
@@ -425,7 +425,7 @@ class OwnerOutcome(models.Model):
 		return self.__unicode__()
 
 	def __unicode__(self):
-		return self.label
+		return self.name
 
 	class Meta:
 		ordering = ['value']
@@ -442,7 +442,7 @@ class Resistance(models.Model):
 		return self.__unicode__()
 
 	def __unicode__(self):
-		return self.label
+		return self.name
 
 	class Meta:
 		ordering = ['value']

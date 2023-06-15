@@ -766,7 +766,7 @@ class Enslaved(models.Model):
 		help_text="Date in format: MM,DD,YYYY")
 	captive_fate = models.ForeignKey(CaptiveFate, null=True, on_delete=models.SET_NULL, db_index=True)
 	captive_status = models.ForeignKey(CaptiveStatus, null=True, on_delete=models.SET_NULL, db_index=True)
-	voyage = models.ForeignKey(Voyage, null=False, on_delete=models.CASCADE, db_index=True)
+	voyage = models.ForeignKey(Voyage, null=False, on_delete=models.CASCADE, db_index=True,related_name="voyage_enslaved_people")
 	dataset = models.IntegerField(null=False, default=0, db_index=True)
 	notes = models.CharField(null=True, max_length=8192)
 	sources = models.ManyToManyField(VoyageSources,

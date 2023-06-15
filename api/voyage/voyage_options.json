@@ -2289,6 +2289,21 @@
     "label": "Name",
     "flatlabel": "enslaver voyage connection : enslaver role : Name"
   },
+  "voyage_enslaved_people": {
+    "type": "table",
+    "label": "enslaved",
+    "flatlabel": "enslaved"
+  },
+  "voyage_enslaved_people__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "enslaved : Id"
+  },
+  "voyage_enslaved_people__documented_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Documented name",
+    "flatlabel": "enslaved : Documented name"
+  },
   "voyage_crew": {
     "type": "table",
     "label": "voyage crew",

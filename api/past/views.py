@@ -19,36 +19,6 @@ import pprint
 from common.nest import *
 from common.reqs import *
 import collections
-# 
-# 
-# class SingleEnslaved(generics.GenericAPIView):
-# 	def get(self,request,enslaved_id):
-# 		enslaved_record=Enslaved.objects.get(pk=enslaved_id)
-# 		serialized=EnslavedSerializer(enslaved_record,many=False).data
-# 		return JsonResponse(serialized,safe=False)
-# 
-# class SingleEnslavedVar(TemplateView):
-# 	template_name='singlevar.html'
-# 	def get(self,request,enslaved_id,varname):
-# 		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
-# 		enslaved_record=Enslaved.objects.get(pk=enslaved_id)
-# 		serialized=EnslavedSerializer(enslaved_record,many=False).data
-# 		keychain=varname.split('__')
-# 		bottomval=bottomout(serialized,list(keychain))
-# 		var_options=enslaved_options[varname]
-# 		data={
-# 			'enslaved_id':enslaved_id,
-# 			'variable_api_name':varname,
-# 			'variable_label':var_options['flatlabel'],
-# 			'variable_type':var_options['type'],
-# 			'variable_value':bottomval
-# 		}
-# 		context = super(SingleEnslavedVar, self).get_context_data()
-# 		context['data']=data
-# 		return context
-# 
-
-#LONG-FORM TABULAR ENDPOINT. 
 
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -98,11 +68,6 @@ class EnslavedList(generics.GenericAPIView):
 # 		except:
 # 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 
-#This will only accept one field at a time
-#Should only be a text field
-#And it will only return max 10 results
-#It will therefore serve as an autocomplete endpoint
-#I should make all text queries into 'or' queries
 class EnslavedTextFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]				
@@ -211,12 +176,8 @@ class EnslaverTextFieldAutoComplete(generics.GenericAPIView):
 				} for c in candidates
 			]
 		}
-		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(res,safe=False)
-
-# 
-# 
 
 #LONG-FORM TABULAR ENDPOINT.
 class EnslaverList(generics.GenericAPIView):

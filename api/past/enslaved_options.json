@@ -1,4 +1,9 @@
 {
+  "id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Id",
+    "flatlabel": "Id"
+  },
   "post_disembark_location": {
     "type": "table",
     "label": "post disembark location",

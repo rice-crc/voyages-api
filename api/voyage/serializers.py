@@ -220,11 +220,17 @@ class VoyageZoteroSerializer(serializers.ModelSerializer):
 		model=ZoteroSource
 		exclude=['enslaved_people','voyages','enslavers',]
 
+class VoyageEnslavedSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=Enslaved
+		fields=['id','documented_name']
+
 class VoyageSerializer(serializers.ModelSerializer):
 	voyage_zoterorefs=VoyageZoteroSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False)
 	voyage_dates=VoyageDatesSerializer(many=False)
 	voyage_enslaver_connection=VoyageEnslaverConnectionSerializer(many=True,read_only=True)
+	voyage_enslaved_people=VoyageEnslavedSerializer(many=True,read_only=True)
 	voyage_crew=VoyageCrewSerializer(many=False)
 	voyage_ship=VoyageShipSerializer(many=False)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)

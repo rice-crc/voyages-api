@@ -8,8 +8,8 @@ from voyage.models import Voyage
 
 from past.serializers import EnslaverSerializer,EnslavedSerializer
 from past.models import *
-# from assessment.serializers import EstimateSerializer
-# from assessment.models import Estimate
+from assessment.serializers import EstimateSerializer
+from assessment.models import Estimate
 # from geo.serializers import *
 # from geo.models import Location
 # from docs.models import Doc
@@ -47,11 +47,11 @@ class Command(BaseCommand):
 				'serializer':EnslaverSerializer,
 				'objectclass':EnslaverIdentity
 			},
-# # 			{
-# 				'output_filename':'assessment/assessment_options.json',
-# 				'serializer':EstimateSerializer,
-# 				'objectclass':Estimate
-# 			},
+			{
+				'output_filename':'assessment/assessment_options.json',
+				'serializer':EstimateSerializer,
+				'objectclass':Estimate
+			},
 		]
 
 		def addlevel(thisdict,keychain,payload):

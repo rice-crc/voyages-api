@@ -19,7 +19,22 @@ services:
     command: --slow-query-log=ON --long-query-time=3 --slow-query-log-file=/tmp/slow.log
     environment:
       MYSQL_ROOT_PASSWORD: "voyages"
-      
+
+  voyages-solr:
+    image: "solr:8.5.2"
+    container_name: "voyages-solr"
+    hostname: "voyages-solr"
+    restart: "on-failure"
+    ports:
+      - "8983:8983"
+    networks:
+      - "voyages"
+    volumes:
+      - "solr_volume:/var/solr"
+      - "./solr:/srv/voyages/solr"
+    environment:
+      SOLR_JAVA_MEM: "-Xms1g -Xmx1g"
+    
   voyages-api:
     image: "voyages-api"
     container_name: "voyages-api"
@@ -29,6 +44,7 @@ services:
       - "voyages"
     depends_on:
       - "voyages-mysql"
+      - "voyages-solr"
     ports:
       - "8000:8000"
     volumes:
@@ -49,7 +65,6 @@ services:
     networks:
       - "voyages"
 
-
   voyages-stats:
     image: "voyages-stats"
     container_name: "voyages-stats"
@@ -64,7 +79,7 @@ services:
     build:
       context: "."
       dockerfile: "./docker/stats/Dockerfile"
-            
+
 networks:
   voyages:
     driver: "bridge"
@@ -73,7 +88,6 @@ networks:
       config:
         - subnet: "172.20.0.0/16"
 
-
-
 volumes:
   mysql_volume: {}
+  solr_volume: {}

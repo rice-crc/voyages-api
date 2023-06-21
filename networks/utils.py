@@ -83,9 +83,10 @@ def add_oceanic_network(G,oceanic_network,init_node_id=0):
 	n_id=init_node_id
 	for node in nodes:
 		latitude,longitude=node
-		latlong=(float(latitude),float(longitude))
+		lat=float(latitude)
+		lon=float(longitude)
 		tags=["oceanic_waypoint"]
-		G.add_node(n_id,coords=latlong,tags=tags,name=None)
+		G.add_node(n_id,lat=lat,lon=lon,tags=tags,name=None)
 		n_id+=1
 	e_id=0
 	for link in links:
@@ -103,8 +104,11 @@ def geteuclideandistance(Ay,Ax,By,Bx):
 	return distance
 
 def get_geo_edge_distance(s_id,t_id,G):
-	s_lat,s_lon=G.nodes[s_id]['coords']
-	t_lat,t_lon=G.nodes[t_id]['coords']
+	
+	s_lat=G.nodes[s_id]['lat']
+	s_lon=G.nodes[s_id]['lon']
+	t_lat=G.nodes[t_id]['lat']
+	t_lon=G.nodes[t_id]['lon']
 	distance=geteuclideandistance(s_lat,t_lat,s_lon,t_lon)
 	return(distance)
 

@@ -1,5 +1,6 @@
 transatlantic_maps={
 	'endpoint':'voyage/dataframes',
+	## THE NAME OF THE INDEX
 	'name':'voyage_transatlantic_maps',
 	## USE THE VOYAGES SEARCH FILTERS TO ENSURE THAT WE ONLY GET THE OBJECTS WE WANT
 	## FOR INSTANCE, ONLY TRANSATLANTIC VOYAGES

@@ -35,29 +35,93 @@ def load_graph(endpoint,graph_params):
 	print(G)
 	return(G,graph_name,None)
 
-registered_caches=[
-	transatlantic_maps,
-	intraamerican_maps,
-	ao_maps
-]
+registered_caches={
+	'transatlantic_maps':transatlantic_maps,
+	'intraamerican_maps':intraamerican_maps,
+	'ao_maps':ao_maps
+}
 
 #on initialization, load every index as a graph, via a call to the django api
-for rc in registered_caches:
-	st=time.time()
 
-	try:
-		endpoint=rc['endpoint']
+rcnames=list(registered_caches.keys())
+
+for rcname in rcnames:
+	st=time.time()
+	rc=registered_caches[rcname]
+# 	try:
+	endpoint=rc['endpoint']
+	if 'graphs' not in rc:
 		rc['graphs']={}
-		for graph_params in rc['graph_params']:
-			graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-			rc['graphs'][graph_name]={
-				'graph':graph,
-				'shortest_paths':shortest_paths
-			}
-		print("finished building graphs in %d seconds" %int(time.time()-st))
+
+	for graph_params in rc['graph_params']:
+		graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
+		rc['graphs'][graph_name]={
+			'graph':graph,
+			'shortest_paths':shortest_paths
+		}
+	registered_caches[rcname]=rc
+	print("finished building graphs in %d seconds" %int(time.time()-st))
 	
-	except:
-		print("failed on cache:",rc['name'])
+# 	except:
+# 		print("failed on cache:",rc['name'])
+
+@app.route('/simple_map/<cachename>',methods=['GET'])
+# @app.route('/simple_map',methods=['GET'])
+def simple_map(cachename):
+# def simple_map():
+	'''
+	Implements the pandas groupby function and returns the sparse summary.
+	Excellent for bar & pie charts.
+	'''
+	st=time.time()
+	cachegraphs=registered_caches[cachename]['graphs']
+	
+	
+	
+	featurecollection={
+		"type": "FeatureCollection",
+		"features": [
+		]
+	}
+	print(featurecollection)
+# 	for graphname in cachegraphs:
+	print(cachegraphs)
+	places=cachegraphs['place']
+	print(places)
+	
+	graph=places['graph']
+	features=[]
+	for n in graph.nodes:
+		node=(graph.nodes[n])
+		feature={
+			"type": "Feature",
+			"properties": {},
+			"geometry": {
+				"coordinates": [],
+				"type": "Point"
+			}
+		}
+		feature['properties']['name']=node['name']
+
+		if 'lat' in node and 'lon' in node:
+			lat=node['lat']
+			lon=node['lon']
+			if lat is not None and lon is not None:
+				feature['geometry']['coordinates']=[
+					float(lon),
+					float(lat)
+				]
+				if 'pk' in node:
+					feature['properties']['pk']=node['pk']
+				if 'tags' in node:
+					feature['properties']['tags']=node['tags']
+				features.append(feature)
+	featurecollection['features']=features
+	
+	resp=featurecollection
+	
+	return jsonify(resp)
+
 
 
 

@@ -6,6 +6,7 @@ from past.models import Enslaved,EnslaverIdentity
 import pysolr
 import numpy as np
 
+
 class Command(BaseCommand):
 	help = 'rebuilds the options flatfiles'
 	def handle(self, *args, **options):

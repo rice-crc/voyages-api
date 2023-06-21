@@ -14,11 +14,11 @@ app.config['JSON_SORT_KEYS'] = False
 
 def load_long_df(endpoint,variables):
 	headers={'Authorization':DJANGO_AUTH_KEY}
-	r=requests.options(url=DJANGO_STATIC_URL,headers=headers)
-	print("OPTIONS----->",r.status_code)
+# 	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes',headers=headers)
+# 	print("OPTIONS----->",r.status_code)
 	
 	r=requests.post(
-		url=DJANGO_STATIC_URL+endpoint,
+		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
 		data={'selected_fields':variables}
 	)
@@ -27,7 +27,6 @@ def load_long_df(endpoint,variables):
 	
 	return(df)
 
-#on initialization, load every index as a dataframe, via a call to the django api
 registered_caches=[
 	voyage_bar_and_donut_charts,
 	#JUNE 14: I don't think we're going to use the maps cache but i don't want to destroy that work until i'm sure
@@ -37,6 +36,7 @@ registered_caches=[
 	voyage_xyscatter
 ]
 
+#on initialization, load every index as a dataframe, via a call to the django api
 for rc in registered_caches:
 	try:
 		endpoint=rc['endpoint']

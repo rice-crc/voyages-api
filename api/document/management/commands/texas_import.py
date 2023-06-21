@@ -158,20 +158,21 @@ class Command(BaseCommand):
 					first_page_url=page_urls[0]
 				else:
 					first_page_url=""
+
 				if django_zotero_object.zotero_url in ("",None):
-					template = zot.item_template('book')
+					template = zot.item_template('manuscript')
 					template['itemType'] = "Manuscript"
 					template['title'] = zotero_title
 					template['date'] = parseddate
 					template['shortTitle']=sourcea_shortref
 					template['url']=first_page_url
 					if sourcea_shortref=="OMNO":
-						template["archive"]="National Archives and Records Administration, Washington DC, USA"
+						template["archive"]="National Archives and Records Administration, (Washington DC, USA)"
 						template["archiveLocation"]="Records of the United States Customs Service (Record Group 36)"
-						template["libraryCatalog"]="Slave Manifests of Coastwise Vessels Filed at New Orleans, Louisiana, 1807-1860"
-						template["callNumber"]="Microform M1895"
+						template["libraryCatalog"]="Slave Manifests of Coastwise Vessels Filed at New Orleans, Louisiana, 1807-1860, Outward Series"
+						template["callNumber"]="Microform M1895, RG 36"
 					if sourcea_shortref=="RLMS":
-						template["archive"]="Rosenberg Library"
+						template["archive"]="Rosenberg Library (Galveston, TX, USA)"
 						template["archiveLocation"]="Galveston & Texas History Center"
 						template["libraryCatalog"]="Manifests of Slaves"
 						template["callNumber"]=ms_str

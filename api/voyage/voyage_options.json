@@ -44,6 +44,11 @@
     "label": "Iiif baseimage url",
     "flatlabel": "zotero source : Page connection : source page : Iiif baseimage url"
   },
+  "voyage_zoterorefs__page_connection__source_page__image_filename": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Image filename",
+    "flatlabel": "zotero source : Page connection : source page : Image filename"
+  },
   "voyage_zoterorefs__item_url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Item url",

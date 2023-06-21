@@ -22,12 +22,12 @@ class Command(BaseCommand):
 		#hard-coding the item creation
 		michigan_legacy_refs=[
 			{
-				"short_ref":"ASSIENTO V43 (MICHIGAN)",
-				"full_ref":"Volume 43, Assiento papers, papers concerning the contract between Britain and Spain regarding Spain's slaveholding regions in America, 1718-1748"
+				"short_ref":"AP Clement 43",
+				"full_ref":"Asiento Papers, v. 43, Clements"
 			},
 			{
-				"short_ref":"ASSIENTO V44 (MICHIGAN)",
-				"full_ref":"Volume 44, Assiento papers, papers concerning the contract between Britain and Spain regarding Spain's slaveholding regions in America, 1718-1748"
+				"short_ref":"AP Clement 44",
+				"full_ref":"Asiento Papers, v. 44, Clements"
 			}
 		]
 		source_type,source_type_isnew=VoyageSourcesType.objects.get_or_create(
@@ -72,41 +72,7 @@ class Command(BaseCommand):
 				iiif_base_urls=[re.sub("/canvas.*","",u) for u in doc['canvases']]
 # 				print(iiif_base_urls)
 # 				template = zot.item_template('book')
-				template={
-					'itemType': 'book',
-					'title': '',
-					'creators': [
-						{
-							'creatorType': 'author',
-							'firstName': '',
-							'lastName': ''
-						}
-					],
-					'abstractNote': '',
-					'series': '',
-					'seriesNumber': '',
-					'volume': '',
-					'numberOfVolumes': '',
-					'edition': '',
-					'place': '',
-					'publisher': '',
-					'date': '',
-					'numPages': '',
-					'language': '',
-					'ISBN': '',
-					'shortTitle': '',
-					'url': '',
-					'accessDate': '',
-					'archive': '',
-					'archiveLocation': '',
-					'libraryCatalog': '',
-					'callNumber': '',
-					'rights': '',
-					'extra': '',
-					'tags': [],
-					'collections': [],
-					'relations': {}
-				}
+				template = zot.item_template('manuscript')
 # 				print(template)
 				template['itemType'] = "Manuscript"
 				template['title'] = doc_title

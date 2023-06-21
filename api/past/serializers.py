@@ -17,14 +17,18 @@ class PastVoyageItinerarySerializer(serializers.ModelSerializer):
 	imp_port_voyage_begin=PlaceSerializer(many=False)
 	imp_principal_place_of_slave_purchase=PlaceSerializer(many=False)
 	imp_principal_port_slave_dis=PlaceSerializer(many=False)
+	imp_principal_region_slave_dis=RegionSerializer(many=False)
+	imp_principal_region_of_slave_purchase=RegionSerializer(many=False)
 	class Meta:
 		model=VoyageItinerary
 		fields=[
 			'imp_port_voyage_begin',
 			'imp_principal_place_of_slave_purchase',
-			'imp_principal_port_slave_dis'
+			'imp_principal_port_slave_dis',
+			'imp_principal_region_of_slave_purchase',
+			'imp_principal_region_slave_dis'
 		]
-
+		
 class PastVoyageDatesSerializer(serializers.ModelSerializer):
 	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False)
 	class Meta:
@@ -53,6 +57,8 @@ class EnslavementRelationTypeSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslavementRelationType
 		fields='__all__'
+
+
 
 
 
@@ -100,22 +106,21 @@ class EnslavedInRelationSerializer(serializers.ModelSerializer):
 		model=EnslavedInRelation
 		fields='__all__'
 
+class LanguageGroupSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=LanguageGroup
+		fields='__all__'
+
 class EnslavedSerializer(serializers.ModelSerializer):
 	post_disembark_location=PlaceSerializer(many=False)
 	voyage=PastVoyageSerializer(many=False)
 	captive_fate=CaptiveFateSerializer(many=False)
 	enslaved_relations=EnslavedInRelationSerializer(many=True,read_only=True)
 	captive_status=CaptiveStatusSerializer(many=False)
+	language_group=LanguageGroupSerializer(many=False)
 	class Meta:
 		model=Enslaved
 		fields='__all__'
-
-
-
-
-
-
-
 
 
 #######################

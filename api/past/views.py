@@ -300,3 +300,37 @@ class EnslaverAggregations(generics.GenericAPIView):
 				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 		except:
 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+			
+
+class EnslavedDataFrames(generics.GenericAPIView):
+# 	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('past/enslaved_options.json',request)
+		return JsonResponse(j,safe=False)
+	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
+		st=time.time()
+		params=dict(request.POST)
+		retrieve_all=True
+		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+		queryset=Enslaved.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			enslaved_options,
+			auto_prefetch=False,
+			retrieve_all=True
+		)
+		sf=list(selected_fields)
+		if len(error_messages)==0:
+			output_dicts={}
+			for s in sf:
+				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(output_dicts,safe=False)
+		else:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)

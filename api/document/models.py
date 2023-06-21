@@ -13,6 +13,11 @@ class SourcePage(models.Model):
 	page_url=models.URLField(max_length=400,null=True)
 	iiif_manifest_url=models.URLField(null=True,blank=True,max_length=400)
 	iiif_baseimage_url=models.URLField(null=True,blank=True,max_length=400)
+	image_filename=models.CharField(
+		max_length=100,
+		null=True,
+		blank=True
+	)
 	
 	def __str__(self):
 		nonnulls=[i for i in [

@@ -22,41 +22,8 @@ class Command(BaseCommand):
 		api_key=zotero_credentials['api_key']
 		zot = zotero.Zotero(library_id, library_type, api_key)
 		
-		template={
-			'itemType': 'Manuscript',
-			'title': '',
-			'creators': [
-				{
-					'creatorType': 'author',
-					'firstName': '',
-					'lastName': ''
-				}
-			],
-			'abstractNote': '',
-			'series': '',
-			'seriesNumber': '',
-			'volume': '',
-			'numberOfVolumes': '',
-			'edition': '',
-			'place': '',
-			'publisher': '',
-			'date': '',
-			'numPages': '',
-			'language': '',
-			'ISBN': '',
-			'shortTitle': '',
-			'url': '',
-			'accessDate': '',
-			'archive': '',
-			'archiveLocation': '',
-			'libraryCatalog': '',
-			'callNumber': '',
-			'rights': '',
-			'extra': '',
-			'tags': [],
-			'collections': [],
-			'relations': {}
-		}
+		template = zot.item_template('manuscript')
+		
 		for tsv in tsvs:
 			fpath=os.path.join(basepath,tsv)
 			print(fpath)
@@ -77,6 +44,7 @@ class Command(BaseCommand):
 					part_of_object=row["Part of Object"]
 					reference_url=row["Reference URL"]
 					
+					
 					collection_number=re.search("(?<=mssST)\s+[0-9]+",call_no).group(0).strip()
 					collection_volume=re.search("(?<=v\.)\s+[0-9]+",call_no).group(0).strip()
 					
@@ -86,20 +54,18 @@ class Command(BaseCommand):
 					
 					full_ref=" ".join(
 						[
-							"SSC",
-							physical_collection,
-							part_of_object,
-							"Huntington Library"
+							"Duke of Chandos Papers, msST",
+							collection_number,
+							collection_volume,
+							"Huntington"
 						]
 					)
 					
 					short_ref=" ".join(
 						[
-							"SSC",
-							"Stowe",
+							"DOCP Huntington",
 							collection_number,
-							collection_volume,
-							"(Huntington)"
+							collection_volume
 						]
 					)
 					
@@ -165,7 +131,8 @@ class Command(BaseCommand):
 					
 					sp,sp_isnew=SourcePage.objects.get_or_create(
 						page_url=iiif_manifest_url,
-						iiif_baseimage_url=iiif_page_url
+						iiif_baseimage_url=iiif_page_url,
+						image_filename=object_file_name
 					)
 					
 					print(sp,django_zotero_object)

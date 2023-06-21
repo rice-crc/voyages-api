@@ -80,6 +80,21 @@ services:
       context: "."
       dockerfile: "./docker/stats/Dockerfile"
 
+  voyages-networks:
+    image: "voyages-networks"
+    container_name: "voyages-networks"
+    hostname: "voyages-networks"
+    restart: "on-failure"
+    networks:
+      - "voyages"
+    ports:
+      - "5005:5005"
+    volumes:
+      - "./networks/:/srv/voyages-networks"
+    build:
+      context: "."
+      dockerfile: "./docker/networks/Dockerfile"
+
 networks:
   voyages:
     driver: "bridge"

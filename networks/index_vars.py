@@ -14,7 +14,7 @@ transatlantic_maps={
 	'graph_params': [
 		{
 			'name':'place',
-			'ordered_nodes':[
+			'ordered_node_classes':[
 				{
 					## BECAUSE WE WILL ENCOUNTER SOME NODES IN DIFFERENT CONTEXTS
 					### E.G., THE BIGHT OF BIAFRA AS A REGION OF EMBARK & AS DISEMBARK
@@ -30,11 +30,16 @@ transatlantic_maps={
 						'lat':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude',
 						'val':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value'
-					}
+					},
+					'tag_connections':[
+						("onramp","source","closest")
+					]
 				},
 				## THE OCEANIC GRAPH IS A SPECIAL CASE
 				## IT COMES FROM A FLAT FILE, NOT AN API CALL
-				'OCEANIC',
+				{
+					'tag':'oceanic_waypoint',
+				},
 				{
 					'tag':'disembarkation',
 					'values':{
@@ -43,13 +48,16 @@ transatlantic_maps={
 						'lat':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude',
 						'val':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__value'
-					}
+					},
+					'tag_connections':[
+						("offramp","target","closest")
+					]
 				}
 			]
 		},
 		{
 			'name':'region',
-			'ordered_nodes':[
+			'ordered_node_classes':[
 				{
 					'tag':'embarkation',
 					'values':{
@@ -58,9 +66,14 @@ transatlantic_maps={
 						'lat':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude',
 						'val':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value'		
-					}
+					},
+					'tag_connections':[
+						("onramp","source","closest")
+					]
 				},
-				'OCEANIC',
+				{
+					'tag':'oceanic_waypoint',
+				},
 				{
 					'tag':'disembarkation',
 					'values':{
@@ -69,7 +82,10 @@ transatlantic_maps={
 						'lat':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude',
 						'val':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__value'		
-					}
+					},
+					'tag_connections':[
+						("offramp","target","closest")
+					]
 				}
 			]
 		}
@@ -85,7 +101,7 @@ intraamerican_maps={
 	'graph_params': [
 		{
 			'name':'place',
-			'ordered_nodes':[
+			'ordered_node_classes':[
 				{
 					'tag':'embarkation',
 					'values':{
@@ -94,9 +110,14 @@ intraamerican_maps={
 						'lat':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude',
 						'val':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value'
-					}
+					},
+					'tag_connections':[
+						("onramp","source","closest")
+					]
 				},
-				'OCEANIC',
+				{
+					'tag':'oceanic_waypoint'
+				},
 				{
 					'tag':'disembarkation',
 					'values':{
@@ -105,13 +126,16 @@ intraamerican_maps={
 						'lat':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude',
 						'val':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__value'
-					}
+					},
+					'tag_connections':[
+						("offramp","target","closest")
+					]
 				}
 			]
 		},
 		{
 			'name':'region',
-			'ordered_nodes':[
+			'ordered_node_classes':[
 				{
 					'tag':'embarkation',
 					'values':{
@@ -120,9 +144,14 @@ intraamerican_maps={
 						'lat':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude',
 						'val':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value'		
-					}
+					},
+					'tag_connections':[
+						("onramp","source","closest")
+					]
 				},
-				'OCEANIC',
+				{
+					'tag':'oceanic_waypoint'
+				},
 				{
 					'tag':'disembarkation',
 					'values':{
@@ -131,7 +160,10 @@ intraamerican_maps={
 						'lat':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude',
 						'val':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__value'		
-					}
+					},
+					'tag_connections':[
+						("offramp","target","closest")
+					]
 				}
 			]
 		}
@@ -149,7 +181,7 @@ ao_maps={
 	'graph_params': [
 		{
 			'name':'place',
-			'ordered_nodes':[
+			'ordered_node_classes':[
 				{
 					'tag':'origin',
 					'values':{
@@ -168,9 +200,15 @@ ao_maps={
 						'lat':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude',
 						'val':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value'
-					}
+					},
+					'tag_connections':[
+						('origin','target','all'),
+						("onramp","source","single")
+					]
 				},
-				'OCEANIC',
+				{
+					'tag':'oceanic_waypoint',
+				},
 				{
 					'tag':'disembarkation',
 					'values':{
@@ -179,7 +217,10 @@ ao_maps={
 						'lat':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude',
 						'lon':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude',
 						'val':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__value'
-					}
+					},
+					'tag_connections':[
+						("offramp","target","closest")
+					]
 				},
 				{
 					'tag':'post-disembarkation',
@@ -189,13 +230,16 @@ ao_maps={
 						'lat':'post_disembark_location__geo_location__latitude',
 						'lon':'post_disembark_location__geo_location__longitude',
 						'val':'post_disembark_location__geo_location__name'
-					}
+					},
+					'tag_connections':[
+						("disembarkation","target","all")
+					]
 				}
 			]
 		},
 		{
 			'name':'region',
-			'ordered_nodes':[
+			'ordered_node_classes':[
 				{
 					'tag':'origin',
 					'values':{
@@ -214,9 +258,15 @@ ao_maps={
 						'lat':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude',
 						'val':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value'		
-					}
+					},
+					'tag_connections':[
+						('origin','target','all'),
+						("onramp","source","closest")
+					]
 				},
-				'OCEANIC',
+				{
+					'tag':'oceanic_waypoint'
+				},
 				{
 					'tag':'disembarkation',
 					'values':{
@@ -225,7 +275,10 @@ ao_maps={
 						'lat':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude',
 						'lon':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude',
 						'val':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__value'		
-					}
+					},
+					'tag_connections':[
+						("offramp","target","closest")
+					]
 				},
 				{
 					'tag':'post-disembarkation',
@@ -235,7 +288,10 @@ ao_maps={
 						'lat':'post_disembark_location__geo_location__latitude',
 						'lon':'post_disembark_location__geo_location__longitude',
 						'val':'post_disembark_location__geo_location__name'
-					}
+					},
+					'tag_connections':[
+						("disembarkation","target","all")
+					]
 				}
 			]
 		}

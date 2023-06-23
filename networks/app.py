@@ -21,7 +21,7 @@ def load_graph(endpoint,graph_params):
 		# FIRST, ADD THE OCEANIC NETWORK FROM THE APPROPRIATE JSON FLATFILE
 		## AS POINTED TO IN THE INDEX_VARS.PY FILE
 		oceanic_network_file=rc['oceanic_network_file']
-		print("Network file----->",oceanic_network_file)
+# 		print("Network file----->",oceanic_network_file)
 		d=open(oceanic_network_file,'r')
 		t=d.read()
 		d.close()
@@ -32,8 +32,15 @@ def load_graph(endpoint,graph_params):
 		## AND ADD THE RESULTING UNIQUE NODES TO THE NETWORK
 		filter_obj=rc['filter']
 		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id)
-	print(G)
-	return(G,graph_name,None)
+		#then link across the ordered node classes
+		ordered_node_classes=graph_params['ordered_node_classes']
+		prev_tag=None
+		for ordered_node_class in ordered_node_classes:
+			tag=ordered_node_class['tag']
+			if 'tag_connections' in ordered_node_class:
+				tag_connections=ordered_node_class['tag_connections']
+				G=connect_to_tags(G,tag,tag_connections)
+	return G,graph_name,None
 
 registered_caches={
 	'transatlantic_maps':transatlantic_maps,
@@ -54,6 +61,7 @@ for rcname in rcnames:
 		rc['graphs']={}
 
 	for graph_params in rc['graph_params']:
+# 		print("INITIALIZING",endpoint,graph_params)
 		graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
 		rc['graphs'][graph_name]={
 			'graph':graph,

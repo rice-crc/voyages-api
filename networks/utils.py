@@ -5,21 +5,77 @@ import requests
 import json
 from networkx_query import search_nodes, search_edges
 
+def geteuclideandistance(Ay,Ax,By,Bx):
+	distance=sqrt(
+		(Ay-By)**2 +
+		(Ax-Bx)**2
+	)
+	return distance
+
+def connect_to_tags(G,this_tag,tag_connections):
+	max_edge_id=max([G.edges[e[0],e[1]]['id'] for e in G.edges])
+# 	max_edge_id=max([G.edges(e[0],e[1])['id'] for e in G.edges])
+	print("----------\nthis tag",this_tag)
+	print("starting graph state",G)
+	e=int(max_edge_id)
+	for tag_connection in tag_connections:
+		connect_tag,as_type,mode=tag_connection
+		print("connect tag",this_tag,"to",connect_tag,"as",as_type,"in mode",mode)
+		
+# 		print(,tag)
+		for n_id in G.nodes:
+			thisnode=G.nodes[n_id]
+			
+			comp_node_ids=[
+				comp_id for comp_id in G.nodes
+				if connect_tag in G.nodes[comp_id]['tags']
+			]
+			if mode=="closest":
+# 				print("closest")
+				closest_neighbor,distance=getclosestneighbor(G,n_id,comp_node_ids)
+				if as_type=="source":
+					G.add_edge(n_id,closest_neighbor,distance=distance,id=e,tag=connect_tag)
+				else:
+					G.add_edge(closest_neighbor,n_id,distance=distance,id=e,tag=connect_tag)
+				e+=1
+			elif mode=="all":
+				lat=G.nodes[n_id]['lat']
+				lon=G.nodes[n_id]['lon']
+	
+				for comp_node_id in comp_node_ids:
+					distance=get_geo_edge_distance(n_id,comp_node_id,G)
+					if as_type=="source":
+						G.add_edge(n_id,comp_node_id,id=e,distance=distance,tag=this_tag)
+					else:
+						G.add_edge(comp_node_id,n_id,id=e,distance=distance,tag=this_tag)
+					e+=1
+	print("ending graph state",G)
+	print("-------------")
+	return G
+
+def floatnotnull(x):
+	try:
+		return float(x)
+	except:
+		return 0
+
 def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 	graph_name=graph_params['name']
 	node_id=init_node_id
 	headers={'Authorization':DJANGO_AUTH_KEY}
-	ordered_nodes=graph_params['ordered_nodes']
-	for ordered_node in ordered_nodes:
-		print("ordered node value list",ordered_node)
+	ordered_node_classes=graph_params['ordered_node_classes']
+	prev_tag=None
+	for ordered_node_class in ordered_node_classes:
+# 		print("ordered node value list",ordered_node_class)
 		## OCEANIC SUBGRAPH COMES FROM A FLATFILE
-		if ordered_node != 'OCEANIC':
+		tag=ordered_node_class['tag']
+		if tag != 'oceanic_waypoint':
 			
 			# ON THIS GRAPH, SAY, TRANSATLANTIC REGIONAL ROUTES:
 			## WE WANT TO GET EACH GEOGRAPHIC NODE'S VALUES
 			## AND APPLY ITS TAG, SAY, EMBARK OR DISEMBARK
-			thisgraphvl=ordered_node['values']
-			thisgraphtag=ordered_node['tag']
+			thisgraphvl=ordered_node_class['values']
+			thisgraphtag=ordered_node_class['tag']
 			att_names=[a for a in list(thisgraphvl.keys()) if thisgraphvl[a] is not None]
 # 				print("-->attnames",att_names)
 			vl_var_names=[thisgraphvl[a] for a in att_names]
@@ -56,6 +112,13 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 				### (AND IF IT ALREADY EXISTS, THEN WE WANT TO LAYER THAT NEW TAG IN)
 				### RATHER THAN DUPLICATING
 				att_dict={att_name:row[att_names.index(att_name)] for att_name in att_names}
+				
+				if 'lat' in att_dict:
+					att_dict['lat']=floatnotnull(att_dict['lat'])
+				if 'lon' in att_dict:
+					att_dict['lon']=floatnotnull(att_dict['lon'])
+
+				
 				existing_nodes=[n for n in 
 					search_nodes(G, {"==": [(k,), att_dict[k]] for k in att_dict})
 				]
@@ -63,48 +126,54 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 				if len(existing_nodes)>0:
 # 					print("------>",[[G.nodes[n],n] for n in existing_nodes])
 					thisnodetags=[G.nodes[n] for n in existing_nodes][0]['tags']
-					if thisgraphtag not in thisnodetags:
-						thisnodetags.append(thisgraphtag)
+					if tag not in thisnodetags:
+						thisnodetags.append(tag)
 						G.nodes[existing_nodes[0]]['tags']=thisnodetags
-# 						print("added tag:--->",thisgraphtag,[G.nodes[n] for n in existing_nodes])
+# 						print("added tag:--->",tag,[G.nodes[n] for n in existing_nodes])
 				else:
-					att_dict['tags']=[thisgraphtag]
+					att_dict['tags']=[tag]
 					rowdict=(node_id,att_dict)
 					G.add_nodes_from([rowdict])
 					node_id+=1
-			print("vl nodes added",G)
-		else:
-			print("skipping oceanic.")
+				
 	return G,node_id
 
 def add_oceanic_network(G,oceanic_network,init_node_id=0):
 	nodes=oceanic_network['nodes']
 	links=oceanic_network['links']
 	n_id=init_node_id
+	#add in the nodes
+	oceanic_node_ids=[]
 	for node in nodes:
 		latitude,longitude=node
 		lat=float(latitude)
 		lon=float(longitude)
 		tags=["oceanic_waypoint"]
 		G.add_node(n_id,lat=lat,lon=lon,tags=tags,name=None)
+		oceanic_node_ids.append(n_id)
 		n_id+=1
 	e_id=0
+	#link them (directionally)
 	for link in links:
 		s_id,t_id=[int(n) for n in link]
 		distance=get_geo_edge_distance(s_id,t_id,G)
-		G.add_edge(s_id,t_id,distance=distance,id=e_id,tag="oceanic_leg")
+		G.add_edge(s_id,t_id,distance=distance,id=e_id,tags=["oceanic_leg"])
 		e_id+=1
-	return(G,n_id)
-
-def geteuclideandistance(Ay,Ax,By,Bx):
-	distance=sqrt(
-		(Ay-By)**2 +
-		(Ax-Bx)**2
-	)
-	return distance
+	#layer in the onramp/offramp tags
+	
+	for n_id in oceanic_node_ids:
+		ntags=G.nodes[n_id]['tags']
+		successors=[o for o in G.successors(n_id)]
+		predecessors=[o for o in G.predecessors(n_id)]
+		if len(successors)>0:
+			ntags.append('onramp')
+		if len(predecessors)>0:			
+			ntags.append('offramp')
+		G.nodes[n_id]['tags']=ntags
+	max_node_id=max(oceanic_node_ids)
+	return(G,max_node_id)
 
 def get_geo_edge_distance(s_id,t_id,G):
-	
 	s_lat=G.nodes[s_id]['lat']
 	s_lon=G.nodes[s_id]['lon']
 	t_lat=G.nodes[t_id]['lat']
@@ -112,20 +181,22 @@ def get_geo_edge_distance(s_id,t_id,G):
 	distance=geteuclideandistance(s_lat,t_lat,s_lon,t_lon)
 	return(distance)
 
-def getclosestneighbor(latlong,comp_nodes):
-	a_lat,a_long=latlong
+def getclosestneighbor(G,thisnode_id,comp_nodes_ids):	
+# 	print(thisnode_id,"closestneighborfrom-->",comp_nodes_ids)
 	distances=[
 		(
-			geteuclideandistance(
-				a_lat,
-				a_long,
-				comp_nodes[n][0],
-				comp_nodes[n][1]
+			get_geo_edge_distance(
+				thisnode_id,
+				t_id,
+				G
 			)
-			,n
+			,t_id
 		)
-		for n in comp_nodes
+		for t_id in comp_nodes_ids
 	]
+	
+	distances=[d for d in distances if d is not None]
+	
 	closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
 	distance=min([i[0] for i in distances])
 	return closest_neighbor,distance

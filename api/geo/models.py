@@ -81,7 +81,8 @@ class Polygon(models.Model):
 	
 	shape=models.JSONField(
 		"Geojson Polygon",
-		null=True
+		null=True,
+		blank=True
 		)
 
 # Voyage Regions and Places
@@ -149,6 +150,7 @@ class Location(models.Model):
 		'Polygon',
 		verbose_name="Polygon",
 		null=True,
+		blank=True,
 		on_delete=models.CASCADE
 	)
 	

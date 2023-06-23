@@ -1,5 +1,5 @@
 django/static/
-
+networks/tmp/
 *.DS_Store
 *.sql
 dbconf.json

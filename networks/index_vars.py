@@ -190,7 +190,10 @@ ao_maps={
 						'lon':'language_group__longitude',
 						'name':'language_group__name',
 						'val':None
-					}
+					},
+					'tag_connections':[
+						('embarkation','source','all')
+					]
 				},
 				{
 					'tag':'embarkation',
@@ -202,8 +205,7 @@ ao_maps={
 						'val':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value'
 					},
 					'tag_connections':[
-						('origin','target','all'),
-						("onramp","source","single")
+						("onramp","source","closest")
 					]
 				},
 				{
@@ -226,10 +228,10 @@ ao_maps={
 					'tag':'post-disembarkation',
 					'values':{
 						'pk':'post_disembark_location__geo_location__id',
-						'value':'post_disembark_location__geo_location__value',
+						'val':'post_disembark_location__geo_location__value',
 						'lat':'post_disembark_location__geo_location__latitude',
 						'lon':'post_disembark_location__geo_location__longitude',
-						'val':'post_disembark_location__geo_location__name'
+						'name':'post_disembark_location__geo_location__name'
 					},
 					'tag_connections':[
 						("disembarkation","target","all")
@@ -248,7 +250,10 @@ ao_maps={
 						'lon':'language_group__longitude',
 						'name':'language_group__name',
 						'val':None
-					}
+					},
+					'tag_connections':[
+						("embarkation","source","all")
+					]
 				},
 				{
 					'tag':'embarkation',
@@ -260,7 +265,6 @@ ao_maps={
 						'val':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value'		
 					},
 					'tag_connections':[
-						('origin','target','all'),
 						("onramp","source","closest")
 					]
 				},
@@ -284,10 +288,10 @@ ao_maps={
 					'tag':'post-disembarkation',
 					'values':{
 						'pk':'post_disembark_location__geo_location__id',
-						'value':'post_disembark_location__geo_location__value',
+						'val':'post_disembark_location__geo_location__value',
 						'lat':'post_disembark_location__geo_location__latitude',
 						'lon':'post_disembark_location__geo_location__longitude',
-						'val':'post_disembark_location__geo_location__name'
+						'name':'post_disembark_location__geo_location__name'
 					},
 					'tag_connections':[
 						("disembarkation","target","all")
@@ -296,5 +300,5 @@ ao_maps={
 			]
 		}
 	],
-	'oceanic_network_file':'maps/intraamerican_routes.json'
+	'oceanic_network_file':'maps/ao_routes.json'
 }

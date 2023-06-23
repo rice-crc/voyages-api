@@ -27,11 +27,16 @@ def load_graph(endpoint,graph_params):
 		d.close()
 		oceanic_network=json.loads(t)
 		G,max_node_id=add_oceanic_network(G,oceanic_network,init_node_id=0)
-		print("oceanic network",G)
+		print("created oceanic network",G)
+# 		for n in G.nodes:
+# 			print("node-->",G.nodes[n])
 		# THEN ITERATE OVER THE GEO VARS IN THE INDEX
 		## AND ADD THE RESULTING UNIQUE NODES TO THE NETWORK
 		filter_obj=rc['filter']
-		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id)
+		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id+1)
+		print("added non-oceanic network nodes")
+# 		for n in G.nodes:
+# 			print("node-->",G.nodes[n])
 		#then link across the ordered node classes
 		ordered_node_classes=graph_params['ordered_node_classes']
 		prev_tag=None
@@ -40,6 +45,7 @@ def load_graph(endpoint,graph_params):
 			if 'tag_connections' in ordered_node_class:
 				tag_connections=ordered_node_class['tag_connections']
 				G=connect_to_tags(G,tag,tag_connections)
+		print("connected all remaining network edges (non-oceanic --> (non-oceanic & oceanic)) following index_vars.py file ruleset")
 	return G,graph_name,None
 
 registered_caches={
@@ -84,50 +90,69 @@ def simple_map(cachename):
 	st=time.time()
 	cachegraphs=registered_caches[cachename]['graphs']
 	
-	
-	
-	featurecollection={
-		"type": "FeatureCollection",
-		"features": [
-		]
-	}
-	print(featurecollection)
-# 	for graphname in cachegraphs:
-	print(cachegraphs)
-	places=cachegraphs['place']
-	print(places)
-	
-	graph=places['graph']
-	features=[]
-	for n in graph.nodes:
-		node=(graph.nodes[n])
-		feature={
-			"type": "Feature",
-			"properties": {},
-			"geometry": {
-				"coordinates": [],
-				"type": "Point"
-			}
+	resp=[]
+	for graphname in cachegraphs:
+		featurecollection={
+			"type": "FeatureCollection",
+			"features": [
+			]
 		}
-		feature['properties']['name']=node['name']
+		graphcachedict=cachegraphs[graphname]
+		graph=graphcachedict['graph']	
+		features=[]
+		for n in graph.nodes:
+			node=(graph.nodes[n])
+# 			print(node)
+			feature={
+				"type": "Feature",
+				"properties": {},
+				"geometry": {
+					"coordinates": [],
+					"type": "Point"
+				}
+			}
+			feature['properties']['name']=node['name']
 
-		if 'lat' in node and 'lon' in node:
-			lat=node['lat']
-			lon=node['lon']
-			if lat is not None and lon is not None:
-				feature['geometry']['coordinates']=[
-					float(lon),
-					float(lat)
-				]
-				if 'pk' in node:
-					feature['properties']['pk']=node['pk']
-				if 'tags' in node:
-					feature['properties']['tags']=node['tags']
-				features.append(feature)
-	featurecollection['features']=features
-	
-	resp=featurecollection
-	
+			if 'lat' in node and 'lon' in node:
+				lat=node['lat']
+				lon=node['lon']
+				if lat is not None and lon is not None:
+					feature['geometry']['coordinates']=[
+						float(lon),
+						float(lat)
+					]
+					if 'pk' in node:
+						feature['properties']['pk']=node['pk']
+					if 'tags' in node:
+						feature['properties']['tags']=node['tags']
+					featurecollection['features'].append(feature)
+		for e in graph.edges:
+			feature={
+			  "type": "Feature",
+			  "properties": {},
+			  "geometry": {
+				"coordinates": [],
+				"type": "LineString"
+			  }
+			}
+			s_id,t_id=e
+			edge=graph.edges[[s_id,t_id]]
+# 			print(edge)
+			edge_id=edge['id']
+			edge_tags=edge['tags']
+			s=graph.nodes[s_id]
+			t=graph.nodes[t_id]
+			s_coords=[s['lon'],s['lat']]
+			t_coords=[t['lon'],t['lat']]
+			feature['geometry']['coordinates']=[s_coords,t_coords]
+			feature['properties']['tags']=edge_tags
+			feature['properties']['id']=edge_id
+			featurecollection['features'].append(feature)
+		resp.append(featurecollection)
+# 		d=open("tmp/%s__%s.json" %(cachename,graphname),'w')
+# 		d.write(json.dumps(featurecollection))
+# 		d.close()
+	print("Internal Response Time:",time.time()-st,"\n+++++++")
 	return jsonify(resp)
 
 

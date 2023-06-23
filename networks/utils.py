@@ -17,15 +17,16 @@ def connect_to_tags(G,this_tag,tag_connections):
 # 	max_edge_id=max([G.edges(e[0],e[1])['id'] for e in G.edges])
 	print("----------\nthis tag",this_tag)
 	print("starting graph state",G)
-	e=int(max_edge_id)
+	e=int(max_edge_id+1)
 	for tag_connection in tag_connections:
 		connect_tag,as_type,mode=tag_connection
 		print("connect tag",this_tag,"to",connect_tag,"as",as_type,"in mode",mode)
 		
 # 		print(,tag)
-		for n_id in G.nodes:
+		#A node with no attributes keeps sneaking in here...
+		for n_id in [n for n in G.nodes if this_tag in G.nodes[n]['tags']]:
 			thisnode=G.nodes[n_id]
-			
+# 			print("THIS NODE-->",thisnode)
 			comp_node_ids=[
 				comp_id for comp_id in G.nodes
 				if connect_tag in G.nodes[comp_id]['tags']
@@ -33,31 +34,37 @@ def connect_to_tags(G,this_tag,tag_connections):
 			if mode=="closest":
 # 				print("closest")
 				closest_neighbor,distance=getclosestneighbor(G,n_id,comp_node_ids)
+# 				print("connecting",G.nodes[n_id],G.nodes[closest_neighbor])
 				if as_type=="source":
-					G.add_edge(n_id,closest_neighbor,distance=distance,id=e,tag=connect_tag)
+					concat_tag="_to_".join([this_tag,connect_tag])
+					s_id=n_id
+					t_id=closest_neighbor
 				else:
-					G.add_edge(closest_neighbor,n_id,distance=distance,id=e,tag=connect_tag)
+					s_id=closest_neighbor
+					t_id=n_id
+					concat_tag="_to_".join([connect_tag,this_tag])
+				
+
+				G.add_edge(s_id,t_id,distance=distance,id=e,tags=[concat_tag])
 				e+=1
 			elif mode=="all":
-				lat=G.nodes[n_id]['lat']
-				lon=G.nodes[n_id]['lon']
-	
 				for comp_node_id in comp_node_ids:
 					distance=get_geo_edge_distance(n_id,comp_node_id,G)
 					if as_type=="source":
-						G.add_edge(n_id,comp_node_id,id=e,distance=distance,tag=this_tag)
+						concat_tag="_to_".join([this_tag,connect_tag])
+						s_id=n_id
+						t_id=comp_node_id
 					else:
-						G.add_edge(comp_node_id,n_id,id=e,distance=distance,tag=this_tag)
+						concat_tag="_to_".join([connect_tag,this_tag])
+						s_id=comp_node_id
+						t_id=n_id
+# 					print("connecting",G.nodes[s_id],G.nodes[t_id])
+					G.add_edge(s_id,t_id,id=e,distance=distance,tags=[concat_tag])
 					e+=1
+					
 	print("ending graph state",G)
 	print("-------------")
 	return G
-
-def floatnotnull(x):
-	try:
-		return float(x)
-	except:
-		return 0
 
 def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 	graph_name=graph_params['name']
@@ -77,9 +84,9 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 			thisgraphvl=ordered_node_class['values']
 			thisgraphtag=ordered_node_class['tag']
 			att_names=[a for a in list(thisgraphvl.keys()) if thisgraphvl[a] is not None]
-# 				print("-->attnames",att_names)
+# 			print("-->attnames",att_names)
 			vl_var_names=[thisgraphvl[a] for a in att_names]
-# 				print('-->vl_varnames',vl_var_names)
+# 			print('-->vl_varnames',vl_var_names)
 			payload={'selected_fields':vl_var_names}
 			
 			## MAKE SURE YOU APPLY THE FILTER TO THE QUERY
@@ -96,6 +103,7 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 			
 			## TRANSFORM THE RESPONSE INTO ROWS AND DEDUPE
 			results=json.loads(r.text)
+# 			print("RESULTS",results)
 			rows=[]
 			for i in range(len(results[vl_var_names[0]])):
 				row=[]
@@ -105,6 +113,9 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 					rows.append(row)
 			
 			## PUSH THE UNIQUE NODES (LAT,LONG,PK,NAME,VALUE...) INTO THE GRAPH
+			
+# 			print("ROWS",rows)
+			
 			for row in rows:
 				
 				## BUT WE HAVE TO BE CAREFUL AND TAG THE NODES
@@ -113,28 +124,38 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 				### RATHER THAN DUPLICATING
 				att_dict={att_name:row[att_names.index(att_name)] for att_name in att_names}
 				
-				if 'lat' in att_dict:
-					att_dict['lat']=floatnotnull(att_dict['lat'])
-				if 'lon' in att_dict:
-					att_dict['lon']=floatnotnull(att_dict['lon'])
+				#WE'VE GOT TO SCREEN OUT AND PROPERLY FORMAT NULL LAT & LONGS...
+				#SO THIS IS A GEO-ONLY NETWORK FOR NOW...
+				if 'lat' in att_dict and 'lon' in att_dict:
+					
+					lat=att_dict['lat']
+					lon=att_dict['lon']
+					if lat is not None and lon is not None:
+						att_dict['lat']=float(lat)
+						att_dict['lon']=float(lon)
 
+		# 				print("SEARCHING ON--->",att_dict)
 				
-				existing_nodes=[n for n in 
-					search_nodes(G, {"==": [(k,), att_dict[k]] for k in att_dict})
-				]
+						query=[{"==": [(k,), att_dict[k]]} for k in att_dict]
+		# 				print("QUERY-->",query)
 				
-				if len(existing_nodes)>0:
-# 					print("------>",[[G.nodes[n],n] for n in existing_nodes])
-					thisnodetags=[G.nodes[n] for n in existing_nodes][0]['tags']
-					if tag not in thisnodetags:
-						thisnodetags.append(tag)
-						G.nodes[existing_nodes[0]]['tags']=thisnodetags
-# 						print("added tag:--->",tag,[G.nodes[n] for n in existing_nodes])
-				else:
-					att_dict['tags']=[tag]
-					rowdict=(node_id,att_dict)
-					G.add_nodes_from([rowdict])
-					node_id+=1
+						existing_nodes=[n for n in 
+							search_nodes(G, {"and":query})
+						]
+				
+						if len(existing_nodes)>0:
+		# 					print("RESULTS------>",[[G.nodes[n],n] for n in existing_nodes])
+							thisnodetags=[G.nodes[n] for n in existing_nodes][0]['tags']
+							if tag not in thisnodetags:
+								thisnodetags.append(tag)
+								G.nodes[existing_nodes[0]]['tags']=thisnodetags
+		# 						print("added tag:--->",tag,[G.nodes[n] for n in existing_nodes])
+						else:
+							att_dict['tags']=[tag]
+							rowdict=(node_id,att_dict)
+# 							print("rowdict-->",rowdict)
+							G.add_nodes_from([rowdict])
+							node_id+=1
 				
 	return G,node_id
 
@@ -158,6 +179,7 @@ def add_oceanic_network(G,oceanic_network,init_node_id=0):
 		s_id,t_id=[int(n) for n in link]
 		distance=get_geo_edge_distance(s_id,t_id,G)
 		G.add_edge(s_id,t_id,distance=distance,id=e_id,tags=["oceanic_leg"])
+# 		print("added edge:",s_id,G.nodes[s_id],t_id,G.nodes[t_id],G.edges[s_id,t_id])
 		e_id+=1
 	#layer in the onramp/offramp tags
 	
@@ -170,18 +192,25 @@ def add_oceanic_network(G,oceanic_network,init_node_id=0):
 		if len(predecessors)>0:			
 			ntags.append('offramp')
 		G.nodes[n_id]['tags']=ntags
+		
+# 		print("new node-->",G.nodes[n_id])
+		
 	max_node_id=max(oceanic_node_ids)
 	return(G,max_node_id)
 
 def get_geo_edge_distance(s_id,t_id,G):
-	s_lat=G.nodes[s_id]['lat']
-	s_lon=G.nodes[s_id]['lon']
-	t_lat=G.nodes[t_id]['lat']
-	t_lon=G.nodes[t_id]['lon']
-	distance=geteuclideandistance(s_lat,t_lat,s_lon,t_lon)
+	s=G.nodes[s_id]
+	t=G.nodes[t_id]
+	s_lat=s['lat']
+	s_lon=s['lon']
+	t_lat=t['lat']
+	t_lon=t['lon']
+	distance=geteuclideandistance(s_lat,s_lon,t_lat,t_lon)
+# 	print(s_id,s,t_id,t,distance)
 	return(distance)
 
 def getclosestneighbor(G,thisnode_id,comp_nodes_ids):	
+# 	print("------------------")
 # 	print(thisnode_id,"closestneighborfrom-->",comp_nodes_ids)
 	distances=[
 		(
@@ -197,9 +226,13 @@ def getclosestneighbor(G,thisnode_id,comp_nodes_ids):
 	
 	distances=[d for d in distances if d is not None]
 	
-	closest_neighbor=sorted(distances, key=lambda tup: tup[0])[0][1]
-	distance=min([i[0] for i in distances])
-	return closest_neighbor,distance
+	sorted_distances=sorted(distances, key=lambda tup: tup[0])
+	
+# 	print(sorted_distances)
+	closest_neighbor_distance,closest_neighbor_id=sorted_distances[0]
+# 	print(closest_neighbor_distance,closest_neighbor_id)
+# 	print('---------------------')
+	return closest_neighbor_id,closest_neighbor_distance
 
 def curvedab(A,B,C,ab_id,prev_controlXY,result,smoothing=0.15):
 	##next: smoothing should handled dynamically

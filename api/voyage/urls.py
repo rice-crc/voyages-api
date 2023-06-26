@@ -10,7 +10,7 @@ urlpatterns = [
 	path('groupby',views.VoyageGroupBy.as_view()),
 	path('stats_options',views.VoyageStatsOptions.as_view()),
 	path('crosstabs',views.VoyageCrossTabs.as_view()),
-# 	path('aggroutes',views.VoyageAggRoutes.as_view())
+	path('aggroutes',views.VoyageAggRoutes.as_view())
     ]
     
     

@@ -10,4 +10,5 @@ urlpatterns = [
     path('enslaver/',views.EnslaverList.as_view()),
     path('enslaver/autocomplete', views.EnslaverTextFieldAutoComplete.as_view()),
     path('enslaver/aggregations',views.EnslaverAggregations.as_view()),
+    path('enslaved/aggroutes',views.EnslavedAggRoutes.as_view())
     ]

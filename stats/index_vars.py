@@ -96,7 +96,7 @@ voyage_pivot_tables={
 
 voyage_summary_statistics={
 	'endpoint':'voyage/dataframes',
-	'name':'voyage_xyscatter',
+	'name':'voyage_summary_statistics',
 	'variables': [
 		'id',
 		'voyage_ship__imputed_nationality__name',
@@ -113,26 +113,36 @@ voyage_summary_statistics={
 
 voyage_maps={
 	'endpoint':'voyage/dataframes',
-	'name':'voyage_xyscatter',
+	'name':'voyage_maps',
 	'variables':[
 		'id',
-		'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__id',
-		'voyage_itinerary__imp_region_voyage_begin__geo_location__id',
-		'voyage_itinerary__imp_port_voyage_begin__geo_location__id',
-		'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
-		'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
-		'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id',
-		'voyage_itinerary__imp_broad_region_slave_dis__geo_location__id',
-		'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id',
-		"voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__id",
-		'voyage_id',
-		'voyage_itinerary__imp_principal_port_slave_dis__id',
-		'voyage_itinerary__imp_principal_place_of_slave_purchase__id',
+		'voyage_itinerary__imp_broad_region_voyage_begin__geo_location__name',
+		'voyage_itinerary__imp_region_voyage_begin__geo_location__name',
+		'voyage_itinerary__imp_port_voyage_begin__geo_location__name',
+		'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
+		'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
+		'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
+		'voyage_itinerary__imp_broad_region_slave_dis__geo_location__name',
+		'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
+		"voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__name",
 		'voyage_ship__imputed_nationality__name',
-		'voyage_ship__tonnage_mod',
-		'voyage_ship__ship_name',
 		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
 		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
 		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
+	]
+}
+
+enslaved_maps={
+	'endpoint':'past/enslaved/dataframes',
+	'name':'enslaved_maps',
+	'variables':[
+		'id',
+		'post_disembark_location__geo_location__name',
+		'language_group__name',
+		'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
+		'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
+		'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
+		'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
+		'voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
 	]
 }

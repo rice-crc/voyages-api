@@ -19,6 +19,8 @@ import pprint
 from common.nest import *
 from common.reqs import *
 import collections
+from voyages3.localsettings import *
+
 
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -283,6 +285,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 		
 			aggregation,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,enslaver_options,retrieve_all=True)
 			output_dict={}
+			
 			if len(error_messages)==0:
 				for a in aggregation:
 					for k in a:
@@ -313,7 +316,6 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		print("+++++++\nusername:",request.auth.user)
 		st=time.time()
 		params=dict(request.POST)
-		retrieve_all=True
 		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(
@@ -333,4 +335,58 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			return JsonResponse(output_dicts,safe=False)
 		else:
 			print("failed\n+++++++")
+			print(' | '.join(error_messages))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+
+class EnslavedAggRoutes(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+# 		try:
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		params=dict(request.POST)
+		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+		
+		queryset=Enslaved.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			enslaved_options,
+			auto_prefetch=False,
+			retrieve_all=True
+		)
+		
+		
+		enslaved=queryset.values_list(
+			'id',
+# 			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+# 			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
+# 			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id',
+# 			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
+# 			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
+# 			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
+# 			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id',
+# 			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name'
+		)
+		ids=[i[0] for i in list(enslaved)]
+		print("fetch id time",time.time()-st)
+		ids=[i[0] for i in queryset.values_list('id')]
+		u2=FLASK_BASE_URL+'crosstabs_maps/'
+		d2=params
+		d2['ids']=ids
+		d2['cachename']=['enslaved_maps']
+		d2['agg_fn']=['count']
+		d2['value_field']=['id']
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		print(r.text)
+		j=json.loads(r.text)
+		print(type(j))
+		if r.ok:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(j,safe=True)
+		else:
+			return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
+

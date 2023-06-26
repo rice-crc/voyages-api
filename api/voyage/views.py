@@ -123,7 +123,6 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			u2=FLASK_BASE_URL+'crosstabs/'
 			d2=params
 			d2['ids']=ids
-			d2['selected_fields']=selected_fields
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -186,6 +185,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 			return JsonResponse(output_dicts,safe=False)
 		else:
 			print("failed\n+++++++")
+			print(' | '.join(error_messages))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 #This will only accept one field at a time
@@ -252,27 +252,49 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 # 			print("failed\n+++++++")
 # 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
 
-# class VoyageAggRoutes(generics.GenericAPIView):
-# # 	serializer_class=VoyageSerializer
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def post(self,request):
+#This endpoint will build a geographic sankey diagram based on a voyages query
+class VoyageAggRoutes(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
 # 		try:
-# 			st=time.time()
-# 			print("+++++++\nusername:",request.auth.user)
-# 			params=dict(request.POST)
-# 			groupby_fields=params.get('groupby_fields')
-# 			value_field_tuple=params.get('value_field_tuple')
-# 			queryset=Voyage.objects.all()
-# 			queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
-# 			ids=[i[0] for i in queryset.values_list('id')]
-# 
-# 			u2=FLASK_BASE_URL+'crosstabs/'
-# 			d2=params
-# 			d2['ids']=ids
-# 			d2['selected_fields']=selected_fields
-# 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-# 			j=json.loads(r.text)
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		params=dict(request.POST)
+		zoom_level=params.get('zoom_level')
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		
+		
+		voys=queryset.values_list(
+			'id',
+# 			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+# 			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
+# 			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id',
+# 			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
+# 			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
+# 			'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
+# 			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id',
+# 			'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name'
+		)
+		ids=[i[0] for i in list(voys)]
+		print("fetch id time",time.time()-st)
+		ids=[i[0] for i in queryset.values_list('id')]
+		u2=FLASK_BASE_URL+'crosstabs_maps/'
+		d2=params
+		d2['ids']=ids
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		print(r.text)
+		j=json.loads(r.text)
+		print(type(j))
+		if r.ok:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(j,safe=True)
+		else:
+			return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
+
+
+
 # 
 # 			abpairs={int(float(k)):{int(float(v)):j[k][v] for v in j[k]} for k in j}
 # 			dataset=int(params['dataset'][0])
@@ -410,50 +432,7 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 # 			output={"points":geojson,"routes":routes}
 # 
 # 			print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 			return JsonResponse(output,safe=False)
+		return JsonResponse(output,safe=False)
 # 		except:
 # 			print("failed\n+++++++")
 # 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
-
-
-
-def voyage_variables_data(voyage_id, show_imputed=True):
-    voyagenum = int(voyage_id)
-    voyage = first_match(
-        get_voyages_search_query_set().filter(var_voyage_id=voyagenum))
-    if voyage is None:
-        return None, []
-    # Apply the matching method (if there is one) in the display_method_details
-    # dict for each variable value in the voyage and return a dict of varname:
-    # varvalue
-    voyagevariables = voyage.get_stored_fields()
-    # for vname, vvalue in voyage.get_stored_fields().items():
-    #    voyagevariables[vname] = display_methods_details.get(vname,
-    #    no_mangle)(vvalue, voyagenum)
-    allvargroups = groupby(var_dict, key=lambda x: x['var_category'])
-    allvars = []
-    for i in allvargroups:
-        group = i[0]
-        glist = list(
-            x for x in i[1]
-            if show_imputed or not x['var_full_name'].endswith('*')
-        )
-        for idx, j in enumerate(glist):
-            val = str("")
-            if voyagevariables[j['var_name']]:
-                mangle_method = display_unmangle_methods.get(
-                    j['var_name'], default_prettifier(j['var_name']))
-                val = str(
-                    mangle_method(voyagevariables[j['var_name']], voyagenum))
-            if val == u'[]':
-                val = u''
-            if idx == 0:
-                # For the first variable, give the number of variables in the
-                # group, and give the name of the group as a tuple in the first
-                # entry of the triple for the row
-                newvar = (len(glist), str(group))
-            else:
-                newvar = (None, None)
-            allvars.append((newvar,
-                            str(j['var_full_name']), val, j['var_name']))
-    return voyage, allvars

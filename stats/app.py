@@ -28,15 +28,16 @@ def load_long_df(endpoint,variables):
 	return(df)
 
 registered_caches=[
-	voyage_bar_and_donut_charts,
-	#JUNE 14: I don't think we're going to use the maps cache but i don't want to destroy that work until i'm sure
+# 	voyage_bar_and_donut_charts,
 	voyage_maps,
-	voyage_summary_statistics,
-	voyage_pivot_tables,
-	voyage_xyscatter
+	enslaved_maps,
+# 	voyage_summary_statistics,
+# 	voyage_pivot_tables,
+# 	voyage_xyscatter
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
+st=time.time()
 for rc in registered_caches:
 	try:
 		endpoint=rc['endpoint']
@@ -44,6 +45,7 @@ for rc in registered_caches:
 		rc['df']=load_long_df(endpoint,variables)
 	except:
 		print("failed on cache:",rc['name'])
+print("finished building stats indices in %d seconds" %int(time.time()-st))
 
 #we need to make the indices' contents visible
 @app.route('/get_indices/')
@@ -76,6 +78,84 @@ def groupby():
 		resp[gbc]=list(ct[gbc])
 	return json.dumps(resp)
 
+
+
+
+
+@app.route('/crosstabs_maps/',methods=['POST'])
+def crosstabs_maps():
+	
+	'''
+	Implements the pandas crosstab function and returns the sparse summary.
+	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
+	'''
+
+# 	try:
+	st=time.time()
+	rdata=request.json
+	dfname=rdata['cachename'][0]
+
+	#it must have a list of ids (even if it's all of the ids)
+	ids=rdata['ids']
+
+
+
+# 	normalize=rdata.get('normalize')
+# 	if normalize is not None:
+# 		normalize=normalize[0]
+# 	if normalize not in ["columns","index"]:
+# 		normalize=False
+
+	df=eval(dfname)['df']
+	print(df)
+	df2=df[df['id'].isin(ids)]
+# 	df2=df2.set_index('id')
+	print(df2)
+
+	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
+	rowvar=rdata['rows']
+	colvars=rdata['cols']
+	valvars=rdata['value_field']
+	
+	rdf=df2[rowvar[0]]
+	
+	coldfs=[df2[c] for c in colvars]
+	
+	valdf=df2[valvars[0]]
+	
+# 	print(rdf)
+# 	
+# 	print(coldfs)
+# 	
+# 	print(valdf)
+	
+	fn=rdata['agg_fn'][0]
+	
+	if fn=='count':
+		aggfunc='count'
+	else:
+		aggfunc=eval("np."+fn)
+	
+	
+	ct=pd.crosstab(
+		rdf,
+		coldfs,
+		values=valdf,
+		aggfunc=aggfunc
+	)
+	
+	print(ct)
+	ct_dict=ct.to_dict()
+# 	ct_dict={}
+	return jsonify(ct_dict)
+
+
+
+
+
+
+
+
 @app.route('/crosstabs/',methods=['POST'])
 def crosstabs():
 	
@@ -84,44 +164,44 @@ def crosstabs():
 	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
 	'''
 
-	try:
-		st=time.time()
-		rdata=request.json
-		dfname=rdata['cachename'][0]
+# 	try:
+	st=time.time()
+	rdata=request.json
+	dfname=rdata['cachename'][0]
 
-		#it must have a list of ids (even if it's all of the ids)
-		ids=rdata['ids']
+	#it must have a list of ids (even if it's all of the ids)
+	ids=rdata['ids']
 
-		#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
-		columns,rows=rdata['groupby_fields']
-		val=rdata['value_field'][0]
-		fn=rdata['agg_fn'][0]
+	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
+	columns,rows=rdata['groupby_fields']
+	val=rdata['value_field'][0]
+	fn=rdata['agg_fn'][0]
 
-		normalize=rdata.get('normalize')
-		if normalize is not None:
-			normalize=normalize[0]
-		if normalize not in ["columns","index"]:
-			normalize=False
+	normalize=rdata.get('normalize')
+	if normalize is not None:
+		normalize=normalize[0]
+	if normalize not in ["columns","index"]:
+		normalize=False
 
-		df=eval(dfname)['df']
+	df=eval(dfname)['df']
+	
+	df2=df[df['id'].isin(ids)]
 
-		df2=df[df['id'].isin(ids)]
-
-		bins=rdata.get('bins')
-		if bins is not None:
-			binvar,nbins=[bins[0],int(bins[1])]
-			df2=pd.cut(df2[binvar],nbins)
-		ct=pd.crosstab(
-			df2[columns],
-			df2[rows],
-			values=df2[val],
-			aggfunc=eval("np."+fn),
-			normalize=normalize,
-		)
-		ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
-		return jsonify(ctd)
-	except:
-		abort(400)
+	bins=rdata.get('bins')
+	if bins is not None:
+		binvar,nbins=[bins[0],int(bins[1])]
+		df2=pd.cut(df2[binvar],nbins)
+	ct=pd.crosstab(
+		df2[columns],
+		df2[rows],
+		values=df2[val],
+		aggfunc=eval("np."+fn),
+		normalize=normalize,
+	)
+	ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
+	return jsonify(ctd)
+# 	except:
+# 		abort(400)
 
 @app.route('/dataframes/',methods=['POST'])
 def dataframes():

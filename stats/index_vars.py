@@ -137,6 +137,7 @@ enslaved_maps={
 	'name':'enslaved_maps',
 	'variables':[
 		'id',
+		'documented_name',
 		'post_disembark_location__geo_location__name',
 		'language_group__name',
 		'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',

@@ -323,9 +323,10 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			self,
 			request,
 			enslaved_options,
-			auto_prefetch=False,
+			auto_prefetch=True,
 			retrieve_all=True
 		)
+		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
 		if len(error_messages)==0:
 			output_dicts={}
@@ -381,9 +382,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		d2['agg_fn']=['count']
 		d2['value_field']=['id']
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		print(r.text)
 		j=json.loads(r.text)
-		print(type(j))
 		if r.ok:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(j,safe=True)

@@ -23,6 +23,11 @@ def load_long_df(endpoint,variables):
 		data={'selected_fields':variables}
 	)
 	j=json.loads(r.text)
+# 	for i in range(7):
+# 		print("----")
+# 		for k in list(j.keys()):
+# 			print(k,j[k][i])
+# 	print("----")
 	df=pd.DataFrame.from_dict(j)
 	
 	return(df)
@@ -78,7 +83,16 @@ def groupby():
 		resp[gbc]=list(ct[gbc])
 	return json.dumps(resp)
 
+#https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
+class NotNanDict(dict):
+	@staticmethod
+	def is_nan(v):
+		if isinstance(v, dict):
+			return False
+		return np.isnan(v)
 
+	def __new__(self, a):
+		return {k: v for k, v in a if not self.is_nan(v) and v!={}} 
 
 
 
@@ -98,36 +112,20 @@ def crosstabs_maps():
 	#it must have a list of ids (even if it's all of the ids)
 	ids=rdata['ids']
 
-
-
-# 	normalize=rdata.get('normalize')
-# 	if normalize is not None:
-# 		normalize=normalize[0]
-# 	if normalize not in ["columns","index"]:
-# 		normalize=False
-
 	df=eval(dfname)['df']
-	print(df)
+	df=df.fillna('null')
 	df2=df[df['id'].isin(ids)]
-# 	df2=df2.set_index('id')
-	print(df2)
-
-	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
-	rowvar=rdata['rows']
+	idxvar=rdata['idx'][0]
+	
 	colvars=rdata['cols']
-	valvars=rdata['value_field']
 	
-	rdf=df2[rowvar[0]]
+	valvar=rdata['value_field'][0]
 	
-	coldfs=[df2[c] for c in colvars]
+	colsdf=[df2[c] for c in colvars]
 	
-	valdf=df2[valvars[0]]
+	idxdf=df2[idxvar]
 	
-# 	print(rdf)
-# 	
-# 	print(coldfs)
-# 	
-# 	print(valdf)
+	valdf=df2[valvar]
 	
 	fn=rdata['agg_fn'][0]
 	
@@ -136,18 +134,27 @@ def crosstabs_maps():
 	else:
 		aggfunc=eval("np."+fn)
 	
+	#from https://stackoverflow.com/questions/42150769/pandas-multi-index-dataframe-to-nested-dictionary
+	def createDictFromPandas(thisdf):
+		if (thisdf.index.nlevels==1):
+			return thisdf.to_dict(into=NotNanDict)
+		dict_f = {}
+		for level in thisdf.index.levels[0]:
+			if (level in thisdf.index):
+				res=createDictFromPandas(thisdf.xs(level))
+				dict_f[level]=createDictFromPandas(thisdf.xs(level))
+		return dict_f
 	
 	ct=pd.crosstab(
-		rdf,
-		coldfs,
+		colsdf,
+		idxdf,
 		values=valdf,
 		aggfunc=aggfunc
 	)
 	
-	print(ct)
-	ct_dict=ct.to_dict()
-# 	ct_dict={}
-	return jsonify(ct_dict)
+	ct2=createDictFromPandas(ct)
+	
+	return jsonify(ct2)
 
 
 

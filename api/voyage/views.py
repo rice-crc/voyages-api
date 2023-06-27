@@ -176,6 +176,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 			auto_prefetch=False,
 			retrieve_all=True
 		)
+		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
 		if len(error_messages)==0:
 			output_dicts={}

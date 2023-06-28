@@ -3,6 +3,7 @@ import json
 from django.core.management.base import BaseCommand, CommandError
 from voyage.models import *
 from geo.models import *
+import uuid
 
 class Command(BaseCommand):
 	help = 'maps all voyage geo data to their new counterparts'
@@ -16,6 +17,7 @@ class Command(BaseCommand):
 		print(regions)
 		print(broadregions)
 		print(geolocations)
+		print("DELETING GEOLOCATIONS FOR SYNC")
 		
 		regionvals=[]
 		
@@ -31,12 +33,16 @@ class Command(BaseCommand):
 			)
 			
 			thislocation,thislocation_isnew=Location.objects.get_or_create(
-				longitude=br.longitude,
-				latitude=br.latitude,
-				name=br.broad_region,
-				location_type=LT,
 				value=br.value
 			)
+			
+			thislocation.longitude=br.longitude
+			thislocation.latitude=br.latitude
+			thislocation.name=br.broad_region
+			thislocation.location_type=LT
+			thislocation.uuid=uuid.uuid4()
+			thislocation.save()
+			
 			br.geo_location=thislocation
 			br.save()
 		
@@ -49,14 +55,17 @@ class Command(BaseCommand):
 			parent=Location.objects.get(value=r.broad_region.value)
 			
 			thislocation,thislocation_isnew=Location.objects.get_or_create(
-				longitude=r.longitude,
-				latitude=r.latitude,
-				name=r.region,
-				location_type=LT,
-				value=r.value,
-				child_of=parent
+				value=r.value
 			)
-			
+
+			thislocation.longitude=r.longitude
+			thislocation.latitude=r.latitude
+			thislocation.name=r.region
+			thislocation.location_type=LT
+			thislocation.child_of=parent
+			thislocation.uuid=uuid.uuid4()
+			thislocation.save()
+
 			r.geo_location=thislocation
 			r.save()
 			
@@ -80,12 +89,14 @@ class Command(BaseCommand):
 				pvalue=p.value
 			
 			thislocation,thislocation_isnew=Location.objects.get_or_create(
-				longitude=p.longitude,
-				latitude=p.latitude,
-				name=p.place,
-				location_type=LT,
-				value=pvalue,
-				child_of=parent
+				value=pvalue
 			)
+			thislocation.longitude=p.longitude
+			thislocation.latitude=p.latitude
+			thislocation.name=p.place
+			thislocation.location_type=LT
+			thislocation.child_of=parent
+			thislocation.uuid=uuid.uuid4()
+			thislocation.save()
 			p.geo_location=thislocation
 			p.save()

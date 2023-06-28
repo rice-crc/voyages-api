@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from builtins import str
-
+import uuid
 from django.db import models
 from django.db.models import Prefetch
 #from django.utils.translation import gettext_lazy as _
@@ -109,6 +109,7 @@ class Location(models.Model):
 	"""
 	Geographic Location
 	"""
+	uuid=models.UUIDField(default=uuid.uuid4, editable=False,null=True)
 
 	name = models.CharField(
 		"Location name",

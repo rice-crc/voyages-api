@@ -14,7 +14,6 @@ def geteuclideandistance(Ay,Ax,By,Bx):
 
 def connect_to_tags(G,this_tag,tag_connections):
 	max_edge_id=max([G.edges[e[0],e[1]]['id'] for e in G.edges])
-# 	max_edge_id=max([G.edges(e[0],e[1])['id'] for e in G.edges])
 	print("----------\nthis tag",this_tag)
 	print("starting graph state",G)
 	e=int(max_edge_id+1)
@@ -112,7 +111,7 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 				if row not in rows:
 					rows.append(row)
 			
-			## PUSH THE UNIQUE NODES (LAT,LONG,PK,NAME,VALUE...) INTO THE GRAPH
+			## PUSH THE UNIQUE NODES (LAT,LONG,UUID,NAME,VALUE...) INTO THE GRAPH
 			
 # 			print("ROWS",rows)
 			

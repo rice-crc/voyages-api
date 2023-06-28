@@ -99,6 +99,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__port_of_departure__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Port of departure (PORTDEP) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__port_of_departure__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -148,6 +153,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__int_first_port_emb__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : First intended port of embarkation (EMBPORT) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__int_first_port_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -199,6 +209,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__int_second_port_emb__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Second intended port of embarkation (EMBPORT2) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__int_second_port_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -248,6 +263,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__int_first_region_purchase_slaves__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : First intended region of purchase of slaves (EMBREG) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__int_first_region_purchase_slaves__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -299,6 +319,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__int_second_region_purchase_slaves__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Second intended region of purchase of slaves (EMBREG2) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__int_second_region_purchase_slaves__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -348,6 +373,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__int_first_port_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__int_first_port_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -399,6 +429,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__int_second_port_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Second intended port of disembarkation (ARRPORT2) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__int_second_port_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -448,6 +483,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__int_first_region_slave_landing__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : First intended region of slave landing (REGARR) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__int_first_region_slave_landing__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -499,6 +539,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -548,6 +593,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__int_second_place_region_slave_landing__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Second intended region of slave landing (REGARR2) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__int_second_place_region_slave_landing__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -599,6 +649,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__first_place_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : First place of slave purchase (PLAC1TRA) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__first_place_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -648,6 +703,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__second_place_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Second place of slave purchase (PLAC2TRA) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__second_place_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -699,6 +759,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__third_place_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Third place of slave purchase (PLAC3TRA) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__third_place_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -748,6 +813,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__first_region_slave_emb__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : First region of embarkation of slaves (REGEM1) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__first_region_slave_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -799,6 +869,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__second_region_slave_emb__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Second region of embarkation of slaves (REGEM2) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__second_region_slave_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -848,6 +923,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__third_region_slave_emb__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Third region of embarkation of slaves (REGEM3) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__third_region_slave_emb__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -899,6 +979,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Port of call before Atlantic crossing (NPAFTTRA) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__port_of_call_before_atl_crossing__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -948,6 +1033,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__first_landing_place__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : First place of slave landing (SLA1PORT) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__first_landing_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -999,6 +1089,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__second_landing_place__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Second place of slave landing (ADPSALE1) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__second_landing_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1048,6 +1143,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__third_landing_place__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Third place of slave landing (ADPSALE2) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__third_landing_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -1099,6 +1199,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__first_landing_region__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : First region of slave landing (REGDIS1) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__first_landing_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1148,6 +1253,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__second_landing_region__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Second region of slave landing (REGDIS2) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__second_landing_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -1199,6 +1309,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__third_landing_region__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Third region of slave landing (REGDIS3) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__third_landing_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1248,6 +1363,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__place_voyage_ended__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Place at which voyage ended (PORTRET) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__place_voyage_ended__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -1299,6 +1419,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__region_of_return__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Region of return (RETRNREG) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__region_of_return__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1348,6 +1473,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__broad_region_of_return__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Broad region of return (RETRNREG1) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__broad_region_of_return__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -1399,6 +1529,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__imp_port_voyage_begin__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__imp_port_voyage_begin__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1448,6 +1583,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__imp_region_voyage_begin__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed region where voyage began (DEPTREGIMP) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__imp_region_voyage_begin__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -1499,6 +1639,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed broad region where voyage began (DEPTREGIMP1) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__imp_broad_region_voyage_begin__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1548,6 +1693,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__principal_place_of_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Principal place of slave purchase (MAJBUYPT) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__principal_place_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -1599,6 +1749,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1648,6 +1803,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -1699,6 +1859,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed principal broad region of slave purchase (MAJBYIMP1) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__imp_broad_region_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1748,6 +1913,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__principal_port_of_slave_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Principal port of slave disembarkation (MAJSELPT) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__principal_port_of_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -1799,6 +1969,11 @@
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : ID"
   },
+  "voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Uuid"
+  },
   "voyage_itinerary__imp_principal_port_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -1848,6 +2023,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : ID"
+  },
+  "voyage_itinerary__imp_broad_region_slave_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage itinerary : Imputed broad region of slave disembarkation (MJSELIMP1) : New Location Fieldmapping : Uuid"
   },
   "voyage_itinerary__imp_broad_region_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -2474,6 +2654,11 @@
     "label": "ID",
     "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : ID"
   },
+  "voyage_ship__vessel_construction_place__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage ship : Place where vessel constructed : New Location Fieldmapping : Uuid"
+  },
   "voyage_ship__vessel_construction_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -2523,6 +2708,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : ID"
+  },
+  "voyage_ship__vessel_construction_region__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage ship : Region where vessel constructed : New Location Fieldmapping : Uuid"
   },
   "voyage_ship__vessel_construction_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -2574,6 +2764,11 @@
     "label": "ID",
     "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : ID"
   },
+  "voyage_ship__registered_place__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage ship : Place where vessel registered : New Location Fieldmapping : Uuid"
+  },
   "voyage_ship__registered_place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -2623,6 +2818,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : ID"
+  },
+  "voyage_ship__registered_region__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage ship : Region where vessel registered : New Location Fieldmapping : Uuid"
   },
   "voyage_ship__registered_region__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",

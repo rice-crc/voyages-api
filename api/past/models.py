@@ -18,6 +18,7 @@ from django.db.models.fields import TextField
 from django.db.models.functions import Coalesce, Concat, Length, Substr
 from django.db.models.sql import RawQuery
 import re
+import uuid
 from common.models import NamedModelAbstractBase
 
 from voyage.models import Place, Voyage, VoyageDataset, VoyageSources
@@ -668,6 +669,9 @@ class EnslaverVoyageConnection(models.Model):
 
 
 class LanguageGroup(NamedModelAbstractBase):
+	
+	uuid=models.UUIDField(default=uuid.uuid4, editable=False,null=True)
+	
 	longitude = models.DecimalField("Longitude of point",
 									max_digits=10,
 									decimal_places=7,
@@ -679,6 +683,9 @@ class LanguageGroup(NamedModelAbstractBase):
 
 
 class ModernCountry(NamedModelAbstractBase):
+	
+	uuid=models.UUIDField(default=uuid.uuid4, editable=False,null=True)
+	
 	longitude = models.DecimalField("Longitude of Country",
 									max_digits=10,
 									decimal_places=7,

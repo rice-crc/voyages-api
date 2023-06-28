@@ -9,7 +9,7 @@ From scratch
 		1. installed apps
 		1. urls.py
 	1. remove rest framework from installed apps
-1. makemigrations & migrate
+1. migrate. ONLY MIGRATE, USING THE 0001 INIT VALUES
 1. create another db in the mysql container named "voyages voyages past merge"
 1. inject the prod db into this new db
 1. run the custom script in this folder

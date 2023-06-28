@@ -19,6 +19,11 @@
     "label": "ID",
     "flatlabel": "post disembark location : New Location Fieldmapping : ID"
   },
+  "post_disembark_location__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "post disembark location : New Location Fieldmapping : Uuid"
+  },
   "post_disembark_location__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -84,6 +89,11 @@
     "label": "ID",
     "flatlabel": "voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : ID"
   },
+  "voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Uuid"
+  },
   "voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -133,6 +143,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : ID"
+  },
+  "voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Uuid"
   },
   "voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -184,6 +199,11 @@
     "label": "ID",
     "flatlabel": "voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : ID"
   },
+  "voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Uuid"
+  },
   "voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -234,6 +254,11 @@
     "label": "ID",
     "flatlabel": "voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : ID"
   },
+  "voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Uuid"
+  },
   "voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -283,6 +308,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : ID"
+  },
+  "voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Uuid"
   },
   "voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -489,6 +519,11 @@
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : ID"
   },
+  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Uuid"
+  },
   "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -538,6 +573,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : ID"
+  },
+  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Uuid"
   },
   "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -589,6 +629,11 @@
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : ID"
   },
+  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Uuid"
+  },
   "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -639,6 +684,11 @@
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : ID"
   },
+  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Uuid"
+  },
   "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Location name",
@@ -688,6 +738,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : ID"
+  },
+  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Uuid"
   },
   "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -773,6 +828,11 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : place : New Location Fieldmapping : ID"
+  },
+  "enslaved_relations__relation__place__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "enslaved in relation : enslavement relation : place : New Location Fieldmapping : Uuid"
   },
   "enslaved_relations__relation__place__geo_location__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -868,6 +928,11 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name",
     "flatlabel": "language group : Name"
+  },
+  "language_group__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "language group : Uuid"
   },
   "language_group__longitude": {
     "type": "<class 'rest_framework.fields.DecimalField'>",

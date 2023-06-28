@@ -1,10 +1,10 @@
-transatlantic_maps={
+voyage_maps={
 	'endpoint':'voyage/dataframes',
 	## THE NAME OF THE INDEX
-	'name':'voyage_transatlantic_maps',
+	'name':'voyage_maps',
 	## USE THE VOYAGES SEARCH FILTERS TO ENSURE THAT WE ONLY GET THE OBJECTS WE WANT
 	## FOR INSTANCE, ONLY TRANSATLANTIC VOYAGES
-	'filter':{'dataset':[0,0]},
+	'filter':{},
 	## THIS OCEANIC FLAG IS BASICALLY TAKEN FOR GRANTED RIGHT NOW
 	## BUT MAYBE LATER ON WE'LL LOAD IN PERSON-TO-PERSON DATA
 	'type':'oceanic',
@@ -25,7 +25,7 @@ transatlantic_maps={
 					#### B. WE DON'T DUPLICATE, OR TOO AGGRESSIVELY DE-DUPLICATE
 					'tag':'embarkation',
 					'values':{
-						'pk':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+						'uuid':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
 						'name':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
 						'lat':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude',
@@ -43,7 +43,7 @@ transatlantic_maps={
 				{
 					'tag':'disembarkation',
 					'values':{
-						'pk':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id',
+						'uuid':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
 						'name':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
 						'lat':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude',
@@ -61,7 +61,7 @@ transatlantic_maps={
 				{
 					'tag':'embarkation',
 					'values':{
-						'pk':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
+						'uuid':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
 						'name':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
 						'lat':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude',
@@ -77,7 +77,7 @@ transatlantic_maps={
 				{
 					'tag':'disembarkation',
 					'values':{
-						'pk':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id',
+						'uuid':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
 						'name':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
 						'lat':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude',
 						'lon':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude',
@@ -90,85 +90,7 @@ transatlantic_maps={
 			]
 		}
 	],
-	'oceanic_network_file':'maps/transatlantic_routes.json'
-}
-
-intraamerican_maps={
-	'endpoint':'voyage/dataframes',
-	'name':'voyage_intraamerican_maps',
-	'filter':{'dataset':[1,1]},
-	'type':'oceanic',
-	'graph_params': [
-		{
-			'name':'place',
-			'ordered_node_classes':[
-				{
-					'tag':'embarkation',
-					'values':{
-						'pk':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
-						'name':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
-						'lat':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude',
-						'lon':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude',
-						'val':'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value'
-					},
-					'tag_connections':[
-						("onramp","source","closest")
-					]
-				},
-				{
-					'tag':'oceanic_waypoint'
-				},
-				{
-					'tag':'disembarkation',
-					'values':{
-						'pk':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__id',
-						'name':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
-						'lat':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude',
-						'lon':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude',
-						'val':'voyage_itinerary__imp_principal_port_slave_dis__geo_location__value'
-					},
-					'tag_connections':[
-						("offramp","target","closest")
-					]
-				}
-			]
-		},
-		{
-			'name':'region',
-			'ordered_node_classes':[
-				{
-					'tag':'embarkation',
-					'values':{
-						'pk':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
-						'name':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
-						'lat':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude',
-						'lon':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude',
-						'val':'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value'		
-					},
-					'tag_connections':[
-						("onramp","source","closest")
-					]
-				},
-				{
-					'tag':'oceanic_waypoint'
-				},
-				{
-					'tag':'disembarkation',
-					'values':{
-						'pk':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__id',
-						'name':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
-						'lat':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude',
-						'lon':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude',
-						'val':'voyage_itinerary__imp_principal_region_slave_dis__geo_location__value'		
-					},
-					'tag_connections':[
-						("offramp","target","closest")
-					]
-				}
-			]
-		}
-	],
-	'oceanic_network_file':'maps/intraamerican_routes.json'
+	'oceanic_network_file':'maps/all_routes.json'
 }
 
 ao_maps={
@@ -185,7 +107,7 @@ ao_maps={
 				{
 					'tag':'origin',
 					'values':{
-						'pk':'language_group__id',
+						'uuid':'language_group__uuid',
 						'lat':'language_group__latitude',
 						'lon':'language_group__longitude',
 						'name':'language_group__name',
@@ -198,7 +120,7 @@ ao_maps={
 				{
 					'tag':'embarkation',
 					'values':{
-						'pk':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id',
+						'uuid':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
 						'name':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
 						'lat':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude',
@@ -214,7 +136,7 @@ ao_maps={
 				{
 					'tag':'disembarkation',
 					'values':{
-						'pk':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__id',
+						'uuid':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
 						'name':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
 						'lat':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude',
 						'lon':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude',
@@ -227,7 +149,7 @@ ao_maps={
 				{
 					'tag':'post-disembarkation',
 					'values':{
-						'pk':'post_disembark_location__geo_location__id',
+						'uuid':'post_disembark_location__geo_location__uuid',
 						'val':'post_disembark_location__geo_location__value',
 						'lat':'post_disembark_location__geo_location__latitude',
 						'lon':'post_disembark_location__geo_location__longitude',
@@ -245,7 +167,7 @@ ao_maps={
 				{
 					'tag':'origin',
 					'values':{
-						'pk':'language_group__id',
+						'uuid':'language_group__uuid',
 						'lat':'language_group__latitude',
 						'lon':'language_group__longitude',
 						'name':'language_group__name',
@@ -258,7 +180,7 @@ ao_maps={
 				{
 					'tag':'embarkation',
 					'values':{
-						'pk':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id',
+						'uuid':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
 						'name':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
 						'lat':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude',
 						'lon':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude',
@@ -274,7 +196,7 @@ ao_maps={
 				{
 					'tag':'disembarkation',
 					'values':{
-						'pk':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__id',
+						'uuid':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
 						'name':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
 						'lat':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude',
 						'lon':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude',
@@ -287,7 +209,7 @@ ao_maps={
 				{
 					'tag':'post-disembarkation',
 					'values':{
-						'pk':'post_disembark_location__geo_location__id',
+						'uuid':'post_disembark_location__geo_location__uuid',
 						'val':'post_disembark_location__geo_location__value',
 						'lat':'post_disembark_location__geo_location__latitude',
 						'lon':'post_disembark_location__geo_location__longitude',

@@ -232,6 +232,17 @@
       "intro"
     ]
   },
+  "captcha_captchastore": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "challenge",
+      "response",
+      "hashkey",
+      "expiration"
+    ]
+  },
   "common_savedquery": {
     "constraints": [],
     "columns": [],

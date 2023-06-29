@@ -38,7 +38,7 @@ voyage_bar_and_donut_charts={
 		'voyage_dates__slave_purchase_began_sparsedate__month',
 		'voyage_slaves_numbers__percentage_men',
 		'voyage_dates__voyage_completed_sparsedate__month',
-		'voyage_itinerary__region_of_return',
+		'voyage_itinerary__region_of_return__geo_location__name',
 		'voyage_slaves_numbers__percentage_boy',
 		'voyage_crew__crew_voyage_outset',
 		'voyage_itinerary__imp_principal_region_slave_dis',

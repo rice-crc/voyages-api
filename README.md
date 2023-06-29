@@ -56,6 +56,14 @@ host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyag
 host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "select * from voyages_api.voyage_voyage limit 1"
 ```
 
+### Localsettings.py files
+
+Required in:
+
+* stats/
+* networks/
+* api/voyages3/
+
 ### Post-Install Setup Tasks
 
 Run media asset tasks.
@@ -64,27 +72,22 @@ Run media asset tasks.
 host:~/Projects/voyages-api docker exec -i voyages-django bash -c 'python3 manage.py collectstatic --noinput'
 ```
 
-#### Set up the stats engine (flask app):
+#### Getting API keys (for Flask containers):
 
-Copy the stats / flask localsettings over:
-
-```bash
-host:~/Projects/voyages-api$ cp stats/localsettings.py-default stats/localsettings.py
-```
-
-Enter the django contariner and create a new superuser
+Enter the django container and create a new superuser
 
 	docker exec -it voyages-api /bin/bash
 	python3 manage.py createsuperuser
 
 Log in to the admin interface at [http://127.0.0.1:8100/admin](http://127.0.0.1:8000/admin) with those credentials, and create an api token for yourself.
 
-Update your new file at ```stats/localsettings.py``` with this token.
+Update your new files at ```stats/localsettings.py``` and ```networks/localsettings.py``` with this token.
 
-Restart the flask engine.
+Restart the flask engine(s).
 
 ```bash
 host:~/Projects/voyages-api$ docker restart voyages-stats
+host:~/Projects/voyages-api$ docker restart voyages-networks
 ```
 
 ### Cleanup
@@ -110,10 +113,9 @@ There are currently 5 major endpoints, which allow you to query on People, Voyag
 1. Voyages: POST http://127.0.0.1:8000/voyage/
 1. Places: POST http://127.0.0.1:8000/geo/
 1. Estimates:  POST http://127.0.0.1:8000/assessment/
+1. Documents:  GET http://127.0.0.1:8000/docs/
 
 ### 0. AUTHENTICATION
-
-#### Required as of March 16.
 
 documentation: https://www.django-rest-framework.org/api-guide/authentication/
 
@@ -136,7 +138,6 @@ Let's imagine that that username and password you've set are simply "voyages"/"v
 
 The full authentication workflow would look like:
 
-
 	import requests
 	import json
 	url='http://127.0.0.1:8000/voyages2022_auth_endpoint/'
@@ -148,12 +149,17 @@ The full authentication workflow would look like:
 	print(headers)
 
 	url='http://127.0.0.1:8000/voyage/'
-	r=requests.post(url,headers=headers)
-
+	resp=requests.post(url,headers=headers)
+	print(resp.status_code)
+	j=json.loads(resp.text)
+	print(json.dumps(j,indent=2))
 
 ### 1. Using POST Requests
 
-NUMERIC RANGES: A request to PAST asking for people transported on voyages with Voyage ID's between 2314 and 2500 would look like
+
+#### 1A. Numerics
+
+RANGES: A request to PAST asking for people transported on voyages with Voyage ID's between 2314 and 2500 would look like
 	
 	POST http://127.0.0.1:8000/past/enslaved/
 	
@@ -164,9 +170,18 @@ NUMERIC RANGES: A request to PAST asking for people transported on voyages with 
 		'voyage__voyage_id': ['2314,2500']
 	}
 	
-And would return results 60-79 of 21,867 total records.
+ONE-SIDED INTERVALS: Use double-asterisks in a list of length 2 for a greater-than or less-than request.
 
-DISCRETE INTEGER VALUES: You can now send a request for a list of specific values on an integer field by including an asterisk in your list.
+	POST http://127.0.0.1:8000/past/enslaved/
+	
+	Body:
+	{
+		'results_page': ['3'],
+		'results_per_page': ['20'],
+		'voyage__voyage_id': ['2314,**']
+	}
+
+DISCRETE INTEGER VALUES: You can filter on specific values *on an integer field only* by including an single asterisk in your list.
 
 	POST http://127.0.0.1:8000/past/enslaved/
 	
@@ -175,9 +190,18 @@ DISCRETE INTEGER VALUES: You can now send a request for a list of specific value
 		'voyage__voyage_id': ['*,2314,2500']
 	}
 
-Would return results for 353 total records.
+#### 1B. Text fields
 
-AUTOCOMPLETE w. TEXT FIELDS: You can search for inexact matches on strings and receive a list of the 20 first alphabetically sorted matches:
+Text fields accept exact matches only: 
+
+	POST http://127.0.0.1:8000/voyage/
+	
+	Body:
+	{	'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name':
+		['Barbados','Jamaica']
+	}
+
+How do you find the exact matches? By using autocomplete to see the valid values on that field.
 
 This request
 
@@ -189,21 +213,15 @@ This request
 Would return
 
 	{
-		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": [
-			"Jamaica"
-		]
+		"results": [
+			{
+				"id": 2419,
+				"label": "Jamaica"
+			}
+		],
+		"total_results_count": 3715
 	}
 
-Which is useful because text fields take only precise matches on other endpoints. So you might run a couple autocomplete searches to let the user find an exact match, which they then select, and then allow them to do it again as they pick all the matches that they want, like so:
-
-	POST http://127.0.0.1:8000/voyage/
-	
-	Body:
-	{	'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name':
-		['Barbados','Jamaica']
-	}
-
-And get back 5,816 results.
 
 ### 2. Enumerating variables, relationships, and data types
 
@@ -214,7 +232,7 @@ And get back 5,816 results.
 
 Why "hierarchical=False"?
 
-1. The default is hierarchical=True, which gives you a tree
+1. The default is hierarchical
 1. These variables' hierarchical relations correspond to links between db tables
 1. The django syntax for those links is a double underscore: "__"
 1. Variable labels are now presented in two formats:
@@ -222,6 +240,8 @@ Why "hierarchical=False"?
 	1. "flatlabel" which is a concatenated label -- good for menus targeting specific fields
 
 hierarchical=False looks like:
+
+
 
     ...
     "voyage_itinerary__port_of_departure__geo_location__child_of__longitude": {

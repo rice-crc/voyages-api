@@ -49,6 +49,11 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 				fieldvals=params.get(field)
 				if '*' in fieldvals:
 					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
+				elif '**' in fieldvals and len(fieldvals)==2:
+					if fieldvals[0]=='**':
+						kwargs['{0}__{1}'.format(field, 'lte')]=max
+					else:
+						kwargs['{0}__{1}'.format(field, 'gte')]=min
 				else:
 					range=fieldvals
 					vals=[float(i) for i in range]

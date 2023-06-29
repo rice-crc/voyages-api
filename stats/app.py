@@ -14,42 +14,50 @@ app.config['JSON_SORT_KEYS'] = False
 
 def load_long_df(endpoint,variables):
 	headers={'Authorization':DJANGO_AUTH_KEY}
-# 	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes',headers=headers)
-# 	print("OPTIONS----->",r.status_code)
-	
+	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
+	options=json.loads(r.text)
+	print("OPTIONS----->",r.status_code)
+		
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
 		data={'selected_fields':variables}
 	)
 	j=json.loads(r.text)
-# 	for i in range(7):
-# 		print("----")
-# 		for k in list(j.keys()):
-# 			print(k,j[k][i])
-# 	print("----")
 	df=pd.DataFrame.from_dict(j)
+	#coerce datatypes based on options call
+	for varname in variables:
+		optionsvar=options[varname]
+		vartype=optionsvar['type']
+		if vartype in [
+			"<class 'rest_framework.fields.IntegerField'>",
+			"<class 'rest_framework.fields.FloatField'>",
+			"<class 'rest_framework.fields.DecimalField'>"
+		]:
+			df[varname]=pd.to_numeric(df[varname])
+			
+	print(df)
 	
 	return(df)
 
 registered_caches=[
-# 	voyage_bar_and_donut_charts,
-	voyage_maps,
-	enslaved_maps,
-# 	voyage_summary_statistics,
-# 	voyage_pivot_tables,
-# 	voyage_xyscatter
+	voyage_bar_and_donut_charts,
+# 	voyage_maps,
+# 	enslaved_maps,
+	voyage_summary_statistics,
+	voyage_pivot_tables,
+	voyage_xyscatter
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
 st=time.time()
 for rc in registered_caches:
-	try:
-		endpoint=rc['endpoint']
-		variables=rc['variables']
-		rc['df']=load_long_df(endpoint,variables)
-	except:
-		print("failed on cache:",rc['name'])
+# 	try:
+	endpoint=rc['endpoint']
+	variables=rc['variables']
+	rc['df']=load_long_df(endpoint,variables)
+# 	except:
+# 		print("failed on cache:",rc['name'])
 print("finished building stats indices in %d seconds" %int(time.time()-st))
 
 #we need to make the indices' contents visible
@@ -76,6 +84,7 @@ def groupby():
 	agg_fn=rdata['agg_fn'][0]
 	df=eval(dfname)['df']
 	df2=df[df['id'].isin(ids)]
+	print(df2,df2[groupby_cols[0]].unique())
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
 # 	ct=ct.fillna(0)
 	resp={groupby_by:list(ct.index)}

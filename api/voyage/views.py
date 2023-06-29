@@ -143,7 +143,6 @@ class VoyageGroupBy(generics.GenericAPIView):
 		print(params)
 		groupby_by=params.get('groupby_by')
 		groupby_cols=params.get('groupby_cols')
-		value_field_tuple=params.get('value_field_tuple')
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		ids=[i[0] for i in queryset.values_list('id')]

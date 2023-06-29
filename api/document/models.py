@@ -6,9 +6,7 @@ from past.models import Enslaved,EnslaverIdentity
 
 class SourcePage(models.Model):
 	"""
-	Voyage sources.
-	Representing the original variables SOURCEA, SOURCEB, SOURCEC
-	and etc to SOURCER
+	INDIVIDUAL PAGES
 	"""
 	page_url=models.URLField(max_length=400,null=True)
 	iiif_manifest_url=models.URLField(null=True,blank=True,max_length=400)
@@ -18,6 +16,7 @@ class SourcePage(models.Model):
 		null=True,
 		blank=True
 	)
+	transcription=models.TextField(null=True,blank=True)
 	
 	def __str__(self):
 		nonnulls=[i for i in [

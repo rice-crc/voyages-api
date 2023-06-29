@@ -1871,6 +1871,8 @@ class VoyageSources(models.Model):
 								max_length=2550, null=False, blank=True)
 	source_type = models.ForeignKey('VoyageSourcesType', null=False,
 									on_delete=models.CASCADE)
+	
+	transkribus_docid=models.IntegerField(null=True,blank=True)
 
 	class Meta:
 		verbose_name = 'Source'

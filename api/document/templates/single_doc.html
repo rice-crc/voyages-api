@@ -14,15 +14,28 @@
 <ol>
 
 {% for spc in zs.page_connection.all %}
+<table border=1>
+	<tr>
+		<td>
+			<a href="{{ spc.source_page.page_url }}">Item page</a>
+			<br/>
 
-	<li><a href="{{ spc.source_page.page_url }}">Item page
-
-	{% if spc.source_page.iiif_baseimage_url %}
-		<ul><li>Link to full image: <a href="{{ spc.source_page.iiif_baseimage_url }}" target="_blank"><img src="{{ spc.source_page.square_thumbnail }}"></a></li></ul>
-	{% endif %}
+			{% if spc.source_page.iiif_baseimage_url %}
+				Link to full image: <br/><a href="{{ spc.source_page.iiif_baseimage_url }}" target="_blank"><img src="{{ spc.source_page.square_thumbnail }}"></a></li></ul>
+			{% endif %}
+		</td>
+		<td>
+			{% if spc.source_page.transcription %}
+				<p><b><a href="http://127.0.0.1:8000/admin/document/sourcepage/{{ spc.source_page.id }}/change/" target="_blank">Edit Transcript Here</a></b></p>
+				<p>
+				 {{ spc.source_page.transcription }}
+				</p>
+				<p></p>
+			{% endif %}
+		</td>
+	</tr>
 	
-	</li>
-
+</table>
 {% endfor %}
 
 </ol>

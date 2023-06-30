@@ -276,19 +276,19 @@ class EnslaverInfoAbstractBase(models.Model):
 	principal_alias = models.CharField(max_length=255)
 
 	# Personal info.
-	birth_year = models.IntegerField(null=True)
-	birth_month = models.IntegerField(null=True)
-	birth_day = models.IntegerField(null=True)
-	birth_place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+')
+	birth_year = models.IntegerField(null=True,blank=True)
+	birth_month = models.IntegerField(null=True,blank=True)
+	birth_day = models.IntegerField(null=True,blank=True)
+	birth_place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+',blank=True)
 
-	death_year = models.IntegerField(null=True)
-	death_month = models.IntegerField(null=True)
-	death_day = models.IntegerField(null=True)
-	death_place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+')
+	death_year = models.IntegerField(null=True,blank=True)
+	death_month = models.IntegerField(null=True,blank=True)
+	death_day = models.IntegerField(null=True,blank=True)
+	death_place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+',blank=True)
 
-	father_name = models.CharField(max_length=255, null=True)
-	father_occupation = models.CharField(max_length=255, null=True)
-	mother_name = models.CharField(max_length=255, null=True)
+	father_name = models.CharField(max_length=255, null=True,blank=True)
+	father_occupation = models.CharField(max_length=255, null=True,blank=True)
+	mother_name = models.CharField(max_length=255, null=True,blank=True)
 
 	# We will include the spouses in the Enslaver table and use
 	# EnslavementRelation to join the individuals by a marriage
@@ -298,16 +298,19 @@ class EnslaverInfoAbstractBase(models.Model):
 	# second_spouse_name = models.CharField(max_length=255, null=True)
 	# second_marriage_date = models.CharField(max_length=12, null=True)
 	
-	probate_date = models.CharField(max_length=12, null=True)
-	will_value_pounds = models.CharField(max_length=12, null=True)
-	will_value_dollars = models.CharField(max_length=12, null=True)
-	will_court = models.CharField(max_length=12, null=True)
+	probate_date = models.CharField(max_length=12, null=True,blank=True)
+	will_value_pounds = models.CharField(max_length=12, null=True,blank=True)
+	will_value_dollars = models.CharField(max_length=12, null=True,blank=True)
+	will_court = models.CharField(max_length=12, null=True,blank=True)
 	principal_location = models.ForeignKey(Place, null=True,
 												on_delete=models.CASCADE,
-												db_index=True)
-	notes = models.CharField(null=True, max_length=8192)
+												db_index=True,blank=True)
+	notes = models.CharField(null=True, max_length=8192,blank=True)
 
-	is_natural_person = models.BooleanField(null=False, default=True)
+	is_natural_person = models.BooleanField(null=False, default=True,blank=True)
+	
+	last_updated=models.DateTimeField(auto_now=True)
+	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 
 	def __str__(self):
 		return self.__unicode__()
@@ -562,6 +565,8 @@ class EnslaverAlias(models.Model):
 	# The manual id can be used to track the original entries in sheets produced
 	# by the researchers.
 	manual_id = models.CharField(max_length=30, null=True)
+	last_updated=models.DateTimeField(auto_now=True)
+	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 
 	def __str__(self):
 		return self.__unicode__()
@@ -736,12 +741,12 @@ class Enslaved(models.Model):
 	"""
 	Enslaved person.
 	"""
-	id = models.IntegerField(primary_key=True)
+	id = models.IntegerField(primary_key=True,blank=True)
 
 	# For African Origins dataset documented_name is an African Name.
 	# For Oceans of Kinfolk, this field is used to store the Western
 	# Name of the enslaved.
-	documented_name = models.CharField(max_length=100, blank=True)
+	documented_name = models.CharField(max_length=100, blank=True,null=True)
 	name_first = models.CharField(max_length=100, null=True, blank=True)
 	name_second = models.CharField(max_length=100, null=True, blank=True)
 	name_third = models.CharField(max_length=100, null=True, blank=True)
@@ -751,38 +756,42 @@ class Enslaved(models.Model):
 													 null=True,
 													 blank=True)
 	# Personal data
-	age = models.IntegerField(null=True, db_index=True)
-	gender = models.IntegerField(null=True, db_index=True)
-	height = models.DecimalField(null=True, decimal_places=2, max_digits=6, verbose_name="Height in inches", db_index=True)
-	skin_color = models.CharField(max_length=100, null=True, db_index=True)
-	language_group = models.ForeignKey(LanguageGroup, null=True,
+	age = models.IntegerField(null=True, db_index=True,blank=True)
+	gender = models.IntegerField(null=True, db_index=True,blank=True)
+	height = models.DecimalField(null=True, decimal_places=2, max_digits=6, verbose_name="Height in inches", db_index=True,blank=True)
+	skin_color = models.CharField(max_length=100, null=True, db_index=True,blank=True)
+	language_group = models.ForeignKey(LanguageGroup,
 									   on_delete=models.CASCADE,
-									   db_index=True)
+									   db_index=True,null=True,blank=True)
 	register_country = models.ForeignKey(RegisterCountry, null=True,
 										 on_delete=models.CASCADE,
-										db_index=True)
+										db_index=True,blank=True)
 	# For Kinfolk, this is the Last known location field.
 	post_disembark_location = models.ForeignKey(Place, null=True,
 												on_delete=models.CASCADE,
 												db_index=True,
-												related_name='+')
+												related_name='+',blank=True)
 	last_known_date = models.CharField(
 		max_length=10,
 		blank=True,
 		null=True,
 		help_text="Date in format: MM,DD,YYYY")
-	captive_fate = models.ForeignKey(CaptiveFate, null=True, on_delete=models.SET_NULL, db_index=True)
-	captive_status = models.ForeignKey(CaptiveStatus, null=True, on_delete=models.SET_NULL, db_index=True)
-	voyage = models.ForeignKey(Voyage, null=False, on_delete=models.CASCADE, db_index=True,related_name="voyage_enslaved_people")
-	dataset = models.IntegerField(null=False, default=0, db_index=True)
-	notes = models.CharField(null=True, max_length=8192)
+	captive_fate = models.ForeignKey(CaptiveFate, null=True, on_delete=models.SET_NULL, db_index=True,blank=True)
+	captive_status = models.ForeignKey(CaptiveStatus, null=True, on_delete=models.SET_NULL, db_index=True,blank=True)
+	voyage = models.ForeignKey(Voyage, null=True, on_delete=models.CASCADE, db_index=True,related_name="voyage_enslaved_people",blank=True)
+	dataset = models.IntegerField(null=True, default=0, db_index=True,blank=True)
+	notes = models.CharField(null=True, max_length=8192,blank=True)
 	sources = models.ManyToManyField(VoyageSources,
 									 through='EnslavedSourceConnection',
-									 related_name='+')
+									 related_name='+',null=True,blank=True)
+	last_updated=models.DateTimeField(auto_now=True)
+	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 
 	def __str__(self):
 		return ": ".join([i for i in [self.documented_name,str(self.id)," ".join(["voyage:", str(self.voyage_id)])] if i not in [""," ",None]])
-
+	
+	class Meta:
+		verbose_name_plural = "Enslaved People"
 
 class EnslavedSourceConnection(SourceConnectionAbstractBase):
 	enslaved = models.ForeignKey(Enslaved,

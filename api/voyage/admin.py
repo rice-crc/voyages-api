@@ -31,17 +31,17 @@ class VoyageDatesInline(admin.StackedInline):
 	]
 	verbose_name_plural="Voyage Dates"
 
-class PlaceAdmin(admin.ModelAdmin):
-	model=Place
-	search_fields=['place']
-
-class RegionAdmin(admin.ModelAdmin):
-	model=Region
-	search_fields=['region']
-
-class BroadRegionAdmin(admin.ModelAdmin):
-	model=BroadRegion
-	search_fields=['broad_region']
+# class PlaceAdmin(admin.ModelAdmin):
+# 	model=Place
+# 	search_fields=['place']
+# 
+# class RegionAdmin(admin.ModelAdmin):
+# 	model=Region
+# 	search_fields=['region']
+# 
+# class BroadRegionAdmin(admin.ModelAdmin):
+# 	model=BroadRegion
+# 	search_fields=['broad_region']
 
 
 
@@ -52,40 +52,40 @@ class VoyageSlavesNumbersInline(admin.StackedInline):
 	classes = ['collapse']
 	max_num=1
 # 
-class ParticularOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('name','value')
-	list_display_links = ('name',)
-	model=ParticularOutcome
-	search_fields=['name']
-	classes = ['collapse']
-
-class SlavesOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('name','value')
-	list_display_links = ('name',)
-	model=SlavesOutcome
-	search_fields=['name']
-	classes = ['collapse']
-	
-class VesselCapturedOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('name','value')
-	list_display_links = ('name',)
-	model=VesselCapturedOutcome
-	search_fields=['name']
-	classes = ['collapse']
-
-class OwnerOutcomeAdmin(admin.ModelAdmin):
-	list_display = ('name','value')
-	list_display_links = ('name',)
-	model=OwnerOutcome
-	search_fields=['name']
-	classes = ['collapse']
-
-class ResistanceAdmin(admin.ModelAdmin):
-	list_display = ('name','value')
-	list_display_links = ('name',)
-	model=Resistance
-	search_fields=['name']
-	classes = ['collapse']
+# class ParticularOutcomeAdmin(admin.ModelAdmin):
+# 	list_display = ('name','value')
+# 	list_display_links = ('name',)
+# 	model=ParticularOutcome
+# 	search_fields=['name']
+# 	classes = ['collapse']
+# 
+# class SlavesOutcomeAdmin(admin.ModelAdmin):
+# 	list_display = ('name','value')
+# 	list_display_links = ('name',)
+# 	model=SlavesOutcome
+# 	search_fields=['name']
+# 	classes = ['collapse']
+# 	
+# class VesselCapturedOutcomeAdmin(admin.ModelAdmin):
+# 	list_display = ('name','value')
+# 	list_display_links = ('name',)
+# 	model=VesselCapturedOutcome
+# 	search_fields=['name']
+# 	classes = ['collapse']
+# 
+# class OwnerOutcomeAdmin(admin.ModelAdmin):
+# 	list_display = ('name','value')
+# 	list_display_links = ('name',)
+# 	model=OwnerOutcome
+# 	search_fields=['name']
+# 	classes = ['collapse']
+# 
+# class ResistanceAdmin(admin.ModelAdmin):
+# 	list_display = ('name','value')
+# 	list_display_links = ('name',)
+# 	model=Resistance
+# 	search_fields=['name']
+# 	classes = ['collapse']
 # # 
 # # ##Autocomplete won't work on this
 # # ##Until we update the voyages table to explicitly point at outcomes
@@ -103,113 +103,114 @@ class VoyageOutcomeInline(admin.StackedInline):
 	classes = ['collapse']
 	model=VoyageOutcome
 # 
-class NationalityAdmin(admin.ModelAdmin):
-	search_fields=['name']
-	model=Nationality
+# class NationalityAdmin(admin.ModelAdmin):
+# 	search_fields=['name']
+# 	model=Nationality
 # 
-class TonTypeAdmin(admin.ModelAdmin):
-	search_fields=['name']
-	model=TonType
+# class TonTypeAdmin(admin.ModelAdmin):
+# 	search_fields=['name']
+# 	model=TonType
 # 
-class RigOfVesselAdmin(admin.ModelAdmin):
-	model=RigOfVessel
-	search_fields=['name']
+# class RigOfVesselAdmin(admin.ModelAdmin):
+# 	model=RigOfVessel
+# 	search_fields=['name']
 
 # 
 class VoyageShipInline(admin.StackedInline):
 	model = VoyageShip
 	max_num = 1
-	autocomplete_fields=[
-		'nationality_ship',
-		'ton_type',
-		'rig_of_vessel',
-		'vessel_construction_place',
-		'vessel_construction_region',
-		'registered_place',
-		'registered_region',
-		'imputed_nationality'
-	]
+# 	autocomplete_fields=[
+# 		'nationality_ship',
+# 		'ton_type',
+# 		'rig_of_vessel',
+# 		'vessel_construction_place',
+# 		'vessel_construction_region',
+# 		'registered_place',
+# 		'registered_region',
+# 		'imputed_nationality'
+# 	]
 	classes = ['collapse']
 # 
 class VoyageItineraryInline(admin.StackedInline):
 	model = VoyageItinerary
 	max_num = 1
-	autocomplete_fields=[
-		'imp_broad_region_voyage_begin',
-		'port_of_departure',
-		'int_first_port_emb',
-		'int_third_port_dis',
-		'int_fourth_port_dis',
-		'int_third_place_region_slave_landing',
-		'int_fourth_place_region_slave_landing',
-		'int_second_port_emb',
-		'int_first_region_purchase_slaves',
-		'int_second_region_purchase_slaves',
-		'int_first_port_dis',
-		'int_second_port_dis',
-		'int_first_region_slave_landing',
-		'imp_principal_region_slave_dis',
-		'int_second_place_region_slave_landing',
-		'first_place_slave_purchase',
-		'second_place_slave_purchase',
-		'third_place_slave_purchase',
-		'first_region_slave_emb',
-		'second_region_slave_emb',
-		'third_region_slave_emb',
-		'port_of_call_before_atl_crossing',
-		'first_landing_place',
-		'second_landing_place',
-		'third_landing_place',
-		'first_landing_region',
-		'second_landing_region',
-		'third_landing_region',
-		'place_voyage_ended',
-		'region_of_return',
-		'broad_region_of_return',
-		'imp_port_voyage_begin',
-		'imp_region_voyage_begin',
-		'imp_broad_region_voyage_begin',
-		'principal_place_of_slave_purchase',
-		'imp_principal_place_of_slave_purchase',
-		'imp_principal_region_of_slave_purchase',
-		'imp_broad_region_of_slave_purchase',
-		'principal_port_of_slave_dis',
-		'imp_principal_port_slave_dis',
-		'imp_broad_region_slave_dis'
-	]
+# 	autocomplete_fields=[
+# 		'imp_broad_region_voyage_begin',
+# 		'port_of_departure',
+# 		'int_first_port_emb',
+# 		'int_third_port_dis',
+# 		'int_fourth_port_dis',
+# 		'int_third_place_region_slave_landing',
+# 		'int_fourth_place_region_slave_landing',
+# 		'int_second_port_emb',
+# 		'int_first_region_purchase_slaves',
+# 		'int_second_region_purchase_slaves',
+# 		'int_first_port_dis',
+# 		'int_second_port_dis',
+# 		'int_first_region_slave_landing',
+# 		'imp_principal_region_slave_dis',
+# 		'int_second_place_region_slave_landing',
+# 		'first_place_slave_purchase',
+# 		'second_place_slave_purchase',
+# 		'third_place_slave_purchase',
+# 		'first_region_slave_emb',
+# 		'second_region_slave_emb',
+# 		'third_region_slave_emb',
+# 		'port_of_call_before_atl_crossing',
+# 		'first_landing_place',
+# 		'second_landing_place',
+# 		'third_landing_place',
+# 		'first_landing_region',
+# 		'second_landing_region',
+# 		'third_landing_region',
+# 		'place_voyage_ended',
+# 		'region_of_return',
+# 		'broad_region_of_return',
+# 		'imp_port_voyage_begin',
+# 		'imp_region_voyage_begin',
+# 		'imp_broad_region_voyage_begin',
+# 		'principal_place_of_slave_purchase',
+# 		'imp_principal_place_of_slave_purchase',
+# 		'imp_principal_region_of_slave_purchase',
+# 		'imp_broad_region_of_slave_purchase',
+# 		'principal_port_of_slave_dis',
+# 		'imp_principal_port_slave_dis',
+# 		'imp_broad_region_slave_dis'
+# 	]
 	classes = ['collapse']
 # 
 
-class VoyageSourcesConnectionInline(admin.StackedInline):
-	model=VoyageSourcesConnection
-	autocomplete_fields=['source']
-	fields=[
-		'source',
-		'text_ref'
-	]
-	classes = ['collapse']
-	extra=0
+# class VoyageSourcesConnectionInline(admin.StackedInline):
+# 	model=VoyageSourcesConnection
+# 	autocomplete_fields=['source']
+# 	fields=[
+# 		'source',
+# 		'text_ref'
+# 	]
+# 	classes = ['collapse']
+# 	extra=0
 # # 
-class VoyageSourcesAdmin(admin.ModelAdmin):
-	search_fields=['full_ref','short_ref']
-	list_display=['short_ref','full_ref']
-	model=VoyageSources
+# class VoyageSourcesAdmin(admin.ModelAdmin):
+# 	search_fields=['full_ref','short_ref']
+# 	list_display=['short_ref','full_ref']
+# 	model=VoyageSources
 # 
 class VoyageOutcomeInline(admin.StackedInline):
 	model=VoyageOutcome
 	extra=0
-	autocomplete_fields=[
-		'particular_outcome',
-		'resistance',
-		'outcome_slaves',
-		'vessel_captured_outcome',
-		'outcome_owner'
-	]
+# 	autocomplete_fields=[
+# 		'particular_outcome',
+# 		'resistance',
+# 		'outcome_slaves',
+# 		'vessel_captured_outcome',
+# 		'outcome_owner'
+# 	]
 	classes = ['collapse']
 
 class EnslaverAliasConnectionInline(admin.StackedInline):
 	model = EnslaverVoyageConnection
-	autocomplete_fields=['enslaver_alias',]
+	readonly_fields=['enslaver_alias','role','order']
+# 	autocomplete_fields=['enslaver_alias',]
 	classes = ['collapse']
 	extra=0
 
@@ -217,7 +218,7 @@ class VoyageAdmin(admin.ModelAdmin):
 	inlines=(
 		VoyageDatesInline,
 		VoyageItineraryInline,
-		VoyageSourcesConnectionInline,
+# 		VoyageSourcesConnectionInline,
 		EnslaverAliasConnectionInline,
 		VoyageCrewInline,
 		VoyageOutcomeInline,
@@ -231,16 +232,16 @@ class VoyageAdmin(admin.ModelAdmin):
 # 
 # 
 admin.site.register(Voyage, VoyageAdmin)
-admin.site.register(VoyageDates)
-admin.site.register(Place,PlaceAdmin)
-admin.site.register(Region,RegionAdmin)
-admin.site.register(BroadRegion,BroadRegionAdmin)
-admin.site.register(VoyageSources, VoyageSourcesAdmin)
-admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
-admin.site.register(SlavesOutcome, SlavesOutcomeAdmin)
-admin.site.register(VesselCapturedOutcome, VesselCapturedOutcomeAdmin)
-admin.site.register(OwnerOutcome, OwnerOutcomeAdmin)
-admin.site.register(Resistance, ResistanceAdmin)
-admin.site.register(Nationality, NationalityAdmin)
-admin.site.register(TonType, TonTypeAdmin)
-admin.site.register(RigOfVessel, RigOfVesselAdmin)
+# admin.site.register(VoyageDates)
+# admin.site.register(Place,PlaceAdmin)
+# admin.site.register(Region,RegionAdmin)
+# admin.site.register(BroadRegion,BroadRegionAdmin)
+# admin.site.register(VoyageSources, VoyageSourcesAdmin)
+# admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
+# admin.site.register(SlavesOutcome, SlavesOutcomeAdmin)
+# admin.site.register(VesselCapturedOutcome, VesselCapturedOutcomeAdmin)
+# admin.site.register(OwnerOutcome, OwnerOutcomeAdmin)
+# admin.site.register(Resistance, ResistanceAdmin)
+# admin.site.register(Nationality, NationalityAdmin)
+# admin.site.register(TonType, TonTypeAdmin)
+# admin.site.register(RigOfVessel, RigOfVesselAdmin)

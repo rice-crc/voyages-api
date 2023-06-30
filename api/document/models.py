@@ -17,7 +17,9 @@ class SourcePage(models.Model):
 		blank=True
 	)
 	transcription=models.TextField(null=True,blank=True)
-	
+	last_updated=models.DateTimeField(auto_now=True)
+	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
+		
 	def __str__(self):
 		nonnulls=[i for i in [
 				self.page_url,
@@ -106,6 +108,9 @@ class ZoteroSource(models.Model):
 		blank=False
 	)
 	
+	last_updated=models.DateTimeField(auto_now=True)
+	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
+		
 	class Meta:
 		unique_together=[
 			['zotero_title','zotero_url','legacy_source']

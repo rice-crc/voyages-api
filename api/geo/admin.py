@@ -57,5 +57,5 @@ class LocationAdmin(admin.ModelAdmin):
 # admin.site.register(Adjacency, AdjacencyAdmin)
 # admin.site.register(Polygon, PolygonAdmin)
 # admin.site.register(LocationType,LocationTypeAdmin)
-admin.site.register(Location,LocationAdmin)
+# admin.site.register(Location,LocationAdmin)
 # 

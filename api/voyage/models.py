@@ -2014,7 +2014,8 @@ class Voyage(models.Model):
 	african_info = models.ManyToManyField(AfricanInfo, related_name='african_info', blank=True)
 	cargo = models.ManyToManyField(CargoType, through='VoyageCargoConnection', blank=True)
 
-	last_update = models.DateTimeField(auto_now=True)
+	last_update=models.DateTimeField(auto_now=True)
+	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 	dataset = models.IntegerField(
 		null=False,
 # 		default=VoyageDataset.Transatlantic,

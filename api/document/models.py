@@ -110,6 +110,8 @@ class ZoteroSource(models.Model):
 	
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
+	
+	notes=models.TextField(null=True,blank=True)
 		
 	class Meta:
 		unique_together=[

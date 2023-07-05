@@ -16,7 +16,7 @@ class SourcePageConnectionInline(admin.StackedInline):
 class ZoteroSourceAdmin(admin.ModelAdmin):
 	model=ZoteroSource
 	readonly_fields=['item_url','zotero_url','legacy_source']
-	autocomplete_fields=('legacy_source','voyages','enslaved_people','enslavers')
+	autocomplete_fields=('voyages','enslaved_people','enslavers')
 	list_display=('zotero_title','zotero_date')
 
 admin.site.register(ZoteroSource, ZoteroSourceAdmin)

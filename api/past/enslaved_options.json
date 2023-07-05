@@ -464,6 +464,16 @@
     "label": "Manual id",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : Manual id"
   },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : Last updated"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : Human reviewed"
+  },
   "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Identity",
@@ -1008,6 +1018,16 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Notes",
     "flatlabel": "Notes"
+  },
+  "last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "Last updated"
+  },
+  "human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "Human reviewed"
   },
   "register_country": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",

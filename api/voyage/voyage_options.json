@@ -49,6 +49,31 @@
     "label": "Image filename",
     "flatlabel": "zotero source : Page connection : source page : Image filename"
   },
+  "voyage_zoterorefs__page_connection__source_page__transcription": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Transcription",
+    "flatlabel": "zotero source : Page connection : source page : Transcription"
+  },
+  "voyage_zoterorefs__page_connection__source_page__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "zotero source : Page connection : source page : Last updated"
+  },
+  "voyage_zoterorefs__page_connection__source_page__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "zotero source : Page connection : source page : Human reviewed"
+  },
+  "voyage_zoterorefs__legacy_source": {
+    "type": "table",
+    "label": "Source",
+    "flatlabel": "zotero source : Source"
+  },
+  "voyage_zoterorefs__legacy_source__full_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Full reference",
+    "flatlabel": "zotero source : Source : Full reference"
+  },
   "voyage_zoterorefs__item_url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Item url",
@@ -69,10 +94,20 @@
     "label": "Zotero date",
     "flatlabel": "zotero source : Zotero date"
   },
-  "voyage_zoterorefs__legacy_source": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Legacy source",
-    "flatlabel": "zotero source : Legacy source"
+  "voyage_zoterorefs__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "zotero source : Last updated"
+  },
+  "voyage_zoterorefs__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "zotero source : Human reviewed"
+  },
+  "voyage_zoterorefs__notes": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Notes",
+    "flatlabel": "zotero source : Notes"
   },
   "voyage_itinerary": {
     "type": "table",
@@ -2454,6 +2489,16 @@
     "label": "Manual id",
     "flatlabel": "enslaver voyage connection : Enslaver alias : Manual id"
   },
+  "voyage_enslaver_connection__enslaver_alias__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : Last updated"
+  },
+  "voyage_enslaver_connection__enslaver_alias__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : Human reviewed"
+  },
   "voyage_enslaver_connection__enslaver_alias__identity": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
     "label": "Identity",
@@ -3658,6 +3703,11 @@
     "type": "<class 'rest_framework.fields.DateTimeField'>",
     "label": "Last update",
     "flatlabel": "Last update"
+  },
+  "human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "Human reviewed"
   },
   "dataset": {
     "type": "<class 'rest_framework.fields.IntegerField'>",

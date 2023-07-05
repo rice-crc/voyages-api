@@ -7,6 +7,7 @@ from geo.models import *
 from common.nest import nest_selected_fields
 from common.models import SparseDate
 from past.models import *
+from voyage.models import VoyageSources
 
 #### GEO
 
@@ -214,8 +215,16 @@ class ZoteroPageConnectionSerializer(serializers.ModelSerializer):
 		model=SourcePageConnection
 		fields=['source_page',]
 
+class LegacySourceSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=VoyageSources
+		fields=['full_ref',]
+
+
 class VoyageZoteroSerializer(serializers.ModelSerializer):
 	page_connection=ZoteroPageConnectionSerializer(many=True,read_only=True)
+	legacy_source=LegacySourceSerializer(many=False)
+	
 	class Meta:
 		model=ZoteroSource
 		exclude=['enslaved_people','voyages','enslavers',]

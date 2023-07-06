@@ -114,8 +114,8 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		st=time.time()
 		print("+++++++\nusername:",request.auth.user)
 		params=dict(request.POST)
-		groupby_fields=params.get('groupby_fields')
-		value_field_tuple=params.get('value_field_tuple')
+# 		groupby_fields=params.get('groupby_fields')
+# 		value_field_tuple=params.get('value_field_tuple')
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		if len(error_messages)==0:

@@ -64,6 +64,16 @@
     "label": "voyage",
     "flatlabel": "voyage"
   },
+  "voyage__voyage_id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Voyage ID",
+    "flatlabel": "voyage : Voyage ID"
+  },
+  "voyage__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : ID"
+  },
   "voyage__dataset": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Dataset",
@@ -349,6 +359,61 @@
     "label": "Polygon",
     "flatlabel": "voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Polygon"
   },
+  "voyage__voyage_itinerary__int_first_port_dis": {
+    "type": "table",
+    "label": "First intended port of disembarkation (ARRPORT)",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT)"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location": {
+    "type": "table",
+    "label": "New Location Fieldmapping",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : ID"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Uuid"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Location name",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Location name"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of Centroid",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Longitude of Centroid"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of Centroid",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Latitude of Centroid"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "SPSS code",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : SPSS code"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__child_of": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Child of",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Child of"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__location_type": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location Type",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Location Type"
+  },
+  "voyage__voyage_itinerary__int_first_port_dis__geo_location__spatial_extent": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Polygon",
+    "flatlabel": "voyage : voyage itinerary : First intended port of disembarkation (ARRPORT) : New Location Fieldmapping : Polygon"
+  },
   "voyage__voyage_dates": {
     "type": "table",
     "label": "voyage dates",
@@ -383,6 +448,131 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name of vessel",
     "flatlabel": "voyage : voyage ship : Name of vessel"
+  },
+  "voyage__voyage_name_outcome": {
+    "type": "table",
+    "label": "Outcome",
+    "flatlabel": "voyage : Outcome"
+  },
+  "voyage__voyage_name_outcome__particular_outcome": {
+    "type": "table",
+    "label": "Fate (particular outcome of voyage)",
+    "flatlabel": "voyage : Outcome : Fate (particular outcome of voyage)"
+  },
+  "voyage__voyage_name_outcome__particular_outcome__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : Outcome : Fate (particular outcome of voyage) : ID"
+  },
+  "voyage__voyage_name_outcome__particular_outcome__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Outcome label",
+    "flatlabel": "voyage : Outcome : Fate (particular outcome of voyage) : Outcome label"
+  },
+  "voyage__voyage_name_outcome__particular_outcome__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Code of outcome",
+    "flatlabel": "voyage : Outcome : Fate (particular outcome of voyage) : Code of outcome"
+  },
+  "voyage__voyage_zoterorefs": {
+    "type": "table",
+    "label": "zotero source",
+    "flatlabel": "voyage : zotero source"
+  },
+  "voyage__voyage_zoterorefs__legacy_source": {
+    "type": "table",
+    "label": "Source",
+    "flatlabel": "voyage : zotero source : Source"
+  },
+  "voyage__voyage_zoterorefs__legacy_source__full_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Full reference",
+    "flatlabel": "voyage : zotero source : Source : Full reference"
+  },
+  "voyage__voyage_zoterorefs__legacy_source__short_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Short reference",
+    "flatlabel": "voyage : zotero source : Source : Short reference"
+  },
+  "voyage__voyage_zoterorefs__page_connection": {
+    "type": "table",
+    "label": "Page connection",
+    "flatlabel": "voyage : zotero source : Page connection"
+  },
+  "voyage__voyage_zoterorefs__page_connection__source_page": {
+    "type": "table",
+    "label": "source page",
+    "flatlabel": "voyage : zotero source : Page connection : source page"
+  },
+  "voyage__voyage_zoterorefs__page_connection__source_page__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : zotero source : Page connection : source page : ID"
+  },
+  "voyage__voyage_zoterorefs__page_connection__source_page__page_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Page url",
+    "flatlabel": "voyage : zotero source : Page connection : source page : Page url"
+  },
+  "voyage__voyage_zoterorefs__page_connection__source_page__iiif_manifest_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Iiif manifest url",
+    "flatlabel": "voyage : zotero source : Page connection : source page : Iiif manifest url"
+  },
+  "voyage__voyage_zoterorefs__page_connection__source_page__iiif_baseimage_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Iiif baseimage url",
+    "flatlabel": "voyage : zotero source : Page connection : source page : Iiif baseimage url"
+  },
+  "voyage__voyage_zoterorefs__page_connection__source_page__image_filename": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Image filename",
+    "flatlabel": "voyage : zotero source : Page connection : source page : Image filename"
+  },
+  "voyage__voyage_zoterorefs__page_connection__source_page__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "voyage : zotero source : Page connection : source page : Last updated"
+  },
+  "voyage__voyage_zoterorefs__page_connection__source_page__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "voyage : zotero source : Page connection : source page : Human reviewed"
+  },
+  "voyage__voyage_zoterorefs__zotero_title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Zotero title",
+    "flatlabel": "voyage : zotero source : Zotero title"
+  },
+  "voyage__voyage_enslaver_connection": {
+    "type": "table",
+    "label": "enslaver voyage connection",
+    "flatlabel": "voyage : enslaver voyage connection"
+  },
+  "voyage__voyage_enslaver_connection__enslaver_alias": {
+    "type": "table",
+    "label": "Enslaver alias",
+    "flatlabel": "voyage : enslaver voyage connection : Enslaver alias"
+  },
+  "voyage__voyage_enslaver_connection__enslaver_alias__alias": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Alias",
+    "flatlabel": "voyage : enslaver voyage connection : Enslaver alias : Alias"
+  },
+  "voyage__voyage_enslaver_connection__role": {
+    "type": "table",
+    "label": "enslaver role",
+    "flatlabel": "voyage : enslaver voyage connection : enslaver role"
+  },
+  "voyage__voyage_enslaver_connection__role__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : enslaver voyage connection : enslaver role : ID"
+  },
+  "voyage__voyage_enslaver_connection__role__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "voyage : enslaver voyage connection : enslaver role : Name"
   },
   "captive_fate": {
     "type": "table",
@@ -499,331 +689,6 @@
     "label": "Relation",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Relation"
   },
-  "enslaved_relations__relation__voyage": {
-    "type": "table",
-    "label": "voyage",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage"
-  },
-  "enslaved_relations__relation__voyage__dataset": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Dataset",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : Dataset"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary": {
-    "type": "table",
-    "label": "voyage itinerary",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin": {
-    "type": "table",
-    "label": "Imputed port where voyage began (PTDEPIMP)",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP)"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location": {
-    "type": "table",
-    "label": "New Location Fieldmapping",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : ID"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__uuid": {
-    "type": "<class 'rest_framework.fields.UUIDField'>",
-    "label": "Uuid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Uuid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Location name"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Longitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Latitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : SPSS code"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Child of"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Location Type"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed port where voyage began (PTDEPIMP) : New Location Fieldmapping : Polygon"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase": {
-    "type": "table",
-    "label": "Imputed principal place of slave purchase (MJBYPTIMP)",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP)"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location": {
-    "type": "table",
-    "label": "New Location Fieldmapping",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : ID"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid": {
-    "type": "<class 'rest_framework.fields.UUIDField'>",
-    "label": "Uuid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Uuid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Location name"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Longitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Latitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : SPSS code"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Child of"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Location Type"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal place of slave purchase (MJBYPTIMP) : New Location Fieldmapping : Polygon"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis": {
-    "type": "table",
-    "label": "Imputed principal port of slave disembarkation (MJSLPTIMP)",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP)"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location": {
-    "type": "table",
-    "label": "New Location Fieldmapping",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : ID"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid": {
-    "type": "<class 'rest_framework.fields.UUIDField'>",
-    "label": "Uuid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Uuid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Location name"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Longitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Latitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : SPSS code"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Child of"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Location Type"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal port of slave disembarkation (MJSLPTIMP) : New Location Fieldmapping : Polygon"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase": {
-    "type": "table",
-    "label": "Imputed principal region of slave purchase (MAJBYIMP)",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP)"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location": {
-    "type": "table",
-    "label": "New Location Fieldmapping",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : ID"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid": {
-    "type": "<class 'rest_framework.fields.UUIDField'>",
-    "label": "Uuid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Uuid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Location name"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Longitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Latitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : SPSS code"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Child of"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Location Type"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave purchase (MAJBYIMP) : New Location Fieldmapping : Polygon"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis": {
-    "type": "table",
-    "label": "Imputed principal region of slave disembarkation (MJSELIMP)",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP)"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location": {
-    "type": "table",
-    "label": "New Location Fieldmapping",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : ID"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid": {
-    "type": "<class 'rest_framework.fields.UUIDField'>",
-    "label": "Uuid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Uuid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Location name",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Location name"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Longitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Longitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude": {
-    "type": "<class 'rest_framework.fields.DecimalField'>",
-    "label": "Latitude of Centroid",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Latitude of Centroid"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__value": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "SPSS code",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : SPSS code"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__child_of": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Child of",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Child of"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__location_type": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Location Type",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Location Type"
-  },
-  "enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__spatial_extent": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Polygon",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage itinerary : Imputed principal region of slave disembarkation (MJSELIMP) : New Location Fieldmapping : Polygon"
-  },
-  "enslaved_relations__relation__voyage__voyage_dates": {
-    "type": "table",
-    "label": "voyage dates",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage dates"
-  },
-  "enslaved_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate": {
-    "type": "table",
-    "label": "Year of arrival at port of disembarkation (YEARAM)",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage dates : Year of arrival at port of disembarkation (YEARAM)"
-  },
-  "enslaved_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__day": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Day",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage dates : Year of arrival at port of disembarkation (YEARAM) : Day"
-  },
-  "enslaved_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__month": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Month",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage dates : Year of arrival at port of disembarkation (YEARAM) : Month"
-  },
-  "enslaved_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Year",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage dates : Year of arrival at port of disembarkation (YEARAM) : Year"
-  },
-  "enslaved_relations__relation__voyage__voyage_ship": {
-    "type": "table",
-    "label": "voyage ship",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage ship"
-  },
-  "enslaved_relations__relation__voyage__voyage_ship__ship_name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Name of vessel",
-    "flatlabel": "enslaved in relation : enslavement relation : voyage : voyage ship : Name of vessel"
-  },
   "enslaved_relations__relation__place": {
     "type": "table",
     "label": "place",
@@ -898,6 +763,11 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Text ref",
     "flatlabel": "enslaved in relation : enslavement relation : Text ref"
+  },
+  "enslaved_relations__relation__voyage": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Voyage",
+    "flatlabel": "enslaved in relation : enslavement relation : Voyage"
   },
   "enslaved_relations__relation__source": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",

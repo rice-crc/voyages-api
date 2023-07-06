@@ -19,6 +19,7 @@ class PastVoyageItinerarySerializer(serializers.ModelSerializer):
 	imp_principal_port_slave_dis=PlaceSerializer(many=False)
 	imp_principal_region_slave_dis=RegionSerializer(many=False)
 	imp_principal_region_of_slave_purchase=RegionSerializer(many=False)
+	int_first_port_dis=PlaceSerializer(many=False)
 	class Meta:
 		model=VoyageItinerary
 		fields=[
@@ -26,7 +27,8 @@ class PastVoyageItinerarySerializer(serializers.ModelSerializer):
 			'imp_principal_place_of_slave_purchase',
 			'imp_principal_port_slave_dis',
 			'imp_principal_region_of_slave_purchase',
-			'imp_principal_region_slave_dis'
+			'imp_principal_region_slave_dis',
+			'int_first_port_dis'
 		]
 		
 class PastVoyageDatesSerializer(serializers.ModelSerializer):
@@ -40,17 +42,87 @@ class PastVoyageShipSerializer(serializers.ModelSerializer):
 		model=VoyageShip
 		fields=['ship_name',]
 
+
+
+class PastVoyageParticularOutcomeSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=ParticularOutcome
+		fields='__all__'
+
+
+class PastVoyageOutcomeSerializer(serializers.ModelSerializer):
+	particular_outcome=PastVoyageParticularOutcomeSerializer(many=False)
+	class Meta:
+		model=VoyageOutcome
+		fields=['particular_outcome']
+		
+class PastSourcePageSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=SourcePage
+		exclude=['transcription']
+
+class PastZoteroPageConnectionSerializer(serializers.ModelSerializer):
+	source_page=PastSourcePageSerializer(many=False)
+	class Meta:
+		model=SourcePageConnection
+		fields=['source_page',]
+
+class PastLegacySourceSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=VoyageSources
+		fields=['full_ref','short_ref']
+
+
+
+
+class PastVoyageZoteroRefsSerializer(serializers.ModelSerializer):
+	page_connection=PastZoteroPageConnectionSerializer(many=True,read_only=True)
+	legacy_source=PastLegacySourceSerializer(many=False)
+	class Meta:
+		model=ZoteroSource
+		fields=['legacy_source','page_connection','zotero_title']
+
+class VoyageEnslaverAliasSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=EnslaverAlias
+		fields=['alias']
+
+
+class PastVoyageEnslaverConnectionSerializer(serializers.ModelSerializer):
+	enslaver_alias=VoyageEnslaverAliasSerializer(many=False)
+	role=EnslaverRoleSerializer(many=False)
+	class Meta:
+		model=EnslaverVoyageConnection
+		fields=['enslaver_alias','role']
+
+
+class PastVoyageZoteroRefsSerializer(serializers.ModelSerializer):
+	page_connection=PastZoteroPageConnectionSerializer(many=True,read_only=True)
+	legacy_source=PastLegacySourceSerializer(many=False)
+	class Meta:
+		model=ZoteroSource
+		fields=['legacy_source','page_connection','zotero_title']
+
+
 class PastVoyageSerializer(serializers.ModelSerializer):
 	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
 	voyage_dates=PastVoyageDatesSerializer(many=False)
 	voyage_ship=PastVoyageShipSerializer(many=False)
+	voyage_name_outcome=PastVoyageOutcomeSerializer(many=True,read_only=True)
+	voyage_zoterorefs=PastVoyageZoteroRefsSerializer(many=True,read_only=True)
+	voyage_enslaver_connection=PastVoyageEnslaverConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
 		fields=[
+			'voyage_id',
+			'id',
 			'dataset',
 			'voyage_itinerary',
 			'voyage_dates',
-			'voyage_ship'
+			'voyage_ship',
+			'voyage_name_outcome',
+			'voyage_zoterorefs',
+			'voyage_enslaver_connection'
 		]
 
 class EnslavementRelationTypeSerializer(serializers.ModelSerializer):
@@ -94,7 +166,7 @@ class EnslavedEnslaverInRelationSerializer(serializers.ModelSerializer):
 class EnslavedEnslavementRelationSerializer(serializers.ModelSerializer):
 	relation_type=EnslavementRelationTypeSerializer(many=False)
 	relation_enslavers=EnslavedEnslaverInRelationSerializer(many=True,read_only=False)
-	voyage=PastVoyageSerializer(many=False)
+# 	voyage=PastVoyageSerializer(many=False)
 	place=PlaceSerializer(many=False)
 	class Meta:
 		model=EnslavementRelation
@@ -141,7 +213,7 @@ class EnslaverEnslavedInRelationSerializer(serializers.ModelSerializer):
 class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
 	enslaved_in_relation=EnslaverEnslavedInRelationSerializer(many=True,read_only=True)
 	relation_type=EnslavementRelationTypeSerializer(many=False)
-	voyage=PastVoyageSerializer(many=False)
+# 	voyage=PastVoyageSerializer(many=False)
 	place=PlaceSerializer(many=False)
 	place
 	class Meta:

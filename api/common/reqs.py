@@ -18,7 +18,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	next_uri=None
 	prev_uri=None
 	results_count=None
-	all_fields={i:options_dict[i] for i in options_dict if 'type' in options_dict[i]}
+	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
 	
 	try:
 		params=dict(r.POST)
@@ -155,6 +155,8 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 					queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))
 				else:
 					queryset=queryset.order_by(F(ob).asc(nulls_last=True))
+		else:
+			queryset=queryset.order_by('id')
 	except:
 		errormessages.append("ordering error")
 	

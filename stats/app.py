@@ -189,7 +189,8 @@ def crosstabs():
 	ids=rdata['ids']
 
 	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
-	columns,rows=rdata['groupby_fields']
+	columns=rdata['columns']
+	rows=rdata['rows']
 	val=rdata['value_field'][0]
 	fn=rdata['agg_fn'][0]
 

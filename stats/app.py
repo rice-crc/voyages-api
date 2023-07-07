@@ -84,7 +84,7 @@ def groupby():
 	agg_fn=rdata['agg_fn'][0]
 	df=eval(dfname)['df']
 	df2=df[df['id'].isin(ids)]
-	print(df2,df2[groupby_cols[0]].unique())
+# 	print(df2,df2[groupby_cols[0]].unique())
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
 # 	ct=ct.fillna(0)
 	resp={groupby_by:list(ct.index)}

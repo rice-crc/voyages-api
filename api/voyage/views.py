@@ -201,19 +201,9 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 # 		try:
 		st=time.time()
 		params=dict(request.POST)
-		k=params.get('ac_field')
-		v=params.get('ac_val')
-		if k is None or v is None:
-			return JsonResponse(
-				{
-					'status':'false',
-					'message':'ac_field and ac_val params are required'
-				},
-				status=400
-			)
-		else:
-			k=k[0]
-			v=v[0]
+		
+		k=list(params.keys())[0]
+		v=params[k][0]
 		
 		print("voyage/autocomplete",k,v)
 		queryset=Voyage.objects.all()

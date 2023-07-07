@@ -155,8 +155,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 					queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))
 				else:
 					queryset=queryset.order_by(F(ob).asc(nulls_last=True))
-		else:
-			queryset=queryset.order_by('id')
 	except:
 		errormessages.append("ordering error")
 	

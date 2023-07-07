@@ -201,17 +201,21 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 # 		try:
 		st=time.time()
 		params=dict(request.POST)
-		
+		print(params)
 		k=list(params.keys())[0]
 		v=params[k][0]
 		
 		print("voyage/autocomplete",k,v)
 		queryset=Voyage.objects.all()
-		kstub=re.sub("__[^__]+?$","",k)
 		if '__' in k:
+			kstub='__'.join(k.split('__')[:-1])
 			k_id_field=kstub+"__id"
 		else:
 			k_id_field="id"
+			
+		
+		print(k,v,kstub,k_id_field)
+		
 		queryset=queryset.prefetch_related(kstub)
 		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
 		queryset=queryset.filter(**kwargs)

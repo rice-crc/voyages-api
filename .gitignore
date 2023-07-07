@@ -1,8 +1,13 @@
+django/static/
+networks/tmp/
 *.DS_Store
-src/static/
 *.sql
 dbconf.json
-src/voyages2021/localsettings.py
+
+django/document/management/commands/*.txt
+django/document/management/commands/*.csv
+
+tmp/
 
 app_secrets.py
 

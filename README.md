@@ -1,68 +1,110 @@
-# Voyages REST API 2022
+# VOYAGES API
 
-This is an attempt to rebuild the Voyages API with as few dependencies as possible in the latest versions of django and python
+## Setup
 
-THIS REQUIRES AN EXTERNAL SQL DUMP. CONTACT JCM FOR THIS.
+N.B. Only tested on an M1 mac thus far
 
-## Local Deployment
+### Docker Installation
 
-Create an external Docker network.
-
-```bash
-host:~/Projects/voyagesapi$ docker network create voyages
-```
-
-Build and run the containers.
+Copy and rename the default localsettings file for local environments.
 
 ```bash
-host:~/Projects/voyagesapi$ docker-compose up -d --build
+host:~/Projects/voyages-api$ cp api/voyages3/localsettings.py-default api/voyages3/localsettings.py
 ```
 
-Create the database.
+Build and run the containers necessary to work on the project.
+
+For details, see `docker-compose.yml`.
 
 ```bash
-host:~/Projects/voyagesapi$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create database voyages"
+# With Apple Silicon
+#
+# Go to Docker Desktop settings > Features in Development > Enable "Use Rosetta" > Click "Apply & Restart"
+host:~/Projects/voyages-api docker-compose -f docker-compose up --build
 ```
+
+Do the other steps in another window. I like to have two terminals up so I can spot errors in the workflow.
+
+Create the database. Note: append a suffix for the branch (e.g.
+voyages_develop).
+
+```bash
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create database voyages_api"
+```
+
+Create the database user and grant privileges. Note: append a suffix for the
+branch (e.g. voyages_develop).
+
+```bash
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create user 'voyages'@'%' identified by 'voyages'"
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "grant all on voyages_api.* to 'voyages'@'%'"
+```
+
+Download the latest `voyage_api.sql.tgz` MySQL dump from the Google Drive share and expand into the `voyages_prod.sql` file.
 
 Import the database dump to MySQL.
 
 ```bash
-host:~/Projects/voyagesapi$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages < data/voyagesapi.sql
+host:~/Downloads$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages_api < voyages_prod.sql
 ```
 
-Run the custom management commands (see bottom of this doc) -- and it's a good idea to run them in this order:
+Verify the data import.
 
-	docker exec -i voyages-django bash -c "python3.9 manage.py rebuild_options"
-	docker exec -i voyages-django bash -c "python3.9 manage.py rebuild_indices"
+```mysql
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "show databases"
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "show tables from voyages_api"
+host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "select * from voyages_api.voyage_voyage limit 1"
+```
 
-View container logs.
+### Localsettings.py files
+
+Required in:
+
+* stats/
+* networks/
+* api/voyages3/
+
+### Post-Install Setup Tasks
+
+Run media asset tasks.
 
 ```bash
-host:~/Projects/voyagesapi$ docker logs voyages-django
-host:~/Projects/voyagesapi$ docker logs voyages-mysql
-host:~/Projects/voyagesapi$ docker logs voyages-flask
+host:~/Projects/voyages-api docker exec -i voyages-django bash -c 'python3 manage.py collectstatic --noinput'
 ```
 
-*The Adminer app is provided as an additional way to work with the database.*
+#### Getting API keys (for Flask containers):
 
-Note the following project resources:
+Enter the django container and create a new superuser
 
-* Voyages API: http://127.0.0.1:8000/
-* Adminer: http://127.0.0.1:8080
+	docker exec -it voyages-api /bin/bash
+	python3 manage.py createsuperuser
 
-## Cleanup
+Log in to the admin interface at [http://127.0.0.1:8100/admin](http://127.0.0.1:8000/admin) with those credentials, and create an api token for yourself.
 
-	bash
-	host:~/Projects/voyagesapi$ docker-compose down
+Update your new files at ```stats/localsettings.py``` and ```networks/localsettings.py``` with this token.
 
-	host:~/Projects/voyagesapi$ docker container prune
-	host:~/Projects/voyagesapi$ docker image prune
-	host:~/Projects/voyagesapi$ docker volume prune
-	host:~/Projects/voyagesapi$ docker network prune
+Restart the flask engine(s).
+
+```bash
+host:~/Projects/voyages-api$ docker restart voyages-stats
+host:~/Projects/voyages-api$ docker restart voyages-networks
+```
+
+### Cleanup
+
+If you want to tear it down:
+
+```bash
+host:~/Projects/voyagesapi$ docker-compose down
+host:~/Projects/voyagesapi$ docker container prune
+host:~/Projects/voyagesapi$ docker image prune
+host:~/Projects/voyagesapi$ docker volume prune
+host:~/Projects/voyagesapi$ docker network prune
+```
 
 ----------------------
 
-## Using the API
+## Using the API --> NEEDS AN UPDATE
 
 There are currently 5 major endpoints, which allow you to query on People, Voyages, Places, and Estimates
 
@@ -71,10 +113,9 @@ There are currently 5 major endpoints, which allow you to query on People, Voyag
 1. Voyages: POST http://127.0.0.1:8000/voyage/
 1. Places: POST http://127.0.0.1:8000/geo/
 1. Estimates:  POST http://127.0.0.1:8000/assessment/
+1. Documents:  GET http://127.0.0.1:8000/docs/
 
 ### 0. AUTHENTICATION
-
-#### Required as of March 16.
 
 documentation: https://www.django-rest-framework.org/api-guide/authentication/
 
@@ -97,7 +138,6 @@ Let's imagine that that username and password you've set are simply "voyages"/"v
 
 The full authentication workflow would look like:
 
-
 	import requests
 	import json
 	url='http://127.0.0.1:8000/voyages2022_auth_endpoint/'
@@ -109,12 +149,17 @@ The full authentication workflow would look like:
 	print(headers)
 
 	url='http://127.0.0.1:8000/voyage/'
-	r=requests.post(url,headers=headers)
-
+	resp=requests.post(url,headers=headers)
+	print(resp.status_code)
+	j=json.loads(resp.text)
+	print(json.dumps(j,indent=2))
 
 ### 1. Using POST Requests
 
-NUMERIC RANGES: A request to PAST asking for people transported on voyages with Voyage ID's between 2314 and 2500 would look like
+
+#### 1A. Numerics
+
+RANGES: A request to PAST asking for people transported on voyages with Voyage ID's between 2314 and 2500 would look like
 	
 	POST http://127.0.0.1:8000/past/enslaved/
 	
@@ -125,9 +170,18 @@ NUMERIC RANGES: A request to PAST asking for people transported on voyages with 
 		'voyage__voyage_id': ['2314,2500']
 	}
 	
-And would return results 60-79 of 21,867 total records.
+ONE-SIDED INTERVALS: Use double-asterisks in a list of length 2 for a greater-than or less-than request.
 
-DISCRETE INTEGER VALUES: You can now send a request for a list of specific values on an integer field by including an asterisk in your list.
+	POST http://127.0.0.1:8000/past/enslaved/
+	
+	Body:
+	{
+		'results_page': ['3'],
+		'results_per_page': ['20'],
+		'voyage__voyage_id': ['2314,**']
+	}
+
+DISCRETE INTEGER VALUES: You can filter on specific values *on an integer field only* by including an single asterisk in your list.
 
 	POST http://127.0.0.1:8000/past/enslaved/
 	
@@ -136,9 +190,18 @@ DISCRETE INTEGER VALUES: You can now send a request for a list of specific value
 		'voyage__voyage_id': ['*,2314,2500']
 	}
 
-Would return results for 353 total records.
+#### 1B. Text fields
 
-AUTOCOMPLETE w. TEXT FIELDS: You can search for inexact matches on strings and receive a list of the 20 first alphabetically sorted matches:
+Text fields accept exact matches only: 
+
+	POST http://127.0.0.1:8000/voyage/
+	
+	Body:
+	{	'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name':
+		['Barbados','Jamaica']
+	}
+
+How do you find the exact matches? By using autocomplete to see the valid values on that field.
 
 This request
 
@@ -150,21 +213,15 @@ This request
 Would return
 
 	{
-		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__name": [
-			"Jamaica"
-		]
+		"results": [
+			{
+				"id": 2419,
+				"label": "Jamaica"
+			}
+		],
+		"total_results_count": 3715
 	}
 
-Which is useful because text fields take only precise matches on other endpoints. So you might run a couple autocomplete searches to let the user find an exact match, which they then select, and then allow them to do it again as they pick all the matches that they want, like so:
-
-	POST http://127.0.0.1:8000/voyage/
-	
-	Body:
-	{	'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name':
-		['Barbados','Jamaica']
-	}
-
-And get back 5,816 results.
 
 ### 2. Enumerating variables, relationships, and data types
 
@@ -175,7 +232,7 @@ And get back 5,816 results.
 
 Why "hierarchical=False"?
 
-1. The default is hierarchical=True, which gives you a tree
+1. The default is hierarchical
 1. These variables' hierarchical relations correspond to links between db tables
 1. The django syntax for those links is a double underscore: "__"
 1. Variable labels are now presented in two formats:
@@ -183,6 +240,8 @@ Why "hierarchical=False"?
 	1. "flatlabel" which is a concatenated label -- good for menus targeting specific fields
 
 hierarchical=False looks like:
+
+
 
     ...
     "voyage_itinerary__port_of_departure__geo_location__child_of__longitude": {
@@ -806,4 +865,6 @@ Uses NetworkX to find all the "best" a/b routes on the above variable pairings v
 		"voyage_itinerary__imp_principal_region_slave_dis__geo_location__id",
 		"voyage_itinerary__imp_broad_region_slave_dis__geo_location__id"
 	]
+
+-----------------
 

@@ -1,0 +1,56 @@
+<h2>{{ zs.zotero_title }}</h2>
+<h3>{{ zs.zotero_date }} --> <a href="http://127.0.0.1:8000/admin/document/zoterosource/{{ zs.id }}/change/" target="_blank">Edit</a></h3>
+<p>Zotero link: <a href="{{ zs.zotero_web_page_url }}">{{ zs.zotero_web_page_url }}</a></p>
+<p>Library collection item listing: <a href="{{ zs.item_url }}">{{ zs.item_url }}</a></p>
+<hr/>
+<h4>Legacy Voyages Source Data</h4>
+
+{{ zs.legacy_source.short_ref }}
+<br/>
+{{ zs.legacy_source.full_ref }}
+</p>
+<hr/>
+<h4>Pages</h4>
+
+<ol>
+
+{% for spc in zs.page_connection.all %}
+<table border=1>
+	<tr>
+		<td>
+			<a href="{{ spc.source_page.page_url }}">Item page</a>
+			<br/>
+
+			{% if spc.source_page.iiif_baseimage_url %}
+				Link to full image: <br/><a href="{{ spc.source_page.iiif_baseimage_url }}" target="_blank"><img src="{{ spc.source_page.square_thumbnail }}"></a></li></ul>
+			{% endif %}
+		</td>
+		<td>
+			{% if spc.source_page.transcription %}
+				<p><b><a href="http://127.0.0.1:8000/admin/document/sourcepage/{{ spc.source_page.id }}/change/" target="_blank">Edit Transcript Here</a></b></p>
+				<p>
+				 {{ spc.source_page.transcription }}
+				</p>
+				<p></p>
+			{% endif %}
+		</td>
+	</tr>
+	
+</table>
+{% endfor %}
+
+</ol>
+<hr/>
+<h4>Linked entities</h4>
+
+<ol>
+{% for v in zs.voyages.all %}
+	<li>Voyage #{{ v.id }} : {{ v.ship.ship_name}} --> <a href="http://127.0.0.1:8000/admin/voyage/voyage/{{ v.id }}/change/" target="_blank">Edit</a></li>
+{% endfor %}
+</ol>
+
+<ol>
+{% for ep in zs.enslaved_people.all %}
+	<li>Person: {{ ep.id }} : {{ ep.documented_name }} --> <a href="http://127.0.0.1:8000/admin/past/enslaved/{{ ep.id }}/change/" target="_blank">Edit</a></li>
+{% endfor %}
+</ol>

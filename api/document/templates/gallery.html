@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block body %}
+
+<body>
+<h1>{{ page_collection_label }}</h1>
+
+<select name="collection" id="collection-select">
+    <option value="">--Other collections--</option>
+    
+    {% for c in other_collections %}
+    
+    <option value="/docs/{{ c.id }}/1">{{ c.label }}</option>
+    
+    {% endfor %}
+    
+</select>
+
+<hr/>
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="1">&laquo; first</a>
+            <a href="/docs/{{ page_collection_id }}/{{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="/docs/{{ page_collection_id }}/{{ page_obj.next_page_number }}">next</a>
+            <a href="/docs/{{ page_collection_id }}/{{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+<hr/>
+
+<div>
+
+{% for zs in page_obj %}
+
+	<div>
+	<p><a href="/docs/single/{{zs.id}}">{{ zs.zotero_title }}<br/>{{ zs.zotero_date }}<br/>
+	{% for spc in zs.page_connection.all %}
+		{% if spc.source_page.iiif_baseimage_url %}
+			<img src="{{spc.source_page.square_thumbnail}}"></a>
+		{% endif %}
+	{% endfor %}
+	</a>
+	</p>
+	</div>
+	<hr/>
+
+{% endfor %}
+
+</div>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="1">&laquo; first</a>
+            <a href="/docs/{{ page_collection_id }}/{{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="/docs/{{ page_collection_id }}/{{ page_obj.next_page_number }}">next</a>
+            <a href="/docs/{{ page_collection_id }}/{{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+</body>
+
+<script type="text/javascript" defer>
+
+$("#collection-select").on("change", function(event){
+	console.log(event.target.value)
+	window.location.replace(event.target.value)
+})
+
+</script>
+
+{% endblock %}

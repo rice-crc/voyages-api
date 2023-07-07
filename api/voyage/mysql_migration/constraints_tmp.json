@@ -1,0 +1,1667 @@
+{
+  "assessment_estimate": {
+    "constraints": [
+      "CONSTRAINT `assessment_estimate_disembarkation_regio_a5703e78_fk_assessmen` FOREIGN KEY (`disembarkation_region_id`) REFERENCES `assessment_importregion` (`id`),",
+      "CONSTRAINT `assessment_estimate_embarkation_region_i_9055cca2_fk_assessmen` FOREIGN KEY (`embarkation_region_id`) REFERENCES `assessment_exportregion` (`id`),",
+      "CONSTRAINT `assessment_estimate_nation_id_4fa2f1cc_fk_assessment_nation_id` FOREIGN KEY (`nation_id`) REFERENCES `assessment_nation` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "year",
+      "embarked_slaves",
+      "disembarked_slaves",
+      "disembarkation_region_id",
+      "embarkation_region_id",
+      "nation_id"
+    ]
+  },
+  "assessment_exportarea": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "order_num",
+      "latitude",
+      "longitude",
+      "show_at_zoom",
+      "show_on_map"
+    ]
+  },
+  "assessment_exportregion": {
+    "constraints": [
+      "CONSTRAINT `assessment_exportreg_export_area_id_a34de79d_fk_assessmen` FOREIGN KEY (`export_area_id`) REFERENCES `assessment_exportarea` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "order_num",
+      "latitude",
+      "longitude",
+      "show_at_zoom",
+      "show_on_map",
+      "export_area_id"
+    ]
+  },
+  "assessment_importarea": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "order_num",
+      "latitude",
+      "longitude",
+      "show_at_zoom",
+      "show_on_map"
+    ]
+  },
+  "assessment_importregion": {
+    "constraints": [
+      "CONSTRAINT `assessment_importreg_import_area_id_dc1c5d59_fk_assessmen` FOREIGN KEY (`import_area_id`) REFERENCES `assessment_importarea` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "order_num",
+      "latitude",
+      "longitude",
+      "show_at_zoom",
+      "show_on_map",
+      "import_area_id"
+    ]
+  },
+  "assessment_nation": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "order_num"
+    ]
+  },
+  "auth_group": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "auth_group_permissions": {
+    "constraints": [
+      "CONSTRAINT `auth_group_permissio_permission_id_84c5c92e_fk_auth_perm` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`),",
+      "CONSTRAINT `auth_group_permissions_group_id_b120cbf9_fk_auth_group_id` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "group_id",
+      "permission_id"
+    ]
+  },
+  "auth_permission": {
+    "constraints": [
+      "CONSTRAINT `auth_permission_content_type_id_2f476e4b_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "content_type_id",
+      "codename"
+    ]
+  },
+  "auth_user": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "password",
+      "last_login",
+      "is_superuser",
+      "username",
+      "first_name",
+      "last_name",
+      "email",
+      "is_staff",
+      "is_active",
+      "date_joined"
+    ]
+  },
+  "auth_user_groups": {
+    "constraints": [
+      "CONSTRAINT `auth_user_groups_group_id_97559544_fk_auth_group_id` FOREIGN KEY (`group_id`) REFERENCES `auth_group` (`id`),",
+      "CONSTRAINT `auth_user_groups_user_id_6a12ed8b_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "user_id",
+      "group_id"
+    ]
+  },
+  "auth_user_user_permissions": {
+    "constraints": [
+      "CONSTRAINT `auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm` FOREIGN KEY (`permission_id`) REFERENCES `auth_permission` (`id`),",
+      "CONSTRAINT `auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "user_id",
+      "permission_id"
+    ]
+  },
+  "blog_author": {
+    "constraints": [
+      "CONSTRAINT `blog_author_institution_id_2d9a7d7a_fk_blog_institution_id` FOREIGN KEY (`institution_id`) REFERENCES `blog_institution` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "description",
+      "slug",
+      "role",
+      "photo",
+      "institution_id"
+    ]
+  },
+  "blog_institution": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "description",
+      "slug",
+      "image"
+    ]
+  },
+  "blog_post": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "title",
+      "language",
+      "subtitle",
+      "slug",
+      "updated_on",
+      "content",
+      "created_on",
+      "status",
+      "thumbnail"
+    ]
+  },
+  "blog_post_authors": {
+    "constraints": [
+      "CONSTRAINT `blog_post_authors_author_id_5671bda3_fk_blog_author_id` FOREIGN KEY (`author_id`) REFERENCES `blog_author` (`id`),",
+      "CONSTRAINT `blog_post_authors_post_id_6136c170_fk_blog_post_id` FOREIGN KEY (`post_id`) REFERENCES `blog_post` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "post_id",
+      "author_id"
+    ]
+  },
+  "blog_post_tags": {
+    "constraints": [
+      "CONSTRAINT `blog_post_tags_post_id_a1c71c8a_fk_blog_post_id` FOREIGN KEY (`post_id`) REFERENCES `blog_post` (`id`),",
+      "CONSTRAINT `blog_post_tags_tag_id_0875c551_fk_blog_tag_id` FOREIGN KEY (`tag_id`) REFERENCES `blog_tag` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "post_id",
+      "tag_id"
+    ]
+  },
+  "blog_tag": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "slug",
+      "intro"
+    ]
+  },
+  "captcha_captchastore": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "challenge",
+      "response",
+      "hashkey",
+      "expiration"
+    ]
+  },
+  "common_savedquery": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "hash",
+      "query",
+      "is_legacy"
+    ]
+  },
+  "contribute_adminfaq": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "question",
+      "answer"
+    ]
+  },
+  "contribute_deletevoyagecontribution": {
+    "constraints": [
+      "CONSTRAINT `contribute_deletevoy_contributor_id_bb117e60_fk_auth_user` FOREIGN KEY (`contributor_id`) REFERENCES `auth_user` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "date_created",
+      "notes",
+      "status",
+      "deleted_voyages_ids",
+      "contributor_id"
+    ]
+  },
+  "contribute_editorvoyagecontribution": {
+    "constraints": [
+      "CONSTRAINT `contribute_editorvoy_interim_voyage_id_677854a4_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`),",
+      "CONSTRAINT `contribute_editorvoy_request_id_dc738931_fk_contribut` FOREIGN KEY (`request_id`) REFERENCES `contribute_reviewrequest` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "notes",
+      "ran_impute",
+      "interim_voyage_id",
+      "request_id"
+    ]
+  },
+  "contribute_editvoyagecontribution": {
+    "constraints": [
+      "CONSTRAINT `contribute_editvoyag_contributor_id_ed1705fa_fk_auth_user` FOREIGN KEY (`contributor_id`) REFERENCES `auth_user` (`id`),",
+      "CONSTRAINT `contribute_editvoyag_interim_voyage_id_335c01bd_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "date_created",
+      "notes",
+      "status",
+      "edited_voyage_id",
+      "contributor_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimarticlesource": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimar_created_voyage_sourc_bdc0a211_fk_voyage_vo` FOREIGN KEY (`created_voyage_sources_id`) REFERENCES `voyage_voyagesources` (`id`),",
+      "CONSTRAINT `contribute_interimar_interim_voyage_id_50ab4bb8_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "information",
+      "url",
+      "source_ref_text",
+      "authors",
+      "article_title",
+      "journal",
+      "volume_number",
+      "year",
+      "page_start",
+      "page_end",
+      "created_voyage_sources_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimbooksource": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimbo_created_voyage_sourc_29319ef3_fk_voyage_vo` FOREIGN KEY (`created_voyage_sources_id`) REFERENCES `voyage_voyagesources` (`id`),",
+      "CONSTRAINT `contribute_interimbo_interim_voyage_id_1e916177_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "information",
+      "url",
+      "source_ref_text",
+      "authors",
+      "book_title",
+      "publisher",
+      "place_of_publication",
+      "year",
+      "page_start",
+      "page_end",
+      "source_is_essay_in_book",
+      "essay_title",
+      "editors",
+      "created_voyage_sources_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimnewspapersource": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimne_created_voyage_sourc_6554d90d_fk_voyage_vo` FOREIGN KEY (`created_voyage_sources_id`) REFERENCES `voyage_voyagesources` (`id`),",
+      "CONSTRAINT `contribute_interimne_interim_voyage_id_2d99bd57_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "information",
+      "url",
+      "source_ref_text",
+      "name",
+      "alternative_name",
+      "city",
+      "country",
+      "created_voyage_sources_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimpreexistingsource": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimpr_interim_voyage_id_928c6b65_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "voyage_ids",
+      "action",
+      "original_short_ref",
+      "original_ref",
+      "full_ref",
+      "notes",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimprimarysource": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimpr_created_voyage_sourc_5d34f40a_fk_voyage_vo` FOREIGN KEY (`created_voyage_sources_id`) REFERENCES `voyage_voyagesources` (`id`),",
+      "CONSTRAINT `contribute_interimpr_interim_voyage_id_db2dc1d6_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "information",
+      "url",
+      "source_ref_text",
+      "name_of_library_or_archive",
+      "location_of_library_or_archive",
+      "series_or_collection",
+      "volume_or_box_or_bundle",
+      "document_detail",
+      "created_voyage_sources_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimprivatenoteorcollectionsource": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimpr_created_voyage_sourc_c23c7d2c_fk_voyage_vo` FOREIGN KEY (`created_voyage_sources_id`) REFERENCES `voyage_voyagesources` (`id`),",
+      "CONSTRAINT `contribute_interimpr_interim_voyage_id_76d9a553_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "information",
+      "url",
+      "source_ref_text",
+      "authors",
+      "title",
+      "location",
+      "year",
+      "page",
+      "created_voyage_sources_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimslavenumber": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimsl_interim_voyage_id_20aa102f_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "var_name",
+      "number",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimunpublishedsecondarysource": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimun_created_voyage_sourc_3a9a054d_fk_voyage_vo` FOREIGN KEY (`created_voyage_sources_id`) REFERENCES `voyage_voyagesources` (`id`),",
+      "CONSTRAINT `contribute_interimun_interim_voyage_id_78741519_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "information",
+      "url",
+      "source_ref_text",
+      "authors",
+      "title",
+      "location",
+      "year",
+      "page",
+      "created_voyage_sources_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_interimvoyage": {
+    "constraints": [
+      "CONSTRAINT `contribute_interimvo_african_resistance_i_2fa1bd22_fk_voyage_re` FOREIGN KEY (`african_resistance_id`) REFERENCES `voyage_resistance` (`id`),",
+      "CONSTRAINT `contribute_interimvo_first_place_of_landi_9b18d913_fk_voyage_pl` FOREIGN KEY (`first_place_of_landing_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_first_place_of_slave_34b0ab2c_fk_voyage_pl` FOREIGN KEY (`first_place_of_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_first_port_intended__0de16bdc_fk_voyage_pl` FOREIGN KEY (`first_port_intended_disembarkation_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_first_port_intended__3f85e391_fk_voyage_pl` FOREIGN KEY (`first_port_intended_embarkation_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_fourth_port_intended_8e959454_fk_voyage_pl` FOREIGN KEY (`fourth_port_intended_disembarkation_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_first_region_1bd2fbfa_fk_voyage_re` FOREIGN KEY (`imputed_first_region_of_slave_landing_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_first_region_4207a640_fk_voyage_re` FOREIGN KEY (`imputed_first_region_of_embarkation_of_slaves_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_national_car_cc1dfe8e_fk_voyage_na` FOREIGN KEY (`imputed_national_carrier_id`) REFERENCES `voyage_nationality` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_outcome_of_v_c67c34b2_fk_voyage_ow` FOREIGN KEY (`imputed_outcome_of_voyage_for_owner_id`) REFERENCES `voyage_owneroutcome` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_outcome_of_v_db7855aa_fk_voyage_ve` FOREIGN KEY (`imputed_outcome_of_voyage_if_ship_captured_id`) REFERENCES `voyage_vesselcapturedoutcome` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_outcome_of_v_ffc463c6_fk_voyage_sl` FOREIGN KEY (`imputed_outcome_of_voyage_for_slaves_id`) REFERENCES `voyage_slavesoutcome` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_port_where_v_6814eafa_fk_voyage_pl` FOREIGN KEY (`imputed_port_where_voyage_began_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_principal_pl_4e4c0f7e_fk_voyage_pl` FOREIGN KEY (`imputed_principal_place_of_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_principal_po_4bc31f77_fk_voyage_pl` FOREIGN KEY (`imputed_principal_port_of_slave_disembarkation_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_region_ship__d790ed93_fk_voyage_re` FOREIGN KEY (`imputed_region_ship_constructed_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_region_where_8c3cc100_fk_voyage_re` FOREIGN KEY (`imputed_region_where_voyage_began_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_second_regio_472a38fc_fk_voyage_re` FOREIGN KEY (`imputed_second_region_of_slave_landing_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_second_regio_f38d4fe1_fk_voyage_re` FOREIGN KEY (`imputed_second_region_of_embarkation_of_slaves_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_third_region_5aadcb88_fk_voyage_re` FOREIGN KEY (`imputed_third_region_of_slave_landing_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_third_region_db84ffb8_fk_voyage_re` FOREIGN KEY (`imputed_third_region_of_embarkation_of_slaves_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `contribute_interimvo_imputed_voyage_group_c0b56de3_fk_voyage_vo` FOREIGN KEY (`imputed_voyage_groupings_for_estimating_imputed_slaves_id`) REFERENCES `voyage_voyagegroupings` (`id`),",
+      "CONSTRAINT `contribute_interimvo_national_carrier_id_4376a7c4_fk_voyage_na` FOREIGN KEY (`national_carrier_id`) REFERENCES `voyage_nationality` (`id`),",
+      "CONSTRAINT `contribute_interimvo_place_of_call_before_4835b3df_fk_voyage_pl` FOREIGN KEY (`place_of_call_before_atlantic_crossing_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_port_of_departure_id_b7d6acee_fk_voyage_pl` FOREIGN KEY (`port_of_departure_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_port_voyage_ended_id_125a543e_fk_voyage_pl` FOREIGN KEY (`port_voyage_ended_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_principal_place_of_s_43e184ec_fk_voyage_pl` FOREIGN KEY (`principal_place_of_slave_disembarkation_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_principal_place_of_s_dc19db63_fk_voyage_pl` FOREIGN KEY (`principal_place_of_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_rig_of_vessel_id_49a228d3_fk_voyage_ri` FOREIGN KEY (`rig_of_vessel_id`) REFERENCES `voyage_rigofvessel` (`id`),",
+      "CONSTRAINT `contribute_interimvo_second_place_of_land_a51fe3a8_fk_voyage_pl` FOREIGN KEY (`second_place_of_landing_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_second_place_of_slav_846ecb04_fk_voyage_pl` FOREIGN KEY (`second_place_of_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_second_port_intended_7f0766b8_fk_voyage_pl` FOREIGN KEY (`second_port_intended_disembarkation_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_second_port_intended_bd669f38_fk_voyage_pl` FOREIGN KEY (`second_port_intended_embarkation_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_ship_construction_pl_eb8ca37b_fk_voyage_pl` FOREIGN KEY (`ship_construction_place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_ship_registration_pl_741256cc_fk_voyage_pl` FOREIGN KEY (`ship_registration_place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_third_place_of_landi_d40a5fc8_fk_voyage_pl` FOREIGN KEY (`third_place_of_landing_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_third_place_of_slave_e9a95ee9_fk_voyage_pl` FOREIGN KEY (`third_place_of_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_third_port_intended__27c477a0_fk_voyage_pl` FOREIGN KEY (`third_port_intended_disembarkation_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `contribute_interimvo_ton_type_id_12e77501_fk_voyage_to` FOREIGN KEY (`ton_type_id`) REFERENCES `voyage_tontype` (`id`),",
+      "CONSTRAINT `contribute_interimvo_voyage_outcome_id_4009f416_fk_voyage_pa` FOREIGN KEY (`voyage_outcome_id`) REFERENCES `voyage_particularoutcome` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name_of_vessel",
+      "year_ship_constructed",
+      "year_ship_registered",
+      "tonnage_of_vessel",
+      "guns_mounted",
+      "first_ship_owner",
+      "second_ship_owner",
+      "additional_ship_owners",
+      "number_of_ports_called_prior_to_slave_purchase",
+      "number_of_new_world_ports_called_prior_to_disembarkation",
+      "date_departure",
+      "date_slave_purchase_began",
+      "date_vessel_left_last_slaving_port",
+      "date_first_slave_disembarkation",
+      "date_second_slave_disembarkation",
+      "date_third_slave_disembarkation",
+      "date_return_departure",
+      "date_voyage_completed",
+      "length_of_middle_passage",
+      "first_captain",
+      "second_captain",
+      "third_captain",
+      "notes",
+      "imputed_standardized_tonnage",
+      "imputed_year_voyage_began",
+      "imputed_year_departed_africa",
+      "imputed_year_arrived_at_port_of_disembarkation",
+      "imputed_quinquennium_in_which_voyage_occurred",
+      "imputed_decade_in_which_voyage_occurred",
+      "imputed_quarter_century_in_which_voyage_occurred",
+      "imputed_century_in_which_voyage_occurred",
+      "imputed_voyage_length_home_port_to_first_port_of_disembarkation",
+      "imputed_length_of_middle_passage",
+      "imputed_total_slaves_embarked",
+      "imputed_total_slaves_disembarked",
+      "imputed_number_of_slaves_embarked_for_mortality_calculation",
+      "imputed_total_slave_deaths_during_middle_passage",
+      "imputed_mortality_rate",
+      "imputed_standardized_price_of_slaves",
+      "voyage_comments",
+      "african_info",
+      "cargo",
+      "persisted_form_data",
+      "african_resistance_id",
+      "first_place_of_landing_id",
+      "first_place_of_slave_purchase_id",
+      "first_port_intended_disembarkation_id",
+      "first_port_intended_embarkation_id",
+      "fourth_port_intended_disembarkation_id",
+      "imputed_first_region_of_embarkation_of_slaves_id",
+      "imputed_first_region_of_slave_landing_id",
+      "imputed_national_carrier_id",
+      "imputed_outcome_of_voyage_for_owner_id",
+      "imputed_outcome_of_voyage_for_slaves_id",
+      "imputed_outcome_of_voyage_if_ship_captured_id",
+      "imputed_port_where_voyage_began_id",
+      "imputed_principal_place_of_slave_purchase_id",
+      "imputed_principal_port_of_slave_disembarkation_id",
+      "imputed_region_ship_constructed_id",
+      "imputed_region_where_voyage_began_id",
+      "imputed_second_region_of_embarkation_of_slaves_id",
+      "imputed_second_region_of_slave_landing_id",
+      "imputed_third_region_of_embarkation_of_slaves_id",
+      "imputed_third_region_of_slave_landing_id",
+      "imputed_voyage_groupings_for_estimating_imputed_slaves_id",
+      "national_carrier_id",
+      "place_of_call_before_atlantic_crossing_id",
+      "port_of_departure_id",
+      "port_voyage_ended_id",
+      "principal_place_of_slave_disembarkation_id",
+      "principal_place_of_slave_purchase_id",
+      "rig_of_vessel_id",
+      "second_place_of_landing_id",
+      "second_place_of_slave_purchase_id",
+      "second_port_intended_disembarkation_id",
+      "second_port_intended_embarkation_id",
+      "ship_construction_place_id",
+      "ship_registration_place_id",
+      "third_place_of_landing_id",
+      "third_place_of_slave_purchase_id",
+      "third_port_intended_disembarkation_id",
+      "ton_type_id",
+      "voyage_outcome_id"
+    ]
+  },
+  "contribute_mergevoyagescontribution": {
+    "constraints": [
+      "CONSTRAINT `contribute_mergevoya_contributor_id_dff0e9c0_fk_auth_user` FOREIGN KEY (`contributor_id`) REFERENCES `auth_user` (`id`),",
+      "CONSTRAINT `contribute_mergevoya_interim_voyage_id_de830726_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "date_created",
+      "notes",
+      "status",
+      "merged_voyages_ids",
+      "contributor_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_newvoyagecontribution": {
+    "constraints": [
+      "CONSTRAINT `contribute_newvoyage_contributor_id_5cc81db8_fk_auth_user` FOREIGN KEY (`contributor_id`) REFERENCES `auth_user` (`id`),",
+      "CONSTRAINT `contribute_newvoyage_interim_voyage_id_c9135ee6_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "date_created",
+      "notes",
+      "status",
+      "contributor_id",
+      "interim_voyage_id"
+    ]
+  },
+  "contribute_reviewrequest": {
+    "constraints": [
+      "CONSTRAINT `contribute_reviewreq_suggested_reviewer_i_2eb890c1_fk_auth_user` FOREIGN KEY (`suggested_reviewer_id`) REFERENCES `auth_user` (`id`),",
+      "CONSTRAINT `contribute_reviewrequest_editor_id_a35460b9_fk_auth_user_id` FOREIGN KEY (`editor_id`) REFERENCES `auth_user` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "contribution_id",
+      "email_sent",
+      "response",
+      "editor_comments",
+      "reviewer_comments",
+      "decision_message",
+      "final_decision",
+      "archived",
+      "created_voyage_id",
+      "dataset",
+      "editor_id",
+      "suggested_reviewer_id"
+    ]
+  },
+  "contribute_reviewvoyagecontribution": {
+    "constraints": [
+      "CONSTRAINT `contribute_reviewvoy_interim_voyage_id_13324e6d_fk_contribut` FOREIGN KEY (`interim_voyage_id`) REFERENCES `contribute_interimvoyage` (`id`),",
+      "CONSTRAINT `contribute_reviewvoy_request_id_167137b5_fk_contribut` FOREIGN KEY (`request_id`) REFERENCES `contribute_reviewrequest` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "notes",
+      "interim_voyage_id",
+      "request_id"
+    ]
+  },
+  "contribute_userprofile": {
+    "constraints": [
+      "CONSTRAINT `contribute_userprofile_user_id_e6ff0d7b_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "institution",
+      "new_material_and_sources",
+      "user_id"
+    ]
+  },
+  "django_admin_log": {
+    "constraints": [
+      "CONSTRAINT `django_admin_log_content_type_id_c4bce8eb_fk_django_co` FOREIGN KEY (`content_type_id`) REFERENCES `django_content_type` (`id`),",
+      "CONSTRAINT `django_admin_log_user_id_c564eba6_fk_auth_user_id` FOREIGN KEY (`user_id`) REFERENCES `auth_user` (`id`),",
+      "CONSTRAINT `django_admin_log_chk_1` CHECK ((`action_flag` >= 0))"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "action_time",
+      "object_id",
+      "object_repr",
+      "action_flag",
+      "change_message",
+      "content_type_id",
+      "user_id"
+    ]
+  },
+  "django_content_type": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "app_label",
+      "model"
+    ]
+  },
+  "django_migrations": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "app",
+      "name",
+      "applied"
+    ]
+  },
+  "django_session": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "session_key",
+      "session_data",
+      "expire_date"
+    ]
+  },
+  "past_altlanguagegroupname": {
+    "constraints": [
+      "CONSTRAINT `past_altlanguagegrou_language_group_id_cc59fa85_fk_past_lang` FOREIGN KEY (`language_group_id`) REFERENCES `past_languagegroup` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "language_group_id"
+    ]
+  },
+  "past_captivefate": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "past_captivestatus": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "past_enslaved": {
+    "constraints": [
+      "CONSTRAINT `past_enslaved_captive_fate_id_95cf6916_fk_past_captivefate_id` FOREIGN KEY (`captive_fate_id`) REFERENCES `past_captivefate` (`id`),",
+      "CONSTRAINT `past_enslaved_captive_status_id_3ab8ecc9_fk_past_capt` FOREIGN KEY (`captive_status_id`) REFERENCES `past_captivestatus` (`id`),",
+      "CONSTRAINT `past_enslaved_language_group_id_b449828d_fk_past_lang` FOREIGN KEY (`language_group_id`) REFERENCES `past_languagegroup` (`id`),",
+      "CONSTRAINT `past_enslaved_post_disembark_locat_1ee51a23_fk_voyage_pl` FOREIGN KEY (`post_disembark_location_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `past_enslaved_register_country_id_b301f691_fk_past_regi` FOREIGN KEY (`register_country_id`) REFERENCES `past_registercountry` (`id`),",
+      "CONSTRAINT `past_enslaved_voyage_id_2958b89e_fk_voyage_voyage_id` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "enslaved_id",
+      "documented_name",
+      "name_first",
+      "name_second",
+      "name_third",
+      "modern_name",
+      "editor_modern_names_certainty",
+      "age",
+      "gender",
+      "height",
+      "skin_color",
+      "last_known_date",
+      "dataset",
+      "notes",
+      "captive_fate_id",
+      "captive_status_id",
+      "language_group_id",
+      "post_disembark_location_id",
+      "register_country_id",
+      "voyage_id"
+    ]
+  },
+  "past_enslavedcontribution": {
+    "constraints": [
+      "CONSTRAINT `past_enslavedcontrib_contributor_id_29f14472_fk_auth_user` FOREIGN KEY (`contributor_id`) REFERENCES `auth_user` (`id`),",
+      "CONSTRAINT `past_enslavedcontrib_enslaved_id_a1023f19_fk_past_ensl` FOREIGN KEY (`enslaved_id`) REFERENCES `past_enslaved` (`enslaved_id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "date",
+      "notes",
+      "is_multilingual",
+      "status",
+      "token",
+      "contributor_id",
+      "enslaved_id"
+    ]
+  },
+  "past_enslavedcontributionlanguageentry": {
+    "constraints": [
+      "CONSTRAINT `past_enslavedcontrib_contribution_id_0c748e2e_fk_past_ensl` FOREIGN KEY (`contribution_id`) REFERENCES `past_enslavedcontribution` (`id`),",
+      "CONSTRAINT `past_enslavedcontrib_language_group_id_ccdbabf8_fk_past_lang` FOREIGN KEY (`language_group_id`) REFERENCES `past_languagegroup` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "order",
+      "contribution_id",
+      "language_group_id"
+    ]
+  },
+  "past_enslavedcontributionnameentry": {
+    "constraints": [
+      "CONSTRAINT `past_enslavedcontrib_contribution_id_35fdb713_fk_past_ensl` FOREIGN KEY (`contribution_id`) REFERENCES `past_enslavedcontribution` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "order",
+      "notes",
+      "contribution_id"
+    ]
+  },
+  "past_enslavedinrelation": {
+    "constraints": [
+      "CONSTRAINT `past_enslavedinrelat_enslaved_id_75992d07_fk_past_ensl` FOREIGN KEY (`enslaved_id`) REFERENCES `past_enslaved` (`enslaved_id`),",
+      "CONSTRAINT `past_enslavedinrelat_relation_id_54fc8a6c_fk_past_ensl` FOREIGN KEY (`relation_id`) REFERENCES `past_enslavementrelation` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "enslaved_id",
+      "relation_id"
+    ]
+  },
+  "past_enslavedname": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "language",
+      "recordings_count"
+    ]
+  },
+  "past_enslavedsourceconnection": {
+    "constraints": [
+      "CONSTRAINT `past_enslavedsourcec_enslaved_id_45239f04_fk_past_ensl` FOREIGN KEY (`enslaved_id`) REFERENCES `past_enslaved` (`enslaved_id`),",
+      "CONSTRAINT `past_enslavedsourcec_source_id_aa0bb1a9_fk_voyage_vo` FOREIGN KEY (`source_id`) REFERENCES `voyage_voyagesources` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "source_order",
+      "text_ref",
+      "enslaved_id",
+      "source_id"
+    ]
+  },
+  "past_enslavementrelation": {
+    "constraints": [
+      "CONSTRAINT `past_enslavementrela_relation_type_id_465f2bdc_fk_past_ensl` FOREIGN KEY (`relation_type_id`) REFERENCES `past_enslavementrelationtype` (`id`),",
+      "CONSTRAINT `past_enslavementrela_source_id_4a8ca881_fk_voyage_vo` FOREIGN KEY (`source_id`) REFERENCES `voyage_voyagesources` (`id`),",
+      "CONSTRAINT `past_enslavementrelation_place_id_aeee354b_fk_voyage_place_id` FOREIGN KEY (`place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `past_enslavementrelation_voyage_id_6d42ac05_fk_voyage_voyage_id` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "date",
+      "amount",
+      "unnamed_enslaved_count",
+      "text_ref",
+      "place_id",
+      "relation_type_id",
+      "source_id",
+      "voyage_id"
+    ]
+  },
+  "past_enslavementrelationtype": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "past_enslaveralias": {
+    "constraints": [
+      "CONSTRAINT `past_enslaveralias_identity_id_85b3539b_fk_past_ensl` FOREIGN KEY (`identity_id`) REFERENCES `past_enslaveridentity` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "alias",
+      "manual_id",
+      "identity_id"
+    ]
+  },
+  "past_enslavercachedproperties": {
+    "constraints": [
+      "CONSTRAINT `past_enslavercachedp_identity_id_ae3d3d48_fk_past_ensl` FOREIGN KEY (`identity_id`) REFERENCES `past_enslaveridentity` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "identity_id",
+      "enslaved_count",
+      "transactions_amount",
+      "roles",
+      "first_year",
+      "last_year",
+      "voyage_datasets",
+      "min_alias",
+      "max_alias"
+    ]
+  },
+  "past_enslavercontribution": {
+    "constraints": [
+      "CONSTRAINT `past_enslavercontrib_contributor_id_6324565d_fk_auth_user` FOREIGN KEY (`contributor_id`) REFERENCES `auth_user` (`id`),",
+      "CONSTRAINT `past_enslavercontrib_enslaver_id_ed86b895_fk_past_ensl` FOREIGN KEY (`enslaver_id`) REFERENCES `past_enslaveridentity` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "created",
+      "status",
+      "data",
+      "contributor_id",
+      "enslaver_id"
+    ]
+  },
+  "past_enslaveridentity": {
+    "constraints": [
+      "CONSTRAINT `past_enslaveridentit_principal_location_i_9e4145f8_fk_voyage_pl` FOREIGN KEY (`principal_location_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `past_enslaveridentity_birth_place_id_5a98f1c9_fk_voyage_place_id` FOREIGN KEY (`birth_place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `past_enslaveridentity_death_place_id_7d9d9826_fk_voyage_place_id` FOREIGN KEY (`death_place_id`) REFERENCES `voyage_place` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "principal_alias",
+      "birth_year",
+      "birth_month",
+      "birth_day",
+      "death_year",
+      "death_month",
+      "death_day",
+      "father_name",
+      "father_occupation",
+      "mother_name",
+      "probate_date",
+      "will_value_pounds",
+      "will_value_dollars",
+      "will_court",
+      "notes",
+      "is_natural_person",
+      "birth_place_id",
+      "death_place_id",
+      "principal_location_id"
+    ]
+  },
+  "past_enslaveridentitysourceconnection": {
+    "constraints": [
+      "CONSTRAINT `past_enslaveridentit_identity_id_d69dd5f5_fk_past_ensl` FOREIGN KEY (`identity_id`) REFERENCES `past_enslaveridentity` (`id`),",
+      "CONSTRAINT `past_enslaveridentit_source_id_79ae3063_fk_voyage_vo` FOREIGN KEY (`source_id`) REFERENCES `voyage_voyagesources` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "source_order",
+      "text_ref",
+      "identity_id",
+      "source_id"
+    ]
+  },
+  "past_enslaverinrelation": {
+    "constraints": [
+      "CONSTRAINT `past_enslaverinrelat_enslaver_alias_id_183d5f17_fk_past_ensl` FOREIGN KEY (`enslaver_alias_id`) REFERENCES `past_enslaveralias` (`id`),",
+      "CONSTRAINT `past_enslaverinrelat_relation_id_e0e36e3a_fk_past_ensl` FOREIGN KEY (`relation_id`) REFERENCES `past_enslavementrelation` (`id`),",
+      "CONSTRAINT `past_enslaverinrelation_role_id_827237ee_fk_past_enslaverrole_id` FOREIGN KEY (`role_id`) REFERENCES `past_enslaverrole` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "enslaver_alias_id",
+      "relation_id",
+      "role_id"
+    ]
+  },
+  "past_enslaverrole": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "past_enslavervoyageconnection": {
+    "constraints": [
+      "CONSTRAINT `past_enslavervoyagec_enslaver_alias_id_6ab8046d_fk_past_ensl` FOREIGN KEY (`enslaver_alias_id`) REFERENCES `past_enslaveralias` (`id`),",
+      "CONSTRAINT `past_enslavervoyagec_role_id_4a71fbea_fk_past_ensl` FOREIGN KEY (`role_id`) REFERENCES `past_enslaverrole` (`id`),",
+      "CONSTRAINT `past_enslavervoyagec_voyage_id_e48f0112_fk_voyage_vo` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "order",
+      "enslaver_alias_id",
+      "role_id",
+      "voyage_id"
+    ]
+  },
+  "past_languagegroup": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "longitude",
+      "latitude"
+    ]
+  },
+  "past_moderncountry": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "longitude",
+      "latitude"
+    ]
+  },
+  "past_moderncountry_languages": {
+    "constraints": [
+      "CONSTRAINT `past_moderncountry_l_languagegroup_id_6c6a220b_fk_past_lang` FOREIGN KEY (`languagegroup_id`) REFERENCES `past_languagegroup` (`id`),",
+      "CONSTRAINT `past_moderncountry_l_moderncountry_id_4a038c0d_fk_past_mode` FOREIGN KEY (`moderncountry_id`) REFERENCES `past_moderncountry` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "moderncountry_id",
+      "languagegroup_id"
+    ]
+  },
+  "past_registercountry": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "voyage_africaninfo": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name",
+      "possibly_offensive"
+    ]
+  },
+  "voyage_broadregion": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "broad_region",
+      "longitude",
+      "latitude",
+      "value",
+      "show_on_map"
+    ]
+  },
+  "voyage_cargotype": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "voyage_cargounit": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "voyage_linkedvoyages": {
+    "constraints": [
+      "CONSTRAINT `voyage_linkedvoyages_first_id_56d7168f_fk_voyage_voyage_id` FOREIGN KEY (`first_id`) REFERENCES `voyage_voyage` (`id`),",
+      "CONSTRAINT `voyage_linkedvoyages_second_id_66121ec0_fk_voyage_voyage_id` FOREIGN KEY (`second_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "mode",
+      "first_id",
+      "second_id"
+    ]
+  },
+  "voyage_nationality": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_owneroutcome": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_particularoutcome": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_place": {
+    "constraints": [
+      "CONSTRAINT `voyage_place_region_id_8aafcefd_fk_voyage_region_id` FOREIGN KEY (`region_id`) REFERENCES `voyage_region` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "place",
+      "value",
+      "longitude",
+      "latitude",
+      "show_on_main_map",
+      "show_on_voyage_map",
+      "region_id"
+    ]
+  },
+  "voyage_region": {
+    "constraints": [
+      "CONSTRAINT `voyage_region_broad_region_id_e3e47803_fk_voyage_broadregion_id` FOREIGN KEY (`broad_region_id`) REFERENCES `voyage_broadregion` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "region",
+      "longitude",
+      "latitude",
+      "value",
+      "show_on_map",
+      "show_on_main_map",
+      "broad_region_id"
+    ]
+  },
+  "voyage_resistance": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_rigofvessel": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_slavesoutcome": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_tontype": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_vesselcapturedoutcome": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_voyage": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyage_voyage_crew_id_b8d804d9_fk_voyage_voyagecrew_id` FOREIGN KEY (`voyage_crew_id`) REFERENCES `voyage_voyagecrew` (`id`),",
+      "CONSTRAINT `voyage_voyage_voyage_dates_id_248675b7_fk_voyage_voyagedates_id` FOREIGN KEY (`voyage_dates_id`) REFERENCES `voyage_voyagedates` (`id`),",
+      "CONSTRAINT `voyage_voyage_voyage_groupings_id_e16544b0_fk_voyage_vo` FOREIGN KEY (`voyage_groupings_id`) REFERENCES `voyage_voyagegroupings` (`id`),",
+      "CONSTRAINT `voyage_voyage_voyage_itinerary_id_0d307ac8_fk_voyage_vo` FOREIGN KEY (`voyage_itinerary_id`) REFERENCES `voyage_voyageitinerary` (`id`),",
+      "CONSTRAINT `voyage_voyage_voyage_ship_id_62829250_fk_voyage_voyageship_id` FOREIGN KEY (`voyage_ship_id`) REFERENCES `voyage_voyageship` (`id`),",
+      "CONSTRAINT `voyage_voyage_voyage_slaves_number_32ff5e47_fk_voyage_vo` FOREIGN KEY (`voyage_slaves_numbers_id`) REFERENCES `voyage_voyageslavesnumbers` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "voyage_id",
+      "voyage_in_cd_rom",
+      "last_update",
+      "dataset",
+      "comments",
+      "voyage_crew_id",
+      "voyage_dates_id",
+      "voyage_groupings_id",
+      "voyage_itinerary_id",
+      "voyage_ship_id",
+      "voyage_slaves_numbers_id"
+    ]
+  },
+  "voyage_voyage_african_info": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyage_africa_africaninfo_id_ef629199_fk_voyage_af` FOREIGN KEY (`africaninfo_id`) REFERENCES `voyage_africaninfo` (`id`),",
+      "CONSTRAINT `voyage_voyage_africa_voyage_id_aa16b42f_fk_voyage_vo` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "voyage_id",
+      "africaninfo_id"
+    ]
+  },
+  "voyage_voyagecaptain": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "voyage_voyagecaptainconnection": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyagecaptain_captain_id_592d0210_fk_voyage_vo` FOREIGN KEY (`captain_id`) REFERENCES `voyage_voyagecaptain` (`id`),",
+      "CONSTRAINT `voyage_voyagecaptain_voyage_id_0839917e_fk_voyage_vo` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "captain_order",
+      "captain_id",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyagecargoconnection": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyagecargoco_cargo_id_ece9c93c_fk_voyage_ca` FOREIGN KEY (`cargo_id`) REFERENCES `voyage_cargotype` (`id`),",
+      "CONSTRAINT `voyage_voyagecargoco_unit_id_d2b18c35_fk_voyage_ca` FOREIGN KEY (`unit_id`) REFERENCES `voyage_cargounit` (`id`),",
+      "CONSTRAINT `voyage_voyagecargoco_voyage_id_905ca60f_fk_voyage_vo` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "amount",
+      "cargo_id",
+      "unit_id",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyagecrew": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyagecrew_voyage_id_b05c449d_fk_voyage_voyage_id` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "crew_voyage_outset",
+      "crew_departure_last_port",
+      "crew_first_landing",
+      "crew_return_begin",
+      "crew_end_voyage",
+      "unspecified_crew",
+      "crew_died_before_first_trade",
+      "crew_died_while_ship_african",
+      "crew_died_middle_passage",
+      "crew_died_in_americas",
+      "crew_died_on_return_voyage",
+      "crew_died_complete_voyage",
+      "crew_deserted",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyagedates": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyagedates_voyage_id_dbb2e4c9_fk_voyage_voyage_id` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "voyage_began",
+      "slave_purchase_began",
+      "vessel_left_port",
+      "first_dis_of_slaves",
+      "date_departed_africa",
+      "arrival_at_second_place_landing",
+      "third_dis_of_slaves",
+      "departure_last_place_of_landing",
+      "voyage_completed",
+      "length_middle_passage_days",
+      "imp_voyage_began",
+      "imp_departed_africa",
+      "imp_arrival_at_port_of_dis",
+      "imp_length_home_to_disembark",
+      "imp_length_leaving_africa_to_disembark",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyagegroupings": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "label",
+      "value"
+    ]
+  },
+  "voyage_voyageitinerary": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyageitinera_broad_region_of_retu_a656711a_fk_voyage_br` FOREIGN KEY (`broad_region_of_return_id`) REFERENCES `voyage_broadregion` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_first_landing_place__e82c787a_fk_voyage_pl` FOREIGN KEY (`first_landing_place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_first_landing_region_50e646f5_fk_voyage_re` FOREIGN KEY (`first_landing_region_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_first_place_slave_pu_79a4c232_fk_voyage_pl` FOREIGN KEY (`first_place_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_first_region_slave_e_35b498ea_fk_voyage_re` FOREIGN KEY (`first_region_slave_emb_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_broad_region_of__237c6aa1_fk_voyage_br` FOREIGN KEY (`imp_broad_region_of_slave_purchase_id`) REFERENCES `voyage_broadregion` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_broad_region_sla_f72358fe_fk_voyage_br` FOREIGN KEY (`imp_broad_region_slave_dis_id`) REFERENCES `voyage_broadregion` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_broad_region_voy_57851792_fk_voyage_br` FOREIGN KEY (`imp_broad_region_voyage_begin_id`) REFERENCES `voyage_broadregion` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_port_voyage_begi_66fc02d5_fk_voyage_pl` FOREIGN KEY (`imp_port_voyage_begin_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_principal_place__41cc34bc_fk_voyage_pl` FOREIGN KEY (`imp_principal_place_of_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_principal_port_s_a1e72a11_fk_voyage_pl` FOREIGN KEY (`imp_principal_port_slave_dis_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_principal_region_849cfb7a_fk_voyage_re` FOREIGN KEY (`imp_principal_region_slave_dis_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_principal_region_b5ee2863_fk_voyage_re` FOREIGN KEY (`imp_principal_region_of_slave_purchase_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_imp_region_voyage_be_5891dc22_fk_voyage_re` FOREIGN KEY (`imp_region_voyage_begin_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_first_port_dis_i_3e5689f7_fk_voyage_pl` FOREIGN KEY (`int_first_port_dis_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_first_port_emb_i_ad464e62_fk_voyage_pl` FOREIGN KEY (`int_first_port_emb_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_first_region_pur_04829538_fk_voyage_re` FOREIGN KEY (`int_first_region_purchase_slaves_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_first_region_sla_756b08f6_fk_voyage_re` FOREIGN KEY (`int_first_region_slave_landing_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_fourth_place_reg_a3074157_fk_voyage_re` FOREIGN KEY (`int_fourth_place_region_slave_landing_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_fourth_port_dis__6a99d4cb_fk_voyage_pl` FOREIGN KEY (`int_fourth_port_dis_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_second_place_reg_c3832afa_fk_voyage_re` FOREIGN KEY (`int_second_place_region_slave_landing_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_second_port_dis__d3ed6d26_fk_voyage_pl` FOREIGN KEY (`int_second_port_dis_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_second_port_emb__91b6570f_fk_voyage_pl` FOREIGN KEY (`int_second_port_emb_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_second_region_pu_4dc5b1f6_fk_voyage_re` FOREIGN KEY (`int_second_region_purchase_slaves_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_third_place_regi_fd427fc7_fk_voyage_re` FOREIGN KEY (`int_third_place_region_slave_landing_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_int_third_port_dis_i_353c8749_fk_voyage_pl` FOREIGN KEY (`int_third_port_dis_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_place_voyage_ended_i_67374f86_fk_voyage_pl` FOREIGN KEY (`place_voyage_ended_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_port_of_call_before__ece5ba7c_fk_voyage_pl` FOREIGN KEY (`port_of_call_before_atl_crossing_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_port_of_departure_id_39c438e8_fk_voyage_pl` FOREIGN KEY (`port_of_departure_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_principal_place_of_s_d4bf8043_fk_voyage_pl` FOREIGN KEY (`principal_place_of_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_principal_port_of_sl_42aa9c1a_fk_voyage_pl` FOREIGN KEY (`principal_port_of_slave_dis_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_region_of_return_id_db2384e3_fk_voyage_re` FOREIGN KEY (`region_of_return_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_second_landing_place_0f1f2f6f_fk_voyage_pl` FOREIGN KEY (`second_landing_place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_second_landing_regio_34159ee6_fk_voyage_re` FOREIGN KEY (`second_landing_region_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_second_place_slave_p_a6614d34_fk_voyage_pl` FOREIGN KEY (`second_place_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_second_region_slave__bc386fe9_fk_voyage_re` FOREIGN KEY (`second_region_slave_emb_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_third_landing_place__31a6dc3e_fk_voyage_pl` FOREIGN KEY (`third_landing_place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_third_landing_region_299c04ef_fk_voyage_re` FOREIGN KEY (`third_landing_region_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_third_place_slave_pu_70851408_fk_voyage_pl` FOREIGN KEY (`third_place_slave_purchase_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageitinera_third_region_slave_e_c5914212_fk_voyage_re` FOREIGN KEY (`third_region_slave_emb_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageitinerary_voyage_id_cf8eacab_fk_voyage_voyage_id` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "ports_called_buying_slaves",
+      "number_of_ports_of_call",
+      "broad_region_of_return_id",
+      "first_landing_place_id",
+      "first_landing_region_id",
+      "first_place_slave_purchase_id",
+      "first_region_slave_emb_id",
+      "imp_broad_region_of_slave_purchase_id",
+      "imp_broad_region_slave_dis_id",
+      "imp_broad_region_voyage_begin_id",
+      "imp_port_voyage_begin_id",
+      "imp_principal_place_of_slave_purchase_id",
+      "imp_principal_port_slave_dis_id",
+      "imp_principal_region_of_slave_purchase_id",
+      "imp_principal_region_slave_dis_id",
+      "imp_region_voyage_begin_id",
+      "int_first_port_dis_id",
+      "int_first_port_emb_id",
+      "int_first_region_purchase_slaves_id",
+      "int_first_region_slave_landing_id",
+      "int_fourth_place_region_slave_landing_id",
+      "int_fourth_port_dis_id",
+      "int_second_place_region_slave_landing_id",
+      "int_second_port_dis_id",
+      "int_second_port_emb_id",
+      "int_second_region_purchase_slaves_id",
+      "int_third_place_region_slave_landing_id",
+      "int_third_port_dis_id",
+      "place_voyage_ended_id",
+      "port_of_call_before_atl_crossing_id",
+      "port_of_departure_id",
+      "principal_place_of_slave_purchase_id",
+      "principal_port_of_slave_dis_id",
+      "region_of_return_id",
+      "second_landing_place_id",
+      "second_landing_region_id",
+      "second_place_slave_purchase_id",
+      "second_region_slave_emb_id",
+      "third_landing_place_id",
+      "third_landing_region_id",
+      "third_place_slave_purchase_id",
+      "third_region_slave_emb_id",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyageoutcome": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyageoutcome_outcome_owner_id_02f31e0d_fk_voyage_ow` FOREIGN KEY (`outcome_owner_id`) REFERENCES `voyage_owneroutcome` (`id`),",
+      "CONSTRAINT `voyage_voyageoutcome_outcome_slaves_id_bc429c2b_fk_voyage_sl` FOREIGN KEY (`outcome_slaves_id`) REFERENCES `voyage_slavesoutcome` (`id`),",
+      "CONSTRAINT `voyage_voyageoutcome_particular_outcome_i_0d806af0_fk_voyage_pa` FOREIGN KEY (`particular_outcome_id`) REFERENCES `voyage_particularoutcome` (`id`),",
+      "CONSTRAINT `voyage_voyageoutcome_resistance_id_57886690_fk_voyage_re` FOREIGN KEY (`resistance_id`) REFERENCES `voyage_resistance` (`id`),",
+      "CONSTRAINT `voyage_voyageoutcome_vessel_captured_outc_030c5372_fk_voyage_ve` FOREIGN KEY (`vessel_captured_outcome_id`) REFERENCES `voyage_vesselcapturedoutcome` (`id`),",
+      "CONSTRAINT `voyage_voyageoutcome_voyage_id_a6a04f40_fk_voyage_voyage_id` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "outcome_owner_id",
+      "outcome_slaves_id",
+      "particular_outcome_id",
+      "resistance_id",
+      "vessel_captured_outcome_id",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyageship": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyageship_imputed_nationality__c97970e3_fk_voyage_na` FOREIGN KEY (`imputed_nationality_id`) REFERENCES `voyage_nationality` (`id`),",
+      "CONSTRAINT `voyage_voyageship_nationality_ship_id_4f0a47c8_fk_voyage_na` FOREIGN KEY (`nationality_ship_id`) REFERENCES `voyage_nationality` (`id`),",
+      "CONSTRAINT `voyage_voyageship_registered_place_id_da169d44_fk_voyage_pl` FOREIGN KEY (`registered_place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageship_registered_region_id_fe11e96f_fk_voyage_re` FOREIGN KEY (`registered_region_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageship_rig_of_vessel_id_82e17e9b_fk_voyage_ri` FOREIGN KEY (`rig_of_vessel_id`) REFERENCES `voyage_rigofvessel` (`id`),",
+      "CONSTRAINT `voyage_voyageship_ton_type_id_ae9ebf28_fk_voyage_tontype_id` FOREIGN KEY (`ton_type_id`) REFERENCES `voyage_tontype` (`id`),",
+      "CONSTRAINT `voyage_voyageship_vessel_construction__01f0028a_fk_voyage_pl` FOREIGN KEY (`vessel_construction_place_id`) REFERENCES `voyage_place` (`id`),",
+      "CONSTRAINT `voyage_voyageship_vessel_construction__13eb6f99_fk_voyage_re` FOREIGN KEY (`vessel_construction_region_id`) REFERENCES `voyage_region` (`id`),",
+      "CONSTRAINT `voyage_voyageship_voyage_id_12f6a1c8_fk_voyage_voyage_id` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "ship_name",
+      "tonnage",
+      "guns_mounted",
+      "year_of_construction",
+      "registered_year",
+      "tonnage_mod",
+      "imputed_nationality_id",
+      "nationality_ship_id",
+      "registered_place_id",
+      "registered_region_id",
+      "rig_of_vessel_id",
+      "ton_type_id",
+      "vessel_construction_place_id",
+      "vessel_construction_region_id",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyageshipowner": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "name"
+    ]
+  },
+  "voyage_voyageshipownerconnection": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyageshipown_owner_id_82431b5e_fk_voyage_vo` FOREIGN KEY (`owner_id`) REFERENCES `voyage_voyageshipowner` (`id`),",
+      "CONSTRAINT `voyage_voyageshipown_voyage_id_1a260dff_fk_voyage_vo` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "owner_order",
+      "owner_id",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyageslavesnumbers": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyageslavesn_voyage_id_516820fa_fk_voyage_vo` FOREIGN KEY (`voyage_id`) REFERENCES `voyage_voyage` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "slave_deaths_before_africa",
+      "slave_deaths_between_africa_america",
+      "slave_deaths_between_arrival_and_sale",
+      "num_slaves_intended_first_port",
+      "num_slaves_intended_second_port",
+      "num_slaves_carried_first_port",
+      "num_slaves_carried_second_port",
+      "num_slaves_carried_third_port",
+      "total_num_slaves_purchased",
+      "total_num_slaves_dep_last_slaving_port",
+      "total_num_slaves_arr_first_port_embark",
+      "num_slaves_disembark_first_place",
+      "num_slaves_disembark_second_place",
+      "num_slaves_disembark_third_place",
+      "imp_total_num_slaves_embarked",
+      "imp_total_num_slaves_disembarked",
+      "imp_jamaican_cash_price",
+      "imp_mortality_during_voyage",
+      "num_men_embark_first_port_purchase",
+      "num_women_embark_first_port_purchase",
+      "num_boy_embark_first_port_purchase",
+      "num_girl_embark_first_port_purchase",
+      "num_adult_embark_first_port_purchase",
+      "num_child_embark_first_port_purchase",
+      "num_infant_embark_first_port_purchase",
+      "num_males_embark_first_port_purchase",
+      "num_females_embark_first_port_purchase",
+      "num_men_died_middle_passage",
+      "num_women_died_middle_passage",
+      "num_boy_died_middle_passage",
+      "num_girl_died_middle_passage",
+      "num_adult_died_middle_passage",
+      "num_child_died_middle_passage",
+      "num_infant_died_middle_passage",
+      "num_males_died_middle_passage",
+      "num_females_died_middle_passage",
+      "num_men_disembark_first_landing",
+      "num_women_disembark_first_landing",
+      "num_boy_disembark_first_landing",
+      "num_girl_disembark_first_landing",
+      "num_adult_disembark_first_landing",
+      "num_child_disembark_first_landing",
+      "num_infant_disembark_first_landing",
+      "num_males_disembark_first_landing",
+      "num_females_disembark_first_landing",
+      "num_men_embark_second_port_purchase",
+      "num_women_embark_second_port_purchase",
+      "num_boy_embark_second_port_purchase",
+      "num_girl_embark_second_port_purchase",
+      "num_adult_embark_second_port_purchase",
+      "num_child_embark_second_port_purchase",
+      "num_infant_embark_second_port_purchase",
+      "num_males_embark_second_port_purchase",
+      "num_females_embark_second_port_purchase",
+      "num_men_embark_third_port_purchase",
+      "num_women_embark_third_port_purchase",
+      "num_boy_embark_third_port_purchase",
+      "num_girl_embark_third_port_purchase",
+      "num_adult_embark_third_port_purchase",
+      "num_child_embark_third_port_purchase",
+      "num_infant_embark_third_port_purchase",
+      "num_males_embark_third_port_purchase",
+      "num_females_embark_third_port_purchase",
+      "num_men_disembark_second_landing",
+      "num_women_disembark_second_landing",
+      "num_boy_disembark_second_landing",
+      "num_girl_disembark_second_landing",
+      "num_adult_disembark_second_landing",
+      "num_child_disembark_second_landing",
+      "num_infant_disembark_second_landing",
+      "num_males_disembark_second_landing",
+      "num_females_disembark_second_landing",
+      "imp_num_adult_embarked",
+      "imp_num_children_embarked",
+      "imp_num_male_embarked",
+      "imp_num_female_embarked",
+      "total_slaves_embarked_age_identified",
+      "total_slaves_embarked_gender_identified",
+      "imp_adult_death_middle_passage",
+      "imp_child_death_middle_passage",
+      "imp_male_death_middle_passage",
+      "imp_female_death_middle_passage",
+      "imp_num_adult_landed",
+      "imp_num_child_landed",
+      "imp_num_male_landed",
+      "imp_num_female_landed",
+      "total_slaves_landed_age_identified",
+      "total_slaves_landed_gender_identified",
+      "total_slaves_dept_or_arr_age_identified",
+      "total_slaves_dept_or_arr_gender_identified",
+      "imp_slaves_embarked_for_mortality",
+      "imp_num_men_total",
+      "imp_num_women_total",
+      "imp_num_boy_total",
+      "imp_num_girl_total",
+      "imp_num_adult_total",
+      "imp_num_child_total",
+      "imp_num_males_total",
+      "imp_num_females_total",
+      "total_slaves_embarked_age_gender_identified",
+      "total_slaves_by_age_gender_identified_among_landed",
+      "total_slaves_by_age_gender_identified_departure_or_arrival",
+      "percentage_boys_among_embarked_slaves",
+      "child_ratio_among_embarked_slaves",
+      "percentage_girls_among_embarked_slaves",
+      "male_ratio_among_embarked_slaves",
+      "percentage_men_among_embarked_slaves",
+      "percentage_women_among_embarked_slaves",
+      "percentage_boys_among_landed_slaves",
+      "child_ratio_among_landed_slaves",
+      "percentage_girls_among_landed_slaves",
+      "male_ratio_among_landed_slaves",
+      "percentage_men_among_landed_slaves",
+      "percentage_women_among_landed_slaves",
+      "percentage_men",
+      "percentage_women",
+      "percentage_boy",
+      "percentage_girl",
+      "percentage_male",
+      "percentage_child",
+      "percentage_adult",
+      "percentage_female",
+      "imp_mortality_ratio",
+      "voyage_id"
+    ]
+  },
+  "voyage_voyagesources": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyagesources_source_type_id_1d7ccfaa_fk_voyage_vo` FOREIGN KEY (`source_type_id`) REFERENCES `voyage_voyagesourcestype` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "short_ref",
+      "full_ref",
+      "source_type_id"
+    ]
+  },
+  "voyage_voyagesourcesconnection": {
+    "constraints": [
+      "CONSTRAINT `voyage_voyagesources_group_id_94ae27ea_fk_voyage_vo` FOREIGN KEY (`group_id`) REFERENCES `voyage_voyage` (`id`),",
+      "CONSTRAINT `voyage_voyagesources_source_id_70e95521_fk_voyage_vo` FOREIGN KEY (`source_id`) REFERENCES `voyage_voyagesources` (`id`)"
+    ],
+    "columns": [],
+    "column_names": [
+      "id",
+      "source_order",
+      "text_ref",
+      "group_id",
+      "source_id"
+    ]
+  },
+  "voyage_voyagesourcestype": {
+    "constraints": [],
+    "columns": [],
+    "column_names": [
+      "id",
+      "group_id",
+      "group_name"
+    ]
+  }
+}

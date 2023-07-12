@@ -209,8 +209,8 @@ class VoyageOutcomeInline(admin.StackedInline):
 
 class EnslaverAliasConnectionInline(admin.StackedInline):
 	model = EnslaverVoyageConnection
-	readonly_fields=['enslaver_alias','role','order']
-# 	autocomplete_fields=['enslaver_alias',]
+# 	readonly_fields=['enslaver_alias','role','order']
+	autocomplete_fields=['enslaver_alias',]
 	classes = ['collapse']
 	extra=0
 

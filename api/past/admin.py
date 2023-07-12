@@ -100,7 +100,7 @@ class EnslavedInRelationInline(admin.StackedInline):
 # admin.site.register(EnslavementRelation,EnslavementRelationAdmin)
 # admin.site.register(EnslaverRole,EnslaverRoleAdmin)
 admin.site.register(EnslaverIdentity,EnslaverIdentityAdmin)
-# admin.site.register(EnslaverAlias,EnslaverAliasAdmin)
+admin.site.register(EnslaverAlias,EnslaverAliasAdmin)
 # admin.site.register(LanguageGroup,LanguageGroupAdmin)
 # admin.site.register(ModernCountry,ModernCountryAdmin)
 # admin.site.register(AltLanguageGroupName)

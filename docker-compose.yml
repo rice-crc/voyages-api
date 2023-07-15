@@ -3,8 +3,8 @@ version: "3.7"
 
 services:
   voyages-mysql:
-    image: "mysql:8.0.23"
-    platform: "linux/amd64"
+    image: "mysql:8.0.33-oracle"
+    #platform: "linux/amd64"
     cap_add:
       - SYS_NICE  # CAP_SYS_NICE
     container_name: "voyages-mysql"
@@ -44,7 +44,6 @@ services:
       - "voyages"
     depends_on:
       - "voyages-mysql"
-      - "voyages-solr"
     ports:
       - "8000:8000"
     volumes:

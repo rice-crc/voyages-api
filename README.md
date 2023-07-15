@@ -1,105 +1,191 @@
 # VOYAGES API
 
-## Setup
+## System Requirements
 
-N.B. Only tested on an M1 mac thus far
+For reference, this document was written while testing on a 2022 MacBook Pro 
+running MacOS Ventura and Docker Desktop 4.21.1.
 
-### Docker Installation
-
-Copy and rename the default localsettings file for local environments.
-
-```bash
-host:~/Projects/voyages-api$ cp api/voyages3/localsettings.py-default api/voyages3/localsettings.py
-```
-
-Build and run the containers necessary to work on the project.
-
-For details, see `docker-compose.yml`.
+Install the macOS Xcode Command Line Tools.
 
 ```bash
-# With Apple Silicon
-#
-# Go to Docker Desktop settings > Features in Development > Enable "Use Rosetta" > Click "Apply & Restart"
-host:~/Projects/voyages-api docker-compose -f docker-compose up --build
+local:~$ sudo xcodebuild -license
+local:~$ xcode-select install
 ```
 
-Do the other steps in another window. I like to have two terminals up so I can spot errors in the workflow.
-
-Create the database. Note: append a suffix for the branch (e.g.
-voyages_develop).
+Install Homebrew.
 
 ```bash
-host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create database voyages_api"
+local:~$ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-Create the database user and grant privileges. Note: append a suffix for the
-branch (e.g. voyages_develop).
+Install and configure the GitHub CLI.
 
 ```bash
-host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create user 'voyages'@'%' identified by 'voyages'"
-host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uroot -pvoyages -e "grant all on voyages_api.* to 'voyages'@'%'"
+local:~$ brew install gh
+local:~$ gh auth login
 ```
 
-Download the latest `voyage_api.sql.tgz` MySQL dump from the Google Drive share and expand into the `voyages_prod.sql` file.
+Install Docker Desktop.
+
+Optionally, download and install manually instead of using Homebrew.
+
+```bash
+local:~$ brew install --cask docker
+```
+
+## Getting Started
+
+Change to your local project directory (in this case, `~/Projects`).
+
+```bash
+local:~$ cd Projects
+```
+
+Fork the `rice-crc/voyages-api` repository and clone to your local environment.
+
+```bash
+local:~/Projects$ gh repo fork rice-crc/voyages-api --remote --default-branch-only --clone
+```
+
+## Local App Deployment
+
+Change to the cloned repository directory.
+
+```bash
+local:~/Projects$ cd voyages-api
+```
+
+Copy the default config files for each app component.
+
+```bash
+local:~/Projects/voyages-api$ cp api/voyages3/localsettings.py-default api/voyages3/localsettings.py
+local:~/Projects/voyages-api$ cp networks/localsettings.py-default networks/localsettings.py
+local:~/Projects/voyages-api$ cp stats/localsettings.py-default stats/localsettings.py
+```
+
+Build the containers.
+
+Remove the `-d` option to run the process in the foreground.
+
+```bash
+local:~/Projects/voyages-api$ docker compose up --build -d
+```
+
+Create the database and set user privileges.
+
+```bash
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create database voyages_api"
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create user 'voyages'@'%' identified by 'voyages'"
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "grant all on voyages_api.* to 'voyages'@'%'"
+```
+
+Download the latest database dump from the Google Drive project share and 
+expand into the `data/` directory. Rename the expanded file to `data/voyages_prod.sql`.
 
 Import the database dump to MySQL.
 
 ```bash
-host:~/Downloads$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages_api < voyages_prod.sql
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages_api < data/voyages_prod.sql
 ```
 
 Verify the data import.
 
-```mysql
-host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "show databases"
-host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "show tables from voyages_api"
-host:~/Projects/voyages-api docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "select * from voyages_api.voyage_voyage limit 1"
+```bash
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "show databases"
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "show tables from voyages_api"
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uvoyages -pvoyages -e "select * from voyages_api.voyage_voyage limit 1"
 ```
 
-### Localsettings.py files
-
-Required in:
-
-* stats/
-* networks/
-* api/voyages3/
-
-### Post-Install Setup Tasks
-
-Run media asset tasks.
+Run the app setup and configuration tasks.
 
 ```bash
-host:~/Projects/voyages-api docker exec -i voyages-django bash -c 'python3 manage.py collectstatic --noinput'
+local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py collectstatic --noinput'
+local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py migrate'
+local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_geo_data'
+local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_voyage_dates_data'
 ```
 
-#### Getting API keys (for Flask containers):
+The Flask components of the app require an API key.
 
-Enter the django container and create a new superuser
+## Generating an API Key for the Flask Components
 
-	docker exec -it voyages-api /bin/bash
-	python3 manage.py createsuperuser
-
-Log in to the admin interface at [http://127.0.0.1:8100/admin](http://127.0.0.1:8000/admin) with those credentials, and create an api token for yourself.
-
-Update your new files at ```stats/localsettings.py``` and ```networks/localsettings.py``` with this token.
-
-Restart the flask engine(s).
+Create a new Django superuser account through the CLI.
 
 ```bash
-host:~/Projects/voyages-api$ docker restart voyages-stats
-host:~/Projects/voyages-api$ docker restart voyages-networks
+local:~/Projects/voyages-api$ docker exec -it voyages-api bash -c 'python3 manage.py createsuperuser'
 ```
 
-### Cleanup
+Use those credentials to log in to the Django admin interface at 
+[http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) and create an API 
+token for the account.
+
+Update the `stats/localsettings.py` and `networks/localsettings.py` files with 
+the new token.
+
+Restart the Flask component containers.
+
+```bash
+local:~/Projects/voyages-api$ docker restart voyages-networks voyages-stats
+```
+
+## Cleanup
 
 If you want to tear it down:
 
 ```bash
-host:~/Projects/voyagesapi$ docker-compose down
-host:~/Projects/voyagesapi$ docker container prune
-host:~/Projects/voyagesapi$ docker image prune
-host:~/Projects/voyagesapi$ docker volume prune
-host:~/Projects/voyagesapi$ docker network prune
+local:~/Projects/voyagesapi$ docker compose down
+local:~/Projects/voyagesapi$ docker container prune
+local:~/Projects/voyagesapi$ docker image prune
+local:~/Projects/voyagesapi$ docker volume prune
+local:~/Projects/voyagesapi$ docker network prune
+```
+
+## Resources
+
+Note the following project resources:
+
+* Voyages API: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+* API Stats Component: [http://127.0.0.1:5000](http://127.0.0.1:5000/)
+* API Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5005/)
+* Solr: [http://127.0.0.1:8983](http://127.0.0.1:8983)
+* Adminer: [http://127.0.0.1:8080](http://127.0.0.1:8080)
+
+## Development Workflow
+
+This project follows a fork-and-pull workflow.
+
+* The `rice-crc:voyages-api` repository is referred to as `upstream` and your fork as `origin`
+* The upstream/develop branch serves as the default change integration point between developers
+* A developer makes Pull Requests from their origin/working-branch to upstream/develop
+
+Keep the following in mind when contributing code.
+
+* Keep your fork up-to-date with the upstream repository
+* Always start new work with a new working branch
+* Periodically fetch and rebase the latest upstream/develop changes onto your local working-branch
+* Do not make Pull Requests containing untested or unfinished code unless intended for temporary review and discussion
+* Clean up the work in your local environment once a Pull Request has been accepted and merged
+
+Use the following git process to contribute work.
+
+```bash
+git fetch upstream            # Pull the latest changes from upstream/develop
+git checkout -b <short-desc>  # and create a new working branch
+
+git fetch upstream            # Do work; before any commits, pull the latest
+git rebase upstream/develop   # changes from upstream/develop and rebase onto
+                              # your working branch
+
+git add . && git commit       # Commit your changes to the working branch
+
+git push origin HEAD          # Push the working branch to your fork and make
+gh pr create --fill           # a Pull Request to upstream/develop
+
+git checkout develop          # Once the PR is accepted and merged, delete
+git branch -D <short-desc>    # your working branch
+
+git pull                      # Pull the latest changes from upstream/develop
+git push                      # and update your fork by pushing to origin/develop
 ```
 
 ----------------------

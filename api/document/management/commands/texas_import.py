@@ -55,7 +55,7 @@ class Command(BaseCommand):
 			enslaved=Enslaved.objects.get(id=row['ENSLAVEDID'])
 			sourcea_full_str=row['SOURCEA']
 			
-# 			#standard format is OMNO, Brazos, 3/12/1846
+# 			#FORMAT NOTE: standard format is OMNO, Brazos, 3/12/1846
 # 			#but for some, dd41 included the ms number like
 # 			#RLMS, MS26-0367, Galveston, 10/27/1849
 			try:
@@ -69,12 +69,6 @@ class Command(BaseCommand):
 			zotero_title="Manifest of the %s" %shipname_str
 			zotero_title=zotero_title[:240] + " " + date_str
 			parseddate="-".join([str(i) for i in [yyyy,mm,dd]])
-# 			vsc,vsc_isnew=VoyageSourcesConnection.objects.get_or_create(
-# 				source=legacy_source,
-# 				group=voyage,
-# 				text_ref=zotero_title,
-# 				source_order=0
-# 			)
 
 
 			dupcount=1
@@ -91,16 +85,22 @@ class Command(BaseCommand):
 					dupcount+=1
 			
 			django_zotero_object.zotero_date=parseddate
-			django_zotero_object.voyages.add(voyage)
-			django_zotero_object.enslaved_people.add(enslaved)
-			
-# 			django_zotero_object.source_cnx.add(vsc)
 			django_zotero_object.save()
 			
-# 			voyage.sources.add(django_zotero_object)
-# 			voyage.save()
-# 			print(voyage,voyage.sources.all())
-# 
+			#create the zotero --> enslaved connection
+			#(i'm not capturing page numbers)
+			zoteroenslavedconnection,zoteroenslavedconnection_isnew=ZoteroEnslavedConnection.objects.get_or_create(
+				zotero_source=django_zotero_object,
+				enslaved=enslaved
+			)
+			
+			#create the zotero --> voyage connection
+			#(i'm not capturing page numbers...)
+			zoterovoyageconnection,zoterovoyageconnection_isnew=ZoteroVoyageConnection.objects.get_or_create(
+				zotero_source=django_zotero_object,
+				voyage=voyage
+			)
+			
 			page_url_fields=['SOURCEB','URL 1','URL 2','URL 3','URL 4','URL 5']
 
 			page_urls=[row[i].strip() for i in page_url_fields if row[i] not in ('',None)]

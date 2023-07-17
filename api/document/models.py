@@ -169,22 +169,7 @@ class ZoteroSource(models.Model):
 		null=True,
 		on_delete=models.CASCADE
 	)
-	
-	voyages=models.ManyToManyField(
-		Voyage,
-		related_name="voyage_zoterorefs"
-	)
-	
-	enslaved_people=models.ManyToManyField(
-		Enslaved,
-		related_name="enslaved_zoterorefs"
-	)
-	
-	enslavers=models.ManyToManyField(
-		EnslaverIdentity,
-		related_name="enslaver_zoterorefs"
-	)
-	
+		
 	zotero_title=models.CharField(
 		max_length=255,
 		null=False,

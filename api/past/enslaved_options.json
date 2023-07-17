@@ -474,75 +474,135 @@
     "label": "Code of outcome",
     "flatlabel": "voyage : Outcome : Fate (particular outcome of voyage) : Code of outcome"
   },
-  "voyage__voyage_zoterorefs": {
+  "voyage__voyage_zotero_connections": {
     "type": "table",
-    "label": "zotero source",
-    "flatlabel": "voyage : zotero source"
+    "label": "zotero voyage connection",
+    "flatlabel": "voyage : zotero voyage connection"
   },
-  "voyage__voyage_zoterorefs__legacy_source": {
-    "type": "table",
-    "label": "Source",
-    "flatlabel": "voyage : zotero source : Source"
-  },
-  "voyage__voyage_zoterorefs__legacy_source__full_ref": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Full reference",
-    "flatlabel": "voyage : zotero source : Source : Full reference"
-  },
-  "voyage__voyage_zoterorefs__legacy_source__short_ref": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Short reference",
-    "flatlabel": "voyage : zotero source : Source : Short reference"
-  },
-  "voyage__voyage_zoterorefs__page_connection": {
-    "type": "table",
-    "label": "Page connection",
-    "flatlabel": "voyage : zotero source : Page connection"
-  },
-  "voyage__voyage_zoterorefs__page_connection__source_page": {
-    "type": "table",
-    "label": "source page",
-    "flatlabel": "voyage : zotero source : Page connection : source page"
-  },
-  "voyage__voyage_zoterorefs__page_connection__source_page__id": {
+  "voyage__voyage_zotero_connections__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "ID",
-    "flatlabel": "voyage : zotero source : Page connection : source page : ID"
+    "flatlabel": "voyage : zotero voyage connection : ID"
   },
-  "voyage__voyage_zoterorefs__page_connection__source_page__page_url": {
+  "voyage__voyage_zotero_connections__zotero_source": {
+    "type": "table",
+    "label": "zotero source",
+    "flatlabel": "voyage : zotero voyage connection : zotero source"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : ID"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__page_connection": {
+    "type": "table",
+    "label": "source page connection",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : ID"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page": {
+    "type": "table",
+    "label": "source page",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page : ID"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__page_url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Page url",
-    "flatlabel": "voyage : zotero source : Page connection : source page : Page url"
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page : Page url"
   },
-  "voyage__voyage_zoterorefs__page_connection__source_page__iiif_manifest_url": {
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__iiif_manifest_url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Iiif manifest url",
-    "flatlabel": "voyage : zotero source : Page connection : source page : Iiif manifest url"
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page : Iiif manifest url"
   },
-  "voyage__voyage_zoterorefs__page_connection__source_page__iiif_baseimage_url": {
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__iiif_baseimage_url": {
     "type": "<class 'rest_framework.fields.URLField'>",
     "label": "Iiif baseimage url",
-    "flatlabel": "voyage : zotero source : Page connection : source page : Iiif baseimage url"
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page : Iiif baseimage url"
   },
-  "voyage__voyage_zoterorefs__page_connection__source_page__image_filename": {
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__image_filename": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Image filename",
-    "flatlabel": "voyage : zotero source : Page connection : source page : Image filename"
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page : Image filename"
   },
-  "voyage__voyage_zoterorefs__page_connection__source_page__last_updated": {
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__transcription": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Transcription",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page : Transcription"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__last_updated": {
     "type": "<class 'rest_framework.fields.DateTimeField'>",
     "label": "Last updated",
-    "flatlabel": "voyage : zotero source : Page connection : source page : Last updated"
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page : Last updated"
   },
-  "voyage__voyage_zoterorefs__page_connection__source_page__human_reviewed": {
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__human_reviewed": {
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Human reviewed",
-    "flatlabel": "voyage : zotero source : Page connection : source page : Human reviewed"
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : source page : Human reviewed"
   },
-  "voyage__voyage_zoterorefs__zotero_title": {
+  "voyage__voyage_zotero_connections__zotero_source__page_connection__zotero_source": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Zotero source",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : source page connection : Zotero source"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__item_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Item url",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : Item url"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__zotero_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Zotero url",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : Zotero url"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__zotero_title": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Zotero title",
-    "flatlabel": "voyage : zotero source : Zotero title"
+    "flatlabel": "voyage : zotero voyage connection : zotero source : Zotero title"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__zotero_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Zotero date",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : Zotero date"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : Last updated"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : Human reviewed"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__notes": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Notes",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : Notes"
+  },
+  "voyage__voyage_zotero_connections__zotero_source__legacy_source": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Legacy source",
+    "flatlabel": "voyage : zotero voyage connection : zotero source : Legacy source"
+  },
+  "voyage__voyage_zotero_connections__page_range": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Page range",
+    "flatlabel": "voyage : zotero voyage connection : Page range"
+  },
+  "voyage__voyage_zotero_connections__voyage": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Voyage",
+    "flatlabel": "voyage : zotero voyage connection : Voyage"
   },
   "voyage__voyage_enslaver_connection": {
     "type": "table",

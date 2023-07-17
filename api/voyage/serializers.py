@@ -7,7 +7,6 @@ from geo.models import *
 from common.nest import nest_selected_fields
 from common.models import SparseDate
 from past.models import *
-from voyage.models import VoyageSources
 
 #### GEO
 
@@ -210,12 +209,6 @@ class SourcePageSerializer(serializers.ModelSerializer):
 		model=SourcePage
 		fields='__all__'
 
-# class ZoteroPageConnectionSerializer(serializers.ModelSerializer):
-# 	source_page=SourcePageSerializer(many=False)
-# 	class Meta:
-# 		model=SourcePageConnection
-# 		fields=['source_page',]
-
 class VoyageSourcePageConnectionSerializer(serializers.ModelSerializer):
 	source_page=SourcePageSerializer(many=False)
 	class Meta:
@@ -229,7 +222,7 @@ class VoyageZoteroSourceSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class ZoteroVoyageConnectionSerializer(serializers.ModelSerializer):
-	zotero_source=VoyageZoteroSourceSerializer(many=True,read_only=True)
+	zotero_source=VoyageZoteroSourceSerializer(many=False,read_only=True)
 	class Meta:
 		model=ZoteroVoyageConnection
 		fields='__all__'

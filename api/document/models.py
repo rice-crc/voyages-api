@@ -60,7 +60,96 @@ class SourcePageConnection(models.Model):
 		unique_together=[
 			['zotero_source','source_page']
 		]
-	
+
+
+
+
+# >>> from document.models import *
+# >>> zoterosources=ZoteroSource.objects.all()
+# >>> for zs in zoterosources:
+# ...     if zs.voyages.all() is not None:
+# ...             for v in zs.voyages.all():
+# ...                     zvc,zvc_isnew=ZoteroVoyageConnection.objects.get_or_create(zotero_source=zs,voyage=v)
+# ...                     zvc.save()
+# ... 
+
+
+# >>> for zs in zoterosources:
+# ...     if zs.enslaved_people.all() is not None:
+# ...             for e in zs.enslaved_people.all():
+# ...                     zec,zec_isnew=ZoteroEnslavedConnection.objects.get_or_create(zotero_source=zs,enslaved=e)
+# ...                     zec.save()
+
+# for zs in zoterosources:
+# 	if zs.enslavers.all() is not None:
+# 		for e in zs.enslavers.all():
+# 			zec,zec_isnew=ZoteroEnslaverConnection.objects.get_or_create(zotero_source=zs,enslaver=e)
+# 			zec.save()
+
+
+class ZoteroVoyageConnection(models.Model):
+	zotero_source=models.ForeignKey(
+		'ZoteroSource',
+		related_name='zotero_voyage_connections',
+		on_delete=models.CASCADE
+	)
+	voyage=models.ForeignKey(
+		Voyage,
+		related_name='voyage_zotero_connections',
+		on_delete=models.CASCADE
+	)
+	page_range=models.CharField(
+		max_length=25,
+		null=True,
+		blank=True
+	)
+	class Meta:
+		unique_together=[
+			['zotero_source','voyage','page_range']
+		]
+
+class ZoteroEnslaverConnection(models.Model):
+	zotero_source=models.ForeignKey(
+		'ZoteroSource',
+		related_name='zotero_enslaver_connections',
+		on_delete=models.CASCADE
+	)
+	enslaver=models.ForeignKey(
+		EnslaverIdentity,
+		related_name='enslaver_zotero_connections',
+		on_delete=models.CASCADE
+	)
+	page_range=models.CharField(
+		max_length=25,
+		null=True,
+		blank=True
+	)
+	class Meta:
+		unique_together=[
+			['zotero_source','enslaver','page_range']
+		]
+
+class ZoteroEnslavedConnection(models.Model):
+	zotero_source=models.ForeignKey(
+		'ZoteroSource',
+		related_name='zotero_enslaved_connections',
+		on_delete=models.CASCADE
+	)
+	enslaved=models.ForeignKey(
+		Enslaved,
+		related_name='enslaved_zotero_connections',
+		on_delete=models.CASCADE
+	)
+	page_range=models.CharField(
+		max_length=25,
+		null=True,
+		blank=True
+	)
+	class Meta:
+		unique_together=[
+			['zotero_source','enslaved','page_range']
+		]
+
 
 class ZoteroSource(models.Model):
 	"""

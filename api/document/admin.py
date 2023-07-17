@@ -15,12 +15,16 @@ class SourcePageConnectionInline(admin.StackedInline):
 
 class ZoteroSourceAdmin(admin.ModelAdmin):
 	model=ZoteroSource
+	search_fields=['zotero_title','zotero_date']
 	readonly_fields=['item_url','zotero_url','legacy_source']
 	autocomplete_fields=('voyages','enslaved_people','enslavers')
 	list_display=('zotero_title','zotero_date')
 
+class ZoteroVoyageConnectionAdmin(admin.ModelAdmin):
+# 	readonly_fields=['zotero_source','voyage']
+	search_fields=['zotero_source','voyage']
+	autocomplete_fields=['zotero_source','voyage']
+
 admin.site.register(ZoteroSource, ZoteroSourceAdmin)
 admin.site.register(SourcePage,SourcePageAdmin)
-
-# admin.site.register(SourcePage)
-# admin.site.register(SourcePageConnectionInline)
+admin.site.register(ZoteroVoyageConnection,ZoteroVoyageConnectionAdmin)

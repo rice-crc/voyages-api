@@ -1,6 +1,7 @@
 from django.contrib import admin
 from voyage.models import *
 from past.models import *
+from document.models import *
 # 
 # # 
 # # 
@@ -220,6 +221,15 @@ class VoyageOutcomeInline(admin.StackedInline):
 # 	]
 	classes = ['collapse']
 
+class VoyageZoteroConnectionInline(admin.StackedInline):
+	model=ZoteroVoyageConnection
+	autocomplete_fields=['zotero_source']
+# 	fields=['__all__',]
+	extra=0
+	classes=['collapse']
+	
+
+
 class EnslaverAliasConnectionInline(admin.StackedInline):
 	model = EnslaverVoyageConnection
 # 	readonly_fields=['enslaver_alias','role','order']
@@ -232,6 +242,7 @@ class VoyageAdmin(admin.ModelAdmin):
 		VoyageDatesInline,
 		VoyageItineraryInline,
 # 		VoyageSourcesConnectionInline,
+		VoyageZoteroConnectionInline,
 		EnslaverAliasConnectionInline,
 		VoyageCrewInline,
 		VoyageOutcomeInline,

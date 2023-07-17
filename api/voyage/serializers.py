@@ -205,29 +205,34 @@ class VoyageDatesSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class SourcePageSerializer(serializers.ModelSerializer):
+
 	class Meta:
 		model=SourcePage
 		fields='__all__'
 
-class ZoteroPageConnectionSerializer(serializers.ModelSerializer):
+# class ZoteroPageConnectionSerializer(serializers.ModelSerializer):
+# 	source_page=SourcePageSerializer(many=False)
+# 	class Meta:
+# 		model=SourcePageConnection
+# 		fields=['source_page',]
+
+class VoyageSourcePageConnectionSerializer(serializers.ModelSerializer):
 	source_page=SourcePageSerializer(many=False)
 	class Meta:
 		model=SourcePageConnection
-		fields=['source_page',]
+		fields='__all__'
 
-class LegacySourceSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=VoyageSources
-		fields=['full_ref',]
-
-
-class VoyageZoteroSerializer(serializers.ModelSerializer):
-	page_connection=ZoteroPageConnectionSerializer(many=True,read_only=True)
-	legacy_source=LegacySourceSerializer(many=False)
-	
+class VoyageZoteroSourceSerializer(serializers.ModelSerializer):
+	page_connection=VoyageSourcePageConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=ZoteroSource
-		exclude=['enslaved_people','voyages','enslavers',]
+		fields='__all__'
+
+class ZoteroVoyageConnectionSerializer(serializers.ModelSerializer):
+	zotero_source=VoyageZoteroSourceSerializer(many=True,read_only=True)
+	class Meta:
+		model=ZoteroVoyageConnection
+		fields='__all__'
 
 class VoyageEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -235,7 +240,7 @@ class VoyageEnslavedSerializer(serializers.ModelSerializer):
 		fields=['id','documented_name']
 
 class VoyageSerializer(serializers.ModelSerializer):
-	voyage_zoterorefs=VoyageZoteroSerializer(many=True,read_only=True)
+	voyage_zotero_connections=ZoteroVoyageConnectionSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False)
 	voyage_dates=VoyageDatesSerializer(many=False)
 	voyage_enslaver_connection=VoyageEnslaverConnectionSerializer(many=True,read_only=True)

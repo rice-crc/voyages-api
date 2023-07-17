@@ -58,34 +58,40 @@ registered_caches={
 
 rcnames=list(registered_caches.keys())
 
-for rcname in rcnames:
-	st=time.time()
-	rc=registered_caches[rcname]
-# 	try:
-	endpoint=rc['endpoint']
-	if 'graphs' not in rc:
-		rc['graphs']={}
 
-	for graph_params in rc['graph_params']:
-# 		print("INITIALIZING",endpoint,graph_params)
-		graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-		rc['graphs'][graph_name]={
-			'graph':graph,
-			'shortest_paths':shortest_paths
-		}
-	registered_caches[rcname]=rc
-	print("finished building graphs in %d seconds" %int(time.time()-st))
-	
-# 	except:
-# 		print("failed on cache:",rc['name'])
+standoff_base=4
+standoff_count=0
 
+st=time.time()
+while True:
+	failures_count=0
+	for rcname in rcnames:
+		rc=registered_caches[rcname]
+		endpoint=rc['endpoint']
+		if 'graphs' not in rc:
+			rc['graphs']={}
 
-
-
-
-
-
-
+		for graph_params in rc['graph_params']:
+			try:
+				graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
+				rc['graphs'][graph_name]={
+					'graph':graph,
+					'shortest_paths':shortest_paths
+				}
+			except:
+				failures_count+=1
+				print("failed on cache:",rc['name'])
+				break
+		registered_caches[rcname]=rc
+	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
+	if failures_count==len(rcnames):
+		standoff_time=standoff_base**standoff_count
+		print("retrying after %d seconds" %(standoff_time))
+		time.sleep(standoff_time)
+		standoff_count+=1
+	else:
+		break
+print("finished building graphs in %d seconds" %int(time.time()-st))
 
 @app.route('/network_maps/',methods=['POST'])
 def network_maps():
@@ -127,7 +133,7 @@ def network_maps():
 			nl:0 for nl in nodelabels
 		},
 		"data":{}
-		} for k in payload for i in k.split('__') if i is not "None"
+		} for k in payload for i in k.split('__') if i != "None"
 	}
 		
 	classedabweights={}

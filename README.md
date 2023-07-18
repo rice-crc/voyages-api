@@ -58,34 +58,22 @@ local:~/Projects$ cd voyages-api
 Copy the default config files for each app component.
 
 ```bash
-local:~/Projects/voyages-api$ cp api/voyages3/localsettings.py-default api/voyages3/localsettings.py
-local:~/Projects/voyages-api$ cp networks/localsettings.py-default networks/localsettings.py
-local:~/Projects/voyages-api$ cp stats/localsettings.py-default stats/localsettings.py
-```
-
-Build the containers.
-
-Remove the `-d` option to run the process in the foreground.
-
-```bash
-local:~/Projects/voyages-api$ docker compose up --build -d
-```
-
-Create the database and set user privileges.
-
-```bash
-local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create database voyages_api"
-local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "create user 'voyages'@'%' identified by 'voyages'"
-local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages -e "grant all on voyages_api.* to 'voyages'@'%'"
+local:~/Projects/voyages-api$ cp api/voyages3/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp networks/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp stats/localsettings.py{-default,}
 ```
 
 Download the latest database dump from the Google Drive project share and 
 expand into the `data/` directory. Rename the expanded file to `data/voyages_prod.sql`.
 
-Import the database dump to MySQL.
+Build the API containers. The component containers must be built separately.
+
+Remove the `-d` option to run the process in the foreground.
+
+Allow a short bit of time for the mysql container to initialize.
 
 ```bash
-local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages_api < data/voyages_prod.sql
+local:~/Projects/voyages-api$ docker compose up --build -d voyages-mysql voyages-api voyages-adminer
 ```
 
 Verify the data import.
@@ -105,9 +93,15 @@ local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_voyage_dates_data'
 ```
 
-The Flask components of the app require an API key.
+Build the API component containers.
+
+```bash
+local:~/Projects/voyages-api$ docker compose up --build -d voyages-networks voyages-stats
+```
 
 ## Generating an API Key for the Flask Components
+
+The Flask components of the app require an API key.
 
 Create a new Django superuser account through the CLI.
 
@@ -134,12 +128,11 @@ If you want to tear it down:
 
 ```bash
 local:~/Projects/voyagesapi$ docker compose down
-local:~/Projects/voyagesapi$ docker container prune
-local:~/Projects/voyagesapi$ docker image prune
-local:~/Projects/voyagesapi$ docker volume prune
-local:~/Projects/voyagesapi$ docker network prune
+local:~/Projects/voyagesapi$ docker container prune -f
+local:~/Projects/voyagesapi$ docker image prune -f
+local:~/Projects/voyagesapi$ docker volume prune -f
+local:~/Projects/voyagesapi$ docker network prune -f
 ```
-
 ## Resources
 
 Note the following project resources:
@@ -149,6 +142,17 @@ Note the following project resources:
 * API Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5005/)
 * Solr: [http://127.0.0.1:8983](http://127.0.0.1:8983)
 * Adminer: [http://127.0.0.1:8080](http://127.0.0.1:8080)
+
+## Adminer
+
+The Adminer container is provided as an optional way of working with the database.
+
+Visit http://127.0.0.1:8080 and log in with the following values.
+
+* Server: voyages-mysql
+* User: voyages
+* Password: voyages
+* Database: voyages-api
 
 ## Development Workflow
 
@@ -177,6 +181,8 @@ git rebase upstream/develop   # changes from upstream/develop and rebase onto
                               # your working branch
 
 git add . && git commit       # Commit your changes to the working branch
+										# Repeat pulling changes and adding commits until
+										# your work is done
 
 git push origin HEAD          # Push the working branch to your fork and make
 gh pr create --fill           # a Pull Request to upstream/develop

@@ -181,8 +181,8 @@ git rebase upstream/develop   # changes from upstream/develop and rebase onto
                               # your working branch
 
 git add . && git commit       # Commit your changes to the working branch
-										# Repeat pulling changes and adding commits until
-										# your work is done
+                              # Repeat pulling changes and adding commits until
+                              # your work is done
 
 git push origin HEAD          # Push the working branch to your fork and make
 gh pr create --fill           # a Pull Request to upstream/develop

@@ -204,6 +204,21 @@
     "label": "Source",
     "flatlabel": "Enslaver alias : Enslaver relations : enslavement relation : Source"
   },
+  "aliases__enslaver_relations__role": {
+    "type": "table",
+    "label": "enslaver role",
+    "flatlabel": "Enslaver alias : Enslaver relations : enslaver role"
+  },
+  "aliases__enslaver_relations__role__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Enslaver relations : enslaver role : ID"
+  },
+  "aliases__enslaver_relations__role__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "Enslaver alias : Enslaver relations : enslaver role : Name"
+  },
   "aliases__enslaver_voyage_connection": {
     "type": "table",
     "label": "Enslaver voyage connection",
@@ -839,6 +854,116 @@
     "label": "Identity",
     "flatlabel": "Enslaver alias : Identity"
   },
+  "birth_place": {
+    "type": "table",
+    "label": "birth place",
+    "flatlabel": "birth place"
+  },
+  "birth_place__geo_location": {
+    "type": "table",
+    "label": "New Location Fieldmapping",
+    "flatlabel": "birth place : New Location Fieldmapping"
+  },
+  "birth_place__geo_location__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "birth place : New Location Fieldmapping : ID"
+  },
+  "birth_place__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "birth place : New Location Fieldmapping : Uuid"
+  },
+  "birth_place__geo_location__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Location name",
+    "flatlabel": "birth place : New Location Fieldmapping : Location name"
+  },
+  "birth_place__geo_location__longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of Centroid",
+    "flatlabel": "birth place : New Location Fieldmapping : Longitude of Centroid"
+  },
+  "birth_place__geo_location__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of Centroid",
+    "flatlabel": "birth place : New Location Fieldmapping : Latitude of Centroid"
+  },
+  "birth_place__geo_location__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "SPSS code",
+    "flatlabel": "birth place : New Location Fieldmapping : SPSS code"
+  },
+  "birth_place__geo_location__child_of": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Child of",
+    "flatlabel": "birth place : New Location Fieldmapping : Child of"
+  },
+  "birth_place__geo_location__location_type": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location Type",
+    "flatlabel": "birth place : New Location Fieldmapping : Location Type"
+  },
+  "birth_place__geo_location__spatial_extent": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Polygon",
+    "flatlabel": "birth place : New Location Fieldmapping : Polygon"
+  },
+  "death_place": {
+    "type": "table",
+    "label": "death place",
+    "flatlabel": "death place"
+  },
+  "death_place__geo_location": {
+    "type": "table",
+    "label": "New Location Fieldmapping",
+    "flatlabel": "death place : New Location Fieldmapping"
+  },
+  "death_place__geo_location__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "death place : New Location Fieldmapping : ID"
+  },
+  "death_place__geo_location__uuid": {
+    "type": "<class 'rest_framework.fields.UUIDField'>",
+    "label": "Uuid",
+    "flatlabel": "death place : New Location Fieldmapping : Uuid"
+  },
+  "death_place__geo_location__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Location name",
+    "flatlabel": "death place : New Location Fieldmapping : Location name"
+  },
+  "death_place__geo_location__longitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Longitude of Centroid",
+    "flatlabel": "death place : New Location Fieldmapping : Longitude of Centroid"
+  },
+  "death_place__geo_location__latitude": {
+    "type": "<class 'rest_framework.fields.DecimalField'>",
+    "label": "Latitude of Centroid",
+    "flatlabel": "death place : New Location Fieldmapping : Latitude of Centroid"
+  },
+  "death_place__geo_location__value": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "SPSS code",
+    "flatlabel": "death place : New Location Fieldmapping : SPSS code"
+  },
+  "death_place__geo_location__child_of": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Child of",
+    "flatlabel": "death place : New Location Fieldmapping : Child of"
+  },
+  "death_place__geo_location__location_type": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Location Type",
+    "flatlabel": "death place : New Location Fieldmapping : Location Type"
+  },
+  "death_place__geo_location__spatial_extent": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Polygon",
+    "flatlabel": "death place : New Location Fieldmapping : Polygon"
+  },
   "principal_alias": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Principal alias",
@@ -928,15 +1053,5 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Human reviewed",
     "flatlabel": "Human reviewed"
-  },
-  "birth_place": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Birth place",
-    "flatlabel": "Birth place"
-  },
-  "death_place": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Death place",
-    "flatlabel": "Death place"
   }
 }

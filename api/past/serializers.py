@@ -247,9 +247,10 @@ class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
 
 class EnslaverInRelationSerializer(serializers.ModelSerializer):
 	relation = EnslaverEnslavementRelationSerializer(many=False)
+	role=EnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverInRelation
-		fields=['relation',]
+		fields=['relation','role']
 
 class EnslaverVoyageConnectionSerializer(serializers.ModelSerializer):
 	voyage=PastVoyageSerializer(many=False)
@@ -274,6 +275,8 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 class EnslaverSerializer(serializers.ModelSerializer):
 	principal_location=PlaceSerializer(many=False)
 	aliases=EnslaverAliasSerializer(many=True,read_only=True)
+	birth_place=PlaceSerializer(many=False)
+	death_place=PlaceSerializer(many=False)
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'

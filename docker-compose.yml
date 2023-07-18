@@ -10,7 +10,7 @@ services:
     hostname: "voyages-mysql"
     restart: "on-failure"
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     networks:
       - "voyages"
     volumes:
@@ -29,7 +29,7 @@ services:
     hostname: "voyages-solr"
     restart: "on-failure"
     ports:
-      - "8983:8983"
+      - "127.0.0.1:8983:8983"
     networks:
       - "voyages"
     volumes:
@@ -48,7 +48,7 @@ services:
     depends_on:
       - "voyages-mysql"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - "./api/:/srv/voyages-api"
     build:
@@ -63,7 +63,7 @@ services:
     depends_on:
       - "voyages-mysql"
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     networks:
       - "voyages"
     environment:
@@ -77,7 +77,7 @@ services:
     networks:
       - "voyages"
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     volumes:
       - "./stats/:/srv/voyages-stats"
     build:
@@ -92,7 +92,7 @@ services:
     networks:
       - "voyages"
     ports:
-      - "5005:5005"
+      - "127.0.0.1:5005:5005"
     volumes:
       - "./networks/:/srv/voyages-networks"
     build:

@@ -144,7 +144,6 @@ def network_maps():
 		#nodes
 		if "None" not in uuids:
 			for idx in range(len(uuids)):
-				print(idx)
 				nodelabel=nodelabels[idx]
 				uuid=uuids[idx]
 				nodes[uuid]['weights'][nodelabel]+=w

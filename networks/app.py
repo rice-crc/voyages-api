@@ -137,30 +137,33 @@ def network_maps():
 	}
 		
 	classedabweights={}
+	
 	for k in payload:
 		w=payload[k]
 		uuids=k.split('__')
 		#nodes
-		for idx in range(len(uuids)):
-			nodelabel=nodelabels[idx]
-			uuid=uuids[idx]
-			nodes[uuid]['weights'][nodelabel]+=w
-		#edges
-		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
-		for idx in range(len(linklabels)):
-			abpair=abpairs[idx]
-			linklabel=linklabels[idx]
-			if linklabel not in classedabweights:
-				classedabweights[linklabel]={}
-			if "None" not in abpair:
-				a,b=abpair
-				if a not in classedabweights[linklabel]:
-					classedabweights[linklabel][a]={b:w}
-				else:
-					if b not in classedabweights[linklabel][a]:
-						classedabweights[linklabel][a][b]=w
+		if "None" not in uuids:
+			for idx in range(len(uuids)):
+				print(idx)
+				nodelabel=nodelabels[idx]
+				uuid=uuids[idx]
+				nodes[uuid]['weights'][nodelabel]+=w
+			#edges
+			abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
+			for idx in range(len(linklabels)):
+				abpair=abpairs[idx]
+				linklabel=linklabels[idx]
+				if linklabel not in classedabweights:
+					classedabweights[linklabel]={}
+				if "None" not in abpair:
+					a,b=abpair
+					if a not in classedabweights[linklabel]:
+						classedabweights[linklabel][a]={b:w}
 					else:
-						classedabweights[linklabel][a][b]+=w
+						if b not in classedabweights[linklabel][a]:
+							classedabweights[linklabel][a][b]=w
+						else:
+							classedabweights[linklabel][a][b]+=w
 	
 	edges={}
 	

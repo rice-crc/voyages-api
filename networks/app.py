@@ -243,10 +243,21 @@ def network_maps():
 									nodes[a_id]={'data':anode,'id':a_id,'weights':{}}
 								if b_id not in nodes:
 									nodes[b_id]={'data':anode,'id':b_id,'weights':{}}
+			
+	#tp60 wants these edges flattened						
+	edgesflat={linklabel:[] for linklabel in edges}
+	for linklabel in edges:
+		for s in edges[linklabel]:
+			for t in edges[linklabel][s]:
+				w=edges[linklabel][s][t]
+				thisedge={'s':s,'t':t,'w':w}
+				edgesflat[linklabel].append(thisedge)
+			
+
 	
 	outputs={
 		"nodes":[nodes[k] for k in nodes],
-		"edges":edges
+		"edges":edgesflat
 	}
 	
 	return jsonify(outputs)

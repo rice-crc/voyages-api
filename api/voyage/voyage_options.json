@@ -94,6 +94,11 @@
     "label": "Zotero url",
     "flatlabel": "zotero voyage connection : zotero source : Zotero url"
   },
+  "voyage_zotero_connections__zotero_source__short_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Short ref",
+    "flatlabel": "zotero voyage connection : zotero source : Short ref"
+  },
   "voyage_zotero_connections__zotero_source__zotero_title": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Zotero title",
@@ -103,6 +108,11 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Zotero date",
     "flatlabel": "zotero voyage connection : zotero source : Zotero date"
+  },
+  "voyage_zotero_connections__zotero_source__is_legacy_source": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Is legacy source",
+    "flatlabel": "zotero voyage connection : zotero source : Is legacy source"
   },
   "voyage_zotero_connections__zotero_source__last_updated": {
     "type": "<class 'rest_framework.fields.DateTimeField'>",

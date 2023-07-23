@@ -99,7 +99,7 @@ class ZoteroVoyageConnection(models.Model):
 		on_delete=models.CASCADE
 	)
 	page_range=models.CharField(
-		max_length=25,
+		max_length=250,
 		null=True,
 		blank=True
 	)
@@ -120,7 +120,7 @@ class ZoteroEnslaverConnection(models.Model):
 		on_delete=models.CASCADE
 	)
 	page_range=models.CharField(
-		max_length=25,
+		max_length=50,
 		null=True,
 		blank=True
 	)
@@ -141,7 +141,7 @@ class ZoteroEnslavedConnection(models.Model):
 		on_delete=models.CASCADE
 	)
 	page_range=models.CharField(
-		max_length=25,
+		max_length=50,
 		null=True,
 		blank=True
 	)
@@ -169,7 +169,13 @@ class ZoteroSource(models.Model):
 		null=True,
 		on_delete=models.CASCADE
 	)
-		
+	
+	short_ref=models.CharField(
+		max_length=255,
+		null=True,
+		blank=True,
+	)
+	
 	zotero_title=models.CharField(
 		max_length=255,
 		null=False,
@@ -181,6 +187,8 @@ class ZoteroSource(models.Model):
 		null=False,
 		blank=False
 	)
+	
+	is_legacy_source=models.BooleanField(default=False,blank=True,null=True)
 	
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)

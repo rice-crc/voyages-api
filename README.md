@@ -72,6 +72,18 @@ Run media asset tasks.
 host:~/Projects/voyages-api docker exec -i voyages-django bash -c 'python3 manage.py collectstatic --noinput'
 ```
 
+
+
+```bash
+host:~/Projects/voyages$ docker exec -i voyages-solr solr create_core -c voyages -d /srv/voyages/solr
+host:~/Projects/voyages$ docker exec -i voyages-solr solr create_core -c enslavers -d /srv/voyages/solr
+host:~/Projects/voyages$ docker exec -i voyages-solr solr create_core -c enslaved -d /srv/voyages/solr
+host:~/Projects/voyages$ docker exec -i voyages-solr solr create_core -c blog -d /srv/voyages/solr
+```
+
+
+
+
 #### Getting API keys (for Flask containers):
 
 Enter the django container and create a new superuser

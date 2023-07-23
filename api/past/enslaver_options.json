@@ -59,6 +59,146 @@
     "label": "Polygon",
     "flatlabel": "principal location : New Location Fieldmapping : Polygon"
   },
+  "enslaver_zotero_connections": {
+    "type": "table",
+    "label": "zotero enslaver connection",
+    "flatlabel": "zotero enslaver connection"
+  },
+  "enslaver_zotero_connections__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "zotero enslaver connection : ID"
+  },
+  "enslaver_zotero_connections__zotero_source": {
+    "type": "table",
+    "label": "zotero source",
+    "flatlabel": "zotero enslaver connection : zotero source"
+  },
+  "enslaver_zotero_connections__zotero_source__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "zotero enslaver connection : zotero source : ID"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection": {
+    "type": "table",
+    "label": "source page connection",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : ID"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page": {
+    "type": "table",
+    "label": "source page",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page : ID"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page__page_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Page url",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page : Page url"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page__iiif_manifest_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Iiif manifest url",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page : Iiif manifest url"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page__iiif_baseimage_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Iiif baseimage url",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page : Iiif baseimage url"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page__image_filename": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Image filename",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page : Image filename"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page__transcription": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Transcription",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page : Transcription"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page : Last updated"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__source_page__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : source page : Human reviewed"
+  },
+  "enslaver_zotero_connections__zotero_source__page_connection__zotero_source": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Zotero source",
+    "flatlabel": "zotero enslaver connection : zotero source : source page connection : Zotero source"
+  },
+  "enslaver_zotero_connections__zotero_source__item_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Item url",
+    "flatlabel": "zotero enslaver connection : zotero source : Item url"
+  },
+  "enslaver_zotero_connections__zotero_source__zotero_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Zotero url",
+    "flatlabel": "zotero enslaver connection : zotero source : Zotero url"
+  },
+  "enslaver_zotero_connections__zotero_source__short_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Short ref",
+    "flatlabel": "zotero enslaver connection : zotero source : Short ref"
+  },
+  "enslaver_zotero_connections__zotero_source__zotero_title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Zotero title",
+    "flatlabel": "zotero enslaver connection : zotero source : Zotero title"
+  },
+  "enslaver_zotero_connections__zotero_source__zotero_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Zotero date",
+    "flatlabel": "zotero enslaver connection : zotero source : Zotero date"
+  },
+  "enslaver_zotero_connections__zotero_source__is_legacy_source": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Is legacy source",
+    "flatlabel": "zotero enslaver connection : zotero source : Is legacy source"
+  },
+  "enslaver_zotero_connections__zotero_source__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "zotero enslaver connection : zotero source : Last updated"
+  },
+  "enslaver_zotero_connections__zotero_source__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "zotero enslaver connection : zotero source : Human reviewed"
+  },
+  "enslaver_zotero_connections__zotero_source__notes": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Notes",
+    "flatlabel": "zotero enslaver connection : zotero source : Notes"
+  },
+  "enslaver_zotero_connections__zotero_source__legacy_source": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Legacy source",
+    "flatlabel": "zotero enslaver connection : zotero source : Legacy source"
+  },
+  "enslaver_zotero_connections__page_range": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Page range",
+    "flatlabel": "zotero enslaver connection : Page range"
+  },
+  "enslaver_zotero_connections__enslaver": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Enslaver",
+    "flatlabel": "zotero enslaver connection : Enslaver"
+  },
   "aliases": {
     "type": "table",
     "label": "Enslaver alias",
@@ -643,166 +783,6 @@
     "type": "<class 'rest_framework.fields.IntegerField'>",
     "label": "Code of outcome",
     "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : Outcome : Fate (particular outcome of voyage) : Code of outcome"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections": {
-    "type": "table",
-    "label": "zotero voyage connection",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : ID"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source": {
-    "type": "table",
-    "label": "zotero source",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : ID"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection": {
-    "type": "table",
-    "label": "source page connection",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : ID"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page": {
-    "type": "table",
-    "label": "source page",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page : ID"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__page_url": {
-    "type": "<class 'rest_framework.fields.URLField'>",
-    "label": "Page url",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page : Page url"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__iiif_manifest_url": {
-    "type": "<class 'rest_framework.fields.URLField'>",
-    "label": "Iiif manifest url",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page : Iiif manifest url"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__iiif_baseimage_url": {
-    "type": "<class 'rest_framework.fields.URLField'>",
-    "label": "Iiif baseimage url",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page : Iiif baseimage url"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__image_filename": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Image filename",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page : Image filename"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__transcription": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Transcription",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page : Transcription"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__last_updated": {
-    "type": "<class 'rest_framework.fields.DateTimeField'>",
-    "label": "Last updated",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page : Last updated"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__source_page__human_reviewed": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Human reviewed",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : source page : Human reviewed"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__page_connection__zotero_source": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Zotero source",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : source page connection : Zotero source"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__item_url": {
-    "type": "<class 'rest_framework.fields.URLField'>",
-    "label": "Item url",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : Item url"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__zotero_url": {
-    "type": "<class 'rest_framework.fields.URLField'>",
-    "label": "Zotero url",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : Zotero url"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__zotero_title": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Zotero title",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : Zotero title"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__zotero_date": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Zotero date",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : Zotero date"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__last_updated": {
-    "type": "<class 'rest_framework.fields.DateTimeField'>",
-    "label": "Last updated",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : Last updated"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__human_reviewed": {
-    "type": "<class 'rest_framework.fields.BooleanField'>",
-    "label": "Human reviewed",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : Human reviewed"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__notes": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Notes",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : Notes"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__zotero_source__legacy_source": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Legacy source",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : zotero source : Legacy source"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__page_range": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Page range",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : Page range"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_zotero_connections__voyage": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Voyage",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : zotero voyage connection : Voyage"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_enslaver_connection": {
-    "type": "table",
-    "label": "enslaver voyage connection",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : enslaver voyage connection"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_enslaver_connection__enslaver_alias": {
-    "type": "table",
-    "label": "Enslaver alias",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : enslaver voyage connection : Enslaver alias"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_enslaver_connection__enslaver_alias__alias": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Alias",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : enslaver voyage connection : Enslaver alias : Alias"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_enslaver_connection__role": {
-    "type": "table",
-    "label": "enslaver role",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : enslaver voyage connection : enslaver role"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_enslaver_connection__role__id": {
-    "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "ID",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : enslaver voyage connection : enslaver role : ID"
-  },
-  "aliases__enslaver_voyage_connection__voyage__voyage_enslaver_connection__role__name": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Name",
-    "flatlabel": "Enslaver alias : Enslaver voyage connection : Voyage : enslaver voyage connection : enslaver role : Name"
   },
   "aliases__enslaver_voyage_connection__role": {
     "type": "table",

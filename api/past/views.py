@@ -185,24 +185,11 @@ class EnslaverList(generics.GenericAPIView):
 			serialized=read_serializer.data
 	
 			outputs=[]
-
-			hierarchical=request.POST.get('hierarchical')
-			if str(hierarchical).lower() in ['false','0','f','n']:
-				hierarchical=False
-			else:
-				hierarchical=True
-
-			if hierarchical==False:
-	
-				for s in serialized:
-					d={}
-					for selected_field in selected_fields:
-						keychain=selected_field.split('__')
-						bottomval=bottomout(s,list(keychain))
-						d[selected_field]=bottomval
-					outputs.append(d)
-			else:
-				outputs=serialized
+			outputs=serialized
+			
+			## now let's add some flattened enslavement relations
+			
+			
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:

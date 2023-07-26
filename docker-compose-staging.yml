@@ -14,15 +14,11 @@ services:
     networks:
       - "voyages"
     volumes:
-      - "./data:/docker-entrypoint-initdb.d"
       - "mysql_volume:/var/lib/mysql"
     command: "--slow-query-log=ON --long-query-time=3 --slow-query-log-file=/tmp/slow.log"
     environment:
-      MYSQL_DATABASE: "voyages_api"
-      MYSQL_ROOT_PASSWORD: "voyages"
-      MYSQL_USER: "voyages"
-      MYSQL_PASSWORD: "voyages"
-
+      MYSQL_DATABASE: "voyages-api"
+      
   voyages-solr:
     image: "solr:8.5.2"
     container_name: "voyages-solr"
@@ -51,23 +47,10 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - "./api/:/srv/voyages-api"
+      - "/var/www/voyages-api-staging.crc.rice.edu/static:/srv/voyages-api/static"
     build:
       context: "."
       dockerfile: "./docker/api/Dockerfile"
-
-  voyages-adminer:
-    image: "adminer:latest"
-    container_name: "voyages-adminer"
-    hostname: "voyages-adminer"
-    restart: "on-failure"
-    depends_on:
-      - "voyages-mysql"
-    ports:
-      - "127.0.0.1:8080:8080"
-    networks:
-      - "voyages"
-    environment:
-      ADMINER_DEFAULT_SERVER: "voyages-mysql"
 
   voyages-stats:
     image: "voyages-stats"

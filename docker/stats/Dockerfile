@@ -1,23 +1,31 @@
-FROM python:3.9-slim AS base
+# -- Build --
 
-RUN apt-get update -y \
-  && apt-get install --yes --no-upgrade --no-install-recommends \
-    python3 \
-    python3-pip \
-  && apt-get clean \
-  && rm -rf \
-    /tmp/* \
-    /usr/share/doc/* \
-    /var/cache/apt/* \
-    /var/lib/apt/lists/* \
-    /var/tmp/*
+FROM python:3.9-slim AS build
 
 WORKDIR /srv/voyages-stats
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
+
+COPY stats/requirements.txt .
+
+RUN pip install --user --no-cache-dir -r ./requirements.txt
+
+# -- Release
+
+FROM python:3.9-slim AS release
+
+WORKDIR /srv/voyages-stats
+
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-COPY stats/requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-EXPOSE 5000
-COPY . .
-CMD ["flask", "run"]
+ENV PATH=/root/.local/bin:$PATH
+
+COPY --from=build /root/.local /root/.local
+
+COPY stats/ .
+
+ARG FLASK_PORT=5000
+
+ENV FLASK_PORT=$FLASK_PORT
+
+EXPOSE $FLASK_PORT
+
+CMD flask run --host=0.0.0.0 --port=$FLASK_PORT

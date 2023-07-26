@@ -94,31 +94,6 @@ local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage
 ```
 
 Build the API component containers.
-=======
-
-
-```bash
-host:~/Projects/voyages$ docker exec -i voyages-solr solr create_core -c voyages -d /srv/voyages/solr
-host:~/Projects/voyages$ docker exec -i voyages-solr solr create_core -c enslavers -d /srv/voyages/solr
-host:~/Projects/voyages$ docker exec -i voyages-solr solr create_core -c enslaved -d /srv/voyages/solr
-host:~/Projects/voyages$ docker exec -i voyages-solr solr create_core -c blog -d /srv/voyages/solr
-```
-
-
-
-
-#### Getting API keys (for Flask containers):
-
-Enter the django container and create a new superuser
-
-	docker exec -it voyages-api /bin/bash
-	python3 manage.py createsuperuser
-
-Log in to the admin interface at [http://127.0.0.1:8100/admin](http://127.0.0.1:8000/admin) with those credentials, and create an api token for yourself.
-
-Update your new files at ```stats/localsettings.py``` and ```networks/localsettings.py``` with this token.
-
-Restart the flask engine(s).
 
 ```bash
 local:~/Projects/voyages-api$ docker compose up --build -d voyages-networks voyages-stats

@@ -30,13 +30,13 @@ def connect_to_tags(G,this_tag,tag_connections):
 				comp_id for comp_id in G.nodes
 				if connect_tag in G.nodes[comp_id]['tags']
 			]
-			if G.nodes[n_id]['name']=='Southeast Africa and Indian Ocean islands':
-				print("connecting",G.nodes[n_id],connect_tag,as_type,mode)
+# 			if G.nodes[n_id]['name']=='Southeast Africa and Indian Ocean islands':
+# 				print("connecting",G.nodes[n_id],connect_tag,as_type,mode)
 			if mode=="closest":
 # 				print("closest")
 				closest_neighbor,distance=getclosestneighbor(G,n_id,comp_node_ids)
-				if G.nodes[n_id]['name']=='Southeast Africa and Indian Ocean islands':
-					print("connecting",G.nodes[n_id],G.nodes[closest_neighbor])
+# 				if G.nodes[n_id]['name']=='Southeast Africa and Indian Ocean islands':
+# 					print("connecting",G.nodes[n_id],G.nodes[closest_neighbor])
 				if as_type=="source":
 					concat_tag="_to_".join([this_tag,connect_tag])
 					s_id=n_id

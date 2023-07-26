@@ -1,5 +1,6 @@
 from django.contrib import admin
 from past.models import *
+from document.models import *
 # 
 # class EnslaverVoyageConnectionAdmin(admin.ModelAdmin):
 # 	model=EnslaverVoyageConnection
@@ -28,11 +29,18 @@ class EnslaverAliasAdmin(admin.ModelAdmin):
 	)
 	autocomplete_fields=['identity']
 	search_fields=['alias']
-	
+
+
+class EnslaverZoteroConnectionInline(admin.StackedInline):
+	model=ZoteroEnslaverConnection
+	autocomplete_fields=['zotero_source']
+	extra=0
+	classes=['collapse']
+
 class EnslaverIdentityAdmin(admin.ModelAdmin):
-# 	inlines=(
-# 		EnslaverIdentitySourceConnectionInline,
-# 	)
+	inlines=(
+		EnslaverZoteroConnectionInline,
+	)
 	search_fields=['principal_alias',]
 
 # class CaptiveFateAdmin(admin.ModelAdmin):
@@ -50,6 +58,14 @@ class EnslaverIdentityAdmin(admin.ModelAdmin):
 # class ModernCountryAdmin(admin.ModelAdmin):
 # 	search_fields=['name']
 # 
+
+
+class EnslavedZoteroConnectionInline(admin.StackedInline):
+	model=ZoteroEnslavedConnection
+	autocomplete_fields=['zotero_source']
+	extra=0
+	classes=['collapse']
+
 class EnslavedAdmin(admin.ModelAdmin):
 # 	autocomplete_fields=[
 # 		'post_disembark_location',
@@ -59,6 +75,7 @@ class EnslavedAdmin(admin.ModelAdmin):
 # 		'captive_fate',
 # 		'captive_status'
 # 	]
+	inlines=[EnslavedZoteroConnectionInline,]
 	search_fields=['documented_name']
 # 
 # class EnslaverRoleAdmin(admin.ModelAdmin):
@@ -67,12 +84,18 @@ class EnslavedAdmin(admin.ModelAdmin):
 # class EnslavementRelationTypeAdmin(admin.ModelAdmin):
 # 	search_fields=['name']
 # 
+
+
 class EnslavedInRelationInline(admin.StackedInline):
 	model=EnslavedInRelation
 	fields=['enslaved']
 	autocomplete_fields=['enslaved']
 	classes = ['collapse']
 	extra=0
+
+
+
+
 # 
 # class EnslaverInRelationInline(admin.StackedInline):
 # 	model=EnslaverInRelation

@@ -2,13 +2,14 @@ import requests
 import json
 from django.core.management.base import BaseCommand, CommandError
 from voyage.models import Voyage
-from past.models import Enslaved,EnslaverIdentity
+from past.models import *
+from blog.models import Post
 import pysolr
 import numpy as np
 
 
 class Command(BaseCommand):
-	help = 'rebuilds the options flatfiles'
+	help = 'rebuilds the solr indices'
 	def handle(self, *args, **options):
 		indices=[
 			{
@@ -69,7 +70,99 @@ class Command(BaseCommand):
 					"voyage_name_outcome__resistance__name",
 					"voyage_name_outcome__vessel_captured_outcome__name"
 				]
-			}
+			},
+			{
+				"model":EnslaverIdentity,
+				"core_name":"enslavers",
+				"fields":[
+					'id',
+					'principal_location__geo_location__name',
+					'enslaver_zotero_connections__zotero_source__page_connection__source_page__transcription',
+					'enslaver_zotero_connections__zotero_source__short_ref',
+					'enslaver_zotero_connections__zotero_source__zotero_title',
+					'enslaver_zotero_connections__zotero_source__notes',
+					'aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name',
+					'aliases__enslaver_relations__relation__relation_type__name',
+					'aliases__enslaver_relations__relation__place__geo_location__name',
+					'aliases__enslaver_relations__relation__date',
+					'aliases__enslaver_relations__role__name',
+					'aliases__enslaver_voyage_connection__voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__name',
+					'aliases__enslaver_voyage_connection__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
+					'aliases__enslaver_voyage_connection__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
+					'aliases__enslaver_voyage_connection__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
+					'aliases__enslaver_voyage_connection__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
+					'aliases__enslaver_voyage_connection__voyage__voyage_itinerary__int_first_port_dis__geo_location__name',
+					'aliases__enslaver_voyage_connection__voyage__voyage_ship__ship_name',
+					'aliases__enslaver_voyage_connection__voyage__voyage_name_outcome__particular_outcome__name',
+					'aliases__enslaver_voyage_connection__role__name',
+					'aliases__alias',
+					'birth_place__geo_location__name',
+					'death_place__geo_location__name',
+					'principal_alias',
+					'father_name',
+					'father_occupation',
+					'mother_name',
+					'notes'
+				]
+			},
+			{
+				"model":Enslaved,
+				"core_name":"enslaved",
+				"fields":[
+					'id',
+					'post_disembark_location__geo_location__name',
+					'voyage__voyage_itinerary__imp_port_voyage_begin__geo_location__name',
+					'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
+					'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
+					'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
+					'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
+					'voyage__voyage_itinerary__int_first_port_dis__geo_location__name',
+					'voyage__voyage_ship__ship_name',
+					'voyage__voyage_name_outcome__particular_outcome__name',
+					'voyage__voyage_enslaver_connection__enslaver_alias__alias',
+					'voyage__voyage_enslaver_connection__role__name',
+					'captive_fate__name',
+					'enslaved_relations__relation__relation_type__name',
+					'enslaved_relations__relation__relation_enslavers__enslaver_alias__alias',
+					'enslaved_relations__relation__relation_enslavers__role__name',
+					'enslaved_relations__relation__place__geo_location__name',
+					'enslaved_relations__relation__text_ref',
+					'captive_status__name',
+					'language_group__name',
+					'enslaved_zotero_connections__zotero_source__page_connection__source_page__transcription',
+					'enslaved_zotero_connections__zotero_source__short_ref',
+					'enslaved_zotero_connections__zotero_source__zotero_title',
+					'enslaved_zotero_connections__zotero_source__zotero_date',
+					'enslaved_zotero_connections__zotero_source__notes',
+					'enslaved_zotero_connections__page_range',
+					'documented_name',
+					'name_first',
+					'name_second',
+					'name_third',
+					'modern_name',
+					'skin_color',
+					'notes'
+				]
+			},
+			{
+				"model":Post,
+				"core_name":"blog",
+				"fields":[
+					'id',
+					'authors__name',
+					'authors__description',
+					'authors__role',
+					'tags__name',
+					'tags__intro',
+					'title',
+					'subtitle',
+					'content'
+				]
+			},
+			
+
+			
+			
 		]
 		
 		results_per_page=1000
@@ -95,37 +188,43 @@ class Command(BaseCommand):
 			
 			ids=[i[0] for i in queryset.values_list('id')]
 			
-			batch_size=5000
+			if len(ids)>0:
 			
-			pagecount=int(len(ids)/batch_size)
+				batch_size=5000
 			
-			pages=np.array_split(np.array(ids),pagecount)
+				pagecount=int(len(ids)/batch_size)
+				if pagecount==0:
+					pagecount=1
+				
+				pages=np.array_split(np.array(ids),pagecount)
 			
-			p=1
+				p=1
 			
-			for page in pages:
-				print("--page",p,'of',pagecount)
+				for page in pages:
+					print("--page",p,'of',pagecount)
 				
-				pageidlist=[int(v) for v in page]
+					pageidlist=[int(v) for v in page]
 				
-				pagedict={v:[] for v in pageidlist}
+					pagedict={v:[] for v in pageidlist}
 				
-				pagequeryset=queryset.filter(id__in=pageidlist)
+					pagequeryset=queryset.filter(id__in=pageidlist)
 				
-				for f in fields:
-					vl=pagequeryset.values_list('id',f)
-					for v in vl:
-						id,i=v
-						if i!=None:
-							pagedict[id].append(str(i))
+					for f in fields:
+						vl=pagequeryset.values_list('id',f)
+						for v in vl:
+							id,i=v
+							if i!=None:
+								pagedict[id].append(str(i))
 				
-				solrpage=[
-					{
-						"id":k,
-						"text":" ".join(pagedict[k])
-					}
-					for k in pagedict
-				]
+					solrpage=[
+						{
+							"id":k,
+							"text":" ".join(pagedict[k])
+						}
+						for k in pagedict
+					]
 				
-				solr.add(solrpage)
-				p+=1
+					solr.add(solrpage)
+					p+=1
+			else:
+				print("-----FOUND NO RESULTS----")

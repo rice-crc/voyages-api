@@ -1,6 +1,8 @@
 from django.contrib import admin
 from voyage.models import *
 from past.models import *
+from document.models import *
+from common.models import *
 # 
 # # 
 # # 
@@ -13,13 +15,11 @@ class VoyageCrewInline(admin.StackedInline):
 		'crew_died_complete_voyage'
 	]
 
-# 
-
 class VoyageDatesInline(admin.StackedInline):
 	model = VoyageDates
 	max_num=1
 	classes = ['collapse']
-	exclude = [
+	autocomplete_fields = [
 		'voyage_began_sparsedate',
 		'slave_purchase_began_sparsedate',
 		'vessel_left_port_sparsedate',
@@ -31,12 +31,39 @@ class VoyageDatesInline(admin.StackedInline):
 		'voyage_completed_sparsedate',
 		'imp_voyage_began_sparsedate',
 		'imp_departed_africa_sparsedate',
-		'imp_arrival_at_port_of_dis_sparsedate',
+		'imp_arrival_at_port_of_dis_sparsedate'
+	]
+
+# 	inlines=SparseDateInline
+	
+	
+	exclude = [
+# 		'voyage_began_sparsedate',
+# 		'slave_purchase_began_sparsedate',
+# 		'vessel_left_port_sparsedate',
+# 		'first_dis_of_slaves_sparsedate',
+# 		'date_departed_africa_sparsedate',
+# 		'arrival_at_second_place_landing_sparsedate',
+# 		'third_dis_of_slaves_sparsedate',
+# 		'departure_last_place_of_landing_sparsedate',
+# 		'voyage_completed_sparsedate',
+# 		'imp_voyage_began_sparsedate',
+# 		'imp_departed_africa_sparsedate',
+# 		'imp_arrival_at_port_of_dis_sparsedate',
+# 		'imp_length_home_to_disembark',
+# 		'imp_length_leaving_africa_to_disembark',
+		'voyage_began',
+		'slave_purchase_began',
+		'vessel_left_port',
+		'first_dis_of_slaves',
 		'date_departed_africa',
+		'arrival_at_second_place_landing',
+		'third_dis_of_slaves',
+		'departure_last_place_of_landing',
 		'voyage_completed',
+		'imp_voyage_began',
 		'imp_departed_africa',
-		'imp_length_home_to_disembark',
-		'imp_length_leaving_africa_to_disembark'
+		'imp_arrival_at_port_of_dis',
 	]
 	verbose_name_plural="Voyage Dates"
 
@@ -220,6 +247,15 @@ class VoyageOutcomeInline(admin.StackedInline):
 # 	]
 	classes = ['collapse']
 
+class VoyageZoteroConnectionInline(admin.StackedInline):
+	model=ZoteroVoyageConnection
+	autocomplete_fields=['zotero_source']
+# 	fields=['__all__',]
+	extra=0
+	classes=['collapse']
+	
+
+
 class EnslaverAliasConnectionInline(admin.StackedInline):
 	model = EnslaverVoyageConnection
 # 	readonly_fields=['enslaver_alias','role','order']
@@ -232,11 +268,12 @@ class VoyageAdmin(admin.ModelAdmin):
 		VoyageDatesInline,
 		VoyageItineraryInline,
 # 		VoyageSourcesConnectionInline,
+		VoyageZoteroConnectionInline,
 		EnslaverAliasConnectionInline,
 		VoyageCrewInline,
 		VoyageOutcomeInline,
 		VoyageShipInline,
-		VoyageSlavesNumbersInline
+		VoyageSlavesNumbersInline,
 	)
 	fields=['voyage_id','dataset','voyage_in_cd_rom']
 	list_display=('voyage_id',)

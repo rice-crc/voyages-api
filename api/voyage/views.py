@@ -210,26 +210,25 @@ class VoyageTextFieldAutoComplete(generics.GenericAPIView):
 		if '__' in k:
 			kstub='__'.join(k.split('__')[:-1])
 			k_id_field=kstub+"__id"
+			queryset=queryset.prefetch_related(kstub)
 		else:
 			k_id_field="id"
-			
-		
-		print(k,v,kstub,k_id_field)
-		
-		queryset=queryset.prefetch_related(kstub)
 		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
 		queryset=queryset.filter(**kwargs)
 		queryset=queryset.order_by(k)
 		total_results_count=queryset.count()
 		candidates=[]
+		candidate_vals=[]
 		fetchcount=30
 		## Have to use this ugliness b/c we're not in postgres
 		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
 		for v in queryset.values_list(k_id_field,k).iterator():
-			if v not in candidates:
+			if v[1] not in candidate_vals:
 				candidates.append(v)
+				candidate_vals.append(v[1])
 			if len(candidates)>=fetchcount:
 				break
+
 		res={
 			"total_results_count":total_results_count,
 			"results":[

@@ -10,6 +10,8 @@ from past.serializers import EnslaverSerializer,EnslavedSerializer
 from past.models import *
 from assessment.serializers import EstimateSerializer
 from assessment.models import Estimate
+from blog.models import *
+from blog.serializers import *
 # from geo.serializers import *
 # from geo.models import Location
 # from docs.models import Doc
@@ -37,6 +39,11 @@ class Command(BaseCommand):
 # 				'serializer':LocationSerializer,
 # 				'objectclass':Location
 # 			},
+			{
+				'output_filename':'blog/post_options.json',
+				'serializer':PostSerializer,
+				'objectclass':Post
+			},
 			{
 				'output_filename':'past/enslaved_options.json',
 				'serializer':EnslavedSerializer,

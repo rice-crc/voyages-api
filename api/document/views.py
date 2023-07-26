@@ -39,7 +39,7 @@ def index(request,collection_id=None,pagenumber=1):
 			page_collection_label=docs.filter(legacy_source__id=page_collection_id).first().legacy_source.short_ref
 			
 		docs=docs.filter(legacy_source__id=collection_id).distinct()
-			
+		docs=docs.order_by('id')
 		docs_paginator=Paginator(docs, 12)
 		this_page=docs_paginator.get_page(pagenumber)
 		

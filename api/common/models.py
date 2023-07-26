@@ -38,7 +38,7 @@ class SparseDate(models.Model):
 	)
 
 	def __str__(self):
-		return "/".join([str(i) if i is not None else "" for i in [self.year,self.month,self.day]])
+		return ",".join([str(i) if i is not None else "" for i in [self.month,self.day,self.year]])
 
 # Create your models here.
 class SavedQuery(models.Model):

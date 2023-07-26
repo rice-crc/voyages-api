@@ -47,6 +47,11 @@ def load_graph(endpoint,graph_params):
 				tag_connections=ordered_node_class['tag_connections']
 				G=connect_to_tags(G,tag,tag_connections)
 		print("connected all remaining network edges (non-oceanic --> (non-oceanic & oceanic)) following index_vars.py file ruleset")
+	elif rc['type']=='people':
+		pass
+		
+		
+		
 	return G,graph_name,None
 
 registered_caches={
@@ -58,34 +63,40 @@ registered_caches={
 
 rcnames=list(registered_caches.keys())
 
-for rcname in rcnames:
-	st=time.time()
-	rc=registered_caches[rcname]
-# 	try:
-	endpoint=rc['endpoint']
-	if 'graphs' not in rc:
-		rc['graphs']={}
 
-	for graph_params in rc['graph_params']:
-# 		print("INITIALIZING",endpoint,graph_params)
-		graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-		rc['graphs'][graph_name]={
-			'graph':graph,
-			'shortest_paths':shortest_paths
-		}
-	registered_caches[rcname]=rc
-	print("finished building graphs in %d seconds" %int(time.time()-st))
-	
-# 	except:
-# 		print("failed on cache:",rc['name'])
+standoff_base=4
+standoff_count=0
 
+st=time.time()
+while True:
+	failures_count=0
+	for rcname in rcnames:
+		rc=registered_caches[rcname]
+		endpoint=rc['endpoint']
+		if 'graphs' not in rc:
+			rc['graphs']={}
 
-
-
-
-
-
-
+		for graph_params in rc['graph_params']:
+			try:
+				graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
+				rc['graphs'][graph_name]={
+					'graph':graph,
+					'shortest_paths':shortest_paths
+				}
+			except:
+				failures_count+=1
+				print("failed on cache:",rc['name'])
+				break
+		registered_caches[rcname]=rc
+	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
+	if failures_count==len(rcnames):
+		standoff_time=standoff_base**standoff_count
+		print("retrying after %d seconds" %(standoff_time))
+		time.sleep(standoff_time)
+		standoff_count+=1
+	else:
+		break
+print("finished building graphs in %d seconds" %int(time.time()-st))
 
 @app.route('/network_maps/',methods=['POST'])
 def network_maps():
@@ -127,34 +138,36 @@ def network_maps():
 			nl:0 for nl in nodelabels
 		},
 		"data":{}
-		} for k in payload for i in k.split('__') if i is not "None"
+		} for k in payload for i in k.split('__') if i != "None"
 	}
 		
 	classedabweights={}
+	
 	for k in payload:
 		w=payload[k]
 		uuids=k.split('__')
 		#nodes
-		for idx in range(len(uuids)):
-			nodelabel=nodelabels[idx]
-			uuid=uuids[idx]
-			nodes[uuid]['weights'][nodelabel]+=w
-		#edges
-		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
-		for idx in range(len(linklabels)):
-			abpair=abpairs[idx]
-			linklabel=linklabels[idx]
-			if linklabel not in classedabweights:
-				classedabweights[linklabel]={}
-			if "None" not in abpair:
-				a,b=abpair
-				if a not in classedabweights[linklabel]:
-					classedabweights[linklabel][a]={b:w}
-				else:
-					if b not in classedabweights[linklabel][a]:
-						classedabweights[linklabel][a][b]=w
+		if "None" not in uuids:
+			for idx in range(len(uuids)):
+				nodelabel=nodelabels[idx]
+				uuid=uuids[idx]
+				nodes[uuid]['weights'][nodelabel]+=w
+			#edges
+			abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
+			for idx in range(len(linklabels)):
+				abpair=abpairs[idx]
+				linklabel=linklabels[idx]
+				if linklabel not in classedabweights:
+					classedabweights[linklabel]={}
+				if "None" not in abpair:
+					a,b=abpair
+					if a not in classedabweights[linklabel]:
+						classedabweights[linklabel][a]={b:w}
 					else:
-						classedabweights[linklabel][a][b]+=w
+						if b not in classedabweights[linklabel][a]:
+							classedabweights[linklabel][a][b]=w
+						else:
+							classedabweights[linklabel][a][b]+=w
 	
 	edges={}
 	
@@ -167,7 +180,7 @@ def network_maps():
 			## and therefore were not added into the network
 			if len(sourcenodematch)!=0:
 				s_id=sourcenodematch[0]
-				sourcenode=graph.nodes[s_id]
+				sourcenode=dict(graph.nodes[s_id])
 				#drop the networkx node tags
 				##we want dynamic multi-classed scores on each node
 				##i think!
@@ -176,12 +189,16 @@ def network_maps():
 				nodes[s_uuid]['data']=sourcenode
 				for t_uuid in abweights[s_uuid]:
 					targetnodematch=[n for n in search_nodes(graph,{"==":["uuid",t_uuid]})]
+					
 					if len(targetnodematch)!=0:
 						t_id=targetnodematch[0]
 						
 						if s_id==t_id and linklabel=='transportation':
 # 							print("TRANSPORTATION SELF-LOOP:",linklabel,graph.nodes[s_id])
 							selfloop=True
+							
+# 							for n_id in graph.successors(s_id):
+# 								print(graph.nodes[n_id])
 							
 							successor_id=[
 								n_id for n_id in graph.successors(s_id)
@@ -191,28 +208,32 @@ def network_maps():
 						else:
 							selfloop=False
 						w=classedabweights[linklabel][s_uuid][t_uuid]
-						targetnode=graph.nodes[t_id]
+						targetnode=dict(graph.nodes[t_id])
 						if 'tags' in targetnode:
 							del targetnode['tags']
 						nodes[t_uuid]['data']=targetnode
+						
+						
 						try:
 							if selfloop:
 								sp=nx.shortest_path(graph,successor_id,t_id,'distance')
 								sp.insert(0,s_id)
 							else:
 								sp=nx.shortest_path(graph,s_id,t_id,'distance')
+							
 						except:
 							print("---\nNO PATH")
 							print("from",sourcenode)
 							print("to",targetnode,"\n---")
 							
 							sp=[]
-												
+									
 						if len(sp)>1:
 							abpairs=[(sp[i],sp[i+1]) for i in range(len(sp)-1)]
 							for a,b in abpairs:
 								anode=graph.nodes[a]
 								bnode=graph.nodes[b]
+								
 								if 'uuid' not in anode:
 									a_id=str(a)
 								else:
@@ -221,28 +242,46 @@ def network_maps():
 									b_id=str(b)
 								else:
 									b_id=bnode['uuid']
-									
+								
 								#edges
-								if a not in edges[linklabel]:
+								if a_id not in edges[linklabel]:
 									edges[linklabel][a_id]={b_id:w}
 								else:
 									if b_id not in edges[linklabel][a_id]:
 										edges[linklabel][a_id][b_id]=w
 									else:
 										edges[linklabel][a_id][b_id]+=w
+	
 								#add oceanic nodes (although we prob don't need to?)
 								if a_id not in nodes:
 									nodes[a_id]={'data':anode,'id':a_id,'weights':{}}
 								if b_id not in nodes:
-									nodes[b_id]={'data':anode,'id':b_id,'weights':{}}
+									nodes[b_id]={'data':bnode,'id':b_id,'weights':{}}
+	
+# 	print("FINDTHATBASTARDO--------")
+# 	print(edges['transportation']['0696fc88-4400-4271-a2a6-008382b97b0d']["6"])
+# 	print(nodes["6"])
+# 	
+# 	print("----------")
+	
+	#tp60 wants these edges flattened						
+	edgesflat={linklabel:[] for linklabel in edges}
+	for linklabel in edges:
+		for s in edges[linklabel]:
+			for t in edges[linklabel][s]:
+				w=edges[linklabel][s][t]
+				thisedge={'s':s,'t':t,'w':w}
+				edgesflat[linklabel].append(thisedge)
+	
+	
 	
 	outputs={
 		"nodes":[nodes[k] for k in nodes],
-		"edges":edges
+		"edges":edgesflat
 	}
 	
 	return jsonify(outputs)
-
+	
 @app.route('/simple_map/<cachename>',methods=['GET'])
 # @app.route('/simple_map',methods=['GET'])
 def simple_map(cachename):

@@ -27,6 +27,7 @@ urlpatterns = [
     path('docs/',include('document.urls')),
     path('assessment/',include('assessment.urls')),
     path('geo/',include('geo.urls')),
+    path('blog/',include('blog.urls')),
     path('common/',include('common.urls')),
 #     path('contribute/',include('contribute.urls')),
     path('captcha/', include('captcha.urls'))

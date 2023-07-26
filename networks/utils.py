@@ -195,7 +195,7 @@ def add_oceanic_network(G,oceanic_network,init_node_id=0):
 		if len(predecessors)>0:			
 			ntags.append('offramp')
 		G.nodes[n_id]['tags']=ntags
-		print(G.nodes[n_id])
+# 		print(G.nodes[n_id])
 		
 # 		print("new node-->",G.nodes[n_id])
 		

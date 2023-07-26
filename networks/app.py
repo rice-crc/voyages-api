@@ -77,16 +77,16 @@ while True:
 			rc['graphs']={}
 
 		for graph_params in rc['graph_params']:
-# 			try:
-			graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-			rc['graphs'][graph_name]={
-				'graph':graph,
-				'shortest_paths':shortest_paths
-			}
-# 			except:
-# 				failures_count+=1
-# 				print("failed on cache:",rc['name'])
-# 				break
+			try:
+				graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
+				rc['graphs'][graph_name]={
+					'graph':graph,
+					'shortest_paths':shortest_paths
+				}
+			except:
+				failures_count+=1
+				print("failed on cache:",rc['name'])
+				break
 		registered_caches[rcname]=rc
 	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
 	if failures_count==len(rcnames):

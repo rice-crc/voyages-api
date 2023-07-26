@@ -950,100 +950,100 @@ class VoyageDates(models.Model):
 	
 	# JCM_JUNE_1_2023: SPARSE INTEGER TRIPLES
 	
-	voyage_began_sparsedate = models.OneToOneField(
+	voyage_began_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date that voyage began (DATEDEPB,A,C)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	slave_purchase_began_sparsedate = models.OneToOneField(
+	slave_purchase_began_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date that slave purchase began (D1SLATRB,A,C)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	vessel_left_port_sparsedate = models.OneToOneField(
+	vessel_left_port_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date that vessel left last slaving port (DLSLATRB,A,C)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	first_dis_of_slaves_sparsedate = models.OneToOneField(
+	first_dis_of_slaves_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date of first disembarkation of slaves (DATARR33,32,34)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	date_departed_africa_sparsedate = models.OneToOneField(
+	date_departed_africa_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date vessel departed Africa (DATELEFTAFR)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	arrival_at_second_place_landing_sparsedate = models.OneToOneField(
+	arrival_at_second_place_landing_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date of arrival at second place of landing (DATARR37,36,38)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	third_dis_of_slaves_sparsedate = models.OneToOneField(
+	third_dis_of_slaves_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date of third disembarkation of slaves (DATARR40,39,41)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	departure_last_place_of_landing_sparsedate = models.OneToOneField(
+	departure_last_place_of_landing_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date of departure from last place of landing (DDEPAMB,*,C)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	voyage_completed_sparsedate = models.OneToOneField(
+	voyage_completed_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Date on which slave voyage completed (DATARR44,43,45)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	imp_voyage_began_sparsedate = models.OneToOneField(
+	imp_voyage_began_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Year voyage began",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	imp_departed_africa_sparsedate = models.OneToOneField(
+	imp_departed_africa_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Year departed Africa",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
-	imp_arrival_at_port_of_dis_sparsedate = models.OneToOneField(
+	imp_arrival_at_port_of_dis_sparsedate = models.ForeignKey(
 		SparseDate,
 		verbose_name="Year of arrival at port of disembarkation (YEARAM)",
 		null=True,
 		help_text="Date in format: MM,DD,YYYY",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name="+"
 	)
 

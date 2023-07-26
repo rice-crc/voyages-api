@@ -83,23 +83,25 @@ class EnslavedTextFieldAutoComplete(generics.GenericAPIView):
 		
 		print("past/enslavers/autocomplete",k,v)
 		queryset=Enslaved.objects.all()
-		kstub=re.sub("__[^__]+?$","",k)
 		if '__' in k:
+			kstub='__'.join(k.split('__')[:-1])
 			k_id_field=kstub+"__id"
+			queryset=queryset.prefetch_related(kstub)
 		else:
 			k_id_field="id"
-		queryset=queryset.prefetch_related(kstub)
 		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
 		queryset=queryset.filter(**kwargs)
 		queryset=queryset.order_by(k)
 		total_results_count=queryset.count()
 		candidates=[]
+		candidate_vals=[]
 		fetchcount=30
 		## Have to use this ugliness b/c we're not in postgres
 		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
 		for v in queryset.values_list(k_id_field,k).iterator():
-			if v not in candidates:
+			if v[1] not in candidate_vals:
 				candidates.append(v)
+				candidate_vals.append(v[1])
 			if len(candidates)>=fetchcount:
 				break
 		res={
@@ -129,23 +131,25 @@ class EnslaverTextFieldAutoComplete(generics.GenericAPIView):
 		
 		print("past/enslavers/autocomplete",k,v)
 		queryset=EnslaverIdentity.objects.all()
-		kstub=re.sub("__[^__]+?$","",k)
 		if '__' in k:
+			kstub='__'.join(k.split('__')[:-1])
 			k_id_field=kstub+"__id"
+			queryset=queryset.prefetch_related(kstub)
 		else:
 			k_id_field="id"
-		queryset=queryset.prefetch_related(kstub)
 		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
 		queryset=queryset.filter(**kwargs)
 		queryset=queryset.order_by(k)
 		total_results_count=queryset.count()
 		candidates=[]
+		candidate_vals=[]
 		fetchcount=30
 		## Have to use this ugliness b/c we're not in postgres
 		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
 		for v in queryset.values_list(k_id_field,k).iterator():
-			if v not in candidates:
+			if v[1] not in candidate_vals:
 				candidates.append(v)
+				candidate_vals.append(v[1])
 			if len(candidates)>=fetchcount:
 				break
 		res={
@@ -181,24 +185,11 @@ class EnslaverList(generics.GenericAPIView):
 			serialized=read_serializer.data
 	
 			outputs=[]
-
-			hierarchical=request.POST.get('hierarchical')
-			if str(hierarchical).lower() in ['false','0','f','n']:
-				hierarchical=False
-			else:
-				hierarchical=True
-
-			if hierarchical==False:
-	
-				for s in serialized:
-					d={}
-					for selected_field in selected_fields:
-						keychain=selected_field.split('__')
-						bottomval=bottomout(s,list(keychain))
-						d[selected_field]=bottomval
-					outputs.append(d)
-			else:
-				outputs=serialized
+			outputs=serialized
+			
+			## now let's add some flattened enslavement relations
+			
+			
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:

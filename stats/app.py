@@ -16,8 +16,8 @@ def load_long_df(endpoint,variables):
 	headers={'Authorization':DJANGO_AUTH_KEY}
 	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
 	options=json.loads(r.text)
-	print("OPTIONS----->",r.status_code)
-		
+	if r.status_code!=200:
+		print("failed on OPTIONS call...")
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
@@ -51,14 +51,30 @@ registered_caches=[
 
 #on initialization, load every index as a dataframe, via a call to the django api
 st=time.time()
-for rc in registered_caches:
-# 	try:
-	endpoint=rc['endpoint']
-	variables=rc['variables']
-	rc['df']=load_long_df(endpoint,variables)
-# 	except:
-# 		print("failed on cache:",rc['name'])
+
+standoff_base=4
+standoff_count=0
+while True:
+	failures_count=0
+	for rc in registered_caches:
+		endpoint=rc['endpoint']
+		variables=rc['variables']
+		try:
+			rc['df']=load_long_df(endpoint,variables)
+		except:
+			failures_count+=1
+			print("failed on cache:",rc['name'])
+	print("failed on %d of %d caches" %(failures_count,len(registered_caches)))
+	if failures_count==len(registered_caches):
+		standoff_time=standoff_base**standoff_count
+		print("retrying after %d seconds" %(standoff_time))
+		time.sleep(standoff_time)
+		standoff_count+=1
+	else:
+		break
+
 print("finished building stats indices in %d seconds" %int(time.time()-st))
+
 
 #we need to make the indices' contents visible
 @app.route('/get_indices/')

@@ -17,7 +17,10 @@ from django.contrib import admin
 from django.urls import include,path
 from django.conf.urls.static import static
 from django.conf import settings
+from filebrowser.sites import site
 from rest_framework.authtoken import views
+
+from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +33,8 @@ urlpatterns = [
     path('blog/',include('blog.urls')),
     path('common/',include('common.urls')),
 #     path('contribute/',include('contribute.urls')),
-    path('captcha/', include('captcha.urls'))
+    path('captcha/', include('captcha.urls')),
+    path('filebrowser/', site.urls),
+    path('tinymce/', site.urls)
 #     path('voyages_auth_endpoint/', views.obtain_auth_token)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

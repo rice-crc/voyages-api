@@ -44,13 +44,13 @@
 <h4>Linked entities</h4>
 
 <ol>
-{% for v in zs.voyages.all %}
-	<li>Voyage #{{ v.id }} : {{ v.ship.ship_name}} --> <a href="/admin/voyage/voyage/{{ v.id }}/change/" target="_blank">Edit</a></li>
+{% for zsvc in zs.zotero_voyage_connections.all %}
+	<li>Voyage #{{ zsvc.voyage.id }} : {{ zsvc.voyage.ship.ship_name}} --> <a href="/admin/voyage/voyage/{{ zsvc.voyage.id }}/change/" target="_blank">Edit</a></li>
 {% endfor %}
 </ol>
 
 <ol>
-{% for ep in zs.enslaved_people.all %}
-	<li>Person: {{ ep.id }} : {{ ep.documented_name }} --> <a href="/admin/past/enslaved/{{ ep.id }}/change/" target="_blank">Edit</a></li>
+{% for zsepc in zs.zotero_enslaved_connections.all %}
+	<li>Person: {{ zsepc.enslaved.id }} : {{ zsepc.enslaved.documented_name }} --> <a href="/admin/past/enslaved/{{ zsepc.enslaved.id }}/change/" target="_blank">Edit</a></li>
 {% endfor %}
 </ol>

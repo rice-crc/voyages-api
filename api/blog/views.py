@@ -13,7 +13,7 @@ from .models import *
 from .serializers import *
 
 try:
-	post_options=options_handler('post/post_options.json',hierarchical=False)
+	post_options=options_handler('blog/post_options.json',hierarchical=False)
 except:
 	print("WARNING. BLANK POST OPTIONS.")
 	post_options={}
@@ -41,3 +41,50 @@ class PostList(generics.GenericAPIView):
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+class PostTextFieldAutoComplete(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
+# 		try:
+		st=time.time()
+		params=dict(request.POST)
+		params=dict(request.POST)
+		k=list(params.keys())[0]
+		v=params[k][0]
+		
+		print("past/enslavers/autocomplete",k,v)
+		queryset=Post.objects.all()
+		if '__' in k:
+			kstub='__'.join(k.split('__')[:-1])
+			k_id_field=kstub+"__id"
+			queryset=queryset.prefetch_related(kstub)
+		else:
+			k_id_field="id"
+		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+		queryset=queryset.filter(**kwargs)
+		queryset=queryset.order_by(k)
+		total_results_count=queryset.count()
+		candidates=[]
+		candidate_vals=[]
+		fetchcount=30
+		## Have to use this ugliness b/c we're not in postgres
+		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
+		for v in queryset.values_list(k_id_field,k).iterator():
+			if v[1] not in candidate_vals:
+				candidates.append(v)
+				candidate_vals.append(v[1])
+			if len(candidates)>=fetchcount:
+				break
+		res={
+			"total_results_count":total_results_count,
+			"results":[
+				{
+					"id":c[0],
+					"label":c[1]
+				} for c in candidates
+			]
+		}
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(res,safe=False)

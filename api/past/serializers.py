@@ -85,7 +85,7 @@ class PastSourcePageSerializer(serializers.ModelSerializer):
 class VoyageEnslaverAliasSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverAlias
-		fields=['alias']
+		fields='__all__'
 
 # 
 class PastVoyageEnslaverConnectionSerializer(serializers.ModelSerializer):

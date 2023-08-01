@@ -179,7 +179,7 @@ class VoyageEnslaverConnectionSerializer(serializers.ModelSerializer):
 	role=VoyageEnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverVoyageConnection
-		fields=['enslaver_alias','role']
+		fields=['id','enslaver_alias','role']
 
 class VoyageSparseDateSerializer(serializers.ModelSerializer):
 	class Meta:

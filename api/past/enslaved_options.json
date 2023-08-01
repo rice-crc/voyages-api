@@ -484,10 +484,35 @@
     "label": "Enslaver alias",
     "flatlabel": "voyage : enslaver voyage connection : Enslaver alias"
   },
+  "voyage__voyage_enslaver_connection__enslaver_alias__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "voyage : enslaver voyage connection : Enslaver alias : ID"
+  },
   "voyage__voyage_enslaver_connection__enslaver_alias__alias": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Alias",
     "flatlabel": "voyage : enslaver voyage connection : Enslaver alias : Alias"
+  },
+  "voyage__voyage_enslaver_connection__enslaver_alias__manual_id": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Manual id",
+    "flatlabel": "voyage : enslaver voyage connection : Enslaver alias : Manual id"
+  },
+  "voyage__voyage_enslaver_connection__enslaver_alias__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "voyage : enslaver voyage connection : Enslaver alias : Last updated"
+  },
+  "voyage__voyage_enslaver_connection__enslaver_alias__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "voyage : enslaver voyage connection : Enslaver alias : Human reviewed"
+  },
+  "voyage__voyage_enslaver_connection__enslaver_alias__identity": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Identity",
+    "flatlabel": "voyage : enslaver voyage connection : Enslaver alias : Identity"
   },
   "voyage__voyage_enslaver_connection__role": {
     "type": "table",

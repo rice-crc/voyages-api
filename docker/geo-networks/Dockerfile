@@ -2,9 +2,9 @@
 
 FROM python:3.9-slim AS build
 
-WORKDIR /srv/voyages-networks
+WORKDIR /srv/voyages-geo-networks
 
-COPY networks/requirements.txt .
+COPY geo-networks/requirements.txt .
 
 RUN pip install --user --no-cache-dir -r ./requirements.txt
 
@@ -12,7 +12,7 @@ RUN pip install --user --no-cache-dir -r ./requirements.txt
 
 FROM python:3.9-slim AS release
 
-WORKDIR /srv/voyages-networks
+WORKDIR /srv/voyages-geo-networks
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -20,7 +20,7 @@ ENV PATH=/root/.local/bin:$PATH
 
 COPY --from=build /root/.local /root/.local
 
-COPY networks/ .
+COPY geo-networks/ .
 
 ARG FLASK_PORT=5005
 

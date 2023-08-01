@@ -13,7 +13,7 @@ from .models import *
 from .serializers import *
 
 try:
-	post_options=options_handler('post/post_options.json',hierarchical=False)
+	post_options=options_handler('blog/post_options.json',hierarchical=False)
 except:
 	print("WARNING. BLANK POST OPTIONS.")
 	post_options={}

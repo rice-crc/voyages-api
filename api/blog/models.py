@@ -60,7 +60,7 @@ class Post(models.Model):
     slug = models.SlugField(max_length=200)
     authors = models.ManyToManyField(Author)
     updated_on = models.DateTimeField(auto_now= True)
-    content = models.TextField()
+    content = HTMLField()
     created_on = models.DateTimeField(default=timezone.now)
     status = models.IntegerField(choices=STATUS, default=0)
     

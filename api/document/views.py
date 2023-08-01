@@ -13,7 +13,9 @@ def index(request,collection_id=None,pagenumber=1):
 	
 	if request.user.is_authenticated:
 		
-		docs=ZoteroSource.objects.all()
+		#let's only get the zotero objects that have pages
+		#otherwise, no need for the gallery -- and it lards the gallery up
+		docs=ZoteroSource.objects.all().filter(~Q(page_connection=None))
 		
 		other_collections=[]
 		for collection_tuple in docs.values_list(

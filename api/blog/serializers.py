@@ -8,7 +8,7 @@ from common.nest import nest_selected_fields
 from common.models import SparseDate
 from .models import *
 
-class AuthorSerializer(serializers.ModelSerializer):
+class PostAuthorSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Author
 		fields='__all__'
@@ -19,8 +19,27 @@ class TagSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class PostSerializer(serializers.ModelSerializer):
-	authors = AuthorSerializer(many=True,read_only=True)
+	authors = PostAuthorSerializer(many=True,read_only=True)
 	tags = TagSerializer(many=True,read_only=True)
 	class Meta:
 		model=Post
 		fields='__all__'
+
+
+
+
+
+
+
+class AuthorPostSerializer(serializers.ModelSerializer):
+	tags = TagSerializer(many=True,read_only=True)
+	class Meta:
+		model=Post
+		exclude=['authors',]
+
+class AuthorSerializer(serializers.ModelSerializer):
+	posts = AuthorPostSerializer(many=True,read_only=True)
+	class Meta:
+		model=Author
+		fields='__all__'
+

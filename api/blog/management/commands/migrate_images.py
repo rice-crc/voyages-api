@@ -6,6 +6,7 @@ from blog.models import *
 from filebrowser.sites import site
 from filebrowser.base import FileListing,FileObject
 from django.core.files.images import ImageFile
+from django.core.files.base import ContentFile
 import requests
 import re
 import shutil
@@ -25,7 +26,6 @@ class Command(BaseCommand):
 		
 		def download_sv_img(fpath,baseurl):
 			fname=os.path.basename(fpath)
-			print(post,fpath,fname)
 			r = requests.get(baseurl+fpath, stream=True)
 			print(r.status_code)
 			if r.status_code == 200:
@@ -79,7 +79,19 @@ class Command(BaseCommand):
 				print(post)
 				post.content=post_content
 				post.save()
-# 				exit()
+
+		
+		authors=Author.objects.all()
+		for author in authors:
+			author_photo=author.photo
+			author_photo_str=str(author_photo)
+			author.photo=None
+			author.save()
+			if author_photo not in [None,""]:
+				new_img_fpath=download_sv_img(author_photo_str,sv_blogimages_baseurl)
+				fo=FileObject(new_img_fpath)
+				author.photo=fo
+				author.save()
 		
 		
 		

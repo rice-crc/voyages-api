@@ -4,6 +4,86 @@
     "label": "ID",
     "flatlabel": "ID"
   },
+  "posts": {
+    "type": "table",
+    "label": "post",
+    "flatlabel": "post"
+  },
+  "posts__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "post : ID"
+  },
+  "posts__tags": {
+    "type": "table",
+    "label": "Tags",
+    "flatlabel": "post : Tags"
+  },
+  "posts__tags__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "post : Tags : ID"
+  },
+  "posts__tags__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "post : Tags : Name"
+  },
+  "posts__tags__slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "post : Tags : Slug"
+  },
+  "posts__tags__intro": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Intro",
+    "flatlabel": "post : Tags : Intro"
+  },
+  "posts__title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Title",
+    "flatlabel": "post : Title"
+  },
+  "posts__language": {
+    "type": "<class 'rest_framework.fields.ChoiceField'>",
+    "label": "Language",
+    "flatlabel": "post : Language"
+  },
+  "posts__subtitle": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Subtitle",
+    "flatlabel": "post : Subtitle"
+  },
+  "posts__slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "post : Slug"
+  },
+  "posts__updated_on": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Updated on",
+    "flatlabel": "post : Updated on"
+  },
+  "posts__content": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Content",
+    "flatlabel": "post : Content"
+  },
+  "posts__created_on": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Created on",
+    "flatlabel": "post : Created on"
+  },
+  "posts__status": {
+    "type": "<class 'rest_framework.fields.ChoiceField'>",
+    "label": "Status",
+    "flatlabel": "post : Status"
+  },
+  "posts__thumbnail": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Thumbnail",
+    "flatlabel": "post : Thumbnail"
+  },
   "name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name",

@@ -20,11 +20,11 @@ import os
 #### and then merge the duplicates (where the same enslaver & enslaved are connected but under different roles)
 
 class Command(BaseCommand):
-	help = 'imports michigan collections -- purpose-built'
+	help = 'puts aliases behind identities'
 	def handle(self, *args, **options):
 		aliases=EnslaverAlias.objects.all()
 		for a in aliases:
-			a2,a2_isnew=a.objects.get_or_create(
+			a2,a2_isnew=EnslaverAlias.objects.get_or_create(
 				manual_id=a.manual_id,
 				last_updated=a.last_updated,
 				human_revieweda.human_reviewed,

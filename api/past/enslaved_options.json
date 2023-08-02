@@ -551,8 +551,8 @@
   },
   "enslaved_relations__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Id",
-    "flatlabel": "enslaved in relation : Id"
+    "label": "ID",
+    "flatlabel": "enslaved in relation : ID"
   },
   "enslaved_relations__relation": {
     "type": "table",
@@ -561,8 +561,8 @@
   },
   "enslaved_relations__relation__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Id",
-    "flatlabel": "enslaved in relation : enslavement relation : Id"
+    "label": "ID",
+    "flatlabel": "enslaved in relation : enslavement relation : ID"
   },
   "enslaved_relations__relation__relation_type": {
     "type": "table",
@@ -586,8 +586,8 @@
   },
   "enslaved_relations__relation__relation_enslavers__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Id",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Id"
+    "label": "ID",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : ID"
   },
   "enslaved_relations__relation__relation_enslavers__enslaver_alias": {
     "type": "table",
@@ -718,6 +718,11 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Text ref",
     "flatlabel": "enslaved in relation : enslavement relation : Text ref"
+  },
+  "enslaved_relations__relation__is_from_voyages": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Is from voyages",
+    "flatlabel": "enslaved in relation : enslavement relation : Is from voyages"
   },
   "enslaved_relations__relation__voyage": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",

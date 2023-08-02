@@ -175,6 +175,7 @@ STATIC_URL = 'static/'
 site = FileBrowserSite(name='filebrowser')
 
 site.storage.location = "static"
+site.directory="uploads"
 site.storage.base_url = "/" + STATIC_URL
 
 TINYMCE_JS_URL="tinymce/tinymce.min.js"
@@ -182,10 +183,6 @@ TINYMCE_DEFAULT_CONFIG = {
     "menubar": "file edit view insert format tools table help",
     "plugins": "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code "
 }
-
-
-
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

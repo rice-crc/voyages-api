@@ -2504,6 +2504,11 @@
     "label": "enslaver voyage connection",
     "flatlabel": "enslaver voyage connection"
   },
+  "voyage_enslaver_connection__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "enslaver voyage connection : ID"
+  },
   "voyage_enslaver_connection__enslaver_alias": {
     "type": "table",
     "label": "Enslaver alias",

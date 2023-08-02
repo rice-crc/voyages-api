@@ -45,6 +45,11 @@ class Command(BaseCommand):
 				'objectclass':Post
 			},
 			{
+				'output_filename':'blog/author_options.json',
+				'serializer':AuthorSerializer,
+				'objectclass':Author
+			},
+			{
 				'output_filename':'past/enslaved_options.json',
 				'serializer':EnslavedSerializer,
 				'objectclass':Enslaved

@@ -221,8 +221,8 @@
   },
   "aliases__enslaver_relations__relation__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Id",
-    "flatlabel": "Enslaver alias : Enslaver relations : enslavement relation : Id"
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Enslaver relations : enslavement relation : ID"
   },
   "aliases__enslaver_relations__relation__enslaved_in_relation": {
     "type": "table",
@@ -231,8 +231,8 @@
   },
   "aliases__enslaver_relations__relation__enslaved_in_relation__id": {
     "type": "<class 'rest_framework.fields.IntegerField'>",
-    "label": "Id",
-    "flatlabel": "Enslaver alias : Enslaver relations : enslavement relation : enslaved in relation : Id"
+    "label": "ID",
+    "flatlabel": "Enslaver alias : Enslaver relations : enslavement relation : enslaved in relation : ID"
   },
   "aliases__enslaver_relations__relation__enslaved_in_relation__enslaved": {
     "type": "table",
@@ -333,6 +333,11 @@
     "type": "<class 'rest_framework.fields.DecimalField'>",
     "label": "Amount",
     "flatlabel": "Enslaver alias : Enslaver relations : enslavement relation : Amount"
+  },
+  "aliases__enslaver_relations__relation__is_from_voyages": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Is from voyages",
+    "flatlabel": "Enslaver alias : Enslaver relations : enslavement relation : Is from voyages"
   },
   "aliases__enslaver_relations__relation__voyage": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",

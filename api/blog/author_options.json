@@ -84,6 +84,11 @@
     "label": "Thumbnail",
     "flatlabel": "post : Thumbnail"
   },
+  "photo": {
+    "type": "<class 'rest_framework.fields.SerializerMethodField'>",
+    "label": "Photo",
+    "flatlabel": "Photo"
+  },
   "name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name",
@@ -103,11 +108,6 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Role",
     "flatlabel": "Role"
-  },
-  "photo": {
-    "type": "<class 'rest_framework.fields.ImageField'>",
-    "label": "Photo",
-    "flatlabel": "Photo"
   },
   "institution": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",

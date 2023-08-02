@@ -30,28 +30,28 @@ class Command(BaseCommand):
 			print(r.status_code)
 			if r.status_code == 200:
 				new_fpath=os.path.join(site.storage.location,site.directory,fname)
-				with open(new_fpath, 'wb') as f:
-					r.raw.decode_content = True
-					shutil.copyfileobj(r.raw, f)
-					return new_fpath
+# 				with open(new_fpath, 'wb') as f:
+# 					r.raw.decode_content = True
+# 					shutil.copyfileobj(r.raw, f)
+				return new_fpath
 			else:
 				print("could not find",baseurl+fpath)
 				return None
-		
-		
-		sv_blogimages_baseurl="https://www.slavevoyages.org/documents/"
-		
-		#1. pull the thumbnails
-		#IF SUCCESSFUL, THIS WILL ONLY HIT 400'S AFTER THE FIRST RUN
-		posts=Post.objects.all()
-		for post in posts:
-			post_thumbnail=post.thumbnail
-			fpath_str=str(post_thumbnail)
-			new_img_fpath=download_sv_img(fpath_str,sv_blogimages_baseurl)
-			if new_img_fpath is not None:
-				fo=FileObject(new_img_fpath)
-				post.thumbnail=fo
-				post.save()
+# 		
+# 		
+# 		sv_blogimages_baseurl="https://www.slavevoyages.org/documents/"
+# 		
+# 		#1. pull the thumbnails
+# 		#IF SUCCESSFUL, THIS WILL ONLY HIT 400'S AFTER THE FIRST RUN
+# 		posts=Post.objects.all()
+# 		for post in posts:
+# 			post_thumbnail=post.thumbnail
+# 			fpath_str=str(post_thumbnail)
+# 			new_img_fpath=download_sv_img(fpath_str,sv_blogimages_baseurl)
+# 			if new_img_fpath is not None:
+# 				fo=FileObject(new_img_fpath)
+# 				post.thumbnail=fo
+# 				post.save()
 		
 		#2. pull the <img> tags
 		
@@ -81,17 +81,17 @@ class Command(BaseCommand):
 				post.save()
 
 		
-		authors=Author.objects.all()
-		for author in authors:
-			author_photo=author.photo
-			author_photo_str=str(author_photo)
-			author.photo=None
-			author.save()
-			if author_photo not in [None,""]:
-				new_img_fpath=download_sv_img(author_photo_str,sv_blogimages_baseurl)
-				fo=FileObject(new_img_fpath)
-				author.photo=fo
-				author.save()
+# 		authors=Author.objects.all()
+# 		for author in authors:
+# 			author_photo=author.photo
+# 			author_photo_str=str(author_photo)
+# 			author.photo=None
+# 			author.save()
+# 			if author_photo not in [None,""]:
+# 				new_img_fpath=download_sv_img(author_photo_str,sv_blogimages_baseurl)
+# 				fo=FileObject(new_img_fpath)
+# 				author.photo=fo
+# 				author.save()
 		
 		
 		

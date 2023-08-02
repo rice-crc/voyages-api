@@ -175,8 +175,8 @@ STATIC_URL = 'static/'
 site = FileBrowserSite(name='filebrowser')
 
 site.storage.location = "static"
-site.directory="uploads"
-site.storage.base_url = "/" + STATIC_URL
+site.directory="uploads/"
+site.storage.base_url = "/static/abcdefg"
 
 TINYMCE_JS_URL="tinymce/tinymce.min.js"
 TINYMCE_DEFAULT_CONFIG = {

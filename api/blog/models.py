@@ -37,7 +37,7 @@ class Author(models.Model):
     	"Thumbnail",
     	format="Image",
     	max_length=300,
-    	directory="images/",
+    	directory="uploads/",
     	extensions=[".jpg",".jpeg",".png",".wep", ".gif"],
     	blank=True,
     	null=True
@@ -78,7 +78,7 @@ class Post(models.Model):
     	"Thumbnail",
     	format="Image",
     	max_length=300,
-    	directory="images/",
+    	directory="uploads/",
     	extensions=[".jpg",".jpeg",".png",".wep", ".gif"],
     	blank=True
     )

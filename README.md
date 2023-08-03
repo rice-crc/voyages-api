@@ -142,7 +142,7 @@ Note the following project resources:
 * Voyages API: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 * API Stats Component: [http://127.0.0.1:5000](http://127.0.0.1:5000/)
 * API Geo Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5005/)
-* API People Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5006/)
+* API People Networks Component: [http://127.0.0.1:5006](http://127.0.0.1:5006/)
 * Solr: [http://127.0.0.1:8983](http://127.0.0.1:8983)
 * Adminer: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 

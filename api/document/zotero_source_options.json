@@ -1,0 +1,117 @@
+{
+  "id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "ID"
+  },
+  "page_connection": {
+    "type": "table",
+    "label": "source page connection",
+    "flatlabel": "source page connection"
+  },
+  "page_connection__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "source page connection : ID"
+  },
+  "page_connection__source_page": {
+    "type": "table",
+    "label": "source page",
+    "flatlabel": "source page connection : source page"
+  },
+  "page_connection__source_page__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "source page connection : source page : ID"
+  },
+  "page_connection__source_page__page_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Page url",
+    "flatlabel": "source page connection : source page : Page url"
+  },
+  "page_connection__source_page__iiif_manifest_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Iiif manifest url",
+    "flatlabel": "source page connection : source page : Iiif manifest url"
+  },
+  "page_connection__source_page__iiif_baseimage_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Iiif baseimage url",
+    "flatlabel": "source page connection : source page : Iiif baseimage url"
+  },
+  "page_connection__source_page__image_filename": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Image filename",
+    "flatlabel": "source page connection : source page : Image filename"
+  },
+  "page_connection__source_page__transcription": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Transcription",
+    "flatlabel": "source page connection : source page : Transcription"
+  },
+  "page_connection__source_page__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "source page connection : source page : Last updated"
+  },
+  "page_connection__source_page__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "source page connection : source page : Human reviewed"
+  },
+  "page_connection__zotero_source": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Zotero source",
+    "flatlabel": "source page connection : Zotero source"
+  },
+  "item_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Item url",
+    "flatlabel": "Item url"
+  },
+  "zotero_url": {
+    "type": "<class 'rest_framework.fields.URLField'>",
+    "label": "Zotero url",
+    "flatlabel": "Zotero url"
+  },
+  "short_ref": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Short ref",
+    "flatlabel": "Short ref"
+  },
+  "zotero_title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Zotero title",
+    "flatlabel": "Zotero title"
+  },
+  "zotero_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Zotero date",
+    "flatlabel": "Zotero date"
+  },
+  "is_legacy_source": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Is legacy source",
+    "flatlabel": "Is legacy source"
+  },
+  "last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "Last updated"
+  },
+  "human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "Human reviewed"
+  },
+  "notes": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Notes",
+    "flatlabel": "Notes"
+  },
+  "legacy_source": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Legacy source",
+    "flatlabel": "Legacy source"
+  }
+}

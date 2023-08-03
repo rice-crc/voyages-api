@@ -39,6 +39,11 @@
     "label": "Intro",
     "flatlabel": "post : Tags : Intro"
   },
+  "posts__thumbnail": {
+    "type": "<class 'rest_framework.fields.SerializerMethodField'>",
+    "label": "Thumbnail",
+    "flatlabel": "post : Thumbnail"
+  },
   "posts__title": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Title",
@@ -78,11 +83,6 @@
     "type": "<class 'rest_framework.fields.ChoiceField'>",
     "label": "Status",
     "flatlabel": "post : Status"
-  },
-  "posts__thumbnail": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Thumbnail",
-    "flatlabel": "post : Thumbnail"
   },
   "photo": {
     "type": "<class 'rest_framework.fields.SerializerMethodField'>",

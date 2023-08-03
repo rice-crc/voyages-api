@@ -408,3 +408,21 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
+
+
+class PASTNetworks(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		params=json.dumps(dict(request.POST))
+		print(PEOPLE_NETWORKS_BASE_URL)
+		r=requests.post(PEOPLE_NETWORKS_BASE_URL,data=params,headers={"Content-type":"application/json"})
+		j=json.loads(r.text)
+		return JsonResponse(j,safe=False)
+
+		
+
+
+

@@ -309,6 +309,40 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			print(' | '.join(error_messages))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
+class EnslaverDataFrames(generics.GenericAPIView):
+# 	serializer_class=VoyageSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('past/enslaver_options.json',request)
+		return JsonResponse(j,safe=False)
+	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
+		st=time.time()
+		params=dict(request.POST)
+		enslaved_options=options_handler('past/enslaver_options.json',hierarchical=False)
+		queryset=EnslaverIdentity.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			enslaved_options,
+			auto_prefetch=True,
+			retrieve_all=True
+		)
+		queryset=queryset.order_by('id')
+		sf=list(selected_fields)
+		if len(error_messages)==0:
+			output_dicts={}
+			for s in sf:
+				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(output_dicts,safe=False)
+		else:
+			print("failed\n+++++++")
+			print(' | '.join(error_messages))
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
 
 class EnslavedAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -356,7 +390,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		counter2={"__".join([str(i) for i in c]):counter[c] for c in counter}
 		
 		
-		u2=NETWORKS_BASE_URL+'network_maps/'
+		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
 		d2={
 			'graphname':graphname,
 			'cachename':'ao_maps',
@@ -374,3 +408,21 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
+
+
+class PASTNetworks(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		st=time.time()
+		print("+++++++\nusername:",request.auth.user)
+		params=json.dumps(dict(request.POST))
+		print(PEOPLE_NETWORKS_BASE_URL)
+		r=requests.post(PEOPLE_NETWORKS_BASE_URL,data=params,headers={"Content-type":"application/json"})
+		j=json.loads(r.text)
+		return JsonResponse(j,safe=False)
+
+		
+
+
+

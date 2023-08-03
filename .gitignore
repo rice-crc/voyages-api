@@ -1,8 +1,10 @@
-django/static/
+api/static/
 networks/tmp/
 *.DS_Store
 *.sql
 dbconf.json
+
+
 
 django/document/management/commands/*.txt
 django/document/management/commands/*.csv

@@ -2,18 +2,71 @@ from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonRespon
 from django.template import loader
 from django.shortcuts import redirect,render
 from django.core.paginator import Paginator
-from document.models import *
+from django.shortcuts import render,get_object_or_404
+from django.http import HttpResponse, JsonResponse
+from rest_framework.schemas.openapi import AutoSchema
+from rest_framework import generics
+from rest_framework.metadata import SimpleMetadata
+from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from django.views.generic.list import ListView
+from collections import Counter
+import urllib
+import json
+import requests
+import time
+from .models import *
+import pprint
+from common.nest import *
+from common.reqs import *
+import collections
+import gc
+from .serializers import *
+from voyages3.localsettings import *
 import re
 from django.db.models import Q
 
+try:
+	zotero_source_options=options_handler('document/zotero_source_options.json',hierarchical=False)
+except:
+	print("WARNING. BLANK ZOTERO OPTIONS.")
+	zotero_source_options={}
+
+class ZoteroSourceList(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('document/zotero_source_options.json',request)
+		return JsonResponse(j,safe=False)
+	def post(self,request):
+		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
+		queryset=ZoteroSource.objects.all()
+		queryset=queryset.order_by('id')
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,zotero_source_options,retrieve_all=False)
+		
+		if len(error_messages)==0:
+			st=time.time()
+			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			read_serializer=ZoteroSourceSerializer(queryset,many=True)
+			serialized=read_serializer.data
+			resp=JsonResponse(serialized,safe=False,headers=headers)
+			resp.headers['total_results_count']=headers['total_results_count']
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return resp
+		else:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 #######################
 # default view will be a paginated gallery
-def index(request,collection_id=None,pagenumber=1):
+def Gallery(request,collection_id=None,pagenumber=1):
 	
 	if request.user.is_authenticated:
 		
-		docs=ZoteroSource.objects.all()
+		#let's only get the zotero objects that have pages
+		#otherwise, no need for the gallery -- and it lards the gallery up
+		docs=ZoteroSource.objects.all().filter(~Q(page_connection=None))
 		
 		other_collections=[]
 		for collection_tuple in docs.values_list(

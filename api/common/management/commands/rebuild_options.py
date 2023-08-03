@@ -9,6 +9,8 @@ from voyage.models import Voyage
 from past.serializers import EnslaverSerializer,EnslavedSerializer
 from past.models import *
 from assessment.serializers import EstimateSerializer
+from document.serializers import ZoteroSourceSerializer
+from document.models import *
 from assessment.models import Estimate
 from blog.models import *
 from blog.serializers import *
@@ -29,20 +31,20 @@ class Command(BaseCommand):
 				'serializer':VoyageSerializer,
 				'objectclass':Voyage
 			},
-# 			{
-# 				'output_filename':'common/sparse_date_options.json',
-# 				'serializer':SparseDateSerializer,
-# 				'objectclass':SparseDate
-# 			},
-# 			{
-# 				'output_filename':'geo/geo_options.json',
-# 				'serializer':LocationSerializer,
-# 				'objectclass':Location
-# 			},
+			{
+				'output_filename':'document/zotero_source_options.json',
+				'serializer':ZoteroSourceSerializer,
+				'objectclass':ZoteroSource
+			},
 			{
 				'output_filename':'blog/post_options.json',
 				'serializer':PostSerializer,
 				'objectclass':Post
+			},
+			{
+				'output_filename':'blog/author_options.json',
+				'serializer':AuthorSerializer,
+				'objectclass':Author
 			},
 			{
 				'output_filename':'past/enslaved_options.json',

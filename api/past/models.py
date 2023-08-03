@@ -21,7 +21,7 @@ import re
 import uuid
 from common.models import NamedModelAbstractBase
 
-from voyage.models import Place, Voyage, VoyageDataset, VoyageSources
+from voyage.models import Place, Voyage, VoyageDataset, VoyageSources, Location
 
 
 # (2022-09-21) MySQL is not executing a properly optimized query plan
@@ -599,6 +599,7 @@ class EnslaverVoyageConnection(models.Model):
 		on_delete=models.CASCADE
 	)
 	role = models.ForeignKey(EnslaverRole, null=False, on_delete=models.CASCADE)
+
 	# There might be multiple persons with the same role for the same voyage
 	# and they can be ordered (ranked) using the following field.
 	order = models.IntegerField(null=True)
@@ -851,7 +852,7 @@ class EnslavementRelation(models.Model):
 	Represents a relation involving any number of enslavers and enslaved
 	individuals.
 	"""
-	id = models.IntegerField(primary_key=True)
+# 	id = models.IntegerField(primary_key=True)
 	relation_type = models.ForeignKey(EnslavementRelationType, null=False, on_delete=models.CASCADE)
 	place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+')
 	date = models.CharField(max_length=12, null=True,
@@ -862,14 +863,16 @@ class EnslavementRelation(models.Model):
 							   null=True, on_delete=models.CASCADE)
 	source = models.ForeignKey(VoyageSources, related_name="+",
 							   null=True, on_delete=models.CASCADE)
-	text_ref = models.CharField(max_length=255, null=False, blank=True, help_text="Source text reference")
+	text_ref = models.CharField(max_length=255, null=True, blank=True, help_text="Source text reference")
+	is_from_voyages=models.BooleanField(default=False)
 
+	
 class EnslavedInRelation(models.Model):
 	"""
 	Associates an enslaved in a slave relation.
 	"""
 
-	id = models.IntegerField(primary_key=True)
+# 	id = models.IntegerField(primary_key=True)
 	relation = models.ForeignKey(
 		EnslavementRelation,
 		related_name="enslaved_in_relation",
@@ -879,13 +882,16 @@ class EnslavedInRelation(models.Model):
 		related_name="enslaved_relations",
 		null=False,
 		on_delete=models.CASCADE)
+	class Meta:
+		unique_together = ('relation', 'enslaved')
+
 
 class EnslaverInRelation(models.Model):
 	"""
 	Associates an enslaver in a slave relation.
 	"""
 
-	id = models.IntegerField(primary_key=True)
+# 	id = models.IntegerField(primary_key=True)
 	relation = models.ForeignKey(
 		EnslavementRelation,
 		related_name="relation_enslavers",
@@ -898,6 +904,9 @@ class EnslaverInRelation(models.Model):
 		on_delete=models.CASCADE
 	)
 	role = models.ForeignKey(EnslaverRole, null=False, on_delete=models.CASCADE, help_text="The role of the enslaver in this relation")
+	class Meta:
+		unique_together = ('relation', 'enslaver_alias','role')
+
 
 # class EnslavementBipartiteGraph:
 # 	"""

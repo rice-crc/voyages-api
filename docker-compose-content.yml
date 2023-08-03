@@ -67,20 +67,35 @@ services:
       context: "."
       dockerfile: "./docker/stats/Dockerfile"
 
-  voyages-networks:
-    image: "voyages-networks"
-    container_name: "voyages-networks"
-    hostname: "voyages-networks"
+  voyages-people-networks:
+    image: "voyages-people-networks"
+    container_name: "voyages-people-networks"
+    hostname: "voyages-people-networks"
+    restart: "on-failure"
+    networks:
+      - "voyages"
+    ports:
+      - "127.0.0.1:5006:5006"
+    volumes:
+      - "./people-networks/:/srv/voyages-people-networks"
+    build:
+      context: "."
+      dockerfile: "./docker/people-networks/Dockerfile"
+
+  voyages-geo-networks:
+    image: "voyages-geo-networks"
+    container_name: "voyages-geo-networks"
+    hostname: "voyages-geo-networks"
     restart: "on-failure"
     networks:
       - "voyages"
     ports:
       - "127.0.0.1:5005:5005"
     volumes:
-      - "./networks/:/srv/voyages-networks"
+      - "./geo-networks/:/srv/voyages-geo-networks"
     build:
       context: "."
-      dockerfile: "./docker/networks/Dockerfile"
+      dockerfile: "./docker/geo-networks/Dockerfile"
 
 networks:
   voyages:

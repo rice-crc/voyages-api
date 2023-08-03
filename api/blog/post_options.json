@@ -14,6 +14,11 @@
     "label": "ID",
     "flatlabel": "author : ID"
   },
+  "authors__photo": {
+    "type": "<class 'rest_framework.fields.SerializerMethodField'>",
+    "label": "Photo",
+    "flatlabel": "author : Photo"
+  },
   "authors__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name",
@@ -33,11 +38,6 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Role",
     "flatlabel": "author : Role"
-  },
-  "authors__photo": {
-    "type": "<class 'rest_framework.fields.ImageField'>",
-    "label": "Photo",
-    "flatlabel": "author : Photo"
   },
   "authors__institution": {
     "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
@@ -68,6 +68,11 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Intro",
     "flatlabel": "tag : Intro"
+  },
+  "thumbnail": {
+    "type": "<class 'rest_framework.fields.SerializerMethodField'>",
+    "label": "Thumbnail",
+    "flatlabel": "Thumbnail"
   },
   "title": {
     "type": "<class 'rest_framework.fields.CharField'>",
@@ -108,10 +113,5 @@
     "type": "<class 'rest_framework.fields.ChoiceField'>",
     "label": "Status",
     "flatlabel": "Status"
-  },
-  "thumbnail": {
-    "type": "<class 'rest_framework.fields.CharField'>",
-    "label": "Thumbnail",
-    "flatlabel": "Thumbnail"
   }
 }

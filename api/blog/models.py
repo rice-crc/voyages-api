@@ -33,7 +33,15 @@ class Author(models.Model):
     description = models.CharField(max_length=600,null=True, blank=True)
     slug = models.SlugField(max_length=200, unique=True)
     role = models.CharField(max_length=200)
-    photo = models.ImageField(upload_to='images',null=True, blank=True)
+    photo = FileBrowseField(
+    	"Thumbnail",
+    	format="Image",
+    	max_length=300,
+    	directory="uploads/",
+    	extensions=[".jpg",".jpeg",".png",".wep", ".gif"],
+    	blank=True,
+    	null=True
+    )
     institution = models.ForeignKey(Institution, on_delete= models.CASCADE)
 
     def __str__(self):
@@ -58,9 +66,9 @@ class Post(models.Model):
     language = models.CharField(max_length=5, null = True, blank=False, default='en', choices=settings.LANGUAGES)
     subtitle = models.CharField(max_length=200, null = True, blank = True)
     slug = models.SlugField(max_length=200)
-    authors = models.ManyToManyField(Author)
+    authors = models.ManyToManyField(Author,related_name="posts")
     updated_on = models.DateTimeField(auto_now= True)
-    content = models.TextField()
+    content = HTMLField()
     created_on = models.DateTimeField(default=timezone.now)
     status = models.IntegerField(choices=STATUS, default=0)
     
@@ -70,8 +78,8 @@ class Post(models.Model):
     	"Thumbnail",
     	format="Image",
     	max_length=300,
-    	directory="images/",
-    	extensions=[".jpg",".png",".wep", ".gif"],
+    	directory="uploads/",
+    	extensions=[".jpg",".jpeg",".png",".wep", ".gif"],
     	blank=True
     )
 

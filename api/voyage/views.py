@@ -302,7 +302,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		
 		print("COULD NOT MAP %d VOYAGES" %len(bad_voyages))
 		
-		u2=NETWORKS_BASE_URL+'network_maps/'
+		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
 		d2={
 			'graphname':graphname,
 			'cachename':'voyage_maps',

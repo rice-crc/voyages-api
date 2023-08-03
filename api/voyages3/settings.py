@@ -13,6 +13,9 @@ from .localsettings import *
 
 from pathlib import Path
 
+from django.core.files.storage import DefaultStorage
+from filebrowser.sites import FileBrowserSite
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,6 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 
 # Application definition
+
+TINYMCE_FILEBROWSER=True
 
 INSTALLED_APPS = [
 	'filebrowser',
@@ -160,10 +165,24 @@ APPEND_SLASH=False
 
 STATIC_ROOT='static'
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Default FileBrowser site
+site = FileBrowserSite(name='filebrowser')
+
+site.storage.location = "static"
+site.directory="uploads/"
+site.storage.base_url = "/static/abcdefg"
+
+TINYMCE_JS_URL="tinymce/tinymce.min.js"
+TINYMCE_DEFAULT_CONFIG = {
+    "menubar": "file edit view insert format tools table help",
+    "plugins": "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code "
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

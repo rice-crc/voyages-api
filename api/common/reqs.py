@@ -19,6 +19,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	prev_uri=None
 	results_count=None
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
+# 	print(all_fields)
 	
 	try:
 		params=dict(r.POST)
@@ -36,10 +37,10 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	try:
 		###FILTER RESULTS
 		##select text and numeric fields, ignoring those without a type
-		text_fields=[i for i in all_fields if 'CharField' in all_fields[i]['type']]
+		text_fields=[i for i in all_fields if 'CharField' in all_fields[i]['type'] or 'SlugField' in all_fields[i]['type'] or 'ChoiceField' in all_fields[i]['type']]
 		numeric_fields=[i for i in all_fields if 'IntegerField' in all_fields[i]['type'] or 'DecimalField' in all_fields[i]['type'] or 'FloatField' in all_fields[i]['type']]
 		boolean_fields=[i for i in all_fields if 'BooleanField' in all_fields[i]['type']]
-
+# 		print("FILTER FIELDS",text_fields,numeric_fields,boolean_fields)
 		##build filters
 		kwargs={}
 		###numeric filters -- only accepting one range per field right now

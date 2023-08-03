@@ -9,7 +9,7 @@
     
     {% for c in other_collections %}
     
-    <option value="/docs/{{ c.id }}/1">{{ c.label }}</option>
+    <option value="/docs/gallery/{{ c.id }}/1">{{ c.label }}</option>
     
     {% endfor %}
     
@@ -20,7 +20,7 @@
     <span class="step-links">
         {% if page_obj.has_previous %}
             <a href="1">&laquo; first</a>
-            <a href="/docs/{{ page_collection_id }}/{{ page_obj.previous_page_number }}">previous</a>
+            <a href="/docs/gallery/{{ page_collection_id }}/{{ page_obj.previous_page_number }}">previous</a>
         {% endif %}
 
         <span class="current">
@@ -28,8 +28,8 @@
         </span>
 
         {% if page_obj.has_next %}
-            <a href="/docs/{{ page_collection_id }}/{{ page_obj.next_page_number }}">next</a>
-            <a href="/docs/{{ page_collection_id }}/{{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            <a href="/docs/gallery/{{ page_collection_id }}/{{ page_obj.next_page_number }}">next</a>
+            <a href="/docs/gallery/{{ page_collection_id }}/{{ page_obj.paginator.num_pages }}">last &raquo;</a>
         {% endif %}
     </span>
 </div>
@@ -40,7 +40,7 @@
 {% for zs in page_obj %}
 
 	<div>
-	<p><a href="/docs/single/{{zs.id}}">{{ zs.zotero_title }}<br/>{{ zs.zotero_date }}<br/>
+	<p><a href="/docs/gallery/single/{{zs.id}}">{{ zs.zotero_title }}<br/>{{ zs.zotero_date }}<br/>
 	{% for spc in zs.page_connection.all %}
 		{% if spc.source_page.iiif_baseimage_url %}
 			<img src="{{spc.source_page.square_thumbnail}}"></a>
@@ -59,7 +59,7 @@
     <span class="step-links">
         {% if page_obj.has_previous %}
             <a href="1">&laquo; first</a>
-            <a href="/docs/{{ page_collection_id }}/{{ page_obj.previous_page_number }}">previous</a>
+            <a href="/docs/gallery/{{ page_collection_id }}/{{ page_obj.previous_page_number }}">previous</a>
         {% endif %}
 
         <span class="current">
@@ -67,8 +67,8 @@
         </span>
 
         {% if page_obj.has_next %}
-            <a href="/docs/{{ page_collection_id }}/{{ page_obj.next_page_number }}">next</a>
-            <a href="/docs/{{ page_collection_id }}/{{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            <a href="/docs/gallery/{{ page_collection_id }}/{{ page_obj.next_page_number }}">next</a>
+            <a href="/docs/gallery/{{ page_collection_id }}/{{ page_obj.paginator.num_pages }}">last &raquo;</a>
         {% endif %}
     </span>
 </div>

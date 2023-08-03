@@ -120,11 +120,12 @@ ao_maps={
 				{
 					'tag':'embarkation',
 					'values':{
-						'uuid':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
-						'name':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
-						'lat':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude',
-						'lon':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude',
-						'val':'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value'
+					
+						'uuid':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
+						'name':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name',
+						'lat':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__latitude',
+						'lon':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__longitude',
+						'val':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__value'
 					},
 					'tag_connections':[
 						("onramp","source","closest")
@@ -136,11 +137,11 @@ ao_maps={
 				{
 					'tag':'disembarkation',
 					'values':{
-						'uuid':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
-						'name':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
-						'lat':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude',
-						'lon':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude',
-						'val':'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__value'
+						'uuid':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
+						'name':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
+						'lat':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__latitude',
+						'lon':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__longitude',
+						'val':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__value'
 					},
 					'tag_connections':[
 						("offramp","target","closest")
@@ -180,11 +181,11 @@ ao_maps={
 				{
 					'tag':'embarkation',
 					'values':{
-						'uuid':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
-						'name':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
-						'lat':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude',
-						'lon':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude',
-						'val':'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value'		
+						'uuid':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
+						'name':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__name',
+						'lat':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__latitude',
+						'lon':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__longitude',
+						'val':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__value'		
 					},
 					'tag_connections':[
 						("onramp","source","closest")
@@ -196,11 +197,11 @@ ao_maps={
 				{
 					'tag':'disembarkation',
 					'values':{
-						'uuid':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
-						'name':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
-						'lat':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude',
-						'lon':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude',
-						'val':'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__value'		
+						'uuid':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
+						'name':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__name',
+						'lat':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__latitude',
+						'lon':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__longitude',
+						'val':'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__value'		
 					},
 					'tag_connections':[
 						("offramp","target","closest")

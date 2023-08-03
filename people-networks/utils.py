@@ -46,7 +46,9 @@ def load_graph():
 			idmap[dfname][id]=uid
 			obj={k:df[k][row_idx] for k in list(df.keys())}
 			obj['node_class']=dfname
+			obj['uuid']=uid
 			G.add_node(uid, **obj)
+			
 	
 	eir = j['enslaved_in_relation']
 	for row_idx in range(len(eir['relation'])):
@@ -60,7 +62,7 @@ def load_graph():
 		obj={k:eir[k][row_idx] for k in list(eir.keys())}
 		enslaver_uuid=idmap['enslavers'][obj['enslaver_alias']]
 		relation_uuid=idmap['enslavement_relations'][obj['relation']]
-		G.add_edge(enslaved_uuid,relation_uuid,role__name=obj['role__name'])
+		G.add_edge(enslaver_uuid,relation_uuid,role__name=obj['role__name'])
 	
 	#then once more around to get voyages tied in to relations
 	enslavement_relations=[n for n in 

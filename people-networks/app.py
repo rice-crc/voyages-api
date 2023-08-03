@@ -9,106 +9,30 @@ from utils import *
 import networkx as nx
 from networkx_query import search_nodes, search_edges
 import re
+import time
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
+standoff_base=4
+standoff_count=0
 
-
-
-
-
-
-
-# def load_graph(endpoint,graph_params):
-# 	graph_name=graph_params['name']
-# 	print("loading network:",graph_name)
-# 	headers={'Authorization':DJANGO_AUTH_KEY}
-# 	G=nx.DiGraph()
-# 	if rc['type']=='oceanic':
-# 		# FIRST, ADD THE OCEANIC NETWORK FROM THE APPROPRIATE JSON FLATFILE
-# 		## AS POINTED TO IN THE INDEX_VARS.PY FILE
-# 		oceanic_network_file=rc['oceanic_network_file']
-# # 		print("Network file----->",oceanic_network_file)
-# 		d=open(oceanic_network_file,'r')
-# 		t=d.read()
-# 		d.close()
-# 		oceanic_network=json.loads(t)
-# 		G,max_node_id=add_oceanic_network(G,oceanic_network,init_node_id=0)
-# 		print("created oceanic network",G)
-# # 		for n in G.nodes:
-# # 			print("node-->",G.nodes[n])
-# 		# THEN ITERATE OVER THE GEO VARS IN THE INDEX
-# 		## AND ADD THE RESULTING UNIQUE NODES TO THE NETWORK
-# 		filter_obj=rc['filter']
-# 		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id+1)
-# 		print("added non-oceanic network nodes")
-# # 		for n in G.nodes:
-# # 			print("node-->",G.nodes[n])
-# 		#then link across the ordered node classes
-# 		ordered_node_classes=graph_params['ordered_node_classes']
-# 		prev_tag=None
-# 		for ordered_node_class in ordered_node_classes:
-# 			tag=ordered_node_class['tag']
-# 			if 'tag_connections' in ordered_node_class:
-# 				tag_connections=ordered_node_class['tag_connections']
-# 				G=connect_to_tags(G,tag,tag_connections)
-# 		print("connected all remaining network edges (non-oceanic --> (non-oceanic & oceanic)) following index_vars.py file ruleset")
-# 	elif rc['type']=='people':
-# 		pass
-# 		
-# 		
-# 		
-# 	return G,graph_name,None
-# 
-# registered_caches={
-# 	'voyage_maps':voyage_maps,
-# 	'ao_maps':ao_maps
-# }
-
-#on initialization, load every index as a graph, via a call to the django api
-
-# rcnames=list(registered_caches.keys())
-# 
-# 
-# standoff_base=4
-# standoff_count=0
-# 
-# st=time.time()
+st=time.time()
+G=load_graph()
 # while True:
-# 	failures_count=0
-# 	for rcname in rcnames:
-# 		rc=registered_caches[rcname]
-# 		endpoint=rc['endpoint']
-# 		if 'graphs' not in rc:
-# 			rc['graphs']={}
-# 
-# 		for graph_params in rc['graph_params']:
-# 			try:
-# 				graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-# 				rc['graphs'][graph_name]={
-# 					'graph':graph,
-# 					'shortest_paths':shortest_paths
-# 				}
-# 			except:
-# 				failures_count+=1
-# 				print("failed on cache:",rc['name'])
-# 				break
-# 		registered_caches[rcname]=rc
-# 	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
-# 	if failures_count==len(rcnames):
+# 	failed=False
+# 	try:
+# 		G=load_graph()
+# 	except:
+# 		failed=True
+# 	if failed:
 # 		standoff_time=standoff_base**standoff_count
 # 		print("retrying after %d seconds" %(standoff_time))
 # 		time.sleep(standoff_time)
 # 		standoff_count+=1
 # 	else:
 # 		break
-# print("finished building graphs in %d seconds" %int(time.time()-st))
-
-
-
-
-load_graph()
+print("finished building graphs in %d seconds" %int(time.time()-st))
 
 
 @app.route('/network_maps/',methods=['POST'])

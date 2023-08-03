@@ -1,3 +1,4 @@
+api/static/
 networks/tmp/
 *.DS_Store
 *.sql

@@ -59,7 +59,8 @@ Copy the default config files for each app component.
 
 ```bash
 local:~/Projects/voyages-api$ cp api/voyages3/localsettings.py{-default,}
-local:~/Projects/voyages-api$ cp networks/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp geo-networks/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp people-networks/localsettings.py{-default,}
 local:~/Projects/voyages-api$ cp stats/localsettings.py{-default,}
 ```
 
@@ -73,7 +74,7 @@ Remove the `-d` option to run the process in the foreground.
 Allow a short bit of time for the mysql container to initialize.
 
 ```bash
-local:~/Projects/voyages-api$ docker compose up --build -d voyages-mysql voyages-api voyages-adminer
+local:~/Projects/voyages-api$ docker compose up --build -d voyages-mysql voyages-api voyages-adminer voyages-solr
 ```
 
 Verify the data import.
@@ -91,12 +92,13 @@ local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py migrate'
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_geo_data'
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_voyage_dates_data'
+local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py rebuild_indices'
 ```
 
 Build the API component containers.
 
 ```bash
-local:~/Projects/voyages-api$ docker compose up --build -d voyages-networks voyages-stats
+local:~/Projects/voyages-api$ docker compose up --build -d voyages-geo-networks voyages-people-networks voyages-stats
 ```
 
 ## Generating an API Key for the Flask Components
@@ -119,7 +121,7 @@ the new token.
 Restart the Flask component containers.
 
 ```bash
-local:~/Projects/voyages-api$ docker restart voyages-networks voyages-stats
+local:~/Projects/voyages-api$ docker restart voyages-geo-networks voyages-people-networks voyages-stats
 ```
 
 ## Cleanup
@@ -139,7 +141,8 @@ Note the following project resources:
 
 * Voyages API: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 * API Stats Component: [http://127.0.0.1:5000](http://127.0.0.1:5000/)
-* API Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5005/)
+* API Geo Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5005/)
+* API People Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5006/)
 * Solr: [http://127.0.0.1:8983](http://127.0.0.1:8983)
 * Adminer: [http://127.0.0.1:8080](http://127.0.0.1:8080)
 

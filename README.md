@@ -69,12 +69,16 @@ expand into the `data/` directory. Rename the expanded file to `data/voyages_pro
 
 Build the API containers. The component containers must be built separately.
 
-Remove the `-d` option to run the process in the foreground.
-
-Allow a short bit of time for the mysql container to initialize.
-
 ```bash
 local:~/Projects/voyages-api$ docker compose up --build -d voyages-mysql voyages-api voyages-adminer voyages-solr
+```
+
+_Note: you can remove the `-d` option to run the process in the foreground. JCM always does this to watch the logs._
+
+Allow a short bit of time for the mysql container to initialize. Then inject the sql dump.
+
+```bash
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages_api <  data/voyages_prod.sql
 ```
 
 Verify the data import.
@@ -92,6 +96,10 @@ local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py migrate'
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_geo_data'
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_voyage_dates_data'
+local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c voyages -d /srv/voyages/solr
+local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c enslavers -d /srv/voyages/solr
+local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c enslaved -d /srv/voyages/solr
+local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c blog -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py rebuild_indices'
 ```
 

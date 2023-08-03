@@ -22,22 +22,17 @@ def load_graph(endpoint,graph_params):
 		# FIRST, ADD THE OCEANIC NETWORK FROM THE APPROPRIATE JSON FLATFILE
 		## AS POINTED TO IN THE INDEX_VARS.PY FILE
 		oceanic_network_file=rc['oceanic_network_file']
-# 		print("Network file----->",oceanic_network_file)
 		d=open(oceanic_network_file,'r')
 		t=d.read()
 		d.close()
 		oceanic_network=json.loads(t)
 		G,max_node_id=add_oceanic_network(G,oceanic_network,init_node_id=0)
 		print("created oceanic network",G)
-# 		for n in G.nodes:
-# 			print("node-->",G.nodes[n])
 		# THEN ITERATE OVER THE GEO VARS IN THE INDEX
 		## AND ADD THE RESULTING UNIQUE NODES TO THE NETWORK
 		filter_obj=rc['filter']
 		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id+1)
 		print("added non-oceanic network nodes")
-# 		for n in G.nodes:
-# 			print("node-->",G.nodes[n])
 		#then link across the ordered node classes
 		ordered_node_classes=graph_params['ordered_node_classes']
 		prev_tag=None
@@ -49,9 +44,6 @@ def load_graph(endpoint,graph_params):
 		print("connected all remaining network edges (non-oceanic --> (non-oceanic & oceanic)) following index_vars.py file ruleset")
 	elif rc['type']=='people':
 		pass
-		
-		
-		
 	return G,graph_name,None
 
 registered_caches={
@@ -60,13 +52,9 @@ registered_caches={
 }
 
 #on initialization, load every index as a graph, via a call to the django api
-
 rcnames=list(registered_caches.keys())
-
-
 standoff_base=4
 standoff_count=0
-
 st=time.time()
 while True:
 	failures_count=0
@@ -180,10 +168,10 @@ def network_maps():
 			## and therefore were not added into the network
 			if len(sourcenodematch)!=0:
 				s_id=sourcenodematch[0]
-				sourcenode=dict(graph.nodes[s_id])
 				#drop the networkx node tags
 				##we want dynamic multi-classed scores on each node
-				##i think!
+				##BUT DO NOT TOUCH THE GRAPH ITSELF
+				sourcenode=dict(graph.nodes[s_id])
 				if 'tags' in sourcenode:
 					del sourcenode['tags']
 				nodes[s_uuid]['data']=sourcenode
@@ -194,12 +182,8 @@ def network_maps():
 						t_id=targetnodematch[0]
 						
 						if s_id==t_id and linklabel=='transportation':
-# 							print("TRANSPORTATION SELF-LOOP:",linklabel,graph.nodes[s_id])
+ 							#TRANSPORTATION SELF-LOOP
 							selfloop=True
-							
-# 							for n_id in graph.successors(s_id):
-# 								print(graph.nodes[n_id])
-							
 							successor_id=[
 								n_id for n_id in graph.successors(s_id)
 								if 'onramp' in graph.nodes[n_id]['tags']
@@ -251,20 +235,12 @@ def network_maps():
 										edges[linklabel][a_id][b_id]=w
 									else:
 										edges[linklabel][a_id][b_id]+=w
-	
 								#add oceanic nodes (although we prob don't need to?)
 								if a_id not in nodes:
 									nodes[a_id]={'data':anode,'id':a_id,'weights':{}}
 								if b_id not in nodes:
 									nodes[b_id]={'data':bnode,'id':b_id,'weights':{}}
-	
-# 	print("FINDTHATBASTARDO--------")
-# 	print(edges['transportation']['0696fc88-4400-4271-a2a6-008382b97b0d']["6"])
-# 	print(nodes["6"])
-# 	
-# 	print("----------")
-	
-	#tp60 wants these edges flattened						
+	#tp60 wants these edges flattened
 	edgesflat={linklabel:[] for linklabel in edges}
 	for linklabel in edges:
 		for s in edges[linklabel]:
@@ -272,24 +248,18 @@ def network_maps():
 				w=edges[linklabel][s][t]
 				thisedge={'s':s,'t':t,'w':w}
 				edgesflat[linklabel].append(thisedge)
-	
-	
-	
 	outputs={
 		"nodes":[nodes[k] for k in nodes],
 		"edges":edgesflat
 	}
 	
 	return jsonify(outputs)
-	
+
+#GEOJSON
 @app.route('/simple_map/<cachename>',methods=['GET'])
 # @app.route('/simple_map',methods=['GET'])
 def simple_map(cachename):
-# def simple_map():
-	'''
-	Implements the pandas groupby function and returns the sparse summary.
-	Excellent for bar & pie charts.
-	'''
+
 	st=time.time()
 	cachegraphs=registered_caches[cachename]['graphs']
 	

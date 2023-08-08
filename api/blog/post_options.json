@@ -19,6 +19,36 @@
     "label": "Photo",
     "flatlabel": "author : Photo"
   },
+  "authors__institution": {
+    "type": "table",
+    "label": "institution",
+    "flatlabel": "author : institution"
+  },
+  "authors__institution__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "author : institution : ID"
+  },
+  "authors__institution__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "author : institution : Name"
+  },
+  "authors__institution__description": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Description",
+    "flatlabel": "author : institution : Description"
+  },
+  "authors__institution__slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "author : institution : Slug"
+  },
+  "authors__institution__image": {
+    "type": "<class 'rest_framework.fields.ImageField'>",
+    "label": "Image",
+    "flatlabel": "author : institution : Image"
+  },
   "authors__name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name",
@@ -38,11 +68,6 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Role",
     "flatlabel": "author : Role"
-  },
-  "authors__institution": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Institution",
-    "flatlabel": "author : Institution"
   },
   "tags": {
     "type": "table",

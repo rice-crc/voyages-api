@@ -43,7 +43,7 @@ class ZoteroSourceAdmin(admin.ModelAdmin):
 		ZoteroEnslaverConnectionInline,
 		ZoteroVoyageConnectionInline
 	]
-	search_fields=['zotero_title','zotero_date']
+	search_fields=['zotero_title','zotero_date','short_ref']
 	readonly_fields=['item_url','zotero_url','legacy_source']
 	list_display=('zotero_title','zotero_date')
 

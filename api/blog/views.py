@@ -23,9 +23,15 @@ try:
 except:
 	print("WARNING. BLANK POST OPTIONS.")
 	author_options={}
+	
+try:
+	institution_options=options_handler('blog/institution_options.json',hierarchical=False)
+except:
+	print("WARNING. BLANK POST OPTIONS.")
+	author_options={}
+
 
 class PostList(generics.GenericAPIView):
-	# serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
@@ -52,7 +58,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		print("+++++++\nusername:",request.auth.user)
+		print("POST LIST+++++++\nusername:",request.auth.user)
 # 		try:
 		st=time.time()
 		params=dict(request.POST)
@@ -96,20 +102,42 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		return JsonResponse(res,safe=False)
 
 class AuthorList(generics.GenericAPIView):
-	# serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
 		j=options_handler('blog/author_options.json',request)
 		return JsonResponse(j,safe=False)
 	def post(self,request):
-		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
+		print("AUTHOR LIST+++++++\nusername:",request.auth.user)
 		queryset=Author.objects.all()
 		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,author_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
 			read_serializer=AuthorSerializer(queryset,many=True)
+			serialized=read_serializer.data
+			resp=JsonResponse(serialized,safe=False,headers=headers)
+			resp.headers['total_results_count']=headers['total_results_count']
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return resp
+		else:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+class InstitutionList(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('blog/institution_options.json',request)
+		return JsonResponse(j,safe=False)
+	def post(self,request):
+		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
+		queryset=Institution.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,institution_options,retrieve_all=False)
+		if len(error_messages)==0:
+			st=time.time()
+			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			read_serializer=InstitutionSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
 			resp.headers['total_results_count']=headers['total_results_count']

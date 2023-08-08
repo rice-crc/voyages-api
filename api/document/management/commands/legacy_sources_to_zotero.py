@@ -8,6 +8,7 @@ from voyage.models import *
 from voyages3.settings import *
 import requests
 import json
+import time
 import os
 
 class Command(BaseCommand):
@@ -92,11 +93,46 @@ class Command(BaseCommand):
 			for lvsc in legacy_voyagesourceconnections:
 				voyage=lvsc.group
 				text_ref=lvsc.text_ref
-				print("*",text_ref,"-->",voyage)
+				
 				zvc,zvc_isnew=ZoteroVoyageConnection.objects.get_or_create(
 					zotero_source=mls,
 					voyage=voyage,
 					page_range=text_ref
 				)
+				if zvc_isnew:
+					print("*",text_ref,"-->",voyage)
 		
-			
+# 		THIS WILL TECHNICALLY WORK, BUT IT ABSOLUTELY SLAMS IMNO, FO84, and SLNALAR
+		# BECAUSE THOSE HAVEN'T BEEN SEGMENTED
+		# SO LET'S SEGMENT THEM!! ----- BUT UNTIL WE DO, I'M NOT GOING TO RUN THIS.
+# 		enslavedsourceconnections=EnslavedSourceConnection.objects.all()
+# 		for esc in enslavedsourceconnections:
+# 			try:
+# 				zs=ZoteroSource.objects.get(legacy_source=esc.source)
+# 				zsc,zsc_isnew=ZoteroEnslavedConnection.objects.get_or_create(
+# 					enslaved=esc.enslaved,
+# 					page_range=esc.text_ref,
+# 					zotero_source=zs
+# 				)
+# 				if zsc_isnew:
+# 					print("*",esc.text_ref,"-->",esc)
+# 			except:
+# 				
+# 				
+# 				time.sleep(1)
+# 				print("MULTIPLE HITS-->",ZoteroSource.objects.get(legacy_source=esc.source))
+# 		
+# 		enslaversourceconnections=EnslaverIdentitySourceConnection.objects.all()
+# 		for esc in enslaversourceconnections:
+# 			try:
+# 				zs=ZoteroSource.objects.get(legacy_source=esc.source)
+# 				zsc,zsc_isnew=ZoteroEnslaverConnection.objects.get_or_create(
+# 					enslaver=esc.identity,
+# 					page_range=esc.text_ref,
+# 					zotero_source=zs
+# 				)
+# 				if zsc_isnew:
+# 					print("*",esc.text_ref,"-->",esc)
+# 			except:
+# 				time.sleep(1)
+# 				print("MULTIPLE HITS-->",ZoteroSource.objects.get(legacy_source=esc.source))

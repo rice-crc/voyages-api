@@ -320,13 +320,15 @@ class EnslaverInfoAbstractBase(models.Model):
 	 
 	class Meta:
 		abstract = True
+		ordering=['id']
 
 
 class EnslaverIdentity(EnslaverInfoAbstractBase):
 
 	class Meta:
-		verbose_name = 'Enslaver unique identity and personal info'
-
+		verbose_name = 'Enslaver Identity'
+		verbose_name_plural = 'Enslaver Identities'
+		ordering=['id']
 
 # class PropHelper:
 # 	"""
@@ -576,7 +578,8 @@ class EnslaverAlias(models.Model):
 
 	class Meta:
 		verbose_name = 'Enslaver alias'
-	
+		verbose_name_plural = "Enslaver aliases"
+		ordering=['id']
 
 class EnslaverRole(NamedModelAbstractBase):
 	pass
@@ -793,6 +796,7 @@ class Enslaved(models.Model):
 	
 	class Meta:
 		verbose_name_plural = "Enslaved People"
+		ordering=['id']
 
 class EnslavedSourceConnection(SourceConnectionAbstractBase):
 	enslaved = models.ForeignKey(Enslaved,
@@ -865,6 +869,8 @@ class EnslavementRelation(models.Model):
 							   null=True, on_delete=models.CASCADE)
 	text_ref = models.CharField(max_length=255, null=True, blank=True, help_text="Source text reference")
 	is_from_voyages=models.BooleanField(default=False)
+	class Meta:
+		ordering=['id']
 
 	
 class EnslavedInRelation(models.Model):
@@ -884,6 +890,8 @@ class EnslavedInRelation(models.Model):
 		on_delete=models.CASCADE)
 	class Meta:
 		unique_together = ('relation', 'enslaved')
+	class Meta:
+		ordering=['id']
 
 
 class EnslaverInRelation(models.Model):
@@ -906,6 +914,8 @@ class EnslaverInRelation(models.Model):
 	role = models.ForeignKey(EnslaverRole, null=False, on_delete=models.CASCADE, help_text="The role of the enslaver in this relation")
 	class Meta:
 		unique_together = ('relation', 'enslaver_alias','role')
+	class Meta:
+		ordering=['id']
 
 
 # class EnslavementBipartiteGraph:

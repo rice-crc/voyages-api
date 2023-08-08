@@ -120,7 +120,7 @@ class ZoteroEnslaverConnection(models.Model):
 		on_delete=models.CASCADE
 	)
 	page_range=models.CharField(
-		max_length=50,
+		max_length=250,
 		null=True,
 		blank=True
 	)
@@ -141,7 +141,7 @@ class ZoteroEnslavedConnection(models.Model):
 		on_delete=models.CASCADE
 	)
 	page_range=models.CharField(
-		max_length=50,
+		max_length=250,
 		null=True,
 		blank=True
 	)
@@ -210,3 +210,6 @@ class ZoteroSource(models.Model):
 			return url
 		else:
 			return None
+	
+	class Meta:
+		ordering=['id']

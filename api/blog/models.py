@@ -23,7 +23,6 @@ class Institution(models.Model):
     description = models.CharField(max_length=600,null=True, blank=True)
     slug = models.SlugField(max_length=200, unique=True)
     image = models.ImageField(upload_to='images',null=True, blank=True)
-
     def __str__(self):
         return self.name
 
@@ -42,7 +41,7 @@ class Author(models.Model):
     	blank=True,
     	null=True
     )
-    institution = models.ForeignKey(Institution, on_delete= models.CASCADE)
+    institution = models.ForeignKey(Institution, on_delete= models.CASCADE,related_name='institution_authors')
 
     def __str__(self):
         return self.name

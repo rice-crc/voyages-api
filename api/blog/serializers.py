@@ -19,9 +19,15 @@ from filebrowser.base import FileListing,FileObject
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # 
 
+class AuthorInstitutionSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=Institution
+		fields='__all__'
+
 
 class PostAuthorSerializer(serializers.ModelSerializer):
 	photo = serializers.SerializerMethodField('get_photo_url')
+	institution = AuthorInstitutionSerializer(many=False)
 	def get_photo_url(self, obj):
 		if obj.photo not in ["",None]:
 			return obj.photo.url
@@ -62,10 +68,17 @@ class AuthorPostSerializer(serializers.ModelSerializer):
 class AuthorSerializer(serializers.ModelSerializer):
 	posts = AuthorPostSerializer(many=True,read_only=True)
 	photo = serializers.SerializerMethodField('get_photo_url')
+	institution = AuthorInstitutionSerializer(many=False)
 	def get_photo_url(self, obj):
 		if obj.photo not in ["",None]:
 			return obj.photo.url
 	class Meta:
 		model=Author
+		fields='__all__'
+
+class InstitutionSerializer(serializers.ModelSerializer):
+	institution_authors=AuthorSerializer(many=True)
+	class Meta:
+		model=Institution
 		fields='__all__'
 

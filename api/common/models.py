@@ -26,14 +26,17 @@ class NamedModelAbstractBase(models.Model):
 class SparseDate(models.Model):
 	day = models.IntegerField(
 		null=True,
+		blank=True,
 		validators=[MinValueValidator(1),MaxValueValidator(31)]
 	)
 	month = models.IntegerField(
 		null=True,
+		blank=True,
 		validators=[MinValueValidator(1),MaxValueValidator(12)]
 	)
 	year = models.IntegerField(
 		null=True,
+		blank=True,
 		validators=[MinValueValidator(0),MaxValueValidator(2000)]
 	)
 

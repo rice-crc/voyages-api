@@ -6,9 +6,9 @@ from common.models import SparseDate
 
 
 
-# 
-# class SparseDateAdmin(admin.ModelAdmin):
-# 	fields=['day','month','year']
-# 	search_fields=('day','month','year')
-# 
-# admin.site.register(SparseDate,SparseDateAdmin)
+
+class SparseDateAdmin(admin.ModelAdmin):
+	fields=['day','month','year']
+	search_fields=('day','month','year')
+
+admin.site.register(SparseDate,SparseDateAdmin)

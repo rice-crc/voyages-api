@@ -1,0 +1,27 @@
+{
+  "id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "ID"
+  },
+  "name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "Name"
+  },
+  "description": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Description",
+    "flatlabel": "Description"
+  },
+  "slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "Slug"
+  },
+  "image": {
+    "type": "<class 'rest_framework.fields.ImageField'>",
+    "label": "Image",
+    "flatlabel": "Image"
+  }
+}

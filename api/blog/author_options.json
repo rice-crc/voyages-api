@@ -89,6 +89,36 @@
     "label": "Photo",
     "flatlabel": "Photo"
   },
+  "institution": {
+    "type": "table",
+    "label": "institution",
+    "flatlabel": "institution"
+  },
+  "institution__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "institution : ID"
+  },
+  "institution__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "institution : Name"
+  },
+  "institution__description": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Description",
+    "flatlabel": "institution : Description"
+  },
+  "institution__slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "institution : Slug"
+  },
+  "institution__image": {
+    "type": "<class 'rest_framework.fields.ImageField'>",
+    "label": "Image",
+    "flatlabel": "institution : Image"
+  },
   "name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name",
@@ -108,10 +138,5 @@
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Role",
     "flatlabel": "Role"
-  },
-  "institution": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Institution",
-    "flatlabel": "Institution"
   }
 }

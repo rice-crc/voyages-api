@@ -43,6 +43,7 @@ class EnslaverIdentityAdmin(admin.ModelAdmin):
 	inlines=(
 		EnslaverZoteroConnectionInline,
 	)
+	autocomplete_fields=['birth_place','death_place','principal_location']
 	search_fields=['principal_alias',]
 
 class EnslavedZoteroConnectionInline(admin.StackedInline):

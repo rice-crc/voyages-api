@@ -64,17 +64,17 @@ class PastGraphMaker(generics.GenericAPIView):
 				
 		#ENSLAVER DICT
 		enslaver_aliases=EnslaverAlias.objects.all()
-		enslaver_alias_map={str(uuid.uuid4()):v[0] for v in voy_vals}
+		enslaver_aliases=enslaver_aliases.select_related('identity')
 		enslaver_aliases_vals=enslaver_aliases.values_list(
 			'id',
-			'alias',
-			'identity'
+			'identity__id',
+			'identity__principal_alias'
 		)
-		
+
 		valkeys=(
+			'alias_id',
 			'id',
-			'alias',
-			'identity'
+			'principal_alias'
 		)
 		
 		enslaver_aliases_df={
@@ -175,7 +175,7 @@ class PastGraphMaker(generics.GenericAPIView):
 			'enslaved_in_relation':enslaved_in_relation_df,
 			'enslavers_in_relation':enslaver_in_relation_df	
 		}
-		print("elapsed time:",time.time()-st)
+		print("PAST GRAPH MAKER elapsed time:",time.time()-st)
 		return JsonResponse(relation_map,safe=False)
 
 

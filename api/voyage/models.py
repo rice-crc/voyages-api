@@ -954,6 +954,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date that voyage began (DATEDEPB,A,C)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -962,6 +963,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date that slave purchase began (D1SLATRB,A,C)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -970,6 +972,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date that vessel left last slaving port (DLSLATRB,A,C)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -978,6 +981,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date of first disembarkation of slaves (DATARR33,32,34)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -986,6 +990,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date vessel departed Africa (DATELEFTAFR)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -994,6 +999,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date of arrival at second place of landing (DATARR37,36,38)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -1002,6 +1008,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date of third disembarkation of slaves (DATARR40,39,41)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -1010,6 +1017,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date of departure from last place of landing (DDEPAMB,*,C)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -1018,6 +1026,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Date on which slave voyage completed (DATARR44,43,45)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -1026,6 +1035,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Year voyage began",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -1034,6 +1044,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Year departed Africa",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"
@@ -1042,6 +1053,7 @@ class VoyageDates(models.Model):
 		SparseDate,
 		verbose_name="Year of arrival at port of disembarkation (YEARAM)",
 		null=True,
+		blank=True,
 		help_text="Date in format: MM,DD,YYYY",
 		on_delete=models.SET_NULL,
 		related_name="+"

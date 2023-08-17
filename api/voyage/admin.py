@@ -289,6 +289,7 @@ class EnslaverAliasConnectionInline(admin.StackedInline):
 	model = EnslaverVoyageConnection
 # 	readonly_fields=['enslaver_alias','role','order']
 	autocomplete_fields=['enslaver_alias',]
+	exclude=['order']
 	classes = ['collapse']
 	extra=0
 

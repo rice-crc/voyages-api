@@ -23,6 +23,7 @@ class EnslaverInRelationInline(admin.StackedInline):
 
 class EnslaverVoyageConnectionInline(admin.StackedInline):
 	model=EnslaverVoyageConnection
+	exclude=['order']
 	autocomplete_fields=['voyage']
 	classes = ['collapse']
 	extra=0

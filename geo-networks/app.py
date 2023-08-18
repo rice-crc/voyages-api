@@ -251,7 +251,7 @@ def network_maps():
 										'weights':{}
 									}
 								else:
-									print("---->",nodes[a_id])
+# 									print("---->",nodes[a_id])
 									if prev_node_id is not None:
 										if prev_node_id in nodes[a_id]['prev_nodes']:
 											nodes[a_id]['prev_nodes'][prev_node_id]+=1

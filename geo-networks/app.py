@@ -125,7 +125,9 @@ def network_maps():
 		"weights":{
 			nl:0 for nl in nodelabels
 		},
-		"data":{}
+		"data":{},
+		"prev_nodes":{},
+		"next_nodes":{}
 		} for k in payload for i in k.split('__') if i != "None"
 	}
 		
@@ -175,8 +177,6 @@ def network_maps():
 				if 'tags' in sourcenode:
 					del sourcenode['tags']
 				nodes[s_uuid]['data']=sourcenode
-				nodes[s_uuid]['prev_nodes']={}
-				nodes[s_uuid]['next_nodes']={}
 				for t_uuid in abweights[s_uuid]:
 					targetnodematch=[n for n in search_nodes(graph,{"==":["uuid",t_uuid]})]
 					
@@ -199,8 +199,6 @@ def network_maps():
 						if 'tags' in targetnode:
 							del targetnode['tags']
 						nodes[t_uuid]['data']=targetnode
-						nodes[t_uuid]['prev_nodes']={}
-						nodes[t_uuid]['next_nodes']={}
 						
 						
 						try:
@@ -253,6 +251,7 @@ def network_maps():
 										'weights':{}
 									}
 								else:
+									print("---->",nodes[a_id])
 									if prev_node_id is not None:
 										if prev_node_id in nodes[a_id]['prev_nodes']:
 											nodes[a_id]['prev_nodes'][prev_node_id]+=1

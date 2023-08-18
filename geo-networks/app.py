@@ -217,10 +217,9 @@ def network_maps():
 									
 						if len(sp)>1:
 							abpairs=[(sp[i],sp[i+1]) for i in range(len(sp)-1)]
-							
 							prev_node_id=None
-							
 							for a,b in abpairs:
+								
 								anode=graph.nodes[a]
 								bnode=graph.nodes[b]
 								
@@ -246,12 +245,12 @@ def network_maps():
 									nodes[a_id]={
 										'data':anode,
 										'id':a_id,
-										'prev_nodes':{prev_node_id:1},
-										'next_nodes':{},
+										'next_nodes':{b_id:1},
 										'weights':{}
 									}
+									if prev_node_id is not None:
+										nodes[a_id]['prev_nodes']={prev_node_id:1}
 								else:
-# 									print("---->",nodes[a_id])
 									if prev_node_id is not None:
 										if prev_node_id in nodes[a_id]['prev_nodes']:
 											nodes[a_id]['prev_nodes'][prev_node_id]+=1
@@ -269,11 +268,12 @@ def network_maps():
 										'next_nodes':{},
 										'weights':{}
 									}
-								elif prev_node_id is not None:
+								elif a_id is not None:
 									if a_id in nodes[b_id]['prev_nodes']:
-										nodes[b_id]['prev_nodes'][prev_node_id]+=1
+										nodes[b_id]['prev_nodes'][a_id]+=1
 									else:
-										nodes[b_id]['prev_nodes'][prev_node_id]=1
+										nodes[b_id]['prev_nodes'][a_id]=1
+								prev_node_id=a_id
 								
 								
 	#tp60 wants these edges flattened

@@ -19,6 +19,7 @@ import re
 import pysolr
 from voyage.models import Voyage
 from past.models import *
+from blog.models import Post
 import uuid
 
 #this isn't pretty
@@ -189,9 +190,6 @@ class GlobalSearch(generics.GenericAPIView):
 		params=dict(request.POST)
 		search_string=params.get('search_string')
 		# Oh, yes. Little Bobby Tables, we call him.
-		search_string=re.sub("\s+"," ",search_string[0])
-		search_string=search_string.strip()
-		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
 		
 		core_names= [
 			'voyages',
@@ -202,22 +200,48 @@ class GlobalSearch(generics.GenericAPIView):
 		
 		output_dict=[]
 		
-		for core_name in core_names:
+		if search_string is None:
+			
+			coretuples=[
+				['voyages',Voyage.objects.all()],
+				['enslaved',Enslaved.objects.all()],
+				['enslavers',EnslaverIdentity.objects.all()],
+				['blog',Post.objects.all()]
+			]
+			
+			for core in coretuples:
+				corename,qset=core
+				results_count=qset.count()
+				topten_ids=[i[0] for i in qset[:9].values_list('id')]
+				output_dict.append({
+					'type':corename,
+					'results_count':results_count,
+					'ids':topten_ids
+				})
+		else:
+			search_string=search_string[0]
+			search_string=re.sub("\s+"," ",search_string)
+			search_string=search_string.strip()
+			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
 		
-			solr = pysolr.Solr(
-					'http://voyages-solr:8983/solr/%s/' %core_name,
-					always_commit=True,
-					timeout=10
-				)
-			finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
-			results=solr.search('text:%s' %finalsearchstring)
-			results_count=results.hits
-			ids=[r['id'] for r in results]
-			output_dict.append({
-				'type':core_name,
-				'results_count':results_count,
-				'ids':ids
-			})
+		
+		
+			for core_name in core_names:
+		
+				solr = pysolr.Solr(
+						'http://voyages-solr:8983/solr/%s/' %core_name,
+						always_commit=True,
+						timeout=10
+					)
+				finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+				results=solr.search('text:%s' %finalsearchstring)
+				results_count=results.hits
+				ids=[r['id'] for r in results]
+				output_dict.append({
+					'type':core_name,
+					'results_count':results_count,
+					'ids':ids
+				})
 
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(output_dict,safe=False)

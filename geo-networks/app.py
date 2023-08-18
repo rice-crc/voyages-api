@@ -175,6 +175,8 @@ def network_maps():
 				if 'tags' in sourcenode:
 					del sourcenode['tags']
 				nodes[s_uuid]['data']=sourcenode
+				nodes[s_uuid]['prev_nodes']={}
+				nodes[s_uuid]['next_nodes']={}
 				for t_uuid in abweights[s_uuid]:
 					targetnodematch=[n for n in search_nodes(graph,{"==":["uuid",t_uuid]})]
 					
@@ -193,9 +195,12 @@ def network_maps():
 							selfloop=False
 						w=classedabweights[linklabel][s_uuid][t_uuid]
 						targetnode=dict(graph.nodes[t_id])
+						
 						if 'tags' in targetnode:
 							del targetnode['tags']
 						nodes[t_uuid]['data']=targetnode
+						nodes[t_uuid]['prev_nodes']={}
+						nodes[t_uuid]['next_nodes']={}
 						
 						
 						try:
@@ -214,6 +219,9 @@ def network_maps():
 									
 						if len(sp)>1:
 							abpairs=[(sp[i],sp[i+1]) for i in range(len(sp)-1)]
+							
+							prev_node_id=None
+							
 							for a,b in abpairs:
 								anode=graph.nodes[a]
 								bnode=graph.nodes[b]
@@ -237,9 +245,38 @@ def network_maps():
 										edges[linklabel][a_id][b_id]+=w
 								#add oceanic nodes (although we prob don't need to?)
 								if a_id not in nodes:
-									nodes[a_id]={'data':anode,'id':a_id,'weights':{}}
+									nodes[a_id]={
+										'data':anode,
+										'id':a_id,
+										'prev_nodes':{prev_node_id:1},
+										'next_nodes':{},
+										'weights':{}
+									}
+								else:
+									if prev_node_id is not None:
+										if prev_node_id in nodes[a_id]['prev_nodes']:
+											nodes[a_id]['prev_nodes'][prev_node_id]+=1
+										else:
+											nodes[a_id]['prev_nodes'][prev_node_id]=1
+									if b_id in nodes[a_id]['next_nodes']:
+										nodes[a_id]['next_nodes'][b_id]+=1
+									else:
+										nodes[a_id]['next_nodes'][b_id]=1
 								if b_id not in nodes:
-									nodes[b_id]={'data':bnode,'id':b_id,'weights':{}}
+									nodes[b_id]={
+										'data':bnode,
+										'id':b_id,
+										'prev_nodes':{a_id:1},
+										'next_nodes':{},
+										'weights':{}
+									}
+								elif prev_node_id is not None:
+									if a_id in nodes[b_id]['prev_nodes']:
+										nodes[b_id]['prev_nodes'][prev_node_id]+=1
+									else:
+										nodes[b_id]['prev_nodes'][prev_node_id]=1
+								
+								
 	#tp60 wants these edges flattened
 	edgesflat={linklabel:[] for linklabel in edges}
 	for linklabel in edges:

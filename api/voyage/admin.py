@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django import forms
 from voyage.models import *
 from past.models import *
 from document.models import *
@@ -15,10 +16,44 @@ class VoyageCrewInline(admin.StackedInline):
 		'crew_died_complete_voyage'
 	]
 
+# class MyForm(forms.ModelForm):
+# 	voyage_began_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	slave_purchase_began_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	vessel_left_port_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	first_dis_of_slaves_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	date_departed_africa_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	arrival_at_second_place_landing_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	third_dis_of_slaves_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	departure_last_place_of_landing_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	voyage_completed_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	imp_voyage_began_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	imp_departed_africa_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	imp_arrival_at_port_of_dis_sparsedate=forms.ModelChoiceField(queryset=SparseDate.objects.all(),widget=forms.TextInput())
+# 	class Meta:
+# 		model = VoyageDates
+# 		fields = [
+# 			'voyage_began_sparsedate',
+# 			'slave_purchase_began_sparsedate',
+# 			'vessel_left_port_sparsedate',
+# 			'first_dis_of_slaves_sparsedate',
+# 			'date_departed_africa_sparsedate',
+# 			'arrival_at_second_place_landing_sparsedate',
+# 			'third_dis_of_slaves_sparsedate',
+# 			'departure_last_place_of_landing_sparsedate',
+# 			'voyage_completed_sparsedate',
+# 			'imp_voyage_began_sparsedate',
+# 			'imp_departed_africa_sparsedate',
+# 			'imp_arrival_at_port_of_dis_sparsedate'
+# 		]
+
+
+
 class VoyageDatesInline(admin.StackedInline):
 	model = VoyageDates
+# 	form=MyForm
 	max_num=1
 	classes = ['collapse']
+# 	fields=['voyage_began_sparsedate']
 	autocomplete_fields = [
 		'voyage_began_sparsedate',
 		'slave_purchase_began_sparsedate',

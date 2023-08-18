@@ -18,11 +18,7 @@ class Command(BaseCommand):
 ##### I ATTEMPTED TO USE THE ASYNC BATCH AND THE REGULAR BATCH SETTINGS IN DJANGO
 ######## BUT I COULDN'T GET THE CHANGES TO TAKE WITH EITHER OF THOSE
 		voyagedates=VoyageDates.objects.all()
-		st=time.time()
-		SparseDate.objects.all().delete()
-		delete_time=time.time()-st
-		print("deleted sparse date objects in %d seconds" %delete_time)
-		
+		st=time.time()		
 		
 		vd1=voyagedates[0]
 		process_st=time.time()
@@ -32,9 +28,24 @@ class Command(BaseCommand):
 		
 		#METHOD 1 -- "LONG" - FIELD BY FIELD OVER ALL 60K+ VOYAGES
 		#FINISHES IN ~280 seconds
+		
 		batch_size=2500
 		print("number of fields:",len(vdfields))
 		for vdfield in vdfields:
+			voyagedates=voyagedates.select_related(
+				'voyage_began_sparsedate',
+				'slave_purchase_began_sparsedate',
+				'vessel_left_port_sparsedate',
+				'first_dis_of_slaves_sparsedate',
+				'date_departed_africa_sparsedate',
+				'arrival_at_second_place_landing_sparsedate',
+				'third_dis_of_slaves_sparsedate',
+				'departure_last_place_of_landing_sparsedate',
+				'voyage_completed_sparsedate',
+				'imp_voyage_began_sparsedate',
+				'imp_departed_africa_sparsedate',
+				'imp_arrival_at_port_of_dis_sparsedate'
+			)
 			field_st=time.time()
 			voyagedate_objs=[]
 			print("vdfield-->",vdfield)
@@ -43,7 +54,7 @@ class Command(BaseCommand):
 				vdval=eval("vd.%s" %nonsparsefieldname)
 				if "," in str(vdval):
 					m,d,y=[int(i) if i!='' else None for i in vdval.split(',')]
-					sd=SparseDate.objects.create(
+					sd,sd_isnew=SparseDate.objects.get_or_create(
 						day=d,
 						month=m,
 						year=y
@@ -61,7 +72,7 @@ class Command(BaseCommand):
 			print("field finished in %d seconds" %(time.time()-field_st))
 		print("full job finished in %d seconds" %(time.time()-process_st))
 		
-# 		#METHOD 1 -- "WIDE" - ALL FIELDS, VOYAGE-BY-VOYAGE
+# 		#METHOD 2 -- "WIDE" - ALL FIELDS, VOYAGE-BY-VOYAGE
 # 		#FINISHES IN ~350 seconds
 # 		voyagedate_objs=[]
 # 		batch_size=2500

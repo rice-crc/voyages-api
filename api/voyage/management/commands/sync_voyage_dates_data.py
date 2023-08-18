@@ -43,7 +43,7 @@ class Command(BaseCommand):
 				vdval=eval("vd.%s" %nonsparsefieldname)
 				if "," in str(vdval):
 					m,d,y=[int(i) if i!='' else None for i in vdval.split(',')]
-					sd=SparseDate.objects.create(
+					sd,sd_isnew=SparseDate.objects.get_or_create(
 						day=d,
 						month=m,
 						year=y

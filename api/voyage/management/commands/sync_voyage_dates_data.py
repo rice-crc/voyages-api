@@ -19,9 +19,9 @@ class Command(BaseCommand):
 ######## BUT I COULDN'T GET THE CHANGES TO TAKE WITH EITHER OF THOSE
 		voyagedates=VoyageDates.objects.all()
 		st=time.time()
-		SparseDate.objects.all().delete()
-		delete_time=time.time()-st
-		print("deleted sparse date objects in %d seconds" %delete_time)
+# 		SparseDate.objects.all().delete()
+# 		delete_time=time.time()-st
+# 		print("deleted sparse date objects in %d seconds" %delete_time)
 		
 		
 		vd1=voyagedates[0]
@@ -43,7 +43,7 @@ class Command(BaseCommand):
 				vdval=eval("vd.%s" %nonsparsefieldname)
 				if "," in str(vdval):
 					m,d,y=[int(i) if i!='' else None for i in vdval.split(',')]
-					sd=SparseDate.objects.create(
+					sd,sd_isnew=SparseDate.objects.get_or_create(
 						day=d,
 						month=m,
 						year=y

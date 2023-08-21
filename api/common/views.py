@@ -19,6 +19,7 @@ import re
 import pysolr
 from voyage.models import Voyage
 from past.models import *
+from blog.models import Post
 import uuid
 
 #this isn't pretty
@@ -64,17 +65,17 @@ class PastGraphMaker(generics.GenericAPIView):
 				
 		#ENSLAVER DICT
 		enslaver_aliases=EnslaverAlias.objects.all()
-		enslaver_alias_map={str(uuid.uuid4()):v[0] for v in voy_vals}
+		enslaver_aliases=enslaver_aliases.select_related('identity')
 		enslaver_aliases_vals=enslaver_aliases.values_list(
 			'id',
-			'alias',
-			'identity'
+			'identity__id',
+			'identity__principal_alias'
 		)
-		
+
 		valkeys=(
+			'alias_id',
 			'id',
-			'alias',
-			'identity'
+			'principal_alias'
 		)
 		
 		enslaver_aliases_df={
@@ -175,7 +176,7 @@ class PastGraphMaker(generics.GenericAPIView):
 			'enslaved_in_relation':enslaved_in_relation_df,
 			'enslavers_in_relation':enslaver_in_relation_df	
 		}
-		print("elapsed time:",time.time()-st)
+		print("PAST GRAPH MAKER elapsed time:",time.time()-st)
 		return JsonResponse(relation_map,safe=False)
 
 
@@ -189,9 +190,6 @@ class GlobalSearch(generics.GenericAPIView):
 		params=dict(request.POST)
 		search_string=params.get('search_string')
 		# Oh, yes. Little Bobby Tables, we call him.
-		search_string=re.sub("\s+"," ",search_string[0])
-		search_string=search_string.strip()
-		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
 		
 		core_names= [
 			'voyages',
@@ -202,22 +200,48 @@ class GlobalSearch(generics.GenericAPIView):
 		
 		output_dict=[]
 		
-		for core_name in core_names:
+		if search_string is None:
+			
+			coretuples=[
+				['voyages',Voyage.objects.all()],
+				['enslaved',Enslaved.objects.all()],
+				['enslavers',EnslaverIdentity.objects.all()],
+				['blog',Post.objects.all()]
+			]
+			
+			for core in coretuples:
+				corename,qset=core
+				results_count=qset.count()
+				topten_ids=[i[0] for i in qset[:9].values_list('id')]
+				output_dict.append({
+					'type':corename,
+					'results_count':results_count,
+					'ids':topten_ids
+				})
+		else:
+			search_string=search_string[0]
+			search_string=re.sub("\s+"," ",search_string)
+			search_string=search_string.strip()
+			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
 		
-			solr = pysolr.Solr(
-					'http://voyages-solr:8983/solr/%s/' %core_name,
-					always_commit=True,
-					timeout=10
-				)
-			finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
-			results=solr.search('text:%s' %finalsearchstring)
-			results_count=results.hits
-			ids=[r['id'] for r in results]
-			output_dict.append({
-				'type':core_name,
-				'results_count':results_count,
-				'ids':ids
-			})
+		
+		
+			for core_name in core_names:
+		
+				solr = pysolr.Solr(
+						'http://voyages-solr:8983/solr/%s/' %core_name,
+						always_commit=True,
+						timeout=10
+					)
+				finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+				results=solr.search('text:%s' %finalsearchstring)
+				results_count=results.hits
+				ids=[r['id'] for r in results]
+				output_dict.append({
+					'type':core_name,
+					'results_count':results_count,
+					'ids':ids
+				})
 
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(output_dict,safe=False)

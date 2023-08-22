@@ -64,33 +64,33 @@ def network_maps():
 				nodes_dict[n]=G.nodes[n]
 				predecessors=G.predecessors(n)
 				for p in predecessors:
-					e={'s':p,'t':n,'data':G.edges[p,n]}
+					e={'source':p,'target':n,'data':G.edges[p,n]}
 					if e not in edges:
 						edges.append(e)
 					nodes_dict[p]=G.nodes[p]
 					for pp in G.predecessors(p):
-						e={'s':pp,'t':p,'data':G.edges[pp,p]}
+						e={'source':pp,'target':p,'data':G.edges[pp,p]}
 						if e not in edges:
 							edges.append(e)
 						nodes_dict[pp]=G.nodes[pp]
 					for ps in G.successors(p):
-						e={'s':p,'t':ps,'data':G.edges[p,ps]}
+						e={'source':p,'target':ps,'data':G.edges[p,ps]}
 						if e not in edges:
 							edges.append(e)
 						nodes_dict[ps]=G.nodes[ps]
 				successors=G.successors(n)
 				for s in successors:
-					e={'s':n,'t':s,'data':G.edges[n,s]}
+					e={'source':n,'target':s,'data':G.edges[n,s]}
 					if e not in edges:
 						edges.append(e)
 					nodes_dict[s]=G.nodes[s]
 					for ss in G.successors(s):
-						e={'s':s,'t':ss,'data':G.edges[s,ss]}
+						e={'source':s,'target':ss,'data':G.edges[s,ss]}
 						if e not in edges:
 							edges.append(e)
 						nodes_dict[ss]=G.nodes[ss]
 					for sp in G.predecessors(s):
-						e={'s':sp,'t':s,'data':G.edges[sp,s]}
+						e={'source':sp,'target':s,'data':G.edges[sp,s]}
 						if e not in edges:
 							edges.append(e)
 						nodes_dict[sp]=G.nodes[sp]

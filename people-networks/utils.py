@@ -116,83 +116,102 @@ def load_graph():
 	return G
 
 
-## The below recursive functions have the ability to pass over one intermediary node
-## But will break after that
-## Also, it's a bit hacky -- the directionality does not hold anymore
-def add_successors(G,nodes_dict,n,edges,prior_id=None):
-	passthrough_node_classes=['enslavement_relations']
-	successors=G.successors(n)
-# 	print("add successors to",n)
-	for s in successors:
-		sdata=G.nodes[s]
-# 		print("s:",s,json.dumps(sdata,indent=2))
-		print(n,"--has successor-->",s,sdata)
-		if sdata['node_class'] in passthrough_node_classes:
-			nodes_dict,edges=add_predecessors(G,nodes_dict,s,edges,prior_id=n)
-			nodes_dict,edges=add_successors(G,nodes_dict,s,edges,prior_id=n)
-		else:
-			if prior_id is None:
-				thisnode_id=n
-				prior_edata={}
-			else:
-				thisnode_id=prior_id
-				try:
-					next_edata=G.edges[n,s]
-				except:
-					next_edata=G.edges[s,n]
-			#avoid self-loops and unnecessary interconnections
-			#unfortunately, this move does screen out
-			## spousal relations between enslavers
-			## mutual transaction relations between enslaved (i.e., bought/sold by the same enslaver on the same vessel)
-			thisnodedata=G.nodes[thisnode_id]
-			if thisnode_id != s and thisnodedata['node_class']!=sdata['node_class']:
-				nodes_dict[thisnode_id]=G.nodes[thisnode_id]
-				try:
-					this_edata=G.edges[thisnode_id,n]
-				except:
-					this_edata=G.edges[n,thisnode_id]
-				merged_edata=this_edata|next_edata
-				e={'source':thisnode_id,'target':s,'data':merged_edata}
-				if e not in edges:
-					edges.append(e)
-				nodes_dict[s]=G.nodes[s]
-	return nodes_dict,edges
 
-def add_predecessors(G,nodes_dict,n,edges,prior_id=None):
-	passthrough_node_classes=['enslavement_relations']
-	predecessors=G.predecessors(n)
-# 	print("add predecessors to",n)
-	for p in predecessors:
-		pdata=G.nodes[p]
-# 		print("p:",p,json.dumps(pdata,indent=2))
-		print(n,'--has predecessor-->',p,pdata)
-		if pdata['node_class']==['enslavement_relations'] in passthrough_node_classes:
-			nodes_dict,edges=add_predecessors(G,nodes_dict,p,edges,prior_id=n)
-			nodes_dict,edges=add_successors(G,nodes_dict,p,edges,prior_id=n)
-		else:
-			if prior_id is None:
-				thisnode_id=n
-				prior_edata={}
+def add_neighbors(G,nodes_dict,n,edges_list,levels=3):
+	edges=G.edges(n,data=True)
+	if levels>0:
+		print(edges)
+		for edge in edges:
+			s,t,edata=edge
+			if s==n:
+				other=t
 			else:
-				thisnode_id=prior_id
-				try:
-					prior_edata=G.edges[p,n]
-				except:
-					prior_edata=G.edges[n,p]
-			thisnodedata=G.nodes[thisnode_id]
-			#avoid self-loops and unnecessary interconnections
-			#unfortunately, this move does screen out
-			## spousal relations between enslavers
-			## mutual transaction relations between enslaved (i.e., bought/sold by the same enslaver on the same vessel)
-			if thisnode_id!=p and thisnodedata['node_class']!=pdata['node_class']:
-				nodes_dict[thisnode_id]=G.nodes[thisnode_id]
-				try:
-					this_edata=G.edges[n,thisnode_id]
-				except:
-					this_edata=G.edges[thisnode_id,n]
-				merged_edata=prior_edata|this_edata
-				e={'source':p,'target':thisnode_id,'data':merged_edata}
-				if e not in edges:
-					edges.append(e)
-				nodes_dict[p]=G.nodes[p]
-	return nodes_dict,edges
+				other=s
+			nodes_dict,edges_list=add_neighbors(G,nodes_dict,other,edges_list,levels=levels-1)
+			s,t=sorted([s,t])
+			e={'source':s,'target':t,'data':edata}
+			if e not in edges_list:
+				edges_list.append(e)
+			nodes_dict[other]=G.nodes[other]
+	nodes_dict[n]=G.nodes[n]
+	return(nodes_dict,edges_list)
+
+
+## The below recursive functions were attempts to screen out the enslavement relation intermediary nodes after the fact but I had to abandon them for the sake of time
+# def add_successors(G,nodes_dict,n,edges,prior_id=None):
+# 	passthrough_node_classes=['enslavement_relations']
+# 	successors=G.successors(n)
+# # 	print("add successors to",n)
+# 	for s in successors:
+# 		sdata=G.nodes[s]
+# # 		print("s:",s,json.dumps(sdata,indent=2))
+# 		print(n,"--has successor-->",s,sdata)
+# 		if sdata['node_class'] in passthrough_node_classes:
+# 			nodes_dict,edges=add_predecessors(G,nodes_dict,s,edges,prior_id=n)
+# 			nodes_dict,edges=add_successors(G,nodes_dict,s,edges,prior_id=n)
+# 		else:
+# 			if prior_id is None:
+# 				thisnode_id=n
+# 				prior_edata={}
+# 			else:
+# 				thisnode_id=prior_id
+# 				try:
+# 					next_edata=G.edges[n,s]
+# 				except:
+# 					next_edata=G.edges[s,n]
+# 			#avoid self-loops and unnecessary interconnections
+# 			#unfortunately, this move does screen out
+# 			## spousal relations between enslavers
+# 			## mutual transaction relations between enslaved (i.e., bought/sold by the same enslaver on the same vessel)
+# 			thisnodedata=G.nodes[thisnode_id]
+# 			if thisnode_id != s and thisnodedata['node_class']!=sdata['node_class']:
+# 				nodes_dict[thisnode_id]=G.nodes[thisnode_id]
+# 				try:
+# 					this_edata=G.edges[thisnode_id,n]
+# 				except:
+# 					this_edata=G.edges[n,thisnode_id]
+# 				merged_edata=this_edata|next_edata
+# 				e={'source':thisnode_id,'target':s,'data':merged_edata}
+# 				if e not in edges:
+# 					edges.append(e)
+# 				nodes_dict[s]=G.nodes[s]
+# 	return nodes_dict,edges
+# 
+# def add_predecessors(G,nodes_dict,n,edges,prior_id=None):
+# 	passthrough_node_classes=['enslavement_relations']
+# 	predecessors=G.predecessors(n)
+# # 	print("add predecessors to",n)
+# 	for p in predecessors:
+# 		pdata=G.nodes[p]
+# # 		print("p:",p,json.dumps(pdata,indent=2))
+# 		print(n,'--has predecessor-->',p,pdata)
+# 		if pdata['node_class']==['enslavement_relations'] in passthrough_node_classes:
+# 			nodes_dict,edges=add_predecessors(G,nodes_dict,p,edges,prior_id=n)
+# 			nodes_dict,edges=add_successors(G,nodes_dict,p,edges,prior_id=n)
+# 		else:
+# 			if prior_id is None:
+# 				thisnode_id=n
+# 				prior_edata={}
+# 			else:
+# 				thisnode_id=prior_id
+# 				try:
+# 					prior_edata=G.edges[p,n]
+# 				except:
+# 					prior_edata=G.edges[n,p]
+# 			thisnodedata=G.nodes[thisnode_id]
+# 			#avoid self-loops and unnecessary interconnections
+# 			#unfortunately, this move does screen out
+# 			## spousal relations between enslavers
+# 			## mutual transaction relations between enslaved (i.e., bought/sold by the same enslaver on the same vessel)
+# 			if thisnode_id!=p and thisnodedata['node_class']!=pdata['node_class']:
+# 				nodes_dict[thisnode_id]=G.nodes[thisnode_id]
+# 				try:
+# 					this_edata=G.edges[n,thisnode_id]
+# 				except:
+# 					this_edata=G.edges[thisnode_id,n]
+# 				merged_edata=prior_edata|this_edata
+# 				e={'source':p,'target':thisnode_id,'data':merged_edata}
+# 				if e not in edges:
+# 					edges.append(e)
+# 				nodes_dict[p]=G.nodes[p]
+# 	return nodes_dict,edges

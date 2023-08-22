@@ -49,7 +49,7 @@ def network_maps():
 	print("received",request.json)
 	
 	nodes_dict={}
-	edges=[]
+	edges_list=[]
 	st=time.time()
 	
 	for nodeclass in ['enslaved','enslavers','voyages','enslavement_relations']:
@@ -61,15 +61,16 @@ def network_maps():
 			querynodes=search_nodes(G, {"and":gquery})
 			for n in querynodes:
 				print("getting node",n)
-				nodes_dict,edges=add_predecessors(G,nodes_dict,n,edges)
-				nodes_dict,edges=add_successors(G,nodes_dict,n,edges)
+				nodes_dict,edges_list=add_neighbors(G,nodes_dict,n,edges_list)
+# 				nodes_dict,edges=add_predecessors(G,nodes_dict,n,edges)
+# 				nodes_dict,edges=add_successors(G,nodes_dict,n,edges)
 
 	nodes=[nodes_dict[k] for k in nodes_dict]
 	
 	print("elapsed time:",time.time()-st)
 	output={
 		"nodes":nodes,
-		"edges":edges
+		"edges":edges_list
 	}
 
 	st=time.time()

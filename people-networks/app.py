@@ -44,10 +44,9 @@ def network_maps():
 		voyages
 		enslavement_relations
 	returns nodes and edges with attributes
-	i think we should give back 1 hop to start
+	we're now giving back 1 hop (but passing through some intermediary nodes (see utils.py))
 	'''
 	print("received",request.json)
-
 	
 	nodes_dict={}
 	edges=[]
@@ -61,39 +60,10 @@ def network_maps():
 			gquery=[{"==":[('node_class',),nodeclass]},{":=":[('id',),node_id_int_list]}]
 			querynodes=search_nodes(G, {"and":gquery})
 			for n in querynodes:
-				nodes_dict[n]=G.nodes[n]
-				predecessors=G.predecessors(n)
-				for p in predecessors:
-					e={'source':p,'target':n,'data':G.edges[p,n]}
-					if e not in edges:
-						edges.append(e)
-					nodes_dict[p]=G.nodes[p]
-					for pp in G.predecessors(p):
-						e={'source':pp,'target':p,'data':G.edges[pp,p]}
-						if e not in edges:
-							edges.append(e)
-						nodes_dict[pp]=G.nodes[pp]
-					for ps in G.successors(p):
-						e={'source':p,'target':ps,'data':G.edges[p,ps]}
-						if e not in edges:
-							edges.append(e)
-						nodes_dict[ps]=G.nodes[ps]
-				successors=G.successors(n)
-				for s in successors:
-					e={'source':n,'target':s,'data':G.edges[n,s]}
-					if e not in edges:
-						edges.append(e)
-					nodes_dict[s]=G.nodes[s]
-					for ss in G.successors(s):
-						e={'source':s,'target':ss,'data':G.edges[s,ss]}
-						if e not in edges:
-							edges.append(e)
-						nodes_dict[ss]=G.nodes[ss]
-					for sp in G.predecessors(s):
-						e={'source':sp,'target':s,'data':G.edges[sp,s]}
-						if e not in edges:
-							edges.append(e)
-						nodes_dict[sp]=G.nodes[sp]
+				print("getting node",n)
+				nodes_dict,edges=add_predecessors(G,nodes_dict,n,edges)
+				nodes_dict,edges=add_successors(G,nodes_dict,n,edges)
+
 	nodes=[nodes_dict[k] for k in nodes_dict]
 	
 	print("elapsed time:",time.time()-st)

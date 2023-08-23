@@ -117,23 +117,28 @@ def load_graph():
 
 
 
-def add_neighbors(G,nodes_dict,n,edges_list,levels=3):
+def add_neighbors(G,nodes_dict,n,edges_list,levels=2):
 	edges=G.edges(n,data=True)
+	selfdata=G.nodes[n]
 	if levels>0:
-		print(edges)
 		for edge in edges:
 			s,t,edata=edge
+			
 			if s==n:
 				other=t
 			else:
 				other=s
-			nodes_dict,edges_list=add_neighbors(G,nodes_dict,other,edges_list,levels=levels-1)
+			otherdata=G.nodes[other]
+			if otherdata['node_class']=='enslavement_relations':
+				nodes_dict,edges_list=add_neighbors(G,nodes_dict,other,edges_list,levels=levels)
+			else:
+				nodes_dict,edges_list=add_neighbors(G,nodes_dict,other,edges_list,levels=levels-1)
 			s,t=sorted([s,t])
 			e={'source':s,'target':t,'data':edata}
 			if e not in edges_list:
 				edges_list.append(e)
-			nodes_dict[other]=G.nodes[other]
-	nodes_dict[n]=G.nodes[n]
+			nodes_dict[other]=otherdata
+	nodes_dict[n]=selfdata
 	return(nodes_dict,edges_list)
 
 

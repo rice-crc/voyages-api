@@ -102,11 +102,18 @@ class VoyageStatsOptions(generics.GenericAPIView):
 
 class VoyageCrossTabs(generics.GenericAPIView):
 	'''
-	Think of this as a pivot table (but it will generalize later)
-	This view takes:
-		a groupby tuple (row, col)
-		a value field tuple (cellvalue,aggregationfunction)
-		any search parameters you want!
+	This is now a true pivot table. You can request multi-level columns AND rows.
+	
+	It returns a flat html table dump from pandas.
+	
+	What's next in terms of features?
+		1. testing the binning functionality to get year ranges back as row groups
+		2. better styling from pandas io?
+		3. maybe make some jquery hooks using pandas io table options, for instance to allow columnar sorting?
+		4. summary stats at bottom?
+	
+	Output can be quite large and this is compute-hungry now, so I won't be handling pagination server-side. I suggest on-page jquery pagination like: https://jsfiddle.net/u9d1ewsh/
+	
 	'''
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -126,7 +133,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-				return JsonResponse(json.loads(r.text),safe=False)
+				return HttpResponse(r.text)
 			else:
 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
 		else:

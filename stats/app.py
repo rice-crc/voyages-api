@@ -35,9 +35,7 @@ def load_long_df(endpoint,variables):
 			"<class 'rest_framework.fields.DecimalField'>"
 		]:
 			df[varname]=pd.to_numeric(df[varname])
-			
 	print(df)
-	
 	return(df)
 
 registered_caches=[
@@ -119,81 +117,20 @@ class NotNanDict(dict):
 	def __new__(self, a):
 		return {k: v for k, v in a if not self.is_nan(v) and v!={}} 
 
-
-
-@app.route('/crosstabs_maps/',methods=['POST'])
-def crosstabs_maps():
-	
-	'''
-	Implements the pandas crosstab function and returns the sparse summary.
-	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
-	'''
-
-# 	try:
-	st=time.time()
-	rdata=request.json
-	dfname=rdata['cachename'][0]
-
-	#it must have a list of ids (even if it's all of the ids)
-	ids=rdata['ids']
-
-	df=eval(dfname)['df']
-	df=df.fillna('null')
-	df2=df[df['id'].isin(ids)]
-	idxvar=rdata['idx'][0]
-	
-	colvars=rdata['cols']
-	
-	valvar=rdata['value_field'][0]
-	
-	colsdf=[df2[c] for c in colvars]
-	
-	idxdf=df2[idxvar]
-	
-	valdf=df2[valvar]
-	
-	fn=rdata['agg_fn'][0]
-	
-	if fn=='count':
-		aggfunc='count'
-	else:
-		aggfunc=eval("np."+fn)
-	
-	#from https://stackoverflow.com/questions/42150769/pandas-multi-index-dataframe-to-nested-dictionary
-	def createDictFromPandas(thisdf):
-		if (thisdf.index.nlevels==1):
-			return thisdf.to_dict(into=NotNanDict)
-		dict_f = {}
-		for level in thisdf.index.levels[0]:
-			if (level in thisdf.index):
-				res=createDictFromPandas(thisdf.xs(level))
-				dict_f[level]=createDictFromPandas(thisdf.xs(level))
-		return dict_f
-	
-	ct=pd.crosstab(
-		colsdf,
-		idxdf,
-		values=valdf,
-		aggfunc=aggfunc
-	)
-	
-	ct2=createDictFromPandas(ct)
-	
-	return jsonify(ct2)
-
-
-
-
-
-
-
-
 @app.route('/crosstabs/',methods=['POST'])
 def crosstabs():
 	
 	'''
 	Implements the pandas crosstab function and returns the sparse summary.
 	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
+	Is my solution below (raw html) elegant? No.
+	Is that the point? No! Consider that the slavevoyages tables
+		1. aren't true pivot tables (can't group rows)
+		2. don't even work right now (row header is wrong)
+	Recommend using something like this to paginate the bulky html: https://jsfiddle.net/u9d1ewsh/
+	And other on-page jquery handlers for column sorting, sankey & map popups, column & row collapsing, etc.
+	Unfortunately, I haven't figured out how to do this for less than 10MB and 5 seconds if I style the html dump at all
+	--> so for now at least it'll have to be on-page jquery indexing?
 	'''
 
 # 	try:
@@ -217,22 +154,41 @@ def crosstabs():
 		normalize=False
 
 	df=eval(dfname)['df']
-	
+
 	df2=df[df['id'].isin(ids)]
 
 	bins=rdata.get('bins')
 	if bins is not None:
 		binvar,nbins=[bins[0],int(bins[1])]
 		df2=pd.cut(df2[binvar],nbins)
+	
 	ct=pd.crosstab(
-		df2[columns],
-		df2[rows],
-		values=df2[val],
+		[df2[col] for col in columns],
+		[df2[row] for row in rows],
+		values=df2[val].astype('Int64'),
 		aggfunc=eval("np."+fn),
 		normalize=normalize,
+		margins=True
 	)
-	ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
-	return jsonify(ctd)
+	
+# 	print("ct-->",time.time()-st)
+	
+	ct=ct.dropna(axis=1,how='all')
+	ct=ct.dropna(axis=0,how='all')
+	
+# 	print("dropna-->",time.time()-st)
+	ct_html=ct.to_html(na_rep='')
+# 	print(ct_html)
+# 	ct_html=ct.to_html(float_format=fmt)
+# 	print("to_html-->",time.time()-st)
+	ct_html_clean=re.sub("\n\s+","",ct_html)
+	#NA_REP isn't playing nicely with this dataframe for some reason...
+	ct_html_clean=re.sub("&lt;NA&gt;","",ct_html_clean)
+	ct_html_clean=re.sub("<NA>","",ct_html_clean)
+	ct_html_clean=re.sub("class=\".*?\"","",ct_html_clean)
+# 	print("re-->",time.time()-st)
+	return ct_html_clean
+
 # 	except:
 # 		abort(400)
 

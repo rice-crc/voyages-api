@@ -58,7 +58,7 @@ class Command(BaseCommand):
 		
 		print(resp,json.dumps(j,indent=2))
 		
-		#flag all legacy sources with transkribus ids
+		#2. flag all legacy sources with transkribus ids
 		
 		legacysources=VoyageSources.objects.all()
 		transkribus_sources=legacysources.exclude(transkribus_docid=None)

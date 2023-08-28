@@ -117,7 +117,7 @@ def load_graph():
 
 
 
-def add_neighbors(G,nodes_dict,n,edges_list,levels=2):
+def add_neighbors(G,nodes_dict,n,edges_list,levels=1):
 	edges=G.edges(n,data=True)
 	selfdata=G.nodes[n]
 	if levels>0:

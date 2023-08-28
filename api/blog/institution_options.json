@@ -4,6 +4,151 @@
     "label": "ID",
     "flatlabel": "ID"
   },
+  "institution_authors": {
+    "type": "table",
+    "label": "author",
+    "flatlabel": "author"
+  },
+  "institution_authors__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "author : ID"
+  },
+  "institution_authors__posts": {
+    "type": "table",
+    "label": "Posts",
+    "flatlabel": "author : Posts"
+  },
+  "institution_authors__posts__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "author : Posts : ID"
+  },
+  "institution_authors__posts__tags": {
+    "type": "table",
+    "label": "Tags",
+    "flatlabel": "author : Posts : Tags"
+  },
+  "institution_authors__posts__tags__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "author : Posts : Tags : ID"
+  },
+  "institution_authors__posts__tags__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "author : Posts : Tags : Name"
+  },
+  "institution_authors__posts__tags__slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "author : Posts : Tags : Slug"
+  },
+  "institution_authors__posts__tags__intro": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Intro",
+    "flatlabel": "author : Posts : Tags : Intro"
+  },
+  "institution_authors__posts__thumbnail": {
+    "type": "<class 'rest_framework.fields.SerializerMethodField'>",
+    "label": "Thumbnail",
+    "flatlabel": "author : Posts : Thumbnail"
+  },
+  "institution_authors__posts__title": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Title",
+    "flatlabel": "author : Posts : Title"
+  },
+  "institution_authors__posts__language": {
+    "type": "<class 'rest_framework.fields.ChoiceField'>",
+    "label": "Language",
+    "flatlabel": "author : Posts : Language"
+  },
+  "institution_authors__posts__subtitle": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Subtitle",
+    "flatlabel": "author : Posts : Subtitle"
+  },
+  "institution_authors__posts__slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "author : Posts : Slug"
+  },
+  "institution_authors__posts__updated_on": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Updated on",
+    "flatlabel": "author : Posts : Updated on"
+  },
+  "institution_authors__posts__content": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Content",
+    "flatlabel": "author : Posts : Content"
+  },
+  "institution_authors__posts__created_on": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Created on",
+    "flatlabel": "author : Posts : Created on"
+  },
+  "institution_authors__posts__status": {
+    "type": "<class 'rest_framework.fields.ChoiceField'>",
+    "label": "Status",
+    "flatlabel": "author : Posts : Status"
+  },
+  "institution_authors__photo": {
+    "type": "<class 'rest_framework.fields.SerializerMethodField'>",
+    "label": "Photo",
+    "flatlabel": "author : Photo"
+  },
+  "institution_authors__institution": {
+    "type": "table",
+    "label": "institution",
+    "flatlabel": "author : institution"
+  },
+  "institution_authors__institution__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "author : institution : ID"
+  },
+  "institution_authors__institution__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "author : institution : Name"
+  },
+  "institution_authors__institution__description": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Description",
+    "flatlabel": "author : institution : Description"
+  },
+  "institution_authors__institution__slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "author : institution : Slug"
+  },
+  "institution_authors__institution__image": {
+    "type": "<class 'rest_framework.fields.ImageField'>",
+    "label": "Image",
+    "flatlabel": "author : institution : Image"
+  },
+  "institution_authors__name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Name",
+    "flatlabel": "author : Name"
+  },
+  "institution_authors__description": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Description",
+    "flatlabel": "author : Description"
+  },
+  "institution_authors__slug": {
+    "type": "<class 'rest_framework.fields.SlugField'>",
+    "label": "Slug",
+    "flatlabel": "author : Slug"
+  },
+  "institution_authors__role": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Role",
+    "flatlabel": "author : Role"
+  },
   "name": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Name",

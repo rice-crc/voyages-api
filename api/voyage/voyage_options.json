@@ -2519,6 +2519,121 @@
     "label": "ID",
     "flatlabel": "enslaver voyage connection : Enslaver alias : ID"
   },
+  "voyage_enslaver_connection__enslaver_alias__identity": {
+    "type": "table",
+    "label": "identity",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : ID"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__principal_alias": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Principal alias",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Principal alias"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__birth_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth year",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Birth year"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__birth_month": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth month",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Birth month"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__birth_day": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth day",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Birth day"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__death_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death year",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Death year"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__death_month": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death month",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Death month"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__death_day": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death day",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Death day"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__father_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Father name",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Father name"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__father_occupation": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Father occupation",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Father occupation"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__mother_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Mother name",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Mother name"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__probate_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Probate date",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Probate date"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__will_value_pounds": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will value pounds",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Will value pounds"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__will_value_dollars": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will value dollars",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Will value dollars"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__will_court": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will court",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Will court"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__notes": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Notes",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Notes"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__is_natural_person": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Is natural person",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Is natural person"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Last updated"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Human reviewed"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__birth_place": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Birth place",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Birth place"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__death_place": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Death place",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Death place"
+  },
+  "voyage_enslaver_connection__enslaver_alias__identity__principal_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Principal location",
+    "flatlabel": "enslaver voyage connection : Enslaver alias : identity : Principal location"
+  },
   "voyage_enslaver_connection__enslaver_alias__alias": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Alias",
@@ -2538,11 +2653,6 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Human reviewed",
     "flatlabel": "enslaver voyage connection : Enslaver alias : Human reviewed"
-  },
-  "voyage_enslaver_connection__enslaver_alias__identity": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Identity",
-    "flatlabel": "enslaver voyage connection : Enslaver alias : Identity"
   },
   "voyage_enslaver_connection__role": {
     "type": "table",

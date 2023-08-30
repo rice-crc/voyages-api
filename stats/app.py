@@ -163,31 +163,96 @@ def crosstabs():
 		df2=pd.cut(df2[binvar],nbins)
 	
 	ct=pd.crosstab(
+		[df2[rows[0]]],
 		[df2[col] for col in columns],
-		[df2[row] for row in rows],
 		values=df2[val].astype('Int64'),
 		aggfunc=eval("np."+fn),
 		normalize=normalize,
 		margins=True
 	)
 	
-# 	print("ct-->",time.time()-st)
+	mlctuples=list(ct.columns)
+	def makechild(name,isfield=False,columngroupshow=False,key=None):
+		if columngroupshow:
+			cgsval="open"
+		else:
+			cgsval="closed"
+		if isfield:
+			##N.B. "All" is a reserved column name here, for the margins/totals
+			### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+			if type(key) in [list,tuple]:
+				if key[0]=='All':
+					key='All'
+				else:
+					key='__'.join(key)
+			
+			child={
+				"columnGroupShow":cgsval,
+				"headerName":name,
+				"field":key,
+				"filter": 'agNumberColumnFilter'
+			}
+		else:
+			child={
+				"headerName":name,
+				"children":[]
+			}
+		return child
+		
+	##N.B. "All" is a reserved column name here, for the margins/totals
+	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+	def makecolgroups(colgroups,mlct,fullpath):
+		k=mlct.pop()
+		if k is not None:
+			if len(mlct)>0 and k!= 'All':
+				headernames=[cg['headerName'] for cg in colgroups]
+				if k not in headernames:
+					thiscg=makechild(k,isfield=False)
+					colgroups.append(thiscg)
+				else:
+					thiscg=[cg for cg in colgroups if cg['headerName']==k][0]
+				thiscg_idx=colgroups.index(thiscg)
+				colgroups[thiscg_idx]['children']=makecolgroups(thiscg['children'],mlct,fullpath)
+			elif k=='All':
+				##N.B. "All" is a reserved column name here, for the margins/totals
+				thiscg=makechild(k,isfield=False)
+				thisfield=makechild(k,isfield=True,key=fullpath)
+				thiscg['children'].append(thisfield)
+				colgroups.append(thiscg)
+			else:
+				thisfield=makechild(k,isfield=True,key=fullpath)
+				colgroups.append(thisfield)
+		return colgroups
 	
-	ct=ct.dropna(axis=1,how='all')
-	ct=ct.dropna(axis=0,how='all')
+	colgroups=[]
+	indexcol_varname=rows[0]
+	if 'rows_label' in rdata:
+		indexcol_name=rdata['rows_label'][0]
+	else:
+		indexcol_name=''
+	indexcolcg=makechild(indexcol_name,isfield=False)
+	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name)
+	indexcolcg['children'].append(indexcolfield)
+	colgroups.append(indexcolcg)
 	
-# 	print("dropna-->",time.time()-st)
-	ct_html=ct.to_html(na_rep='')
-# 	print(ct_html)
-# 	ct_html=ct.to_html(float_format=fmt)
-# 	print("to_html-->",time.time()-st)
-	ct_html_clean=re.sub("\n\s+","",ct_html)
-	#NA_REP isn't playing nicely with this dataframe for some reason...
-	ct_html_clean=re.sub("&lt;NA&gt;","",ct_html_clean)
-	ct_html_clean=re.sub("<NA>","",ct_html_clean)
-	ct_html_clean=re.sub("class=\".*?\"","",ct_html_clean)
-# 	print("re-->",time.time()-st)
-	return ct_html_clean
+	for mlct in mlctuples:
+		l=list(mlct)
+		l.reverse()
+		colgroups=makecolgroups(colgroups,l,mlct)
+	
+	records=[]
+	##N.B. "All" is a reserved column name here, for the margins/totals
+	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
+	allcolumns.insert(0,indexcol_name)
+	print(len(ct.to_records()[0]),len(allcolumns))
+	ct=ct.fillna(0)
+	for r in ct.to_records():
+		thisrecord={allcolumns[i]:r[i] for i in range(len(r))}
+		records.append(thisrecord)
+	
+	output={'tablestructure':colgroups,'data':records}
+	return json.dumps(output)
 
 # 	except:
 # 		abort(400)

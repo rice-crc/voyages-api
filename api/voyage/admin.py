@@ -259,10 +259,10 @@ class VoyageItineraryInline(admin.StackedInline):
 # 	classes = ['collapse']
 # 	extra=0
 # # 
-# class VoyageSourcesAdmin(admin.ModelAdmin):
-# 	search_fields=['full_ref','short_ref']
-# 	list_display=['short_ref','full_ref']
-# 	model=VoyageSources
+class VoyageSourcesAdmin(admin.ModelAdmin):
+	search_fields=['full_ref','short_ref']
+	list_display=['short_ref','full_ref']
+	model=VoyageSources
 # 
 class VoyageOutcomeInline(admin.StackedInline):
 	model=VoyageOutcome
@@ -315,7 +315,7 @@ admin.site.register(Voyage, VoyageAdmin)
 admin.site.register(Place,PlaceAdmin)
 admin.site.register(Region,RegionAdmin)
 admin.site.register(BroadRegion,BroadRegionAdmin)
-# admin.site.register(VoyageSources, VoyageSourcesAdmin)
+admin.site.register(VoyageSources, VoyageSourcesAdmin)
 # admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
 # admin.site.register(SlavesOutcome, SlavesOutcomeAdmin)
 # admin.site.register(VesselCapturedOutcome, VesselCapturedOutcomeAdmin)

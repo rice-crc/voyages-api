@@ -102,18 +102,9 @@ class VoyageStatsOptions(generics.GenericAPIView):
 
 class VoyageCrossTabs(generics.GenericAPIView):
 	'''
-	This is now a true pivot table. You can request multi-level columns AND rows.
-	
-	It returns a flat html table dump from pandas.
-	
-	What's next in terms of features?
-		1. testing the binning functionality to get year ranges back as row groups
-		2. better styling from pandas io?
-		3. maybe make some jquery hooks using pandas io table options, for instance to allow columnar sorting?
-		4. summary stats at bottom?
-	
-	Output can be quite large and this is compute-hungry now, so I won't be handling pagination server-side. I suggest on-page jquery pagination like: https://jsfiddle.net/u9d1ewsh/
-	
+	I was only able to figure out how to output a true pivot table (multi levels and columns) as a straight html dump from pandas.
+	Moreover, if I styled it at all (tagged the <td>'s with id's for jquery), the size ballooned.
+	Instead, then, we'll go with a custom ag-grid dump that can accommodate multi-level cols, but not multi-level rows.	
 	'''
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -128,12 +119,13 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		if len(error_messages)==0:
 			ids=[i[0] for i in queryset.values_list('id')]
 			u2=STATS_BASE_URL+'crosstabs/'
+			params=dict(request.POST)
 			d2=params
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			if r.ok:
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-				return HttpResponse(r.text)
+				return JsonResponse(json.loads(r.text),safe=False)
 			else:
 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
 		else:

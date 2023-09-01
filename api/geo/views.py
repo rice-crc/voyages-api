@@ -9,6 +9,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.views.generic.list import ListView
 from .models import *
+from .common import GeoTreeFilter
 
 class GeoTree(generics.GenericAPIView):
 	# serializer_class=VoyageSerializer
@@ -17,33 +18,7 @@ class GeoTree(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("GEO TREE+++++++\nusername:",request.auth.user)
-		broadregions=Location.objects.all().filter(location_type__name='Broad Region')
-		regions=Location.objects.all().filter(location_type__name='Region')
-		places=Location.objects.all().filter(location_type__name='Place')
-		
-		locationtree=[]
-		
-		def locationdict(l):
-			ld={
-				'id':l.id,
-				'name':l.name,
-				'longitude':l.longitude,
-				'latitude':l.latitude,
-				'value':l.value
-			}
-			return ld
-		
-		for br in broadregions:
-			brdict=locationdict(br)
-			brdict['children']=[]
-			childregions=regions.filter(child_of=br)
-			for cr in childregions:
-				crdict=locationdict(cr)
-				childplaces=places.filter(child_of=cr)
-				crdict['children']=[locationdict(p) for p in childplaces]
-				brdict['children'].append(crdict)
-			locationtree.append(brdict)
-		
+		locationtree=GeoTreeFilter(select_all=True)
 		resp=JsonResponse(locationtree,safe=False)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp

@@ -55,16 +55,6 @@ INSTALLED_APPS = [
 #the below are defined in localsettings.
 #i couldn't figure out how to make the .pg_pass file work in docker
 #and it seemed that if i did, it might not translate to production deployment seamlessly anyways
-DATABASES = {
-    'default': {
-        'ENGINE':'django.db.backends.mysql',
-        'NAME':'voyages_api',
-        'USER':'voyages',
-        'PASSWORD':'voyages',
-        'HOST':'voyages-mysql',
-        'PORT':'3306'
-    }
-}
 
 #DRF settings
 #via https://www.django-rest-framework.org/api-guide/metadata/#setting-the-metadata-scheme

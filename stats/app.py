@@ -192,6 +192,8 @@ def crosstabs():
 				"field":key,
 				"filter": 'agNumberColumnFilter'
 			}
+			if key=='All':
+				child['pinned']='right'
 		else:
 			child={
 				"headerName":name,
@@ -230,8 +232,9 @@ def crosstabs():
 		indexcol_name=rdata['rows_label'][0]
 	else:
 		indexcol_name=''
-	indexcolcg=makechild(indexcol_name,isfield=False)
+	indexcolcg=makechild('',isfield=False)
 	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name)
+	indexcolfield['pinned']='left'
 	indexcolcg['children'].append(indexcolfield)
 	colgroups.append(indexcolcg)
 	

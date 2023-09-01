@@ -135,8 +135,7 @@ class Location(models.Model):
 		verbose_name="Child of",
 		null=True,
 		on_delete=models.CASCADE,
-		related_name='parent_of',
-		related_query_name='Parent of'
+		related_name='parent_of'
 	)
 	
 	location_type = models.ForeignKey(

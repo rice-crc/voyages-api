@@ -16,6 +16,7 @@ from .models import *
 import pprint
 from common.nest import *
 from common.reqs import *
+from geo.common import GeoTreeFilter
 import collections
 import gc
 from .serializers import *
@@ -187,6 +188,36 @@ class VoyageDataFrames(generics.GenericAPIView):
 			print("failed\n+++++++")
 			print(' | '.join(error_messages))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+
+class VoyageGeoTreeFilter(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('voyage/voyage_options.json',request)
+		return JsonResponse(j,safe=False)
+	def post(self,request):
+		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
+		st=time.time()
+		reqdict=dict(request.POST)
+		geotree_valuefields=reqdict['geotree_valuefields']
+		del(reqdict['geotree_valuefields'])
+		queryset=Voyage.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,reqdict,voyage_options,retrieve_all=True)
+		for geotree_valuefield in geotree_valuefields:
+			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
+			queryset=queryset.select_related(geotree_valuefield_stub)
+		vls=[]
+		for geotree_valuefield in geotree_valuefields:		
+			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+		vls=list(set(vls))
+# 		print(len(vls),"filtered vals")
+# 		print("first 10:",vls[:10])
+		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+		resp=JsonResponse(filtered_geotree,safe=False)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return resp
+
 
 #This will only accept one field at a time
 #Should only be a text field

@@ -129,6 +129,121 @@
     "label": "ID",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : ID"
   },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity": {
+    "type": "table",
+    "label": "identity",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__id": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "ID",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : ID"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__principal_alias": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Principal alias",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Principal alias"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__birth_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth year",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Birth year"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__birth_month": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth month",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Birth month"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__birth_day": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Birth day",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Birth day"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__death_year": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death year",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Death year"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__death_month": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death month",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Death month"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__death_day": {
+    "type": "<class 'rest_framework.fields.IntegerField'>",
+    "label": "Death day",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Death day"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__father_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Father name",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Father name"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__father_occupation": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Father occupation",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Father occupation"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__mother_name": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Mother name",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Mother name"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__probate_date": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Probate date",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Probate date"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__will_value_pounds": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will value pounds",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Will value pounds"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__will_value_dollars": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will value dollars",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Will value dollars"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__will_court": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Will court",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Will court"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__notes": {
+    "type": "<class 'rest_framework.fields.CharField'>",
+    "label": "Notes",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Notes"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__is_natural_person": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Is natural person",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Is natural person"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__last_updated": {
+    "type": "<class 'rest_framework.fields.DateTimeField'>",
+    "label": "Last updated",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Last updated"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__human_reviewed": {
+    "type": "<class 'rest_framework.fields.BooleanField'>",
+    "label": "Human reviewed",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Human reviewed"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__birth_place": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Birth place",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Birth place"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__death_place": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Death place",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Death place"
+  },
+  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity__principal_location": {
+    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
+    "label": "Principal location",
+    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : identity : Principal location"
+  },
   "enslaved_relations__relation__relation_enslavers__enslaver_alias__alias": {
     "type": "<class 'rest_framework.fields.CharField'>",
     "label": "Alias",
@@ -148,11 +263,6 @@
     "type": "<class 'rest_framework.fields.BooleanField'>",
     "label": "Human reviewed",
     "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : Human reviewed"
-  },
-  "enslaved_relations__relation__relation_enslavers__enslaver_alias__identity": {
-    "type": "<class 'rest_framework.relations.PrimaryKeyRelatedField'>",
-    "label": "Identity",
-    "flatlabel": "enslaved in relation : enslavement relation : enslaver in relation : Enslaver alias : Identity"
   },
   "enslaved_relations__relation__relation_enslavers__role": {
     "type": "table",

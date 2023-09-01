@@ -126,7 +126,13 @@ class CaptiveStatusSerializer(serializers.ModelSerializer):
 		model=CaptiveStatus
 		fields='__all__'
 
+class EnslavedEnslaverIdentitySerializer(serializers.ModelSerializer):
+	class Meta:
+		model=EnslaverIdentity
+		fields='__all__'
+
 class EnslavedEnslaverAliasSerializer(serializers.ModelSerializer):
+	identity=EnslavedEnslaverIdentitySerializer(many=False)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'

@@ -20,9 +20,12 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	results_count=None
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
 # 	print(all_fields)
-	
+# 	print("----->",type(r))
 	try:
-		params=dict(r.POST)
+		if type(r)==dict:
+			params=r
+		else:
+			params=dict(r.POST)
 		pp = pprint.PrettyPrinter(indent=4)
 		print("--post req params--")
 		pp.pprint(params)
@@ -48,20 +51,16 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		if len(active_numeric_search_fields)>0:
 			for field in active_numeric_search_fields:
 				fieldvals=params.get(field)
-				if '*' in fieldvals:
-					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
-				elif '**' in fieldvals and len(fieldvals)==2:
-					if fieldvals[0]=='**':
-						kwargs['{0}__{1}'.format(field, 'lte')]=max
-					else:
-						kwargs['{0}__{1}'.format(field, 'gte')]=min
-				else:
+				if len(fieldvals)==2 and '*' not in fieldvals:
 					range=fieldvals
 					vals=[float(i) for i in range]
 					vals.sort()
 					min,max=vals
 					kwargs['{0}__{1}'.format(field, 'lte')]=max
 					kwargs['{0}__{1}'.format(field, 'gte')]=min
+				else:
+					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
+					
 		###text filters (exact match, and allow for multiple entries joined by an or)
 		###this hard eval is not ideal but I can't quite see how else to do it just now?
 		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]

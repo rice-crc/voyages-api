@@ -9,11 +9,35 @@ ALLOWED_HOSTS = ['*']
 # STATIC_URL="http://voyages-django:8000/static/"
 FLASK_BASE_URL="http://voyages-stats:5000/"
 
+# STATIC_URL="http://voyages-django:8000/static/"
+STATS_BASE_URL="http://voyages-stats:5000/"
+GEO_NETWORKS_BASE_URL="http://voyages-geo-networks:5005/"
+PEOPLE_NETWORKS_BASE_URL="http://voyages-people-networks:5006/"
+
 zotero_credentials={
-	'abc':'def'
+	"api_key":"abcdefg",
+	"library_id":"hijklmnop",
+	"library_type":"qrstuv"
 }
 
 michigan_collection_manifests=[
 	'ghi',
 	'jkl'
 ]
+
+DATABASES = {
+    'default': {
+        'ENGINE':'django.db.backends.mysql',
+        'NAME':'123',
+        'USER':'456',
+        'PASSWORD':'789',
+        'HOST':'voyages-mysql',
+        'PORT':'3306'
+    }
+}
+
+transkribus_credentials={
+	"user":"dcba",
+	"pw":"zyxw"
+}
+

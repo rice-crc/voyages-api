@@ -35,9 +35,7 @@ def load_long_df(endpoint,variables):
 			"<class 'rest_framework.fields.DecimalField'>"
 		]:
 			df[varname]=pd.to_numeric(df[varname])
-			
 	print(df)
-	
 	return(df)
 
 registered_caches=[
@@ -119,81 +117,20 @@ class NotNanDict(dict):
 	def __new__(self, a):
 		return {k: v for k, v in a if not self.is_nan(v) and v!={}} 
 
-
-
-@app.route('/crosstabs_maps/',methods=['POST'])
-def crosstabs_maps():
-	
-	'''
-	Implements the pandas crosstab function and returns the sparse summary.
-	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
-	'''
-
-# 	try:
-	st=time.time()
-	rdata=request.json
-	dfname=rdata['cachename'][0]
-
-	#it must have a list of ids (even if it's all of the ids)
-	ids=rdata['ids']
-
-	df=eval(dfname)['df']
-	df=df.fillna('null')
-	df2=df[df['id'].isin(ids)]
-	idxvar=rdata['idx'][0]
-	
-	colvars=rdata['cols']
-	
-	valvar=rdata['value_field'][0]
-	
-	colsdf=[df2[c] for c in colvars]
-	
-	idxdf=df2[idxvar]
-	
-	valdf=df2[valvar]
-	
-	fn=rdata['agg_fn'][0]
-	
-	if fn=='count':
-		aggfunc='count'
-	else:
-		aggfunc=eval("np."+fn)
-	
-	#from https://stackoverflow.com/questions/42150769/pandas-multi-index-dataframe-to-nested-dictionary
-	def createDictFromPandas(thisdf):
-		if (thisdf.index.nlevels==1):
-			return thisdf.to_dict(into=NotNanDict)
-		dict_f = {}
-		for level in thisdf.index.levels[0]:
-			if (level in thisdf.index):
-				res=createDictFromPandas(thisdf.xs(level))
-				dict_f[level]=createDictFromPandas(thisdf.xs(level))
-		return dict_f
-	
-	ct=pd.crosstab(
-		colsdf,
-		idxdf,
-		values=valdf,
-		aggfunc=aggfunc
-	)
-	
-	ct2=createDictFromPandas(ct)
-	
-	return jsonify(ct2)
-
-
-
-
-
-
-
-
 @app.route('/crosstabs/',methods=['POST'])
 def crosstabs():
 	
 	'''
 	Implements the pandas crosstab function and returns the sparse summary.
 	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
+	Is my solution below (raw html) elegant? No.
+	Is that the point? No! Consider that the slavevoyages tables
+		1. aren't true pivot tables (can't group rows)
+		2. don't even work right now (row header is wrong)
+	Recommend using something like this to paginate the bulky html: https://jsfiddle.net/u9d1ewsh/
+	And other on-page jquery handlers for column sorting, sankey & map popups, column & row collapsing, etc.
+	Unfortunately, I haven't figured out how to do this for less than 10MB and 5 seconds if I style the html dump at all
+	--> so for now at least it'll have to be on-page jquery indexing?
 	'''
 
 # 	try:
@@ -209,6 +146,8 @@ def crosstabs():
 	rows=rdata['rows']
 	val=rdata['value_field'][0]
 	fn=rdata['agg_fn'][0]
+	
+	print("columns",columns)
 
 	normalize=rdata.get('normalize')
 	if normalize is not None:
@@ -217,22 +156,120 @@ def crosstabs():
 		normalize=False
 
 	df=eval(dfname)['df']
-	
+
 	df2=df[df['id'].isin(ids)]
 
 	bins=rdata.get('bins')
 	if bins is not None:
 		binvar,nbins=[bins[0],int(bins[1])]
 		df2=pd.cut(df2[binvar],nbins)
+	
+# 	print("splitem",[df2[col] for col in columns])
+	
 	ct=pd.crosstab(
-		df2[columns],
-		df2[rows],
-		values=df2[val],
+		[df2[rows[0]]],
+		[df2[col] for col in columns],
+		values=df2[val].astype('Int64'),
 		aggfunc=eval("np."+fn),
 		normalize=normalize,
+		margins=True
 	)
-	ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
-	return jsonify(ctd)
+	
+# 	print("crosstabs",ct)
+	
+	if len(columns)==1:
+		mlctuples=[[i] for i in list(ct.columns)]
+	else:
+		mlctuples=list(ct.columns)
+	
+# 	print("tuples",mlctuples)
+	
+	def makechild(name,isfield=False,columngroupshow=False,key=None):
+		if columngroupshow:
+			cgsval="open"
+		else:
+			cgsval="closed"
+		if isfield:
+			##N.B. "All" is a reserved column name here, for the margins/totals
+			### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+			if type(key) in [list,tuple]:
+				if key[0]=='All':
+					key='All'
+				else:
+					key='__'.join(key)
+			
+			child={
+				"columnGroupShow":cgsval,
+				"headerName":name,
+				"field":key,
+				"filter": 'agNumberColumnFilter',
+				"sort": 'desc'
+			}
+			if key=='All':
+				child['pinned']='right'
+		else:
+			child={
+				"headerName":name,
+				"children":[]
+			}
+		return child
+		
+	##N.B. "All" is a reserved column name here, for the margins/totals
+	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+	def makecolgroups(colgroups,mlct,fullpath):
+		k=mlct.pop()
+		if k is not None:
+			if len(mlct)>0 and k!= 'All':
+				headernames=[cg['headerName'] for cg in colgroups]
+				if k not in headernames:
+					thiscg=makechild(k,isfield=False)
+					colgroups.append(thiscg)
+				else:
+					thiscg=[cg for cg in colgroups if cg['headerName']==k][0]
+				thiscg_idx=colgroups.index(thiscg)
+				colgroups[thiscg_idx]['children']=makecolgroups(thiscg['children'],mlct,fullpath)
+			elif k=='All':
+				##N.B. "All" is a reserved column name here, for the margins/totals
+				thiscg=makechild('',isfield=False)
+				thisfield=makechild(k,isfield=True,key=fullpath)
+				thiscg['children'].append(thisfield)
+				colgroups.append(thiscg)
+			else:
+				thisfield=makechild(k,isfield=True,key=fullpath)
+				colgroups.append(thisfield)
+		return colgroups
+	
+	colgroups=[]
+	indexcol_varname=rows[0]
+	if 'rows_label' in rdata:
+		indexcol_name=rdata['rows_label'][0]
+	else:
+		indexcol_name=''
+	indexcolcg=makechild('',isfield=False)
+	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name)
+	indexcolfield['pinned']='left'
+	indexcolcg['children'].append(indexcolfield)
+	colgroups.append(indexcolcg)
+	
+	for mlct in mlctuples:
+		l=list(mlct)
+		l.reverse()
+		colgroups=makecolgroups(colgroups,l,mlct)
+	
+	records=[]
+	##N.B. "All" is a reserved column name here, for the margins/totals
+	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
+	allcolumns.insert(0,indexcol_name)
+	print(len(ct.to_records()[0]),len(allcolumns))
+	ct=ct.fillna(0)
+	for r in ct.to_records():
+		thisrecord={allcolumns[i]:r[i] for i in range(len(r))}
+		records.append(thisrecord)
+	
+	output={'tablestructure':colgroups,'data':records}
+	return json.dumps(output)
+
 # 	except:
 # 		abort(400)
 

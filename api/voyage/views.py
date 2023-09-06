@@ -103,11 +103,9 @@ class VoyageStatsOptions(generics.GenericAPIView):
 
 class VoyageCrossTabs(generics.GenericAPIView):
 	'''
-	Think of this as a pivot table (but it will generalize later)
-	This view takes:
-		a groupby tuple (row, col)
-		a value field tuple (cellvalue,aggregationfunction)
-		any search parameters you want!
+	I was only able to figure out how to output a true pivot table (multi levels and columns) as a straight html dump from pandas.
+	Moreover, if I styled it at all (tagged the <td>'s with id's for jquery), the size ballooned.
+	Instead, then, we'll go with a custom ag-grid dump that can accommodate multi-level cols, but not multi-level rows.	
 	'''
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -122,6 +120,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		if len(error_messages)==0:
 			ids=[i[0] for i in queryset.values_list('id')]
 			u2=STATS_BASE_URL+'crosstabs/'
+			params=dict(request.POST)
 			d2=params
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})

@@ -191,24 +191,17 @@ class GlobalSearch(generics.GenericAPIView):
 		search_string=params.get('search_string')
 		# Oh, yes. Little Bobby Tables, we call him.
 		
-		core_names= [
-			'voyages',
-			'enslaved',
-			'enslavers',
-			'blog'
-		]
-		
 		output_dict=[]
 		
+		coretuples=[
+			['voyages',Voyage.objects.all()],
+			['enslaved',Enslaved.objects.all()],
+			['enslavers',EnslaverIdentity.objects.all()],
+			['blog',Post.objects.all()]
+		]
+		
 		if search_string is None:
-			
-			coretuples=[
-				['voyages',Voyage.objects.all()],
-				['enslaved',Enslaved.objects.all()],
-				['enslavers',EnslaverIdentity.objects.all()],
-				['blog',Post.objects.all()]
-			]
-			
+		
 			for core in coretuples:
 				corename,qset=core
 				results_count=qset.count()
@@ -224,7 +217,7 @@ class GlobalSearch(generics.GenericAPIView):
 			search_string=search_string.strip()
 			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
 		
-		
+			core_names=[ct[0] for ct in coretuples]
 		
 			for core_name in core_names:
 		

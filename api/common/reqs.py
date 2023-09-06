@@ -6,11 +6,11 @@ from django.db.models.aggregates import StdDev
 from .nest import *
 from django.core.paginator import Paginator
 import html
+import pysolr
 #GENERIC FUNCTION TO RUN A CALL ON REST SERIALIZERS
 ##Default is to auto prefetch, but need to be able to turn it off.
 ##For instance, on our PAST graph-like data, the prefetch can overwhelm the system if you try to get everything
 ##can also just pass an array of prefetch vars
-
 
 def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
@@ -29,6 +29,32 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	except:
 		errormessages.append("error parsing parameters")
 	
+	if 'global_search' in params:
+		qsetclassstr=str(queryset[0].__class__)
+		
+		solrcorenamedict={
+			"<class 'voyage.models.Voyage'>":'voyages',
+			"<class 'past.models.EnslaverIdentity'>":'enslaved',
+			"<class 'past.models.Enslaved>":'enslavers',
+			"<class 'blog.models.Post'>":'blog'
+		}
+		
+		solrcorename=solrcorenamedict[qsetclassstr]
+		
+		solr = pysolr.Solr(
+			'http://voyages-solr:8983/solr/%s/' %solrcorename,
+			always_commit=True,
+			timeout=10
+		)
+		search_string=params['global_search'][0]
+		search_string=re.sub("\s+"," ",search_string)
+		search_string=search_string.strip()
+		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
+		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
+		ids=[doc['id'] for doc in results.docs]
+		queryset=queryset.filter(id__in=ids)
+		
 	selected_fields=params.get('selected_fields') or list(all_fields.keys())
 	bad_fields=[f for f in selected_fields if f not in all_fields]
 	if len(bad_fields)>0:

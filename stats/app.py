@@ -146,6 +146,8 @@ def crosstabs():
 	rows=rdata['rows']
 	val=rdata['value_field'][0]
 	fn=rdata['agg_fn'][0]
+	
+	print("columns",columns)
 
 	normalize=rdata.get('normalize')
 	if normalize is not None:
@@ -162,6 +164,8 @@ def crosstabs():
 		binvar,nbins=[bins[0],int(bins[1])]
 		df2=pd.cut(df2[binvar],nbins)
 	
+# 	print("splitem",[df2[col] for col in columns])
+	
 	ct=pd.crosstab(
 		[df2[rows[0]]],
 		[df2[col] for col in columns],
@@ -171,7 +175,15 @@ def crosstabs():
 		margins=True
 	)
 	
-	mlctuples=list(ct.columns)
+# 	print("crosstabs",ct)
+	
+	if len(columns)==1:
+		mlctuples=[[i] for i in list(ct.columns)]
+	else:
+		mlctuples=list(ct.columns)
+	
+# 	print("tuples",mlctuples)
+	
 	def makechild(name,isfield=False,columngroupshow=False,key=None):
 		if columngroupshow:
 			cgsval="open"
@@ -190,7 +202,8 @@ def crosstabs():
 				"columnGroupShow":cgsval,
 				"headerName":name,
 				"field":key,
-				"filter": 'agNumberColumnFilter'
+				"filter": 'agNumberColumnFilter',
+				"sort": 'desc'
 			}
 			if key=='All':
 				child['pinned']='right'
@@ -217,7 +230,7 @@ def crosstabs():
 				colgroups[thiscg_idx]['children']=makecolgroups(thiscg['children'],mlct,fullpath)
 			elif k=='All':
 				##N.B. "All" is a reserved column name here, for the margins/totals
-				thiscg=makechild(k,isfield=False)
+				thiscg=makechild('',isfield=False)
 				thisfield=makechild(k,isfield=True,key=fullpath)
 				thiscg['children'].append(thisfield)
 				colgroups.append(thiscg)

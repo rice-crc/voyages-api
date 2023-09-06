@@ -19,6 +19,7 @@ import pprint
 from common.nest import *
 from common.reqs import *
 from collections import Counter
+from geo.common import GeoTreeFilter
 from voyages3.localsettings import *
 
 
@@ -81,7 +82,7 @@ class EnslavedTextFieldAutoComplete(generics.GenericAPIView):
 		k=list(params.keys())[0]
 		v=params[k][0]
 		
-		print("past/enslavers/autocomplete",k,v)
+		print("past/enslaved/autocomplete",k,v)
 		queryset=Enslaved.objects.all()
 		if '__' in k:
 			kstub='__'.join(k.split('__')[:-1])
@@ -342,6 +343,66 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			print("failed\n+++++++")
 			print(' | '.join(error_messages))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+
+class EnslaverGeoTreeFilter(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('past/enslaver_options.json',request)
+		return JsonResponse(j,safe=False)
+	def post(self,request):
+		print("Enslaved Geo Tree+++++++\nusername:",request.auth.user)
+		st=time.time()
+		reqdict=dict(request.POST)
+		enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
+		geotree_valuefields=reqdict['geotree_valuefields']
+		del(reqdict['geotree_valuefields'])
+		queryset=EnslaverIdentity.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,reqdict,enslaver_options,retrieve_all=True)
+		for geotree_valuefield in geotree_valuefields:
+			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
+			queryset=queryset.select_related(geotree_valuefield_stub)
+		vls=[]
+		for geotree_valuefield in geotree_valuefields:		
+			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+		vls=list(set(vls))
+# 		print(len(vls),"filtered vals")
+# 		print("first 10:",vls[:10])
+		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+		resp=JsonResponse(filtered_geotree,safe=False)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return resp
+
+
+class EnslavedGeoTreeFilter(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def options(self,request):
+		j=options_handler('past/enslaved_options.json',request)
+		return JsonResponse(j,safe=False)
+	def post(self,request):
+		print("Enslaved Geo Tree+++++++\nusername:",request.auth.user)
+		st=time.time()
+		reqdict=dict(request.POST)
+		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+		geotree_valuefields=reqdict['geotree_valuefields']
+		del(reqdict['geotree_valuefields'])
+		queryset=Enslaved.objects.all()
+		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,reqdict,enslaved_options,retrieve_all=True)
+		for geotree_valuefield in geotree_valuefields:
+			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
+			queryset=queryset.select_related(geotree_valuefield_stub)
+		vls=[]
+		for geotree_valuefield in geotree_valuefields:		
+			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+		vls=list(set(vls))
+# 		print(len(vls),"filtered vals")
+# 		print("first 10:",vls[:10])
+		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+		resp=JsonResponse(filtered_geotree,safe=False)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return resp
 
 
 class EnslavedAggRoutes(generics.GenericAPIView):

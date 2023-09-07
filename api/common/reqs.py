@@ -34,12 +34,13 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		
 		solrcorenamedict={
 			"<class 'voyage.models.Voyage'>":'voyages',
-			"<class 'past.models.EnslaverIdentity'>":'enslaved',
-			"<class 'past.models.Enslaved>":'enslavers',
+			"<class 'past.models.EnslaverIdentity'>":'enslavers',
+			"<class 'past.models.Enslaved'>":'enslaved',
 			"<class 'blog.models.Post'>":'blog'
 		}
 		
 		solrcorename=solrcorenamedict[qsetclassstr]
+		print("CLASS",qsetclassstr,solrcorename)
 		
 		solr = pysolr.Solr(
 			'http://voyages-solr:8983/solr/%s/' %solrcorename,

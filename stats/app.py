@@ -100,7 +100,7 @@ def groupby():
 	df2=df[df['id'].isin(ids)]
 # 	print(df2,df2[groupby_cols[0]].unique())
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
-# 	ct=ct.fillna(0)
+	ct=ct.fillna(0)
 	resp={groupby_by:list(ct.index)}
 	for gbc in groupby_cols:
 		resp[gbc]=list(ct[gbc])

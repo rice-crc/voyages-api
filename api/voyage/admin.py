@@ -270,6 +270,7 @@ class EnslaverAliasConnectionInline(admin.StackedInline):
 # 	readonly_fields=['enslaver_alias','role','order']
 	autocomplete_fields=['enslaver_alias',]
 	classes = ['collapse']
+	exclude=['order']
 	extra=0
 
 class VoyageAdmin(admin.ModelAdmin):

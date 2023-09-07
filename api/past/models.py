@@ -605,7 +605,7 @@ class EnslaverVoyageConnection(models.Model):
 
 	# There might be multiple persons with the same role for the same voyage
 	# and they can be ordered (ranked) using the following field.
-	order = models.IntegerField(null=True)
+	order = models.IntegerField(null=True,blank=True)
 	# NOTE: we will have to substitute VoyageShipOwner and VoyageCaptain
 	# models/tables by this entity.
 	# leaving this line below for later cleanup when the migration is finished.

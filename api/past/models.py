@@ -303,7 +303,7 @@ class EnslaverInfoAbstractBase(models.Model):
 	will_value_dollars = models.CharField(max_length=12, null=True,blank=True)
 	will_court = models.CharField(max_length=12, null=True,blank=True)
 	principal_location = models.ForeignKey(Place, null=True,
-												on_delete=models.CASCADE,
+												on_delete=models.SET_NULL,
 												db_index=True,blank=True)
 	notes = models.CharField(null=True, max_length=8192,blank=True)
 
@@ -772,7 +772,7 @@ class Enslaved(models.Model):
 										db_index=True,blank=True)
 	# For Kinfolk, this is the Last known location field.
 	post_disembark_location = models.ForeignKey(Place, null=True,
-												on_delete=models.CASCADE,
+												on_delete=models.SET_NULL,
 												db_index=True,
 												related_name='+',blank=True)
 	last_known_date = models.CharField(

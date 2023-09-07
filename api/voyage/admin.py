@@ -70,13 +70,6 @@ class VoyageDatesInline(admin.StackedInline):
 class PlaceAdmin(admin.ModelAdmin):
 	model=Place
 	readonly_fields=[
-		'place',
-		'region',
-		'value',
-		'longitude',
-		'latitude',
-		'show_on_main_map',
-		'show_on_voyage_map',
 		'geo_location'
 	]
 	search_fields=['place']
@@ -84,13 +77,6 @@ class PlaceAdmin(admin.ModelAdmin):
 class RegionAdmin(admin.ModelAdmin):
 	model=Region
 	readonly_fields=[
-		'region',
-		'broad_region',
-		'value',
-		'longitude',
-		'latitude',
-		'show_on_map',
-		'show_on_main_map',
 		'geo_location'
 	]
 	search_fields=['region']
@@ -98,11 +84,6 @@ class RegionAdmin(admin.ModelAdmin):
 class BroadRegionAdmin(admin.ModelAdmin):
 	model=BroadRegion
 	readonly_fields=[
-		'broad_region',
-		'value',
-		'longitude',
-		'latitude',
-		'show_on_map',
 		'geo_location'
 	]
 	search_fields=['broad_region']

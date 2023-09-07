@@ -857,16 +857,16 @@ class EnslavementRelation(models.Model):
 	individuals.
 	"""
 # 	id = models.IntegerField(primary_key=True)
-	relation_type = models.ForeignKey(EnslavementRelationType, null=False, on_delete=models.CASCADE)
+	relation_type = models.ForeignKey(EnslavementRelationType, null=True, on_delete=models.SET_NULL)
 	place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+')
 	date = models.CharField(max_length=12, null=True,
 		help_text="Date in MM,DD,YYYY format with optional fields.")
 	amount = models.DecimalField(null=True, decimal_places=2, max_digits=6)
 	unnamed_enslaved_count = models.IntegerField(null=True)
-	voyage = models.ForeignKey(Voyage, related_name="+",
-							   null=True, on_delete=models.CASCADE)
+	voyage = models.ForeignKey(Voyage, related_name="voyage_enslavement_relation",
+							   null=True, on_delete=models.SET_NULL)
 	source = models.ForeignKey(VoyageSources, related_name="+",
-							   null=True, on_delete=models.CASCADE)
+							   null=True, on_delete=models.SET_NULL)
 	text_ref = models.CharField(max_length=255, null=True, blank=True, help_text="Source text reference")
 	is_from_voyages=models.BooleanField(default=False)
 	class Meta:

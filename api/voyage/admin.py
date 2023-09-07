@@ -91,6 +91,7 @@ class BroadRegionAdmin(admin.ModelAdmin):
 
 
 
+
 # # 
 class VoyageSlavesNumbersInline(admin.StackedInline):
 	model=VoyageSlavesNumbers
@@ -263,8 +264,6 @@ class VoyageZoteroConnectionInline(admin.StackedInline):
 # 	fields=['__all__',]
 	extra=0
 	classes=['collapse']
-	
-
 
 class EnslaverAliasConnectionInline(admin.StackedInline):
 	model = EnslaverVoyageConnection

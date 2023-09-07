@@ -239,6 +239,9 @@ class VoyageEnslavedSerializer(serializers.ModelSerializer):
 		model=Enslaved
 		fields=['id','documented_name']
 
+
+
+
 class VoyageSerializer(serializers.ModelSerializer):
 	voyage_zotero_connections=ZoteroVoyageConnectionSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False)

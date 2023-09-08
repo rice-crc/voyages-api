@@ -15,6 +15,7 @@ app.config['JSON_SORT_KEYS'] = False
 def load_long_df(endpoint,variables):
 	headers={'Authorization':DJANGO_AUTH_KEY}
 	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
+# 	print(r)
 	options=json.loads(r.text)
 	if r.status_code!=200:
 		print("failed on OPTIONS call...")
@@ -70,6 +71,12 @@ while True:
 		standoff_count+=1
 	else:
 		break
+		
+#non-standoff for debugging
+# for rc in registered_caches:
+# 	endpoint=rc['endpoint']
+# 	variables=rc['variables']
+# 	rc['df']=load_long_df(endpoint,variables)
 
 print("finished building stats indices in %d seconds" %int(time.time()-st))
 

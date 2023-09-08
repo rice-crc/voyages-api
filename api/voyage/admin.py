@@ -295,6 +295,7 @@ class EnslavementRelationInline(nested_admin.NestedStackedInline):
 		EnslaverInRelationInline
 	]
 	sortable_field_name='voyage'
+	classes = ['collapse']
 	extra=0
 	exclude=['source','place','text_ref','unnamed_enslaved_count','date','amount','is_from_voyages']
 

@@ -863,13 +863,8 @@ class EnslavementRelation(models.Model):
 		help_text="Date in MM,DD,YYYY format with optional fields.")
 	amount = models.DecimalField(null=True, decimal_places=2, max_digits=6)
 	unnamed_enslaved_count = models.IntegerField(null=True)
-<<<<<<< HEAD
 	voyage = models.ForeignKey(Voyage, related_name="voyage_enslavement_relations",
 							   null=True, on_delete=models.CASCADE)
-=======
-	voyage = models.ForeignKey(Voyage, related_name="voyage_enslavement_relation",
-							   null=True, on_delete=models.SET_NULL)
->>>>>>> hooper_admin_updates_sept7
 	source = models.ForeignKey(VoyageSources, related_name="+",
 							   null=True, on_delete=models.SET_NULL)
 	text_ref = models.CharField(max_length=255, null=True, blank=True, help_text="Source text reference")

@@ -50,10 +50,10 @@ class BroadRegion(models.Model):
 	value = models.IntegerField("Numeric code", unique=True)
 	show_on_map = models.BooleanField(default=True)
 
-	geo_location = models.OneToOneField(
+	geo_location = models.ForeignKey(
 		Location,
 		verbose_name="New Location Fieldmapping",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		null=True
 	)
 
@@ -87,15 +87,15 @@ class Region(models.Model):
 								   decimal_places=7,
 								   null=True,
 								   blank=True)
-	broad_region = models.ForeignKey('BroadRegion', on_delete=models.CASCADE)
+	broad_region = models.ForeignKey('BroadRegion', null=True, on_delete=models.SET_NULL)
 	value = models.IntegerField("Numeric code", unique=True)
 	show_on_map = models.BooleanField(default=True)
 	show_on_main_map = models.BooleanField(default=True)
 
-	geo_location = models.OneToOneField(
+	geo_location = models.ForeignKey(
 		Location,
 		verbose_name="New Location Fieldmapping",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		null=True
 	)
 
@@ -118,7 +118,7 @@ class Place(models.Model):
 	"""
 
 	place = models.CharField(max_length=255)
-	region = models.ForeignKey('Region', on_delete=models.CASCADE)
+	region = models.ForeignKey('Region', null=True, on_delete=models.SET_NULL)
 	value = models.IntegerField("Numeric code", unique=True)
 	longitude = models.DecimalField("Longitude of point",
 									max_digits=10,
@@ -133,10 +133,10 @@ class Place(models.Model):
 	show_on_main_map = models.BooleanField(default=True)
 	show_on_voyage_map = models.BooleanField(default=True)
 
-	geo_location = models.OneToOneField(
+	geo_location = models.ForeignKey(
 		Location,
 		verbose_name="New Location Fieldmapping",
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		null=True
 	)
 
@@ -517,7 +517,7 @@ class VoyageItinerary(models.Model):
 		verbose_name="Port of departure (PORTDEP)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	# Intended variables
 	int_first_port_emb = models.ForeignKey(
 		'Place',
@@ -525,84 +525,84 @@ class VoyageItinerary(models.Model):
 		verbose_name="First intended port of embarkation (EMBPORT)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_second_port_emb = models.ForeignKey(
 		'Place',
 		related_name="int_second_port_emb",
 		verbose_name="Second intended port of embarkation (EMBPORT2)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_first_region_purchase_slaves = models.ForeignKey(
 		'Region',
 		related_name="int_first_region_purchase_slaves",
 		verbose_name="First intended region of purchase of slaves (EMBREG)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_second_region_purchase_slaves = models.ForeignKey(
 		'Region',
 		related_name="int_second_region_purchase_slaves",
 		verbose_name="Second intended region of purchase of slaves (EMBREG2)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_first_port_dis = models.ForeignKey(
 		'Place',
 		related_name="int_first_port_dis",
 		verbose_name="First intended port of disembarkation (ARRPORT)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_second_port_dis = models.ForeignKey(
 		'Place',
 		related_name="int_second_port_dis",
 		verbose_name="Second intended port of disembarkation (ARRPORT2)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_third_port_dis = models.ForeignKey(
 		'Place',
 		related_name="int_third_port_dis",
 		verbose_name="Third intended port of disembarkation (ARRPORT3)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_fourth_port_dis = models.ForeignKey(
 		'Place',
 		related_name="int_fourth_port_dis",
 		verbose_name="Fourth intended port of disembarkation (ARRPORT4)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_first_region_slave_landing = models.ForeignKey(
 		'Region',
 		related_name="int_first_region_slave_landing",
 		verbose_name="First intended region of slave landing (REGARR)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_second_place_region_slave_landing = models.ForeignKey(
 		'Region',
 		related_name="int_second_region_slave_landing",
 		verbose_name="Second intended region of slave landing (REGARR2)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_third_place_region_slave_landing = models.ForeignKey(
 		'Region',
 		related_name="int_third_region_slave_landing",
 		verbose_name="Third intended region of slave landing (REGARR3)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	int_fourth_place_region_slave_landing = models.ForeignKey(
 		'Region',
 		related_name="int_fourth_region_slave_landing",
 		verbose_name="Fourth intended region of slave landing (REGARR4)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 
 	# End of intended variables
 	ports_called_buying_slaves = models.IntegerField(
@@ -616,21 +616,21 @@ class VoyageItinerary(models.Model):
 		verbose_name="First place of slave purchase (PLAC1TRA)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	second_place_slave_purchase = models.ForeignKey(
 		'Place',
 		related_name="second_place_slave_purchase",
 		verbose_name="Second place of slave purchase (PLAC2TRA)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	third_place_slave_purchase = models.ForeignKey(
 		'Place',
 		related_name="third_place_slave_purchase",
 		verbose_name="Third place of slave purchase (PLAC3TRA)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 
 	first_region_slave_emb = models.ForeignKey(
 		'Region',
@@ -638,21 +638,21 @@ class VoyageItinerary(models.Model):
 		verbose_name="First region of embarkation of slaves (REGEM1)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	second_region_slave_emb = models.ForeignKey(
 		'Region',
 		related_name="second_region_slave_emb",
 		verbose_name="Second region of embarkation of slaves (REGEM2)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	third_region_slave_emb = models.ForeignKey(
 		'Region',
 		related_name="third_region_slave_emb",
 		verbose_name="Third region of embarkation of slaves (REGEM3)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 
 	port_of_call_before_atl_crossing = models.ForeignKey(
 		'Place',
@@ -660,7 +660,7 @@ class VoyageItinerary(models.Model):
 		verbose_name="Port of call before Atlantic crossing (NPAFTTRA)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 
 	number_of_ports_of_call = models.IntegerField(
 		"Number of ports of call in Americas prior to sale of slaves "
@@ -673,21 +673,21 @@ class VoyageItinerary(models.Model):
 		verbose_name="First place of slave landing (SLA1PORT)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	second_landing_place = models.ForeignKey(
 		'Place',
 		related_name="second_landing_place",
 		verbose_name="Second place of slave landing (ADPSALE1)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	third_landing_place = models.ForeignKey(
 		'Place',
 		related_name="third_landing_place",
 		verbose_name="Third place of slave landing (ADPSALE2)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 
 	first_landing_region = models.ForeignKey(
 		'Region',
@@ -695,21 +695,21 @@ class VoyageItinerary(models.Model):
 		verbose_name="First region of slave landing (REGDIS1)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	second_landing_region = models.ForeignKey(
 		'Region',
 		related_name="second_landing_region",
 		verbose_name="Second region of slave landing (REGDIS2)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	third_landing_region = models.ForeignKey(
 		'Region',
 		related_name="third_landing_region",
 		verbose_name="Third region of slave landing (REGDIS3)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 
 	place_voyage_ended = models.ForeignKey(
 		'Place',
@@ -717,21 +717,21 @@ class VoyageItinerary(models.Model):
 		verbose_name="Place at which voyage ended (PORTRET)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	region_of_return = models.ForeignKey(
 		'Region',
 		related_name="region_of_return",
 		verbose_name="Region of return (RETRNREG)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	broad_region_of_return = models.ForeignKey(
 		'BroadRegion',
 		related_name="broad_region_of_return",
 		verbose_name="Broad region of return (RETRNREG1)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 
 	# Imputed variables
 	imp_port_voyage_begin = models.ForeignKey(
@@ -740,42 +740,42 @@ class VoyageItinerary(models.Model):
 		verbose_name="Imputed port where voyage began (PTDEPIMP)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	imp_region_voyage_begin = models.ForeignKey(
 		'Region',
 		related_name="imp_region_voyage_begin",
 		verbose_name="Imputed region where voyage began (DEPTREGIMP)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	imp_broad_region_voyage_begin = models.ForeignKey(
 		'BroadRegion',
 		related_name="imp_broad_region_voyage_begin",
 		verbose_name="Imputed broad region where voyage began (DEPTREGIMP1)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	principal_place_of_slave_purchase = models.ForeignKey(
 		'Place',
 		related_name="principal_place_of_slave_purchase",
 		verbose_name="Principal place of slave purchase (MAJBUYPT)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	imp_principal_place_of_slave_purchase = models.ForeignKey(
 		'Place',
 		related_name="imp_principal_place_of_slave_purchase",
 		verbose_name="Imputed principal place of slave purchase (MJBYPTIMP)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	imp_principal_region_of_slave_purchase = models.ForeignKey(
 		'Region',
 		related_name="imp_principal_region_of_slave_purchase",
 		verbose_name="Imputed principal region of slave purchase (MAJBYIMP)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	imp_broad_region_of_slave_purchase = models.ForeignKey(
 		'BroadRegion',
 		related_name="imp_broad_region_of_slave_purchase",
@@ -783,14 +783,14 @@ class VoyageItinerary(models.Model):
 		"(MAJBYIMP1)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	principal_port_of_slave_dis = models.ForeignKey(
 		'Place',
 		related_name="principal_port_of_slave_dis",
 		verbose_name="Principal port of slave disembarkation (MAJSELPT)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	imp_principal_port_slave_dis = models.ForeignKey(
 		'Place',
 		related_name="imp_principal_port_slave_dis",
@@ -798,7 +798,7 @@ class VoyageItinerary(models.Model):
 		"(MJSLPTIMP)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	imp_principal_region_slave_dis = models.ForeignKey(
 		'Region',
 		related_name="imp_principal_region_slave_dis",
@@ -806,7 +806,7 @@ class VoyageItinerary(models.Model):
 		"(MJSELIMP)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 	imp_broad_region_slave_dis = models.ForeignKey(
 		'BroadRegion',
 		related_name="imp_broad_region_slave_dis",
@@ -814,7 +814,7 @@ class VoyageItinerary(models.Model):
 		"(MJSELIMP1)",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE)
+		on_delete=models.SET_NULL)
 
 	voyage = models.ForeignKey('Voyage',
 							   null=True,

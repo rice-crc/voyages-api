@@ -303,7 +303,7 @@ class EnslaverInfoAbstractBase(models.Model):
 	will_value_dollars = models.CharField(max_length=12, null=True,blank=True)
 	will_court = models.CharField(max_length=12, null=True,blank=True)
 	principal_location = models.ForeignKey(Place, null=True,
-												on_delete=models.CASCADE,
+												on_delete=models.SET_NULL,
 												db_index=True,blank=True)
 	notes = models.CharField(null=True, max_length=8192,blank=True)
 
@@ -605,7 +605,7 @@ class EnslaverVoyageConnection(models.Model):
 
 	# There might be multiple persons with the same role for the same voyage
 	# and they can be ordered (ranked) using the following field.
-	order = models.IntegerField(null=True)
+	order = models.IntegerField(null=True,blank=True)
 	# NOTE: we will have to substitute VoyageShipOwner and VoyageCaptain
 	# models/tables by this entity.
 	# leaving this line below for later cleanup when the migration is finished.
@@ -772,7 +772,7 @@ class Enslaved(models.Model):
 										db_index=True,blank=True)
 	# For Kinfolk, this is the Last known location field.
 	post_disembark_location = models.ForeignKey(Place, null=True,
-												on_delete=models.CASCADE,
+												on_delete=models.SET_NULL,
 												db_index=True,
 												related_name='+',blank=True)
 	last_known_date = models.CharField(
@@ -857,16 +857,21 @@ class EnslavementRelation(models.Model):
 	individuals.
 	"""
 # 	id = models.IntegerField(primary_key=True)
-	relation_type = models.ForeignKey(EnslavementRelationType, null=False, on_delete=models.CASCADE)
+	relation_type = models.ForeignKey(EnslavementRelationType, null=True, on_delete=models.SET_NULL)
 	place = models.ForeignKey(Place, null=True, on_delete=models.SET_NULL, related_name='+')
 	date = models.CharField(max_length=12, null=True,
 		help_text="Date in MM,DD,YYYY format with optional fields.")
 	amount = models.DecimalField(null=True, decimal_places=2, max_digits=6)
 	unnamed_enslaved_count = models.IntegerField(null=True)
+<<<<<<< HEAD
 	voyage = models.ForeignKey(Voyage, related_name="voyage_enslavement_relations",
 							   null=True, on_delete=models.CASCADE)
+=======
+	voyage = models.ForeignKey(Voyage, related_name="voyage_enslavement_relation",
+							   null=True, on_delete=models.SET_NULL)
+>>>>>>> hooper_admin_updates_sept7
 	source = models.ForeignKey(VoyageSources, related_name="+",
-							   null=True, on_delete=models.CASCADE)
+							   null=True, on_delete=models.SET_NULL)
 	text_ref = models.CharField(max_length=255, null=True, blank=True, help_text="Source text reference")
 	is_from_voyages=models.BooleanField(default=False)
 	class Meta:

@@ -72,13 +72,6 @@ class VoyageDatesInline(nested_admin.NestedStackedInline):
 class PlaceAdmin(nested_admin.NestedModelAdmin):
 	model=Place
 	readonly_fields=[
-		'place',
-		'region',
-		'value',
-		'longitude',
-		'latitude',
-		'show_on_main_map',
-		'show_on_voyage_map',
 		'geo_location'
 	]
 	search_fields=['place']
@@ -86,13 +79,6 @@ class PlaceAdmin(nested_admin.NestedModelAdmin):
 class RegionAdmin(nested_admin.NestedModelAdmin):
 	model=Region
 	readonly_fields=[
-		'region',
-		'broad_region',
-		'value',
-		'longitude',
-		'latitude',
-		'show_on_map',
-		'show_on_main_map',
 		'geo_location'
 	]
 	search_fields=['region']
@@ -100,14 +86,10 @@ class RegionAdmin(nested_admin.NestedModelAdmin):
 class BroadRegionAdmin(nested_admin.NestedModelAdmin):
 	model=BroadRegion
 	readonly_fields=[
-		'broad_region',
-		'value',
-		'longitude',
-		'latitude',
-		'show_on_map',
 		'geo_location'
 	]
 	search_fields=['broad_region']
+
 
 
 
@@ -285,16 +267,6 @@ class VoyageZoteroConnectionInline(nested_admin.NestedStackedInline):
 	extra=0
 	classes=['collapse']
 	
-
-# 
-# class EnslaverAliasConnectionInline(nested_admin.NestedStackedInline):
-# 	model = EnslaverVoyageConnection
-# # 	readonly_fields=['enslaver_alias','role','order']
-# 	autocomplete_fields=['enslaver_alias',]
-# 	classes = ['collapse']
-# 	extra=0
-# 
-
 class EnslavedInRelationInline(nested_admin.NestedStackedInline):
 	model=EnslavedInRelation
 	autocomplete_fields=['enslaved']
@@ -311,6 +283,7 @@ class EnslaverInRelationInline(nested_admin.NestedStackedInline):
 	sortable_field_name='enslaver_alias'
 	readonly_fields=['relation']
 	classes = ['collapse']
+	exclude=['order']
 	extra=0
 
 

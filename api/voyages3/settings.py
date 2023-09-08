@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'tinymce',
     'rest_framework',
     'rest_framework.authtoken',
-    'captcha'
+    'captcha',
+    'nested_admin'
 ]
 
 #the below are defined in localsettings.

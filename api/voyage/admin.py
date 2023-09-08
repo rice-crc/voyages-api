@@ -1,12 +1,14 @@
 from django.contrib import admin
+import nested_admin
 from voyage.models import *
 from past.models import *
 from document.models import *
+from past.admin import EnslavedInRelationInline,EnslaverInRelationInline
 from common.models import *
 # 
 # # 
 # # 
-class VoyageCrewInline(admin.StackedInline):
+class VoyageCrewInline(nested_admin.NestedStackedInline):
 	model=VoyageCrew
 	max_num=1
 	classes = ['collapse']
@@ -15,7 +17,7 @@ class VoyageCrewInline(admin.StackedInline):
 		'crew_died_complete_voyage'
 	]
 
-class VoyageDatesInline(admin.StackedInline):
+class VoyageDatesInline(nested_admin.NestedStackedInline):
 	model = VoyageDates
 	max_num=1
 	classes = ['collapse']
@@ -67,7 +69,7 @@ class VoyageDatesInline(admin.StackedInline):
 	]
 	verbose_name_plural="Voyage Dates"
 
-class PlaceAdmin(admin.ModelAdmin):
+class PlaceAdmin(nested_admin.NestedModelAdmin):
 	model=Place
 	readonly_fields=[
 		'place',
@@ -81,7 +83,7 @@ class PlaceAdmin(admin.ModelAdmin):
 	]
 	search_fields=['place']
 
-class RegionAdmin(admin.ModelAdmin):
+class RegionAdmin(nested_admin.NestedModelAdmin):
 	model=Region
 	readonly_fields=[
 		'region',
@@ -95,7 +97,7 @@ class RegionAdmin(admin.ModelAdmin):
 	]
 	search_fields=['region']
 
-class BroadRegionAdmin(admin.ModelAdmin):
+class BroadRegionAdmin(nested_admin.NestedModelAdmin):
 	model=BroadRegion
 	readonly_fields=[
 		'broad_region',
@@ -111,41 +113,41 @@ class BroadRegionAdmin(admin.ModelAdmin):
 
 
 # # 
-class VoyageSlavesNumbersInline(admin.StackedInline):
+class VoyageSlavesNumbersInline(nested_admin.NestedStackedInline):
 	model=VoyageSlavesNumbers
 
 	classes = ['collapse']
 	max_num=1
 # 
-# class ParticularOutcomeAdmin(admin.ModelAdmin):
+# class ParticularOutcomeAdmin(nested_admin.NestedModelAdmin):
 # 	list_display = ('name','value')
 # 	list_display_links = ('name',)
 # 	model=ParticularOutcome
 # 	search_fields=['name']
 # 	classes = ['collapse']
 # 
-# class SlavesOutcomeAdmin(admin.ModelAdmin):
+# class SlavesOutcomeAdmin(nested_admin.NestedModelAdmin):
 # 	list_display = ('name','value')
 # 	list_display_links = ('name',)
 # 	model=SlavesOutcome
 # 	search_fields=['name']
 # 	classes = ['collapse']
 # 	
-# class VesselCapturedOutcomeAdmin(admin.ModelAdmin):
+# class VesselCapturedOutcomeAdmin(nested_admin.NestedModelAdmin):
 # 	list_display = ('name','value')
 # 	list_display_links = ('name',)
 # 	model=VesselCapturedOutcome
 # 	search_fields=['name']
 # 	classes = ['collapse']
 # 
-# class OwnerOutcomeAdmin(admin.ModelAdmin):
+# class OwnerOutcomeAdmin(nested_admin.NestedModelAdmin):
 # 	list_display = ('name','value')
 # 	list_display_links = ('name',)
 # 	model=OwnerOutcome
 # 	search_fields=['name']
 # 	classes = ['collapse']
 # 
-# class ResistanceAdmin(admin.ModelAdmin):
+# class ResistanceAdmin(nested_admin.NestedModelAdmin):
 # 	list_display = ('name','value')
 # 	list_display_links = ('name',)
 # 	model=Resistance
@@ -163,25 +165,25 @@ class VoyageSlavesNumbersInline(admin.StackedInline):
 # # ##Insofar as you can apply more than one outcome entry to each voyage
 # # ##But it doesn't appear that this has ever been done
 # # ##which on this admin page results in multiple possible outcome fields being allowed
-class VoyageOutcomeInline(admin.StackedInline):
+class VoyageOutcomeInline(nested_admin.NestedStackedInline):
 	max_num = 0
 	classes = ['collapse']
 	model=VoyageOutcome
 # 
-# class NationalityAdmin(admin.ModelAdmin):
+# class NationalityAdmin(nested_admin.NestedModelAdmin):
 # 	search_fields=['name']
 # 	model=Nationality
 # 
-# class TonTypeAdmin(admin.ModelAdmin):
+# class TonTypeAdmin(nested_admin.NestedModelAdmin):
 # 	search_fields=['name']
 # 	model=TonType
 # 
-# class RigOfVesselAdmin(admin.ModelAdmin):
+# class RigOfVesselAdmin(nested_admin.NestedModelAdmin):
 # 	model=RigOfVessel
 # 	search_fields=['name']
 
 # 
-class VoyageShipInline(admin.StackedInline):
+class VoyageShipInline(nested_admin.NestedStackedInline):
 	model = VoyageShip
 	max_num = 1
 # 	autocomplete_fields=[
@@ -196,7 +198,7 @@ class VoyageShipInline(admin.StackedInline):
 # 	]
 	classes = ['collapse']
 # 
-class VoyageItineraryInline(admin.StackedInline):
+class VoyageItineraryInline(nested_admin.NestedStackedInline):
 	model = VoyageItinerary
 	max_num = 1
 	autocomplete_fields=[
@@ -249,7 +251,7 @@ class VoyageItineraryInline(admin.StackedInline):
 	classes = ['collapse']
 # 
 
-# class VoyageSourcesConnectionInline(admin.StackedInline):
+# class VoyageSourcesConnectionInline(nested_admin.NestedStackedInline):
 # 	model=VoyageSourcesConnection
 # 	autocomplete_fields=['source']
 # 	fields=[
@@ -259,12 +261,12 @@ class VoyageItineraryInline(admin.StackedInline):
 # 	classes = ['collapse']
 # 	extra=0
 # # 
-class VoyageSourcesAdmin(admin.ModelAdmin):
+class VoyageSourcesAdmin(nested_admin.NestedModelAdmin):
 	search_fields=['full_ref','short_ref']
 	list_display=['short_ref','full_ref']
 	model=VoyageSources
 # 
-class VoyageOutcomeInline(admin.StackedInline):
+class VoyageOutcomeInline(nested_admin.NestedStackedInline):
 	model=VoyageOutcome
 	extra=0
 # 	autocomplete_fields=[
@@ -276,7 +278,7 @@ class VoyageOutcomeInline(admin.StackedInline):
 # 	]
 	classes = ['collapse']
 
-class VoyageZoteroConnectionInline(admin.StackedInline):
+class VoyageZoteroConnectionInline(nested_admin.NestedStackedInline):
 	model=ZoteroVoyageConnection
 	autocomplete_fields=['zotero_source']
 # 	fields=['__all__',]
@@ -284,21 +286,53 @@ class VoyageZoteroConnectionInline(admin.StackedInline):
 	classes=['collapse']
 	
 
+# 
+# class EnslaverAliasConnectionInline(nested_admin.NestedStackedInline):
+# 	model = EnslaverVoyageConnection
+# # 	readonly_fields=['enslaver_alias','role','order']
+# 	autocomplete_fields=['enslaver_alias',]
+# 	classes = ['collapse']
+# 	extra=0
+# 
 
-class EnslaverAliasConnectionInline(admin.StackedInline):
-	model = EnslaverVoyageConnection
-# 	readonly_fields=['enslaver_alias','role','order']
-	autocomplete_fields=['enslaver_alias',]
+class EnslavedInRelationInline(nested_admin.NestedStackedInline):
+	model=EnslavedInRelation
+	autocomplete_fields=['enslaved']
+	readonly_fields=['relation']
+	classes = ['collapse']
+	sortable_field_name='enslaved'
+	extra=0
+
+class EnslaverInRelationInline(nested_admin.NestedStackedInline):
+	model=EnslaverInRelation
+	autocomplete_fields=[
+		'enslaver_alias'
+	]
+	sortable_field_name='enslaver_alias'
+	readonly_fields=['relation']
 	classes = ['collapse']
 	extra=0
 
-class VoyageAdmin(admin.ModelAdmin):
+
+
+class EnslavementRelationInline(nested_admin.NestedStackedInline):
+	model = EnslavementRelation
+	inlines=[
+		EnslavedInRelationInline,
+		EnslaverInRelationInline
+	]
+	sortable_field_name='voyage'
+	extra=0
+	exclude=['source','place','text_ref','unnamed_enslaved_count','date','amount','is_from_voyages']
+
+class VoyageAdmin(nested_admin.NestedModelAdmin):
 	inlines=(
 		VoyageDatesInline,
 		VoyageItineraryInline,
 # 		VoyageSourcesConnectionInline,
 		VoyageZoteroConnectionInline,
-		EnslaverAliasConnectionInline,
+# 		EnslaverAliasConnectionInline,
+		EnslavementRelationInline,
 		VoyageCrewInline,
 		VoyageOutcomeInline,
 		VoyageShipInline,
@@ -307,6 +341,7 @@ class VoyageAdmin(admin.ModelAdmin):
 	fields=['voyage_id','dataset','voyage_in_cd_rom']
 	list_display=('voyage_id',)
 	search_fields=('voyage_id',)
+	classes = ['collapse']
 	model=Voyage
 # 
 # 

@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include,path
+from django.urls import include,path,re_path
 from django.conf.urls.static import static
 from django.conf import settings
 from filebrowser.sites import site
@@ -35,6 +35,7 @@ urlpatterns = [
 #     path('contribute/',include('contribute.urls')),
     path('captcha/', include('captcha.urls')),
     path('filebrowser/', site.urls),
-    path('tinymce/', site.urls)
+    path('tinymce/', site.urls),
+	re_path(r'^_nested_admin/', include('nested_admin.urls'))
 #     path('voyages_auth_endpoint/', views.obtain_auth_token)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -6,7 +6,15 @@ from geo.models import *
 import uuid
 
 class Command(BaseCommand):
-	help = 'maps all voyage geo data to their new counterparts'
+	help = '\
+	--maps all classic spss voyage geo data to their new "geolocation" counterparts. \
+	1. Used to blow away all the new geolocation entities \
+	2. Now it just checks against the spss vals ("Value"), and either updates or creates\
+	3. So if you change or add a legacy Region, Place, or BroadRegion entry...\
+	--> this will update your geo_location entity data accordingly\
+	** Eventually we want to fully deprecate the legacy Region Place & BroadRegion Types\
+	** In favor of the unified GeoLocation type\
+	'
 	def handle(self, *args, **options):
 		places=Place.objects.all()
 		regions=Region.objects.all()
@@ -17,7 +25,6 @@ class Command(BaseCommand):
 		print(regions)
 		print(broadregions)
 		print(geolocations)
-		print("DELETING GEOLOCATIONS FOR SYNC")
 		
 		regionvals=[]
 		

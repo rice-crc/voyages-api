@@ -13,7 +13,7 @@ class Command(BaseCommand):
 	3. So if you change or add a legacy Region, Place, or BroadRegion entry...\
 	--> this will update your geo_location entity data accordingly\
 	** Eventually we want to fully deprecate the legacy Region Place & BroadRegion Types\
-	** In favor of the unified GeoLocation type
+	** In favor of the unified GeoLocation type\
 	'
 	def handle(self, *args, **options):
 		places=Place.objects.all()

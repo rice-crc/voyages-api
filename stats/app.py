@@ -11,13 +11,10 @@ import re
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
+options={}
 
 def load_long_df(endpoint,variables):
 	headers={'Authorization':DJANGO_AUTH_KEY}
-	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
-	options=json.loads(r.text)
-	if r.status_code!=200:
-		print("failed on OPTIONS call...")
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
@@ -28,7 +25,7 @@ def load_long_df(endpoint,variables):
 	#coerce datatypes based on options call
 	for varname in variables:
 		optionsvar=options[varname]
-		vartype=optionsvar['type']
+		vartype=optionsvar['type']	
 		if vartype in [
 			"<class 'rest_framework.fields.IntegerField'>",
 			"<class 'rest_framework.fields.FloatField'>",
@@ -54,6 +51,9 @@ standoff_base=4
 standoff_count=0
 while True:
 	failures_count=0
+	headers={'Authorization':DJANGO_AUTH_KEY}
+	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
+	options=json.loads(r.text)
 	for rc in registered_caches:
 		endpoint=rc['endpoint']
 		variables=rc['variables']
@@ -148,7 +148,7 @@ def crosstabs():
 	fn=rdata['agg_fn'][0]
 	
 	print("columns",columns)
-
+	
 	normalize=rdata.get('normalize')
 	if normalize is not None:
 		normalize=normalize[0]
@@ -156,24 +156,59 @@ def crosstabs():
 		normalize=False
 
 	df=eval(dfname)['df']
-
 	df2=df[df['id'].isin(ids)]
-
-	bins=rdata.get('bins')
-	if bins is not None:
-		binvar,nbins=[bins[0],int(bins[1])]
-		df2=pd.cut(df2[binvar],nbins)
+	rows=rows[0]
 	
-# 	print("splitem",[df2[col] for col in columns])
+	yeargroupmode=False
 	
-	ct=pd.crosstab(
-		[df2[rows[0]]],
-		[df2[col] for col in columns],
-		values=df2[val].astype('Int64'),
-		aggfunc=eval("np."+fn),
-		normalize=normalize,
-		margins=True
-	)
+	def interval_to_str(s):
+		s=str(s)
+		return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
+	
+	valuetype=options[val]['type']
+	
+	if re.match('.*year__[0-9]+',rows):
+		yeargroupmode=True
+		binsize=int(re.search('[0-9]+',rows).group(0))
+		cutvar=re.sub('_+[0-9]+$','',rows)
+		df2=df2.dropna(subset=[cutvar,val])
+		df2=df2.assign(YEARAM=df2[cutvar].astype('int'))
+		yearam_min=df2[cutvar].min()
+		yearam_max=df2[cutvar].max()
+		year_ints=list(range(int(yearam_min),int(yearam_max+1)))
+		if yearam_max-yearam_min <= binsize:
+			nbins=1
+		else:
+			nbins=int((yearam_max-yearam_min)/binsize)
+		bin_arrays=np.array_split(year_ints,nbins)
+		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
+		print("BINS",bins)
+		df2=df2.assign(YEARAM_BINS=pd.cut(df2['YEARAM'],bins,include_lowest=True))
+		print('DF2',df2)
+		df3=df2[columns+[val]+['YEARAM_BINS']]
+		df3[val]=df3[val].astype('int')
+		print('df3cols',df3,df3.columns)
+		df3['YEARAM_BINS']=df3['YEARAM_BINS'].apply(interval_to_str)
+		print('df3colsB',df3,df3.columns,df3.dtypes)
+		ct=pd.crosstab(
+			[df3['YEARAM_BINS']],
+			[df3[col] for col in columns],
+			values=df3[val],
+			aggfunc=fn,
+			margins=True
+		)
+		ct.fillna(0)
+		print(ct)
+	else:
+		ct=pd.crosstab(
+			[df2[rows]],
+			[df2[col] for col in columns],
+			values=df2[val],
+			aggfunc=fn,
+			normalize=normalize,
+			margins=True
+		)
+		ct.fillna(0)
 	
 # 	print("crosstabs",ct)
 	
@@ -261,10 +296,27 @@ def crosstabs():
 	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
 	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
-	print(len(ct.to_records()[0]),len(allcolumns))
 	ct=ct.fillna(0)
-	for r in ct.to_records():
-		thisrecord={allcolumns[i]:r[i] for i in range(len(r))}
+	
+	def convertcell(cellval,valuetype):
+		if valuetype in [
+			"<class 'rest_framework.fields.FloatField'>",
+			"<class 'rest_framework.fields.DecimalField'>"
+		]:
+			return float(cellval)
+		elif valuetype=="<class 'rest_framework.fields.IntegerField'>":
+			return int(cellval)
+		
+	
+	for r in ct.to_records():	
+		for i in range(len(r)):
+			if i==0:
+				thisrecord={
+					allcolumns[i]:(
+						convertcell(r[i],valuetype) if i!=0 else r[i]
+					)
+					for i in range(len(r))
+				}
 		records.append(thisrecord)
 	
 	output={'tablestructure':colgroups,'data':records}

@@ -44,7 +44,7 @@ class ZoteroSourceAdmin(admin.ModelAdmin):
 		ZoteroVoyageConnectionInline
 	]
 	search_fields=['zotero_title','zotero_date','short_ref']
-	readonly_fields=['item_url','zotero_url','legacy_source']
+	readonly_fields=['item_url','legacy_source']
 	list_display=('zotero_title','zotero_date')
 
 admin.site.register(ZoteroSource, ZoteroSourceAdmin)

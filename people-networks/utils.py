@@ -128,11 +128,15 @@ def load_graph():
 	
 	nodes_to_delete=[]
 	
-	print("graph before disintermediating investor/captain-->voyage cnx's",G)
+	print("graph before disintermediating\n\
+1) investor/captain-->voyage cnx's\n\
+2) enslaved-->voyage cnx's when no shipper, consignor, etc. is present:\n",G,'\n----')
 	
 	for n in transportation_relations:
 		edges=G.edges(n,data=True)
 		has_enslaved=False
+		has_direct_enslavers=False
+		has_indirect_enslavers=False
 		other_node_ids=[]
 		for edge in edges:
 			s,t,edata=edge
@@ -144,7 +148,13 @@ def load_graph():
 				other_node_ids.append(other)
 			if G.nodes[other]['node_class']=='enslaved':
 				has_enslaved=True
-		if not has_enslaved:
+			if G.nodes[other]['node_class']=='enslavers' and 'role__name' in edata:
+				if edata['role__name'] not in ['Investor','Captain']:
+					has_direct_enslavers=True
+				else:
+					has_indirect_enslavers=True
+		if (not has_enslaved and has_indirect_enslavers) or (not has_direct_enslavers and has_enslaved):
+			
 			nodes_to_delete.append(n)
 			for pair in itertools.permutations(other_node_ids,2):
 				a,b=pair
@@ -154,18 +164,24 @@ def load_graph():
 				if anode['node_class']=='voyages':
 					s=b
 					t=a
+					snodeclass=bnode['node_class']
 				elif bnode['node_class']=='voyages':
 					s=a
 					t=b
+					snodeclass=anode['node_class']
 				else:
-					#in this case, we're getting two enslavers connected to the same trasnsportation
-					#e.g., a captain and an investor
-					#we don't want to link them directly
+					# in this case, we're getting
+					## two enslavers or enslaved connected to the same relation
+					# we don't want to link them directly -- but rather through the voyage
 					skipthis=True
 				if not skipthis:
-					#in this case, we have an enslaver-to-voyage connection to make
-					role_name=G.edges[s,n]['role__name']
-					G.add_edge(s,t,role_name=role_name)
+					if has_indirect_enslavers and snodeclass=='enslavers':
+						#in this case, we have an enslaver-to-voyage connection to make
+						role_name=G.edges[s,n]['role__name']
+						G.add_edge(s,t,role_name=role_name)
+					if has_enslaved:
+						G.add_edge(s,t)
+		
 	nodes_to_delete=list(set(nodes_to_delete))
 	
 	for n in nodes_to_delete:

@@ -231,7 +231,7 @@ def crosstabs():
 				if key[0]=='All':
 					key='All'
 				else:
-					key='__'.join(key)
+					key=re.sub('\.','','__'.join(key))
 			
 			child={
 				"columnGroupShow":cgsval,
@@ -294,7 +294,7 @@ def crosstabs():
 	records=[]
 	##N.B. "All" is a reserved column name here, for the margins/totals
 	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
-	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
+	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
 	ct=ct.fillna(0)
 	

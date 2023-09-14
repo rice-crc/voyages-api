@@ -126,13 +126,12 @@ def network_maps():
 			nl:0 for nl in nodelabels
 		},
 		"data":{},
-		"prev_nodes":{},
-		"next_nodes":{}
+# 		"prev_nodes":{},
+# 		"next_nodes":{}
 		} for k in payload for i in k.split('__') if i != "None"
 	}
-		
-	classedabweights={}
 	
+	classedabweights={}
 	for k in payload:
 		w=payload[k]
 		uuids=k.split('__')
@@ -161,13 +160,17 @@ def network_maps():
 	
 	edges={}
 	
+	shortest_path_times=0
+	
+	shortest_paths=[]
+	
 	for linklabel in linklabels:
 		abweights=classedabweights[linklabel]
-		edges[linklabel]={}
 		for s_uuid in abweights:
 			sourcenodematch=[n for n in search_nodes(graph,{"==":["uuid",s_uuid]})]
 			# currently, i'm only getting errors on nodes that had no lat or long
 			## and therefore were not added into the network
+			
 			if len(sourcenodematch)!=0:
 				s_id=sourcenodematch[0]
 				#drop the networkx node tags
@@ -200,7 +203,7 @@ def network_maps():
 							del targetnode['tags']
 						nodes[t_uuid]['data']=targetnode
 						
-						
+						shortest_path_st=time.time()
 						try:
 							if selfloop:
 								sp=nx.shortest_path(graph,successor_id,t_id,'distance')
@@ -209,15 +212,23 @@ def network_maps():
 								sp=nx.shortest_path(graph,s_id,t_id,'distance')
 							
 						except:
-							print("---\nNO PATH")
-							print("from",sourcenode)
-							print("to",targetnode,"\n---")
+# 							print("---\nNO PATH")
+# 							print("from",sourcenode)
+# 							print("to",targetnode,"\n---")
 							
 							sp=[]
+						shortest_path_times+=time.time()-shortest_path_st
 									
 						if len(sp)>1:
+							sp_export=list(sp)
+							sp_export=sp_export[1:-1]
+							sp_export=[s_uuid]+sp_export+[t_uuid]
+							shortest_paths.append({
+								"path":sp_export,
+								"weight":w
+							})
 							abpairs=[(sp[i],sp[i+1]) for i in range(len(sp)-1)]
-							prev_node_id=None
+# 							prev_node_id=None
 							for a,b in abpairs:
 								
 								anode=graph.nodes[a]
@@ -233,60 +244,63 @@ def network_maps():
 									b_id=bnode['uuid']
 								
 								#edges
-								if a_id not in edges[linklabel]:
-									edges[linklabel][a_id]={b_id:w}
+								if a_id not in edges:
+									edges[a_id]={b_id:{'w':w,'type':linklabel}}
 								else:
-									if b_id not in edges[linklabel][a_id]:
-										edges[linklabel][a_id][b_id]=w
+									if b_id not in edges[a_id]:
+										edges[a_id][b_id]={'w':w,'type':linklabel}
 									else:
-										edges[linklabel][a_id][b_id]+=w
+										edges[a_id][b_id]['w']+=w
 								#add oceanic nodes (although we prob don't need to?)
 								if a_id not in nodes:
 									nodes[a_id]={
 										'data':anode,
 										'id':a_id,
-										'next_nodes':{b_id:1},
+# 										'next_nodes':{b_id:1},
 										'weights':{}
 									}
-									if prev_node_id is not None:
-										nodes[a_id]['prev_nodes']={prev_node_id:1}
-								else:
-									if prev_node_id is not None:
-										if prev_node_id in nodes[a_id]['prev_nodes']:
-											nodes[a_id]['prev_nodes'][prev_node_id]+=1
-										else:
-											nodes[a_id]['prev_nodes'][prev_node_id]=1
-									if b_id in nodes[a_id]['next_nodes']:
-										nodes[a_id]['next_nodes'][b_id]+=1
-									else:
-										nodes[a_id]['next_nodes'][b_id]=1
+# 									if prev_node_id is not None:
+# 										nodes[a_id]['prev_nodes']={prev_node_id:1}
+# 								else:
+# 									if prev_node_id is not None:
+# 										if prev_node_id in nodes[a_id]['prev_nodes']:
+# 											nodes[a_id]['prev_nodes'][prev_node_id]+=1
+# 										else:
+# 											nodes[a_id]['prev_nodes'][prev_node_id]=1
+# 									if b_id in nodes[a_id]['next_nodes']:
+# 										nodes[a_id]['next_nodes'][b_id]+=1
+# 									else:
+# 										nodes[a_id]['next_nodes'][b_id]=1
 								if b_id not in nodes:
 									nodes[b_id]={
 										'data':bnode,
 										'id':b_id,
-										'prev_nodes':{a_id:1},
-										'next_nodes':{},
+# 										'prev_nodes':{a_id:1},
+# 										'next_nodes':{},
 										'weights':{}
 									}
-								elif a_id is not None:
-									if a_id in nodes[b_id]['prev_nodes']:
-										nodes[b_id]['prev_nodes'][a_id]+=1
-									else:
-										nodes[b_id]['prev_nodes'][a_id]=1
-								prev_node_id=a_id
+# 								elif a_id is not None:
+# 									if a_id in nodes[b_id]['prev_nodes']:
+# 										nodes[b_id]['prev_nodes'][a_id]+=1
+# 									else:
+# 										nodes[b_id]['prev_nodes'][a_id]=1
+# 								prev_node_id=a_id
 								
-								
+	
+	print("shortest path times=",shortest_path_times)
+						
 	#tp60 wants these edges flattened
-	edgesflat={linklabel:[] for linklabel in edges}
-	for linklabel in edges:
-		for s in edges[linklabel]:
-			for t in edges[linklabel][s]:
-				w=edges[linklabel][s][t]
-				thisedge={'s':s,'t':t,'w':w}
-				edgesflat[linklabel].append(thisedge)
+# 	edgesflat={linklabel:[] for linklabel in edges}
+	edgesflat=[]
+	for s in edges:
+		for t in edges[s]:
+			edge=edges[s][t]
+			thisedge={'s':s,'t':t,'w':edge['w'],'type':edge['type']}
+			edgesflat.append(thisedge)
 	outputs={
 		"nodes":[nodes[k] for k in nodes],
-		"edges":edgesflat
+		"edges":edgesflat,
+		"paths":shortest_paths
 	}
 	
 	return jsonify(outputs)

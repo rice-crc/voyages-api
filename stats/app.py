@@ -11,13 +11,10 @@ import re
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
+options={}
 
 def load_long_df(endpoint,variables):
 	headers={'Authorization':DJANGO_AUTH_KEY}
-	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
-	options=json.loads(r.text)
-	if r.status_code!=200:
-		print("failed on OPTIONS call...")
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
@@ -28,16 +25,14 @@ def load_long_df(endpoint,variables):
 	#coerce datatypes based on options call
 	for varname in variables:
 		optionsvar=options[varname]
-		vartype=optionsvar['type']
+		vartype=optionsvar['type']	
 		if vartype in [
 			"<class 'rest_framework.fields.IntegerField'>",
 			"<class 'rest_framework.fields.FloatField'>",
 			"<class 'rest_framework.fields.DecimalField'>"
 		]:
 			df[varname]=pd.to_numeric(df[varname])
-			
 	print(df)
-	
 	return(df)
 
 registered_caches=[
@@ -56,6 +51,9 @@ standoff_base=4
 standoff_count=0
 while True:
 	failures_count=0
+	headers={'Authorization':DJANGO_AUTH_KEY}
+	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
+	options=json.loads(r.text)
 	for rc in registered_caches:
 		endpoint=rc['endpoint']
 		variables=rc['variables']
@@ -102,7 +100,7 @@ def groupby():
 	df2=df[df['id'].isin(ids)]
 # 	print(df2,df2[groupby_cols[0]].unique())
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
-# 	ct=ct.fillna(0)
+	ct=ct.fillna(0)
 	resp={groupby_by:list(ct.index)}
 	for gbc in groupby_cols:
 		resp[gbc]=list(ct[gbc])
@@ -119,81 +117,20 @@ class NotNanDict(dict):
 	def __new__(self, a):
 		return {k: v for k, v in a if not self.is_nan(v) and v!={}} 
 
-
-
-@app.route('/crosstabs_maps/',methods=['POST'])
-def crosstabs_maps():
-	
-	'''
-	Implements the pandas crosstab function and returns the sparse summary.
-	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
-	'''
-
-# 	try:
-	st=time.time()
-	rdata=request.json
-	dfname=rdata['cachename'][0]
-
-	#it must have a list of ids (even if it's all of the ids)
-	ids=rdata['ids']
-
-	df=eval(dfname)['df']
-	df=df.fillna('null')
-	df2=df[df['id'].isin(ids)]
-	idxvar=rdata['idx'][0]
-	
-	colvars=rdata['cols']
-	
-	valvar=rdata['value_field'][0]
-	
-	colsdf=[df2[c] for c in colvars]
-	
-	idxdf=df2[idxvar]
-	
-	valdf=df2[valvar]
-	
-	fn=rdata['agg_fn'][0]
-	
-	if fn=='count':
-		aggfunc='count'
-	else:
-		aggfunc=eval("np."+fn)
-	
-	#from https://stackoverflow.com/questions/42150769/pandas-multi-index-dataframe-to-nested-dictionary
-	def createDictFromPandas(thisdf):
-		if (thisdf.index.nlevels==1):
-			return thisdf.to_dict(into=NotNanDict)
-		dict_f = {}
-		for level in thisdf.index.levels[0]:
-			if (level in thisdf.index):
-				res=createDictFromPandas(thisdf.xs(level))
-				dict_f[level]=createDictFromPandas(thisdf.xs(level))
-		return dict_f
-	
-	ct=pd.crosstab(
-		colsdf,
-		idxdf,
-		values=valdf,
-		aggfunc=aggfunc
-	)
-	
-	ct2=createDictFromPandas(ct)
-	
-	return jsonify(ct2)
-
-
-
-
-
-
-
-
 @app.route('/crosstabs/',methods=['POST'])
 def crosstabs():
 	
 	'''
 	Implements the pandas crosstab function and returns the sparse summary.
 	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
+	Is my solution below (raw html) elegant? No.
+	Is that the point? No! Consider that the slavevoyages tables
+		1. aren't true pivot tables (can't group rows)
+		2. don't even work right now (row header is wrong)
+	Recommend using something like this to paginate the bulky html: https://jsfiddle.net/u9d1ewsh/
+	And other on-page jquery handlers for column sorting, sankey & map popups, column & row collapsing, etc.
+	Unfortunately, I haven't figured out how to do this for less than 10MB and 5 seconds if I style the html dump at all
+	--> so for now at least it'll have to be on-page jquery indexing?
 	'''
 
 # 	try:
@@ -209,7 +146,9 @@ def crosstabs():
 	rows=rdata['rows']
 	val=rdata['value_field'][0]
 	fn=rdata['agg_fn'][0]
-
+	
+	print("columns",columns)
+	
 	normalize=rdata.get('normalize')
 	if normalize is not None:
 		normalize=normalize[0]
@@ -217,22 +156,172 @@ def crosstabs():
 		normalize=False
 
 	df=eval(dfname)['df']
-	
 	df2=df[df['id'].isin(ids)]
+	rows=rows[0]
+	
+	yeargroupmode=False
+	
+	def interval_to_str(s):
+		s=str(s)
+		return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
+	
+	valuetype=options[val]['type']
+	
+	if re.match('.*year__[0-9]+',rows):
+		yeargroupmode=True
+		binsize=int(re.search('[0-9]+',rows).group(0))
+		cutvar=re.sub('_+[0-9]+$','',rows)
+		df2=df2.dropna(subset=[cutvar,val])
+		df2=df2.assign(YEARAM=df2[cutvar].astype('int'))
+		yearam_min=df2[cutvar].min()
+		yearam_max=df2[cutvar].max()
+		year_ints=list(range(int(yearam_min),int(yearam_max+1)))
+		if yearam_max-yearam_min <= binsize:
+			nbins=1
+		else:
+			nbins=int((yearam_max-yearam_min)/binsize)
+		bin_arrays=np.array_split(year_ints,nbins)
+		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
+		print("BINS",bins)
+		df2=df2.assign(YEARAM_BINS=pd.cut(df2['YEARAM'],bins,include_lowest=True))
+		print('DF2',df2)
+		df3=df2[columns+[val]+['YEARAM_BINS']]
+		df3[val]=df3[val].astype('int')
+		print('df3cols',df3,df3.columns)
+		df3['YEARAM_BINS']=df3['YEARAM_BINS'].apply(interval_to_str)
+		print('df3colsB',df3,df3.columns,df3.dtypes)
+		ct=pd.crosstab(
+			[df3['YEARAM_BINS']],
+			[df3[col] for col in columns],
+			values=df3[val],
+			aggfunc=fn,
+			margins=True
+		)
+		ct.fillna(0)
+		print(ct)
+	else:
+		ct=pd.crosstab(
+			[df2[rows]],
+			[df2[col] for col in columns],
+			values=df2[val],
+			aggfunc=fn,
+			normalize=normalize,
+			margins=True
+		)
+		ct.fillna(0)
+	
+# 	print("crosstabs",ct)
+	
+	if len(columns)==1:
+		mlctuples=[[i] for i in list(ct.columns)]
+	else:
+		mlctuples=list(ct.columns)
+	
+# 	print("tuples",mlctuples)
+	
+	def makechild(name,isfield=False,columngroupshow=False,key=None):
+		if columngroupshow:
+			cgsval="open"
+		else:
+			cgsval="closed"
+		if isfield:
+			##N.B. "All" is a reserved column name here, for the margins/totals
+			### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+			if type(key) in [list,tuple]:
+				if key[0]=='All':
+					key='All'
+				else:
+					key=re.sub('\.','','__'.join(key))
+			
+			child={
+				"columnGroupShow":cgsval,
+				"headerName":name,
+				"field":key,
+				"filter": 'agNumberColumnFilter',
+				"sort": 'desc'
+			}
+			if key=='All':
+				child['pinned']='right'
+		else:
+			child={
+				"headerName":name,
+				"children":[]
+			}
+		return child
+		
+	##N.B. "All" is a reserved column name here, for the margins/totals
+	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+	def makecolgroups(colgroups,mlct,fullpath):
+		k=mlct.pop()
+		if k is not None:
+			if len(mlct)>0 and k!= 'All':
+				headernames=[cg['headerName'] for cg in colgroups]
+				if k not in headernames:
+					thiscg=makechild(k,isfield=False)
+					colgroups.append(thiscg)
+				else:
+					thiscg=[cg for cg in colgroups if cg['headerName']==k][0]
+				thiscg_idx=colgroups.index(thiscg)
+				colgroups[thiscg_idx]['children']=makecolgroups(thiscg['children'],mlct,fullpath)
+			elif k=='All':
+				##N.B. "All" is a reserved column name here, for the margins/totals
+				thiscg=makechild('',isfield=False)
+				thisfield=makechild(k,isfield=True,key=fullpath)
+				thiscg['children'].append(thisfield)
+				colgroups.append(thiscg)
+			else:
+				thisfield=makechild(k,isfield=True,key=fullpath)
+				colgroups.append(thisfield)
+		return colgroups
+	
+	colgroups=[]
+	indexcol_varname=rows[0]
+	if 'rows_label' in rdata:
+		indexcol_name=rdata['rows_label'][0]
+	else:
+		indexcol_name=''
+	indexcolcg=makechild('',isfield=False)
+	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name)
+	indexcolfield['pinned']='left'
+	indexcolcg['children'].append(indexcolfield)
+	colgroups.append(indexcolcg)
+	
+	for mlct in mlctuples:
+		l=list(mlct)
+		l.reverse()
+		colgroups=makecolgroups(colgroups,l,mlct)
+	
+	records=[]
+	##N.B. "All" is a reserved column name here, for the margins/totals
+	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
+	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
+	allcolumns.insert(0,indexcol_name)
+	ct=ct.fillna(0)
+	
+	def convertcell(cellval,valuetype):
+		if valuetype in [
+			"<class 'rest_framework.fields.FloatField'>",
+			"<class 'rest_framework.fields.DecimalField'>"
+		]:
+			return float(cellval)
+		elif valuetype=="<class 'rest_framework.fields.IntegerField'>":
+			return int(cellval)
+		
+	
+	for r in ct.to_records():	
+		for i in range(len(r)):
+			if i==0:
+				thisrecord={
+					allcolumns[i]:(
+						convertcell(r[i],valuetype) if i!=0 else r[i]
+					)
+					for i in range(len(r))
+				}
+		records.append(thisrecord)
+	
+	output={'tablestructure':colgroups,'data':records}
+	return json.dumps(output)
 
-	bins=rdata.get('bins')
-	if bins is not None:
-		binvar,nbins=[bins[0],int(bins[1])]
-		df2=pd.cut(df2[binvar],nbins)
-	ct=pd.crosstab(
-		df2[columns],
-		df2[rows],
-		values=df2[val],
-		aggfunc=eval("np."+fn),
-		normalize=normalize,
-	)
-	ctd={col: ct[col].dropna().to_dict() for col in ct.columns}
-	return jsonify(ctd)
 # 	except:
 # 		abort(400)
 

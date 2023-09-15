@@ -6,11 +6,11 @@ from django.db.models.aggregates import StdDev
 from .nest import *
 from django.core.paginator import Paginator
 import html
+import pysolr
 #GENERIC FUNCTION TO RUN A CALL ON REST SERIALIZERS
 ##Default is to auto prefetch, but need to be able to turn it off.
 ##For instance, on our PAST graph-like data, the prefetch can overwhelm the system if you try to get everything
 ##can also just pass an array of prefetch vars
-
 
 def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
@@ -20,15 +20,45 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	results_count=None
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
 # 	print(all_fields)
-	
+# 	print("----->",type(r))
 	try:
-		params=dict(r.POST)
+		if type(r)==dict:
+			params=r
+		else:
+			params=dict(r.POST)
 		pp = pprint.PrettyPrinter(indent=4)
 		print("--post req params--")
 		pp.pprint(params)
 	except:
 		errormessages.append("error parsing parameters")
 	
+	if 'global_search' in params:
+		qsetclassstr=str(queryset[0].__class__)
+		
+		solrcorenamedict={
+			"<class 'voyage.models.Voyage'>":'voyages',
+			"<class 'past.models.EnslaverIdentity'>":'enslavers',
+			"<class 'past.models.Enslaved'>":'enslaved',
+			"<class 'blog.models.Post'>":'blog'
+		}
+		
+		solrcorename=solrcorenamedict[qsetclassstr]
+		print("CLASS",qsetclassstr,solrcorename)
+		
+		solr = pysolr.Solr(
+			'http://voyages-solr:8983/solr/%s/' %solrcorename,
+			always_commit=True,
+			timeout=10
+		)
+		search_string=params['global_search'][0]
+		search_string=re.sub("\s+"," ",search_string)
+		search_string=search_string.strip()
+		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
+		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
+		ids=[doc['id'] for doc in results.docs]
+		queryset=queryset.filter(id__in=ids)
+		
 	selected_fields=params.get('selected_fields') or list(all_fields.keys())
 	bad_fields=[f for f in selected_fields if f not in all_fields]
 	if len(bad_fields)>0:
@@ -48,20 +78,16 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		if len(active_numeric_search_fields)>0:
 			for field in active_numeric_search_fields:
 				fieldvals=params.get(field)
-				if '*' in fieldvals:
-					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
-				elif '**' in fieldvals and len(fieldvals)==2:
-					if fieldvals[0]=='**':
-						kwargs['{0}__{1}'.format(field, 'lte')]=max
-					else:
-						kwargs['{0}__{1}'.format(field, 'gte')]=min
-				else:
+				if len(fieldvals)==2 and '*' not in fieldvals:
 					range=fieldvals
 					vals=[float(i) for i in range]
 					vals.sort()
 					min,max=vals
 					kwargs['{0}__{1}'.format(field, 'lte')]=max
 					kwargs['{0}__{1}'.format(field, 'gte')]=min
+				else:
+					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
+					
 		###text filters (exact match, and allow for multiple entries joined by an or)
 		###this hard eval is not ideal but I can't quite see how else to do it just now?
 		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]

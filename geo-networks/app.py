@@ -295,7 +295,7 @@ def network_maps():
 	for s in edges:
 		for t in edges[s]:
 			edge=edges[s][t]
-			thisedge={'source':s,'target':t,'w':edge['weight'],'type':edge['type']}
+			thisedge={'source':s,'target':t,'weight':edge['w'],'type':edge['type']}
 			edgesflat.append(thisedge)
 	outputs={
 		"nodes":[nodes[k] for k in nodes],

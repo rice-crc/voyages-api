@@ -162,6 +162,10 @@ STATIC_ROOT='static'
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    "geo/staticfiles"
+]
+
 # Default FileBrowser site
 site = FileBrowserSite(name='filebrowser')
 

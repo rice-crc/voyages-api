@@ -9,6 +9,7 @@ from utils import *
 import networkx as nx
 from networkx_query import search_nodes, search_edges
 import re
+from maps import rnconversion
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -22,10 +23,11 @@ def load_graph(endpoint,graph_params):
 		# FIRST, ADD THE OCEANIC NETWORK FROM THE APPROPRIATE JSON FLATFILE
 		## AS POINTED TO IN THE INDEX_VARS.PY FILE
 		oceanic_network_file=rc['oceanic_network_file']
-		d=open(oceanic_network_file,'r')
-		t=d.read()
-		d.close()
-		oceanic_network=json.loads(t)
+		oceanic_network=rnconversion.main(oceanic_network_file)
+# 		d=open(oceanic_network_file,'r')
+# 		t=d.read()
+# 		d.close()
+# 		oceanic_network=json.loads(t)
 		G,max_node_id=add_oceanic_network(G,oceanic_network,init_node_id=0)
 		print("created oceanic network",G)
 		# THEN ITERATE OVER THE GEO VARS IN THE INDEX
@@ -56,6 +58,7 @@ rcnames=list(registered_caches.keys())
 standoff_base=4
 standoff_count=0
 st=time.time()
+
 while True:
 	failures_count=0
 	for rcname in rcnames:
@@ -65,16 +68,16 @@ while True:
 			rc['graphs']={}
 
 		for graph_params in rc['graph_params']:
-			try:
-				graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-				rc['graphs'][graph_name]={
-					'graph':graph,
-					'shortest_paths':shortest_paths
-				}
-			except:
-				failures_count+=1
-				print("failed on cache:",rc['name'])
-				break
+# 			try:
+			graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
+			rc['graphs'][graph_name]={
+				'graph':graph,
+				'shortest_paths':shortest_paths
+			}
+# 			except:
+# 				failures_count+=1
+# 				print("failed on cache:",rc['name'])
+# 				break
 		registered_caches[rcname]=rc
 	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
 	if failures_count==len(rcnames):
@@ -84,7 +87,7 @@ while True:
 		standoff_count+=1
 	else:
 		break
-print("finished building graphs in %d seconds" %int(time.time()-st))
+# print("finished building graphs in %d seconds" %int(time.time()-st))
 
 @app.route('/network_maps/',methods=['POST'])
 def network_maps():
@@ -212,10 +215,9 @@ def network_maps():
 								sp=nx.shortest_path(graph,s_id,t_id,'distance')
 							
 						except:
-# 							print("---\nNO PATH")
-# 							print("from",sourcenode)
-# 							print("to",targetnode,"\n---")
-							
+							print("---\nNO PATH")
+							print("from",sourcenode)
+							print("to",targetnode,"\n---")
 							sp=[]
 						shortest_path_times+=time.time()-shortest_path_st
 									
@@ -228,7 +230,6 @@ def network_maps():
 								"weight":w
 							})
 							abpairs=[(sp[i],sp[i+1]) for i in range(len(sp)-1)]
-# 							prev_node_id=None
 							for a,b in abpairs:
 								
 								anode=graph.nodes[a]
@@ -256,41 +257,22 @@ def network_maps():
 									nodes[a_id]={
 										'data':anode,
 										'id':a_id,
-# 										'next_nodes':{b_id:1},
 										'weights':{}
 									}
-# 									if prev_node_id is not None:
-# 										nodes[a_id]['prev_nodes']={prev_node_id:1}
-# 								else:
-# 									if prev_node_id is not None:
-# 										if prev_node_id in nodes[a_id]['prev_nodes']:
-# 											nodes[a_id]['prev_nodes'][prev_node_id]+=1
-# 										else:
-# 											nodes[a_id]['prev_nodes'][prev_node_id]=1
-# 									if b_id in nodes[a_id]['next_nodes']:
-# 										nodes[a_id]['next_nodes'][b_id]+=1
-# 									else:
-# 										nodes[a_id]['next_nodes'][b_id]=1
 								if b_id not in nodes:
 									nodes[b_id]={
 										'data':bnode,
 										'id':b_id,
-# 										'prev_nodes':{a_id:1},
-# 										'next_nodes':{},
 										'weights':{}
 									}
-# 								elif a_id is not None:
-# 									if a_id in nodes[b_id]['prev_nodes']:
-# 										nodes[b_id]['prev_nodes'][a_id]+=1
-# 									else:
-# 										nodes[b_id]['prev_nodes'][a_id]=1
-# 								prev_node_id=a_id
-								
 	
 	print("shortest path times=",shortest_path_times)
-						
-	#tp60 wants these edges flattened
-# 	edgesflat={linklabel:[] for linklabel in edges}
+	
+	splined=True
+	
+	if splined:
+		edges=spline_curves(nodes,edges,shortest_paths)
+	
 	edgesflat=[]
 	for s in edges:
 		for t in edges[s]:

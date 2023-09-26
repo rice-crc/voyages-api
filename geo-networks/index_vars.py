@@ -90,7 +90,7 @@ voyage_maps={
 			]
 		}
 	],
-	'oceanic_network_file':'maps/all_routes.json'
+	'oceanic_network_file':'maps/all_routes.js'
 }
 
 ao_maps={
@@ -223,5 +223,5 @@ ao_maps={
 			]
 		}
 	],
-	'oceanic_network_file':'maps/ao_routes.json'
+	'oceanic_network_file':'maps/ao_routes.js'
 }

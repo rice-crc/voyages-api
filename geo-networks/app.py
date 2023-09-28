@@ -89,6 +89,12 @@ while True:
 		break
 # print("finished building graphs in %d seconds" %int(time.time()-st))
 
+def add_stripped_node_to_dict(node,nodesdict):
+	if 'tags' in node:
+		del node['tags']
+	nodesdict[s_uuid]['data']=node
+	return nodesdict
+
 @app.route('/network_maps/',methods=['POST'])
 def network_maps():
 	
@@ -112,8 +118,9 @@ def network_maps():
 	# linklabels are an array (length N-1)
 	## that classify the edges
 	## e.g., in the AO map, ['origination','transportation','disposition']
-	## NOTE -- "TRANSPORTATION" IS SPECIAL (YES, HARD-CODED)
-	## IT FORCES SELF-LOOPS TO ENTER INTO THE OCEANIC NETWORK AND THEN FIND A PATH HOME
+	## NOTE -- "TRANSPORTATION" IS SPECIAL
+	## IT EXPANDS THE PATH BY TRAVERSING THE OCEANIC NETWORK (IF THE GRAPH WAS BUILT PROPERLY)
+	## AND ON SELF-LOOPS IT ENTERS INTO THE OCEANIC NETWORK AND THEN FINDS A PATH BACK
 	linklabels=rdata['linklabels']
 	# nodelabels are N long
 	nodelabels=rdata['nodelabels']
@@ -132,151 +139,275 @@ def network_maps():
 		} for k in payload for i in k.split('__') if i != "None"
 	}
 	
-	classedabweights={}
-# 	print(json.dumps(payload,indent=2))
+	paths=[]
+	
+	edges={}
+	
+	#iterate over the paths
 	for k in payload:
-# 		print(payload[k])
 		w=payload[k]
 		uuids=k.split('__')
+		# because, for now, the paths are all the same length, N, e.g.
+		## people: [origin,embarkation,disembarkation,disposition]
+		## voyages: [embarkation,disembarkation]
+		# and each (nullable) position in the path carries semantic value
+		# to apply the weight of this path across all the affected nodes
+		# while retaining that semantic value
 		for idx in range(len(uuids)):
 			uuid=uuids[idx]
 			if uuid not in [None,'None']:
 				nodelabel=nodelabels[idx]
 				nodes[uuid]['weights'][nodelabel]+=w
-		#edges
+		#similarly for linklabels, which are N-1 long
 		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
+		thispath={"nodes":[],"weight":w}
 		for idx in range(len(linklabels)):
 			abpair=abpairs[idx]
 			linklabel=linklabels[idx]
-			if linklabel not in classedabweights:
-				classedabweights[linklabel]={}
-			if "None" not in abpair:
-				a,b=abpair
-				if a not in classedabweights[linklabel]:
-					classedabweights[linklabel][a]={b:w}
-				else:
-					if b not in classedabweights[linklabel][a]:
-						classedabweights[linklabel][a][b]=w
-					else:
-						classedabweights[linklabel][a][b]+=w
-	
-# 	print(json.dumps(classedabweights,indent=2))
-	
-	edges={}
-	
-	shortest_path_times=0
-	
-	shortest_paths=[]
-	
-	for linklabel in linklabels:
-# 		print(linklabel)
-		abweights=classedabweights[linklabel]
-# 		print(abweights)
-		for s_uuid in abweights:
-			sourcenodematch=[n for n in search_nodes(graph,{"==":["uuid",s_uuid]})]
-			# currently, i'm only getting errors on nodes that had no lat or long
-			## and therefore were not added into the network
-# 			print("SOURCE",s_uuid,sourcenodematch)
-			if len(sourcenodematch)>0:
-				s_id=sourcenodematch[0]
-				#drop the networkx node tags
-				##we want dynamic multi-classed scores on each node
-				##BUT DO NOT TOUCH THE GRAPH ITSELF
-				sourcenode=dict(graph.nodes[s_id])
-				if 'tags' in sourcenode:
-					del sourcenode['tags']
-				nodes[s_uuid]['data']=sourcenode
-				for t_uuid in abweights[s_uuid]:
-					targetnodematch=[n for n in search_nodes(graph,{"==":["uuid",t_uuid]})]
-# 					print("TARGET",t_uuid,targetnodematch)
-					if len(targetnodematch)>0:
-						t_id=targetnodematch[0]
-						spfail=False
-						if s_id==t_id and linklabel=='transportation':
- 							#TRANSPORTATION SELF-LOOP
-							selfloop=True
-							successor_ids=[
-								n_id for n_id in graph.successors(s_id)
-								if 'onramp' in graph.nodes[n_id]['tags']
-							]
-							if len(successor_ids)==0:
-								spfail=True
-							else:
-								successor_id=successor_ids[0]
+			if "None" not in abpair and None not in abpair:
+				#if we hit a break in the path then we want to reset
+				#but still record the discontinuous segments
+				if len(thispath)>0:
+					paths.append(thispath)
+					thispath=[]
+			else:
+				a_uuid,b_uuid=abpair
+				amatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",a_uuid]})]),None)
+				bmatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",b_uuid]})]),None)
+				#the db can still return path node uuid's for places that don't have good geo data (nulled or zeroed lat/long)
+				#so we have to screen those out, as they have been excluded from the networkx graph db
+				if amatch is not None and bmatch is not None:
+					a_id=amatch
+					if len(thispath['nodes'])==0:
+						thispath['nodes'].append(a_uuid)
+					b_id=bmatch
+					nodes=add_stripped_node_to_dict(dict(graph.nodes[a_id]),nodes)
+					nodes=add_stripped_node_to_dict(dict(graph.nodes[b_id]),nodes)
+					#get the shortest path from a to b, according to the graph
+					
+					#but also handle transportation self-loops...
+					spfail=False
+					if a_id==b_id and linklabel=='transportation':
+						#transportation self-loop
+						self_loop=True
+						successor_ids=[
+							n_id for n_id in graph.successors(a_id)
+							if 'onramp' in graph.nodes[n_id]['tags']
+						]
+						if len(successor_ids)==0:
+							spfail=True
 						else:
-							selfloop=False
-						w=classedabweights[linklabel][s_uuid][t_uuid]
-						targetnode=dict(graph.nodes[t_id])
+							successor_id=successor_ids[0]
+					else:
+						selfloop=False
+					
+					if not spfail:
+						try:
+							if selfloop:
+								sp=nx.shortest_path(graph,successor_id,b_id,'distance')
+								sp.insert(0,a_id)
+							else:
+								sp=nx.shortest_path(graph,s_id,t_id,'distance')
+						except:
+							spfail=True
+					
+					#if all our shortest path work has failed, then return a straight line
+					## but log it!
+					if spfail:
+						print("---\nNO PATH")
+						print("from",sourcenode)
+						print("to",targetnode," -- drawing straight line.\n---")
+						sp=[a_id,b_id]
+					
+					#retrieve the uuid's where applicable
+					sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
+					
+					#update the full path with this a, ... , b walk we've just performed
+					thispath['nodes']+=sp_export
+					
+					#update the nodes dictionary with any new nodes
+					for n_id in sp_export:
+						if n_id not in nodes:
+							newnode_data=dict(graph.nodes[n_id])
+							nodes[n_id]={
+								'data':newnode_data,
+								'id':n_id
+							}
+					#update the edges dictionary with this a, ..., b walk data
+					sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
+					for sp_DC_pair in sp_DC_pairs:
+						sp_DC_pair_key='__'.join(sp_DC_pair)
+						if sp_DC_pair_key in edges:
+							edges[sp_DC_pair_key]['weight']+=weight
+						else:
+							edges[sp_DC_pair_key]={
+								'weight':weight,
+								'type':linklabel
+							}
 						
-						if 'tags' in targetnode:
-							del targetnode['tags']
-						nodes[t_uuid]['data']=targetnode
-						
-						shortest_path_st=time.time()
-						if not spfail:
-							try:
-								if selfloop:
-									sp=nx.shortest_path(graph,successor_id,t_id,'distance')
-									sp.insert(0,s_id)
-								else:
-									sp=nx.shortest_path(graph,s_id,t_id,'distance')
-							except:
-								spfail=True
-						
-						if spfail:
-							print("---\nNO PATH")
-							print("from",sourcenode)
-							print("to",targetnode,"\n---")
-							sp=[s_id,t_id]
-						shortest_path_times+=time.time()-shortest_path_st
-						
-# 						print(sp)
-									
-						if len(sp)>1:
-							sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
-							shortest_paths.append({
-								"path":sp_export,
-								"weight":w
-							})
-							abpairs=[(sp[i],sp[i+1]) for i in range(len(sp)-1)]
-							for a,b in abpairs:
-								
-								anode=graph.nodes[a]
-								bnode=graph.nodes[b]
-								
-								if 'uuid' not in anode:
-									a_id=str(a)
-								else:
-									a_id=anode['uuid']
-								if 'uuid' not in bnode:
-									b_id=str(b)
-								else:
-									b_id=bnode['uuid']
-								
-								#edges
-								if a_id not in edges:
-									edges[a_id]={b_id:{'w':w,'type':linklabel}}
-								else:
-									if b_id not in edges[a_id]:
-										edges[a_id][b_id]={'w':w,'type':linklabel}
-									else:
-										edges[a_id][b_id]['w']+=w
-								#add oceanic nodes (although we prob don't need to?)
-								if a_id not in nodes:
-									nodes[a_id]={
-										'data':anode,
-										'id':a_id,
-										'weights':{}
-									}
-								if b_id not in nodes:
-									nodes[b_id]={
-										'data':bnode,
-										'id':b_id,
-										'weights':{}
-									}
-	
-	print("shortest path times=",shortest_path_times)
-	
+	# 				
+# 						
+# 						
+# 						for n_id in sp_
+# 					
+# 					
+# 					
+# 				
+# 				
+# 					
+# 	
+# 	
+# 	
+# 	
+# 	
+# 	
+# 	
+# 	classedabweights={}
+# # 	print(json.dumps(payload,indent=2))
+# 	for k in payload:
+# # 		print(payload[k])
+# 		w=payload[k]
+# 		uuids=k.split('__')
+# 		for idx in range(len(uuids)):
+# 			uuid=uuids[idx]
+# 			if uuid not in [None,'None']:
+# 				nodelabel=nodelabels[idx]
+# 				nodes[uuid]['weights'][nodelabel]+=w
+# 		#edges
+# 		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
+# 		for idx in range(len(linklabels)):
+# 			abpair=abpairs[idx]
+# 			linklabel=linklabels[idx]
+# 			if linklabel not in classedabweights:
+# 				classedabweights[linklabel]={}
+# 			if "None" not in abpair:
+# 				a,b=abpair
+# 				if a not in classedabweights[linklabel]:
+# 					classedabweights[linklabel][a]={b:w}
+# 				else:
+# 					if b not in classedabweights[linklabel][a]:
+# 						classedabweights[linklabel][a][b]=w
+# 					else:
+# 						classedabweights[linklabel][a][b]+=w
+# 				
+# 	
+# # 	print(json.dumps(classedabweights,indent=2))
+# 	
+# 	edges={}
+# 	
+# 	shortest_path_times=0
+# 	
+# 	shortest_paths=[]
+# 	
+# 	for linklabel in linklabels:
+# # 		print(linklabel)
+# 		abweights=classedabweights[linklabel]
+# # 		print(abweights)
+# 		for s_uuid in abweights:
+# 			sourcenodematch=[n for n in search_nodes(graph,{"==":["uuid",s_uuid]})]
+# 			# currently, i'm only getting errors on nodes that had no lat or long
+# 			## and therefore were not added into the network
+# # 			print("SOURCE",s_uuid,sourcenodematch)
+# 			if len(sourcenodematch)>0:
+# 				s_id=sourcenodematch[0]
+# 				#drop the networkx node tags
+# 				##we want dynamic multi-classed scores on each node
+# 				##BUT DO NOT TOUCH THE GRAPH ITSELF
+# 				sourcenode=dict(graph.nodes[s_id])
+# 				if 'tags' in sourcenode:
+# 					del sourcenode['tags']
+# 				nodes[s_uuid]['data']=sourcenode
+# 				for t_uuid in abweights[s_uuid]:
+# 					targetnodematch=[n for n in search_nodes(graph,{"==":["uuid",t_uuid]})]
+# # 					print("TARGET",t_uuid,targetnodematch)
+# 					if len(targetnodematch)>0:
+# 						t_id=targetnodematch[0]
+# 						spfail=False
+# 						if s_id==t_id and linklabel=='transportation':
+#  							#TRANSPORTATION SELF-LOOP
+# 							selfloop=True
+# 							successor_ids=[
+# 								n_id for n_id in graph.successors(s_id)
+# 								if 'onramp' in graph.nodes[n_id]['tags']
+# 							]
+# 							if len(successor_ids)==0:
+# 								spfail=True
+# 							else:
+# 								successor_id=successor_ids[0]
+# 						else:
+# 							selfloop=False
+# 						w=classedabweights[linklabel][s_uuid][t_uuid]
+# 						targetnode=dict(graph.nodes[t_id])
+# 						
+# 						if 'tags' in targetnode:
+# 							del targetnode['tags']
+# 						nodes[t_uuid]['data']=targetnode
+# 						
+# 						shortest_path_st=time.time()
+# 						if not spfail:
+# 							try:
+# 								if selfloop:
+# 									sp=nx.shortest_path(graph,successor_id,t_id,'distance')
+# 									sp.insert(0,s_id)
+# 								else:
+# 									sp=nx.shortest_path(graph,s_id,t_id,'distance')
+# 							except:
+# 								spfail=True
+# 						
+# 						if spfail:
+# 							print("---\nNO PATH")
+# 							print("from",sourcenode)
+# 							print("to",targetnode,"\n---")
+# 							sp=[s_id,t_id]
+# 						shortest_path_times+=time.time()-shortest_path_st
+# 						
+# # 						print(sp)
+# 									
+# 						if len(sp)>1:
+# 							sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
+# 							shortest_paths.append({
+# 								"path":sp_export,
+# 								"weight":w
+# 							})
+# 							abpairs=[(sp[i],sp[i+1]) for i in range(len(sp)-1)]
+# 							for a,b in abpairs:
+# 								
+# 								anode=graph.nodes[a]
+# 								bnode=graph.nodes[b]
+# 								
+# 								if 'uuid' not in anode:
+# 									a_id=str(a)
+# 								else:
+# 									a_id=anode['uuid']
+# 								if 'uuid' not in bnode:
+# 									b_id=str(b)
+# 								else:
+# 									b_id=bnode['uuid']
+# 								
+# 								#edges
+# 								if a_id not in edges:
+# 									edges[a_id]={b_id:{'w':w,'type':linklabel}}
+# 								else:
+# 									if b_id not in edges[a_id]:
+# 										edges[a_id][b_id]={'w':w,'type':linklabel}
+# 									else:
+# 										edges[a_id][b_id]['w']+=w
+# 								#add oceanic nodes (although we prob don't need to?)
+# 								if a_id not in nodes:
+# 									nodes[a_id]={
+# 										'data':anode,
+# 										'id':a_id,
+# 										'weights':{}
+# 									}
+# 								if b_id not in nodes:
+# 									nodes[b_id]={
+# 										'data':bnode,
+# 										'id':b_id,
+# 										'weights':{}
+# 									}
+# 	
+# 	print("shortest path times=",shortest_path_times)
+# 	
 	splined=True
 	
 	if splined:

@@ -241,18 +241,18 @@ def retrieve_nodeXY(node):
 	nodeY=node['data']['lon']
 	return [nodeX,nodeY]
 
-def add_edge_topathdict(edgesdict,s,t,c1,c2,pathweight):
-	if 'controls' in edgesdict[s][t]:
-		edgesdict[s][t]['controls']['c1'].append({
+def add_edge_topathdict(edgesdict,edge_id,c1,c2,pathweight):
+	if 'controls' in edgesdict[edge_id]:
+		edgesdict[edge_id]['controls']['c1'].append({
 			'control':c1,
 			'weight':pathweight
 		})
-		edgesdict[s][t]['controls']['c2'].append({
+		edgesdict[edge_id]['controls']['c2'].append({
 			'control':c2,
 			'weight':pathweight
 		})
 	else:
-		edgesdict[s][t]['controls']={
+		edgesdict[edge_id]['controls']={
 			'c1':[{
 				'control':c1,
 				'weight':pathweight
@@ -293,7 +293,8 @@ def spline_curves(nodes,edges,paths,G):
 				Bxy=retrieve_nodeXY(B)
 				Cxy=retrieve_nodeXY(C)
 				this_control,next_control=curvedab(Axy,Bxy,Cxy,prev_controlXY)
-				edges=add_edge_topathdict(edges,A_id,B_id,this_control,next_control,pathweight)
+				edge_id="__".join([A_id,B_id])
+				edges=add_edge_topathdict(edges,edge_id,this_control,next_control,pathweight)
 				prev_controlXY=next_control
 				i+=1
 			A=getnodefromdict(pathnodes[i],nodes,G)
@@ -304,7 +305,8 @@ def spline_curves(nodes,edges,paths,G):
 			A_id=str(A['id'])
 			B_id=str(B['id'])
 			this_control,next_control=curvedab(Axy,Bxy,C,prev_controlXY)
-			edges=add_edge_topathdict(edges,A_id,B_id,this_control,next_control,pathweight)
+			edge_id="__".join([A_id,B_id])
+			edges=add_edge_topathdict(edges,edge_id,this_control,next_control,pathweight)
 			
 		elif len(pathnodes)==2:
 			A=getnodefromdict(pathnodes[0],nodes,G)
@@ -316,7 +318,8 @@ def spline_curves(nodes,edges,paths,G):
 			midx=(Axy[0]+Bxy[0])/2;
 			midy=(Axy[1]+Bxy[1])/2;
 			Control=[midx,midy]
-			edges=add_edge_topathdict(edges,A_id,B_id,Control,Control,pathweight)
+			edge_id="__".join([A_id,B_id])
+			edges=add_edge_topathdict(edges,edge_id,Control,Control,pathweight)
 		else:
 			print("bad path -- only one node?",path)
 	
@@ -336,16 +339,16 @@ def spline_curves(nodes,edges,paths,G):
 			finalY=numeratorY/denominator
 		
 		return [finalX,finalY]
-		
-	for s in edges:
-		for t in edges[s]:
-			controls=edges[s][t]['controls']
-			try:
-				updatedc1=weightedaverage(controls['c1'])
-				updatedc2=weightedaverage(controls['c2'])
-				edges[s][t]['controls']=[updatedc1,updatedc2]
-			except:
-				print("FAILED CURVING",nodes[s],nodes[t],edges[s][t])
+	
+	for edge_id in edges:
+		s,t=edge_id.split("__")
+		controls=edges[edge_id]['controls']
+		try:
+			updatedc1=weightedaverage(controls['c1'])
+			updatedc2=weightedaverage(controls['c2'])
+			edges[edge_id]['controls']=[updatedc1,updatedc2]
+		except:
+			print("FAILED CURVING",nodes[s],nodes[t],edges[edge_id])
 	
 	return edges
 			

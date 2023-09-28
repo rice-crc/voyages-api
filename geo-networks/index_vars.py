@@ -96,9 +96,7 @@ voyage_maps={
 ao_maps={
 	'endpoint':'past/enslaved/dataframes',
 	'name':'african_origins_maps',
-	'filter':{
-		'dataset':[0,0]
-	},
+	'filter':{},
 	'type':'oceanic',
 	'graph_params': [
 		{

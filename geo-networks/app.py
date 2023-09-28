@@ -68,16 +68,16 @@ while True:
 			rc['graphs']={}
 
 		for graph_params in rc['graph_params']:
-# 			try:
-			graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-			rc['graphs'][graph_name]={
-				'graph':graph,
-				'shortest_paths':shortest_paths
-			}
-# 			except:
-# 				failures_count+=1
-# 				print("failed on cache:",rc['name'])
-# 				break
+			try:
+				graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
+				rc['graphs'][graph_name]={
+					'graph':graph,
+					'shortest_paths':shortest_paths
+				}
+			except:
+				failures_count+=1
+				print("failed on cache:",rc['name'])
+				break
 		registered_caches[rcname]=rc
 	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
 	if failures_count==len(rcnames):
@@ -128,38 +128,39 @@ def network_maps():
 		"weights":{
 			nl:0 for nl in nodelabels
 		},
-		"data":{},
-# 		"prev_nodes":{},
-# 		"next_nodes":{}
+		"data":{}
 		} for k in payload for i in k.split('__') if i != "None"
 	}
 	
 	classedabweights={}
+# 	print(json.dumps(payload,indent=2))
 	for k in payload:
+# 		print(payload[k])
 		w=payload[k]
 		uuids=k.split('__')
-		#nodes
-		if "None" not in uuids:
-			for idx in range(len(uuids)):
+		for idx in range(len(uuids)):
+			uuid=uuids[idx]
+			if uuid not in [None,'None']:
 				nodelabel=nodelabels[idx]
-				uuid=uuids[idx]
 				nodes[uuid]['weights'][nodelabel]+=w
-			#edges
-			abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
-			for idx in range(len(linklabels)):
-				abpair=abpairs[idx]
-				linklabel=linklabels[idx]
-				if linklabel not in classedabweights:
-					classedabweights[linklabel]={}
-				if "None" not in abpair:
-					a,b=abpair
-					if a not in classedabweights[linklabel]:
-						classedabweights[linklabel][a]={b:w}
+		#edges
+		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
+		for idx in range(len(linklabels)):
+			abpair=abpairs[idx]
+			linklabel=linklabels[idx]
+			if linklabel not in classedabweights:
+				classedabweights[linklabel]={}
+			if "None" not in abpair:
+				a,b=abpair
+				if a not in classedabweights[linklabel]:
+					classedabweights[linklabel][a]={b:w}
+				else:
+					if b not in classedabweights[linklabel][a]:
+						classedabweights[linklabel][a][b]=w
 					else:
-						if b not in classedabweights[linklabel][a]:
-							classedabweights[linklabel][a][b]=w
-						else:
-							classedabweights[linklabel][a][b]+=w
+						classedabweights[linklabel][a][b]+=w
+	
+# 	print(json.dumps(classedabweights,indent=2))
 	
 	edges={}
 	
@@ -168,13 +169,15 @@ def network_maps():
 	shortest_paths=[]
 	
 	for linklabel in linklabels:
+# 		print(linklabel)
 		abweights=classedabweights[linklabel]
+# 		print(abweights)
 		for s_uuid in abweights:
 			sourcenodematch=[n for n in search_nodes(graph,{"==":["uuid",s_uuid]})]
 			# currently, i'm only getting errors on nodes that had no lat or long
 			## and therefore were not added into the network
-			
-			if len(sourcenodematch)!=0:
+# 			print("SOURCE",s_uuid,sourcenodematch)
+			if len(sourcenodematch)>0:
 				s_id=sourcenodematch[0]
 				#drop the networkx node tags
 				##we want dynamic multi-classed scores on each node
@@ -185,18 +188,21 @@ def network_maps():
 				nodes[s_uuid]['data']=sourcenode
 				for t_uuid in abweights[s_uuid]:
 					targetnodematch=[n for n in search_nodes(graph,{"==":["uuid",t_uuid]})]
-					
-					if len(targetnodematch)!=0:
+# 					print("TARGET",t_uuid,targetnodematch)
+					if len(targetnodematch)>0:
 						t_id=targetnodematch[0]
-						
+						spfail=False
 						if s_id==t_id and linklabel=='transportation':
  							#TRANSPORTATION SELF-LOOP
 							selfloop=True
-							successor_id=[
+							successor_ids=[
 								n_id for n_id in graph.successors(s_id)
 								if 'onramp' in graph.nodes[n_id]['tags']
-							][0]
-							
+							]
+							if len(successor_ids)==0:
+								spfail=True
+							else:
+								successor_id=successor_ids[0]
 						else:
 							selfloop=False
 						w=classedabweights[linklabel][s_uuid][t_uuid]
@@ -207,24 +213,27 @@ def network_maps():
 						nodes[t_uuid]['data']=targetnode
 						
 						shortest_path_st=time.time()
-						try:
-							if selfloop:
-								sp=nx.shortest_path(graph,successor_id,t_id,'distance')
-								sp.insert(0,s_id)
-							else:
-								sp=nx.shortest_path(graph,s_id,t_id,'distance')
-							
-						except:
+						if not spfail:
+							try:
+								if selfloop:
+									sp=nx.shortest_path(graph,successor_id,t_id,'distance')
+									sp.insert(0,s_id)
+								else:
+									sp=nx.shortest_path(graph,s_id,t_id,'distance')
+							except:
+								spfail=True
+						
+						if spfail:
 							print("---\nNO PATH")
 							print("from",sourcenode)
 							print("to",targetnode,"\n---")
-							sp=[]
+							sp=[s_id,t_id]
 						shortest_path_times+=time.time()-shortest_path_st
+						
+# 						print(sp)
 									
 						if len(sp)>1:
-							sp_export=list(sp)
-							sp_export=sp_export[1:-1]
-							sp_export=[s_uuid]+sp_export+[t_uuid]
+							sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
 							shortest_paths.append({
 								"path":sp_export,
 								"weight":w
@@ -271,13 +280,15 @@ def network_maps():
 	splined=True
 	
 	if splined:
-		edges=spline_curves(nodes,edges,shortest_paths)
+		edges=spline_curves(nodes,edges,shortest_paths,graph)
 	
 	edgesflat=[]
 	for s in edges:
 		for t in edges[s]:
 			edge=edges[s][t]
-			thisedge={'source':s,'target':t,'weight':edge['w'],'type':edge['type'], 'controls': edge['controls']}
+			thisedge={'source':s,'target':t,'weight':edge['w'],'type':edge['type']}
+			if 'controls' in edge:
+				thisedge['controls']= edge['controls']
 			edgesflat.append(thisedge)
 	outputs={
 		"nodes":[nodes[k] for k in nodes],

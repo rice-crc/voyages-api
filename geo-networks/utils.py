@@ -114,22 +114,27 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 					lat=att_dict['lat']
 					lon=att_dict['lon']
 					if lat is not None and lon is not None:
-						att_dict['lat']=float(lat)
-						att_dict['lon']=float(lon)
-						query=[{"==": [(k,), att_dict[k]]} for k in att_dict]
-						existing_nodes=[n for n in 
-							search_nodes(G, {"and":query})
-						]
-						if len(existing_nodes)>0:
-							thisnodetags=[G.nodes[n] for n in existing_nodes][0]['tags']
-							if tag not in thisnodetags:
-								thisnodetags.append(tag)
-								G.nodes[existing_nodes[0]]['tags']=thisnodetags
+						if (float(lat) < -.1 or float(lat) > .1) and (float(lon) < -.1 or float(lon) > .1):
+							att_dict['lat']=float(lat)
+							att_dict['lon']=float(lon)
+							query=[{"==": [(k,), att_dict[k]]} for k in att_dict]
+							existing_nodes=[n for n in 
+								search_nodes(G, {"and":query})
+							]
+							if len(existing_nodes)>0:
+								thisnodetags=[G.nodes[n] for n in existing_nodes][0]['tags']
+								if tag not in thisnodetags:
+									thisnodetags.append(tag)
+									G.nodes[existing_nodes[0]]['tags']=thisnodetags
+							else:
+								att_dict['tags']=[tag]
+								rowdict=(node_id,att_dict)
+								G.add_nodes_from([rowdict])
+								node_id+=1
 						else:
-							att_dict['tags']=[tag]
-							rowdict=(node_id,att_dict)
-							G.add_nodes_from([rowdict])
-							node_id+=1
+							print("BAD NODE-->",att_dict)
+					else:
+						print("BAD NODE-->",att_dict)
 				
 	return G,node_id
 
@@ -201,6 +206,7 @@ def curvedab(A,B,C,prev_controlXY,smoothing=0.15):
 	## and returns a control point and a next control point for the AB segment
 	## why this way? because splines that look forward and back not just to points
 	## but to control points are much, much smoother
+# 	print("curving",A,B,C,prev_controlXY)
 	if prev_controlXY is None:
 		#first edge
 		ControlX = B[0] + smoothing*(A[0]-C[0])
@@ -231,8 +237,8 @@ def straightab(A,B,ab_id,result):
 
 
 def retrieve_nodeXY(node):
-	nodeX=node['data']['lon']
-	nodeY=node['data']['lat']
+	nodeX=node['data']['lat']
+	nodeY=node['data']['lon']
 	return [nodeX,nodeY]
 
 def add_edge_topathdict(edgesdict,s,t,c1,c2,pathweight):
@@ -258,20 +264,29 @@ def add_edge_topathdict(edgesdict,s,t,c1,c2,pathweight):
 		}
 	return edgesdict
 
+def getnodefromdict(node_id,nodesdict,G):
+	if str(node_id) in nodesdict:
+		node=nodesdict[str(node_id)]
+	else:
+		
+		node=G.nodes[node_id]
+		print("failed on",node_id,"data in graph is-->",node)
+	return node
 
-def spline_curves(nodes,edges,paths):
+
+def spline_curves(nodes,edges,paths,G):
 # 	print("edges",edges)
 	for path in paths:
 		pathnodes=path['path']
 		pathweight=path['weight']
 		i=0
 # 		print("pathnodes-->",pathnodes)
-		if len(pathnodes)>1:
+		if len(pathnodes)>2:
 			prev_controlXY=None
 			while i<len(pathnodes)-2:
-				A=nodes[str(pathnodes[i])]
-				B=nodes[str(pathnodes[i+1])]
-				C=nodes[str(pathnodes[i+2])]
+				A=getnodefromdict(pathnodes[i],nodes,G)
+				B=getnodefromdict(pathnodes[i+1],nodes,G)
+				C=getnodefromdict(pathnodes[i+2],nodes,G)
 				A_id=str(A['id'])
 				B_id=str(B['id'])
 				Axy=retrieve_nodeXY(A)
@@ -281,8 +296,8 @@ def spline_curves(nodes,edges,paths):
 				edges=add_edge_topathdict(edges,A_id,B_id,this_control,next_control,pathweight)
 				prev_controlXY=next_control
 				i+=1
-			A=nodes[str(pathnodes[i])]
-			B=nodes[str(pathnodes[i+1])]
+			A=getnodefromdict(pathnodes[i],nodes,G)
+			B=getnodefromdict(pathnodes[i+1],nodes,G)
 			C=None
 			Axy=retrieve_nodeXY(A)
 			Bxy=retrieve_nodeXY(B)
@@ -292,10 +307,12 @@ def spline_curves(nodes,edges,paths):
 			edges=add_edge_topathdict(edges,A_id,B_id,this_control,next_control,pathweight)
 			
 		elif len(pathnodes)==2:
-			A=nodes[str(pathnodes[0])]
-			B=nodes[str(pathnodes[1])]
+			A=getnodefromdict(pathnodes[0],nodes,G)
+			B=getnodefromdict(pathnodes[1],nodes,G)
 			Axy=retrieve_nodeXY(A)
 			Bxy=retrieve_nodeXY(B)
+			A_id=str(A['id'])
+			B_id=str(B['id'])
 			midx=(Axy[0]+Bxy[0])/2;
 			midy=(Axy[1]+Bxy[1])/2;
 			Control=[midx,midy]
@@ -304,24 +321,31 @@ def spline_curves(nodes,edges,paths):
 			print("bad path -- only one node?",path)
 	
 	def weightedaverage(controlpoints):
-		numeratorX=sum([wxy['weight']*wxy['control'][0] for wxy in controlpoints])
-		numeratorY=sum([wxy['weight']*wxy['control'][1] for wxy in controlpoints])
+		
 		denominator=sum([wxy['weight'] for wxy in controlpoints])
-		finalX=numeratorX/denominator
-		finalY=numeratorY/denominator
+		if denominator!=0:
+			numeratorX=sum([wxy['weight']*wxy['control'][0] for wxy in controlpoints])
+			numeratorY=sum([wxy['weight']*wxy['control'][1] for wxy in controlpoints])
+			finalX=numeratorX/denominator
+			finalY=numeratorY/denominator
+		else:
+			denominator=len(controlpoints)
+			numeratorX=sum([denominator*wxy['control'][0] for wxy in controlpoints])
+			numeratorY=sum([denominator*wxy['control'][1] for wxy in controlpoints])
+			finalX=numeratorX/denominator
+			finalY=numeratorY/denominator
+		
 		return [finalX,finalY]
 		
 	for s in edges:
 		for t in edges[s]:
-			# 
-# 			edge_id in list(edges.keys()):
-# 			print("edge_id:",edge_id)
-# 			s,t=edge_id.split("__")
 			controls=edges[s][t]['controls']
-# 			print("controls",controls)
-			updatedc1=weightedaverage(controls['c1'])
-			updatedc2=weightedaverage(controls['c2'])
-			edges[s][t]['controls']=[updatedc1,updatedc2]
+			try:
+				updatedc1=weightedaverage(controls['c1'])
+				updatedc2=weightedaverage(controls['c2'])
+				edges[s][t]['controls']=[updatedc1,updatedc2]
+			except:
+				print("FAILED CURVING",nodes[s],nodes[t],edges[s][t])
 	
 	return edges
 			

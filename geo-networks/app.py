@@ -50,7 +50,7 @@ def load_graph(endpoint,graph_params):
 
 registered_caches={
 	'voyage_maps':voyage_maps,
-# 	'ao_maps':ao_maps
+	'ao_maps':ao_maps
 }
 
 #on initialization, load every index as a graph, via a call to the django api
@@ -250,7 +250,8 @@ def network_maps():
 							newnode_data=dict(graph.nodes[n_id])
 							nodes[str(n_id)]={
 								'data':newnode_data,
-								'id':n_id
+								'id':n_id,
+								'weights':{}
 							}
 					#update the edges dictionary with this a, ..., b walk data
 					sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]

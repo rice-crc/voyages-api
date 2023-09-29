@@ -234,8 +234,8 @@ def network_maps():
 					## but log it!
 					if spfail:
 						print("---\nNO PATH")
-						print("from",amatch)
-						print("to",bmatch," -- drawing straight line.\n---")
+						print("from",amatch,graph.nodes[amatch])
+						print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
 						sp=[a_id,b_id]
 					
 					#retrieve the uuid's where applicable
@@ -261,7 +261,9 @@ def network_maps():
 						else:
 							edges[sp_DC_pair_key]={
 								'weight':weight,
-								'type':linklabel
+								'type':linklabel,
+								'source':str(sp_DC_pair[0]),
+								'target':str(sp_DC_pair[1])
 							}
 		if len(thispath['nodes'])>0:
 			paths.append(thispath)

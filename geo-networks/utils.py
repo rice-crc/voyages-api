@@ -343,6 +343,7 @@ def spline_curves(nodes,edges,paths,G):
 	for edge_id in edges:
 # 		print("edge-->",edges[edge_id])
 		s,t=edge_id.split("__")
+# 		print(edge_id,edges[edge_id])
 		controls=edges[edge_id]['controls']
 		try:
 			updatedc1=weightedaverage(controls['c1'])

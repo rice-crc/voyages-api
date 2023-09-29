@@ -268,8 +268,7 @@ def getnodefromdict(node_id,nodesdict,G):
 	if str(node_id) in nodesdict:
 		node=nodesdict[str(node_id)]
 	else:
-		
-		node=G.nodes[node_id]
+		node=G.nodes[str(node_id)]
 		print("failed on",node_id,"data in graph is-->",node)
 	return node
 
@@ -277,7 +276,8 @@ def getnodefromdict(node_id,nodesdict,G):
 def spline_curves(nodes,edges,paths,G):
 # 	print("edges",edges)
 	for path in paths:
-		pathnodes=path['path']
+# 		print(path)
+		pathnodes=path['nodes']
 		pathweight=path['weight']
 		i=0
 # 		print("pathnodes-->",pathnodes)
@@ -341,6 +341,7 @@ def spline_curves(nodes,edges,paths,G):
 		return [finalX,finalY]
 	
 	for edge_id in edges:
+# 		print("edge-->",edges[edge_id])
 		s,t=edge_id.split("__")
 		controls=edges[edge_id]['controls']
 		try:

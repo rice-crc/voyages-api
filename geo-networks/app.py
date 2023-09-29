@@ -50,7 +50,7 @@ def load_graph(endpoint,graph_params):
 
 registered_caches={
 	'voyage_maps':voyage_maps,
-	'ao_maps':ao_maps
+# 	'ao_maps':ao_maps
 }
 
 #on initialization, load every index as a graph, via a call to the django api
@@ -89,10 +89,20 @@ while True:
 		break
 # print("finished building graphs in %d seconds" %int(time.time()-st))
 
-def add_stripped_node_to_dict(node,nodesdict):
+def add_stripped_node_to_dict(graph,n_id,nodesdict):
+	node=dict(graph.nodes[n_id])
+	if 'uuid' in node:
+		#if it has a uuid from the database
+		#then its id will be like b3199d76-bf58-40fb-8eeb-be3986df6113
+		n_uuid=node['uuid']
+	else:
+		#else, its id in the nodesdict is the string representation
+		#of its id in the networkx graph, which was assigned at service instantiation
+		#as an auto-increment
+		n_uuid=str(n_id)
 	if 'tags' in node:
 		del node['tags']
-	nodesdict[s_uuid]['data']=node
+	nodesdict[n_uuid]['data']=node
 	return nodesdict
 
 @app.route('/network_maps/',methods=['POST'])
@@ -145,7 +155,7 @@ def network_maps():
 	
 	#iterate over the paths
 	for k in payload:
-		w=payload[k]
+		weight=payload[k]
 		uuids=k.split('__')
 		# because, for now, the paths are all the same length, N, e.g.
 		## people: [origin,embarkation,disembarkation,disposition]
@@ -157,39 +167,48 @@ def network_maps():
 			uuid=uuids[idx]
 			if uuid not in [None,'None']:
 				nodelabel=nodelabels[idx]
-				nodes[uuid]['weights'][nodelabel]+=w
+				nodes[uuid]['weights'][nodelabel]+=weight
 		#similarly for linklabels, which are N-1 long
 		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
-		thispath={"nodes":[],"weight":w}
+		thispath={"nodes":[],"weight":weight}
+# 		print("abpairs",abpairs)
 		for idx in range(len(linklabels)):
 			abpair=abpairs[idx]
 			linklabel=linklabels[idx]
-			if "None" not in abpair and None not in abpair:
+# 			print(abpair)
+			if "None" in abpair or None in abpair:
 				#if we hit a break in the path then we want to reset
 				#but still record the discontinuous segments
-				if len(thispath)>0:
+				if len(thispath['nodes'])>0:
 					paths.append(thispath)
-					thispath=[]
+					thispath={"nodes":[],"weight":weight}
 			else:
 				a_uuid,b_uuid=abpair
 				amatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",a_uuid]})]),None)
 				bmatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",b_uuid]})]),None)
+# 				print("A",a_uuid,amatch)
+# 				print("B",b_uuid,bmatch)
 				#the db can still return path node uuid's for places that don't have good geo data (nulled or zeroed lat/long)
 				#so we have to screen those out, as they have been excluded from the networkx graph db
 				if amatch is not None and bmatch is not None:
 					a_id=amatch
-					if len(thispath['nodes'])==0:
-						thispath['nodes'].append(a_uuid)
+# 					if len(thispath['nodes'])==0:
+# 						thispath['nodes'].append(a_uuid)
 					b_id=bmatch
-					nodes=add_stripped_node_to_dict(dict(graph.nodes[a_id]),nodes)
-					nodes=add_stripped_node_to_dict(dict(graph.nodes[b_id]),nodes)
+# 					print("-->",a_id,b_id)
+					nodes=add_stripped_node_to_dict(graph,a_id,nodes)
+					nodes=add_stripped_node_to_dict(graph,b_id,nodes)
+					
+# 					print(nodes)
+					
 					#get the shortest path from a to b, according to the graph
 					
 					#but also handle transportation self-loops...
 					spfail=False
+					selfloop=False
 					if a_id==b_id and linklabel=='transportation':
 						#transportation self-loop
-						self_loop=True
+						selfloop=True
 						successor_ids=[
 							n_id for n_id in graph.successors(a_id)
 							if 'onramp' in graph.nodes[n_id]['tags']
@@ -207,7 +226,7 @@ def network_maps():
 								sp=nx.shortest_path(graph,successor_id,b_id,'distance')
 								sp.insert(0,a_id)
 							else:
-								sp=nx.shortest_path(graph,s_id,t_id,'distance')
+								sp=nx.shortest_path(graph,a_id,b_id,'distance')
 						except:
 							spfail=True
 					
@@ -215,13 +234,13 @@ def network_maps():
 					## but log it!
 					if spfail:
 						print("---\nNO PATH")
-						print("from",sourcenode)
-						print("to",targetnode," -- drawing straight line.\n---")
+						print("from",amatch)
+						print("to",bmatch," -- drawing straight line.\n---")
 						sp=[a_id,b_id]
 					
 					#retrieve the uuid's where applicable
 					sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
-					
+# 					print("spexport",sp_export)
 					#update the full path with this a, ... , b walk we've just performed
 					thispath['nodes']+=sp_export
 					
@@ -229,14 +248,14 @@ def network_maps():
 					for n_id in sp_export:
 						if n_id not in nodes:
 							newnode_data=dict(graph.nodes[n_id])
-							nodes[n_id]={
+							nodes[str(n_id)]={
 								'data':newnode_data,
 								'id':n_id
 							}
 					#update the edges dictionary with this a, ..., b walk data
 					sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
 					for sp_DC_pair in sp_DC_pairs:
-						sp_DC_pair_key='__'.join(sp_DC_pair)
+						sp_DC_pair_key='__'.join([str(i) for i in sp_DC_pair])
 						if sp_DC_pair_key in edges:
 							edges[sp_DC_pair_key]['weight']+=weight
 						else:
@@ -244,6 +263,9 @@ def network_maps():
 								'weight':weight,
 								'type':linklabel
 							}
+		if len(thispath['nodes'])>0:
+			paths.append(thispath)
+			thispath={"nodes":[],"weight":weight}
 						
 	# 				
 # 						
@@ -413,6 +435,8 @@ def network_maps():
 	if splined:
 		edges=spline_curves(nodes,edges,paths,graph)
 	
+	edgesvals=[edges[k] for k in edges]
+	
 # 	edgesflat=[]
 # 	for s in edges:
 # 		for t in edges[s]:
@@ -423,7 +447,7 @@ def network_maps():
 # 			edgesflat.append(thisedge)
 	outputs={
 		"nodes":[nodes[k] for k in nodes],
-		"edges":edges,
+		"edges":edgesvals,
 		"paths":paths
 	}
 	

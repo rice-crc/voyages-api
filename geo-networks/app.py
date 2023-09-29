@@ -411,20 +411,20 @@ def network_maps():
 	splined=True
 	
 	if splined:
-		edges=spline_curves(nodes,edges,shortest_paths,graph)
+		edges=spline_curves(nodes,edges,paths,graph)
 	
-	edgesflat=[]
-	for s in edges:
-		for t in edges[s]:
-			edge=edges[s][t]
-			thisedge={'source':s,'target':t,'weight':edge['w'],'type':edge['type']}
-			if 'controls' in edge:
-				thisedge['controls']= edge['controls']
-			edgesflat.append(thisedge)
+# 	edgesflat=[]
+# 	for s in edges:
+# 		for t in edges[s]:
+# 			edge=edges[s][t]
+# 			thisedge={'source':s,'target':t,'weight':edge['w'],'type':edge['type']}
+# 			if 'controls' in edge:
+# 				thisedge['controls']= edge['controls']
+# 			edgesflat.append(thisedge)
 	outputs={
 		"nodes":[nodes[k] for k in nodes],
-		"edges":edgesflat,
-		"paths":shortest_paths
+		"edges":edges,
+		"paths":paths
 	}
 	
 	return jsonify(outputs)

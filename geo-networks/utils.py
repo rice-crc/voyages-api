@@ -242,17 +242,18 @@ def retrieve_nodeXY(node):
 	return [nodeX,nodeY]
 
 def add_edge_topathdict(edgesdict,edge_id,c1,c2,pathweight):
-	if 'controls' in edgesdict[edge_id]:
-		edgesdict[edge_id]['controls']['c1'].append({
+	s,t=edge_id
+	if 'controls' in edgesdict[s][t]:
+		edgesdict[s][t]['controls']['c1'].append({
 			'control':c1,
 			'weight':pathweight
 		})
-		edgesdict[edge_id]['controls']['c2'].append({
+		edgesdict[s][t]['controls']['c2'].append({
 			'control':c2,
 			'weight':pathweight
 		})
 	else:
-		edgesdict[edge_id]['controls']={
+		edgesdict[s][t]['controls']={
 			'c1':[{
 				'control':c1,
 				'weight':pathweight
@@ -293,7 +294,7 @@ def spline_curves(nodes,edges,paths,G):
 				Bxy=retrieve_nodeXY(B)
 				Cxy=retrieve_nodeXY(C)
 				this_control,next_control=curvedab(Axy,Bxy,Cxy,prev_controlXY)
-				edge_id="__".join([A_id,B_id])
+				edge_id=[A_id,B_id]
 				edges=add_edge_topathdict(edges,edge_id,this_control,next_control,pathweight)
 				prev_controlXY=next_control
 				i+=1
@@ -305,7 +306,7 @@ def spline_curves(nodes,edges,paths,G):
 			A_id=str(A['id'])
 			B_id=str(B['id'])
 			this_control,next_control=curvedab(Axy,Bxy,C,prev_controlXY)
-			edge_id="__".join([A_id,B_id])
+			edge_id=[A_id,B_id]
 			edges=add_edge_topathdict(edges,edge_id,this_control,next_control,pathweight)
 			
 		elif len(pathnodes)==2:
@@ -318,7 +319,7 @@ def spline_curves(nodes,edges,paths,G):
 			midx=(Axy[0]+Bxy[0])/2;
 			midy=(Axy[1]+Bxy[1])/2;
 			Control=[midx,midy]
-			edge_id="__".join([A_id,B_id])
+			edge_id=[A_id,B_id]
 			edges=add_edge_topathdict(edges,edge_id,Control,Control,pathweight)
 		else:
 			print("bad path -- only one node?",path)
@@ -340,17 +341,15 @@ def spline_curves(nodes,edges,paths,G):
 		
 		return [finalX,finalY]
 	
-	for edge_id in edges:
-# 		print("edge-->",edges[edge_id])
-		s,t=edge_id.split("__")
-# 		print(edge_id,edges[edge_id])
-		controls=edges[edge_id]['controls']
-		try:
-			updatedc1=weightedaverage(controls['c1'])
-			updatedc2=weightedaverage(controls['c2'])
-			edges[edge_id]['controls']=[updatedc1,updatedc2]
-		except:
-			print("FAILED CURVING",nodes[s],nodes[t],edges[edge_id])
+	for s in edges:
+		for t in edges[s]:
+			controls=edges[s][t]['controls']
+			try:
+				updatedc1=weightedaverage(controls['c1'])
+				updatedc2=weightedaverage(controls['c2'])
+				edges[s][t]['controls']=[updatedc1,updatedc2]
+			except:
+				print("FAILED CURVING",nodes[s],nodes[t],edges[s][t])
 	
 	return edges
 			

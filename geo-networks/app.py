@@ -263,16 +263,38 @@ def network_maps():
 					#update the edges dictionary with this a, ..., b walk data
 					sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
 					for sp_DC_pair in sp_DC_pairs:
-						sp_DC_pair_key='__'.join([str(i) for i in sp_DC_pair])
-						if sp_DC_pair_key in edges:
-							edges[sp_DC_pair_key]['weight']+=weight
-						else:
-							edges[sp_DC_pair_key]={
+						s,t=[str(i) for i in sp_DC_pair]
+						if s not in edges:
+							edges[s]={t:{
 								'weight':weight,
 								'type':linklabel,
-								'source':str(sp_DC_pair[0]),
-								'target':str(sp_DC_pair[1])
+								'source':s,
+								'target':t
+							}}
+						elif t not in edges[s]:
+							edges[s][t]={
+								'weight':weight,
+								'type':linklabel,
+								'source':s,
+								'target':t
 							}
+						else:
+							edges[s][t]['weight']+=weight
+						
+# 						
+# 						sp_DC_pair_key='__'.join([str(i) for i in sp_DC_pair])
+# 						
+# 						
+# 						
+# 						if sp_DC_pair_key in edges:
+# 							edges[sp_DC_pair_key]['weight']+=weight
+# 						else:
+# 							edges[sp_DC_pair_key]={
+# 								'weight':weight,
+# 								'type':linklabel,
+# 								'source':str(sp_DC_pair[0]),
+# 								'target':str(sp_DC_pair[1])
+# 							}
 		if len(thispath['nodes'])>0:
 			paths.append(thispath)
 			thispath={"nodes":[],"weight":weight}
@@ -284,17 +306,17 @@ def network_maps():
 	
 	edgesvals=[edges[k] for k in edges]
 	
-# 	edgesflat=[]
-# 	for s in edges:
-# 		for t in edges[s]:
-# 			edge=edges[s][t]
-# 			thisedge={'source':s,'target':t,'weight':edge['w'],'type':edge['type']}
-# 			if 'controls' in edge:
-# 				thisedge['controls']= edge['controls']
-# 			edgesflat.append(thisedge)
+	edgesflat=[]
+	for s in edges:
+		for t in edges[s]:
+			edge=edges[s][t]
+			thisedge={'source':s,'target':t,'weight':edge['weight'],'type':edge['type']}
+			if 'controls' in edge:
+				thisedge['controls']= edge['controls']
+			edgesflat.append(thisedge)
 	outputs={
 		"nodes":[nodes[k] for k in nodes],
-		"edges":edgesvals,
+		"edges":edgesflat,
 		"paths":paths
 	}
 	

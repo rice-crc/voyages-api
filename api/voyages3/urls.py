@@ -19,8 +19,10 @@ from django.conf.urls.static import static
 from django.conf import settings
 from filebrowser.sites import site
 from rest_framework.authtoken import views
-
+from rest_framework.schemas import get_schema_view
 from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,6 +38,11 @@ urlpatterns = [
     path('captcha/', include('captcha.urls')),
     path('filebrowser/', site.urls),
     path('tinymce/', site.urls),
-	re_path(r'^_nested_admin/', include('nested_admin.urls'))
+	re_path(r'^_nested_admin/', include('nested_admin.urls')),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Optional UI:
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
 #     path('voyages_auth_endpoint/', views.obtain_auth_token)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

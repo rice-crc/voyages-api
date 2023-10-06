@@ -40,10 +40,10 @@ class PostList(generics.GenericAPIView):
 	def post(self,request):
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		queryset=Post.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,post_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,post_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			headers={"total_results_count":results_count}
 			read_serializer=PostSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
@@ -110,10 +110,10 @@ class AuthorList(generics.GenericAPIView):
 	def post(self,request):
 		print("AUTHOR LIST+++++++\nusername:",request.auth.user)
 		queryset=Author.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,author_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,author_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			headers={"total_results_count":results_count}
 			read_serializer=AuthorSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
@@ -133,10 +133,10 @@ class InstitutionList(generics.GenericAPIView):
 	def post(self,request):
 		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
 		queryset=Institution.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,institution_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,institution_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			headers={"total_results_count":results_count}
 			read_serializer=InstitutionSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)

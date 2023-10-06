@@ -40,7 +40,7 @@ class AssessmentList(generics.GenericAPIView):
 		print("FETCHING...")
 		times.append(time.time())
 		queryset=Estimate.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,assessment_options,auto_prefetch=True,retrieve_all=True)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,assessment_options,auto_prefetch=True,retrieve_all=True)
 		selected_fields=list(assessment_options.keys())
 		times.append(time.time())
 		labels.append('building query')

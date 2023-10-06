@@ -43,7 +43,7 @@ class ZoteroSourceList(generics.GenericAPIView):
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		queryset=ZoteroSource.objects.all()
 		queryset=queryset.order_by('id')
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,zotero_source_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,zotero_source_options,retrieve_all=False)
 		
 		if len(error_messages)==0:
 			st=time.time()

@@ -15,17 +15,14 @@ import pysolr
 def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	errormessages=[]
-	next_uri=None
-	prev_uri=None
 	results_count=None
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
-# 	print(all_fields)
-# 	print("----->",type(r))
 	try:
 		if type(r)==dict:
 			params=r
 		else:
 			params=dict(r.POST)
+		params={k:params[k] for k in params if params[k]!=['']}
 		pp = pprint.PrettyPrinter(indent=4)
 		print("--post req params--")
 		pp.pprint(params)
@@ -201,7 +198,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 # 	except:
 # 		errormessages.append("ordering or pagination error")
 	
-	return res,selected_fields,next_uri,prev_uri,results_count,errormessages
+	return res,selected_fields,results_count,errormessages
 
 def options_handler(flatfilepath,request=None,hierarchical=True):
 	if request is not None:

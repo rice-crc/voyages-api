@@ -21,10 +21,12 @@ from voyage.models import Voyage
 from past.models import *
 from blog.models import Post
 import uuid
-
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 #this isn't pretty
 #but i'm having trouble finding a more elegant way of exporting this data to an external service
-#without installing networkx on this django instance, which i don't want to do!
+#without installing networkx on this django instance, which i don't want to do!@extend_schema(exclude=True)
+@extend_schema(exclude=True)
 class PastGraphMaker(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -179,7 +181,7 @@ class PastGraphMaker(generics.GenericAPIView):
 		print("PAST GRAPH MAKER elapsed time:",time.time()-st)
 		return JsonResponse(relation_map,safe=False)
 
-
+@extend_schema(exclude=True)
 class GlobalSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

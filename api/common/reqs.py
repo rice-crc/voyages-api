@@ -21,7 +21,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		if type(r)==dict:
 			params=r
 		else:
-			params=dict(r.POST)
+			params=dict(r.data)
 		params={k:params[k] for k in params if params[k]!=['']}
 		pp = pprint.PrettyPrinter(indent=4)
 		print("--post req params--")

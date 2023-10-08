@@ -11,6 +11,8 @@ from django.views.generic.list import ListView
 from common.reqs import *
 from .models import *
 from .serializers import *
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 try:
 	post_options=options_handler('blog/post_options.json',hierarchical=False)
@@ -30,7 +32,7 @@ except:
 	print("WARNING. BLANK POST OPTIONS.")
 	author_options={}
 
-
+@extend_schema(exclude=True)
 class PostList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -53,7 +55,7 @@ class PostList(generics.GenericAPIView):
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
+@extend_schema(exclude=True)
 class PostTextFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -100,7 +102,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		}
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(res,safe=False)
-
+@extend_schema(exclude=True)
 class AuthorList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -123,7 +125,7 @@ class AuthorList(generics.GenericAPIView):
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
+@extend_schema(exclude=True)
 class InstitutionList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

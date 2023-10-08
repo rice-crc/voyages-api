@@ -39,10 +39,7 @@ urlpatterns = [
     path('filebrowser/', site.urls),
     path('tinymce/', site.urls),
 	re_path(r'^_nested_admin/', include('nested_admin.urls')),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    # Optional UI:
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-
-#     path('voyages_auth_endpoint/', views.obtain_auth_token)
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui')
+    # path('voyages_auth_endpoint/', views.obtain_auth_token)
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

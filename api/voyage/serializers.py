@@ -7,6 +7,7 @@ from geo.models import *
 from common.nest import nest_selected_fields
 from common.models import SparseDate
 from past.models import *
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 
 #### GEO
 
@@ -239,6 +240,31 @@ class VoyageEnslavedSerializer(serializers.ModelSerializer):
 		model=Enslaved
 		fields=['id','documented_name']
 
+
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+            'Ex. 1: numeric range',
+            summary='Filter on a numeric range for a nested variable',
+            description='Here, we search for voyages whose imputed year of arrival at the principal port of disembarkation was between 1820 & 1850. We choose this variable as it is one of the most fully-populated numeric variables in the dataset.',
+            value={
+				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year': [1820,1850]
+			},
+			request_only=True,
+			response_only=False,
+        ),
+		OpenApiExample(
+            'Ex. 2: array of str vals',
+            summary='OR Filter on exact matches of known str values',
+            description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for voyages that are believed to have disembarked captives principally in Barbados or Cuba',
+            value={
+				'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name': ['Barbados','Cuba']
+			},
+			request_only=True,
+			response_only=False,
+        )
+    ]
+)
 class VoyageSerializer(serializers.ModelSerializer):
 	voyage_zotero_connections=ZoteroVoyageConnectionSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False)

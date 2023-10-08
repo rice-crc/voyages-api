@@ -36,8 +36,9 @@ except:
 # #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 
 class VoyageList(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	authentication_classes=[TokenAuthentication]
+	serializer_class=VoyageSerializer
 	def post(self,request):
 		'''
 		This endpoint returns a list of nested objects, each of which contains all the available information on individual voyages.
@@ -51,7 +52,7 @@ class VoyageList(generics.GenericAPIView):
 			5. Documentary sources
 			6. Data on the vessel
 		
-		You can filter on any of the nested fields by 
+		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
 		'''
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=False)
@@ -71,6 +72,9 @@ class VoyageList(generics.GenericAPIView):
 # # Basic statistics
 # ## takes a numeric variable
 # ## returns its sum, average, max, min, and stdv
+@extend_schema(
+        exclude=True
+    )
 class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -100,6 +104,9 @@ class VoyageAggregations(generics.GenericAPIView):
 			print("failed\n",' | '.join(error_messages),"\n+++++++",)
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
+@extend_schema(
+        exclude=True
+    )
 class VoyageStatsOptions(generics.GenericAPIView):
 	'''
 	Need to make the stats engine's indexed variables transparent to the user
@@ -115,6 +122,9 @@ class VoyageStatsOptions(generics.GenericAPIView):
 		r=requests.get(url=u2,headers={"Content-type":"application/json"})
 		return JsonResponse(json.loads(r.text),safe=False)
 
+@extend_schema(
+        exclude=True
+    )
 class VoyageCrossTabs(generics.GenericAPIView):
 	'''
 	I was only able to figure out how to output a true pivot table (multi levels and columns) as a straight html dump from pandas.
@@ -144,6 +154,9 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
+@extend_schema(
+        exclude=True
+    )
 class VoyageGroupBy(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
@@ -166,6 +179,9 @@ class VoyageGroupBy(generics.GenericAPIView):
 		return JsonResponse(json.loads(r.text),safe=False)# 
 
 #DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
+@extend_schema(
+        exclude=True
+    )
 class VoyageDataFrames(generics.GenericAPIView):
 # 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
@@ -200,7 +216,9 @@ class VoyageDataFrames(generics.GenericAPIView):
 			print(' | '.join(error_messages))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-
+@extend_schema(
+        exclude=True
+    )
 class VoyageGeoTreeFilter(generics.GenericAPIView):
 	if not no_auth:
 		authentication_classes=[TokenAuthentication]
@@ -237,6 +255,9 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 #And it will only return max 10 results
 #It will therefore serve as an autocomplete endpoint
 #I should make all text queries into 'or' queries
+@extend_schema(
+        exclude=True
+    )
 class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -290,6 +311,9 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 # 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
 
 #This endpoint will build a geographic sankey diagram based on a voyages query
+@extend_schema(
+        exclude=True
+    )
 class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

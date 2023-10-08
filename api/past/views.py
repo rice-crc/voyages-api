@@ -22,8 +22,9 @@ from collections import Counter
 from geo.common import GeoTreeFilter
 from geo.serializers import LocationSerializer
 from voyages3.localsettings import *
-
-
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+@extend_schema(exclude=True)
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -67,7 +68,7 @@ class EnslavedList(generics.GenericAPIView):
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
-
+@extend_schema(exclude=True)
 class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]				
@@ -114,7 +115,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(res,safe=False)
-
+@extend_schema(exclude=True)
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -161,7 +162,8 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(res,safe=False)
 
-#LONG-FORM TABULAR ENDPOINT.
+#LONG-FORM TABULAR ENDPOINT.@extend_schema(exclude=True)
+@extend_schema(exclude=True)
 class EnslaverList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -191,7 +193,8 @@ class EnslaverList(generics.GenericAPIView):
 
 # Basic statistics
 ## takes a numeric variable
-## returns its sum, average, max, min, and stdv
+## returns its sum, average, max, min, and stdv@extend_schema(exclude=True)
+@extend_schema(exclude=True)
 class EnslavedAggregations(generics.GenericAPIView):
 # 	serializer_class=EnslavedSerializer
 	authentication_classes=[TokenAuthentication]
@@ -228,7 +231,8 @@ class EnslavedAggregations(generics.GenericAPIView):
 
 # # Basic statistics
 # ## takes a numeric variable
-# ## returns its sum, average, max, min, and stdv
+# ## returns its sum, average, max, min, and stdv@extend_schema(exclude=True)
+@extend_schema(exclude=True)
 class EnslaverAggregations(generics.GenericAPIView):
 # 	serializer_class=EnslaverSerializer
 	authentication_classes=[TokenAuthentication]
@@ -264,7 +268,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 		except:
 			return JsonResponse({'status':'false','message':'bad request'}, status=400)
 			
-
+@extend_schema(exclude=True)
 class EnslavedDataFrames(generics.GenericAPIView):
 	serializer_class=EnslavedSerializer
 	authentication_classes=[TokenAuthentication]
@@ -298,7 +302,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			print("failed\n+++++++")
 			print(' | '.join(error_messages))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
+@extend_schema(exclude=True)
 class EnslaverDataFrames(generics.GenericAPIView):
 	serializer_class=EnslaverSerializer
 	authentication_classes=[TokenAuthentication]
@@ -333,7 +337,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			print(' | '.join(error_messages))
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-
+@extend_schema(exclude=True)
 class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -362,7 +366,7 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
 
-
+@extend_schema(exclude=True)
 class EnslavedGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -390,7 +394,7 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
 
-
+@extend_schema(exclude=True)
 class EnslavedAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -448,7 +452,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
 
-
+@extend_schema(exclude=True)
 class PASTNetworks(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

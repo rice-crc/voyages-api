@@ -18,6 +18,8 @@ import pprint
 from common.nest import *
 from common.reqs import *
 import collections
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 try:
 	assessment_options=options_handler('assessment/assessment_options.json',hierarchical=False)
@@ -27,6 +29,7 @@ except:
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
+@extend_schema(exclude=True)
 class AssessmentList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

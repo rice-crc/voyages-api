@@ -53,7 +53,7 @@ def load_graph(endpoint,graph_params):
 	return G,graph_name,None
 
 registered_caches={
-# 	'voyage_maps':voyage_maps,
+	'voyage_maps':voyage_maps,
 	'ao_maps':ao_maps
 }
 

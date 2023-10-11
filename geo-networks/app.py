@@ -49,7 +49,7 @@ def load_graph(endpoint,graph_params):
 	return G,graph_name,None
 
 registered_caches={
-	'voyage_maps':voyage_maps,
+# 	'voyage_maps':voyage_maps,
 	'ao_maps':ao_maps
 }
 
@@ -155,6 +155,7 @@ def network_maps():
 	
 	#iterate over the paths
 	for k in payload:
+# 		print("PAYLOAD ITEM",k)
 		weight=payload[k]
 		uuids=k.split('__')
 		# because, for now, the paths are all the same length, N, e.g.
@@ -204,6 +205,11 @@ def network_maps():
 					#get the shortest path from a to b, according to the graph
 					
 					#but also handle transportation self-loops...
+					#NOTE OCTOBER 11
+					## HAVE TO GENERALIZE THIS ONRAMP CHECK
+					## OR UPDATE MY EDGE CREATION IN UTILS ** this is the real fix.
+					## BECAUSE EMBARKATION PORTS WITH NO GOOD ONRAMP ARE JUMPING TO THE CLOSEST POSSIBLE MATCH
+					## FOR INSTANCE, VOYAGES FROM ALEXANDRIA ARE GETTING ROUTED THROUGH BAHAMAS, PORT UNSPECIFIED
 					spfail=False
 					selfloop=False
 					if a_id==b_id and linklabel=='transportation':
@@ -252,49 +258,60 @@ def network_maps():
 						thispath['nodes']+=sp_export
 					
 					#update the nodes dictionary with any new nodes
-					for n_id in sp_export:
+					node_errors=False
+					badnodes=[]
+					for i in range(len(sp_export)):
+						n_id=sp[i]
+						uuid=sp_export[i]
 						if n_id not in nodes:
-							newnode_data=dict(graph.nodes[n_id])
-							nodes[str(n_id)]={
-								'data':newnode_data,
-								'id':n_id,
-								'weights':{}
-							}
+							try:
+								newnode_data=dict(graph.nodes[n_id])
+								nodes[str(uuid)]={
+									'data':newnode_data,
+									'id':uuid,
+									'weights':{}
+								}
+							except:
+								node_errors=True
+								badnodes.append(n_id)
 					#update the edges dictionary with this a, ..., b walk data
-					sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
-					for sp_DC_pair in sp_DC_pairs:
-						s,t=[str(i) for i in sp_DC_pair]
-						if s not in edges:
-							edges[s]={t:{
-								'weight':weight,
-								'type':linklabel,
-								'source':s,
-								'target':t
-							}}
-						elif t not in edges[s]:
-							edges[s][t]={
-								'weight':weight,
-								'type':linklabel,
-								'source':s,
-								'target':t
-							}
-						else:
-							edges[s][t]['weight']+=weight
+					if node_errors:
+						print("failed on path-->",sp_export,"specifically on-->",badnodes)
+					else:
+						sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
+						for sp_DC_pair in sp_DC_pairs:
+							s,t=[str(i) for i in sp_DC_pair]
+							if s not in edges:
+								edges[s]={t:{
+									'weight':weight,
+									'type':linklabel,
+									'source':s,
+									'target':t
+								}}
+							elif t not in edges[s]:
+								edges[s][t]={
+									'weight':weight,
+									'type':linklabel,
+									'source':s,
+									'target':t
+								}
+							else:
+								edges[s][t]['weight']+=weight
 						
-# 						
-# 						sp_DC_pair_key='__'.join([str(i) for i in sp_DC_pair])
-# 						
-# 						
-# 						
-# 						if sp_DC_pair_key in edges:
-# 							edges[sp_DC_pair_key]['weight']+=weight
-# 						else:
-# 							edges[sp_DC_pair_key]={
-# 								'weight':weight,
-# 								'type':linklabel,
-# 								'source':str(sp_DC_pair[0]),
-# 								'target':str(sp_DC_pair[1])
-# 							}
+	# 						
+	# 						sp_DC_pair_key='__'.join([str(i) for i in sp_DC_pair])
+	# 						
+	# 						
+	# 						
+	# 						if sp_DC_pair_key in edges:
+	# 							edges[sp_DC_pair_key]['weight']+=weight
+	# 						else:
+	# 							edges[sp_DC_pair_key]={
+	# 								'weight':weight,
+	# 								'type':linklabel,
+	# 								'source':str(sp_DC_pair[0]),
+	# 								'target':str(sp_DC_pair[1])
+	# 							}
 		if len(thispath['nodes'])>0:
 			paths.append(thispath)
 			thispath={"nodes":[],"weight":weight}

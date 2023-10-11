@@ -423,29 +423,31 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			retrieve_all=True
 		)
 		
-		queryset=queryset.order_by('id')
-		
 		zoomlevel=params.get('zoomlevel',['region'])[0]
+		
+# 		print("queryset",queryset)
+# 		print("first",queryset[0].__dict__)
 		
 		if zoomlevel not in ['region','place']:
 			zoomlevel='region'
-
 		if zoomlevel=='place':
 			enslaved_values_list=queryset.values_list(
 				'language_group__uuid',
-				'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
-				'voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
 				'post_disembark_location__geo_location__uuid'
 			)
 			graphname='place'
 		elif zoomlevel=='region':
 			enslaved_values_list=queryset.values_list(
 				'language_group__uuid',
-				'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
-				'voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
 				'post_disembark_location__geo_location__uuid'
 			)
 			graphname='region'
+			
+# 		print("VALUES LIST",enslaved_values_list)
 
 		counter=Counter(list(enslaved_values_list))
 		counter2={"__".join([str(i) for i in c]):counter[c] for c in counter}

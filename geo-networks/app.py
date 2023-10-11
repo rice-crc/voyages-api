@@ -153,13 +153,13 @@ def network_maps():
 		} for k in payload for i in k.split('__') if i != "None"
 	}
 	
-	paths=[]
 	
+	paths=[]
 	edges={}
 	
 	#iterate over the paths
 	for k in payload:
-		print("PAYLOAD ITEM",k)
+# 		print("PAYLOAD ITEM",k)
 		weight=payload[k]
 		uuids=k.split('__')
 		# because, for now, the paths are all the same length, N, e.g.
@@ -176,11 +176,11 @@ def network_maps():
 		#similarly for linklabels, which are N-1 long
 		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
 		thispath={"nodes":[],"weight":weight}
-		print("abpairs",abpairs)
+# 		print("abpairs",abpairs)
 		for idx in range(len(linklabels)):
 			abpair=abpairs[idx]
 			linklabel=linklabels[idx]
-			print(abpair)
+# 			print(abpair)
 			if "None" in abpair or None in abpair:
 				#if we hit a break in the path then we want to reset
 				#but still record the discontinuous segments
@@ -252,10 +252,12 @@ def network_maps():
 					#if all our shortest path work has failed, then return a straight line
 					## but log it!
 					if spfail:
-						print("---\nNO PATH")
-						print("from",amatch,graph.nodes[amatch])
-						print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
 						sp=[a_id,b_id]
+						if DEBUG:
+							print("---\nNO PATH")
+							print("from",amatch,graph.nodes[amatch])
+							print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
+						
 					
 					#retrieve the uuid's where applicable
 					sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
@@ -277,15 +279,15 @@ def network_maps():
 					for i in range(len(sp_export)):
 						n_id=sp[i]
 						uuid=sp_export[i]
-						if n_id not in nodes:
-							try:
+						if uuid not in nodes:
+							if n_id in graph.nodes:
 								newnode_data=dict(graph.nodes[n_id])
 								nodes[str(uuid)]={
 									'data':newnode_data,
 									'id':uuid,
-									'weights':{}
+									'weights':{nl:0 for nl in nodelabels}
 								}
-							except:
+							else:
 								node_errors=True
 								badnodes.append(n_id)
 					#update the edges dictionary with this a, ..., b walk data

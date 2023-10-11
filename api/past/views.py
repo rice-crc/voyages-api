@@ -424,10 +424,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		)
 		
 		zoomlevel=params.get('zoomlevel',['region'])[0]
-		
-# 		print("queryset",queryset)
-# 		print("first",queryset[0].__dict__)
-		
+				
 		if zoomlevel not in ['region','place']:
 			zoomlevel='region'
 		if zoomlevel=='place':
@@ -448,10 +445,12 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			graphname='region'
 			
 # 		print("VALUES LIST",enslaved_values_list)
-
+		
 		counter=Counter(list(enslaved_values_list))
 		counter2={"__".join([str(i) for i in c]):counter[c] for c in counter}
 		
+		django_query_time=time.time()
+		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
 		
 		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
 		d2={
@@ -466,10 +465,14 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 				'post-disembarkation'
 			]
 		}
+		
+		
+		
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		print("Networkx Response Time Back to Django:", time.time()-django_query_time)
 		j=json.loads(r.text)
 		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		print("Total Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
 
 

@@ -35,6 +35,9 @@ except:
 
 # #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 
+@extend_schema(
+        operation_id="Fetch Voyage"
+    )
 class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]

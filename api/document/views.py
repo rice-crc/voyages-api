@@ -62,6 +62,9 @@ class ZoteroSourceList(generics.GenericAPIView):
 
 #######################
 # default view will be a paginated gallery
+@extend_schema(
+        exclude=True
+    )
 def Gallery(request,collection_id=None,pagenumber=1):
 	
 	if request.user.is_authenticated:
@@ -116,6 +119,9 @@ def Gallery(request,collection_id=None,pagenumber=1):
 
 #######################
 # then the individual page view
+@extend_schema(
+        exclude=True
+    )
 def z_source_page(request,zotero_source_id=1):
 	
 	if request.user.is_authenticated:

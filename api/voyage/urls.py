@@ -12,7 +12,7 @@ urlpatterns = [
 	path('crosstabs',views.VoyageCrossTabs.as_view()),
 	path('aggroutes',views.VoyageAggRoutes.as_view()),
 	path('geotree',views.VoyageGeoTreeFilter.as_view()),
-	path('schema',views.SchemaAPI.as_view())
+	path('getschema',views.VoyageAPISchema.as_view())
     ]
     
     

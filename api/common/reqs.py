@@ -4,6 +4,8 @@ import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
 from .nest import *
+from voyages3.localsettings import *
+import requests
 from django.core.paginator import Paginator
 import html
 import pysolr
@@ -64,9 +66,9 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	try:
 		###FILTER RESULTS
 		##select text and numeric fields, ignoring those without a type
-		text_fields=[i for i in all_fields if 'CharField' in all_fields[i]['type'] or 'SlugField' in all_fields[i]['type'] or 'ChoiceField' in all_fields[i]['type']]
-		numeric_fields=[i for i in all_fields if 'IntegerField' in all_fields[i]['type'] or 'DecimalField' in all_fields[i]['type'] or 'FloatField' in all_fields[i]['type']]
-		boolean_fields=[i for i in all_fields if 'BooleanField' in all_fields[i]['type']]
+		text_fields=[i for i in all_fields if all_fields[i]['type'] =='string']
+		numeric_fields=[i for i in all_fields if all_fields[i]['type'] in ['integer','number']]
+		boolean_fields=[i for i in all_fields if all_fields[i]['type']=='boolean']
 # 		print("FILTER FIELDS",text_fields,numeric_fields,boolean_fields)
 		##build filters
 		kwargs={}
@@ -185,7 +187,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		errormessages.append("ordering error")
 	
 	#PAGINATION/LIMITS
-# 	try:
 	if retrieve_all==False:
 		results_per_page=params.get('results_per_page',[10])
 		results_page=params.get('results_page',[1])
@@ -194,13 +195,47 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
 	else:
 		res=queryset
-	
-	
-	
-# 	except:
-# 		errormessages.append("ordering or pagination error")
-	
 	return res,selected_fields,results_count,errormessages
+
+def getJSONschema(base_obj_name,hierarchical):
+	r=requests.get(url=OPEN_API_BASE_API)
+	j=json.loads(r.text)
+	schemas=j['components']['schemas']
+	base_obj_name=base_obj_name
+	def walker(output,schemas,obj_name):
+		obj=schemas[obj_name]
+		for fieldname in obj['properties']:
+			thisfield=obj['properties'][fieldname]
+			if '$ref' in thisfield:
+				next_obj_name=thisfield['$ref'].replace('#/components/schemas/','')
+				output[fieldname]=walker({},schemas,next_obj_name)
+			elif 'type' in thisfield:
+				if thisfield['type']!='array':
+					output[fieldname]={
+						'type':thisfield['type']
+					}
+				else:
+					thisfield_items=thisfield['items']
+					if 'type' in thisfield_items:
+						output[fieldname]={
+							'type':thisfield_items['type']
+						}
+					elif '$ref'	in thisfield_items:
+						next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
+						output[fieldname]=walker({},schemas,next_obj_name)
+		return output
+	output=walker({},schemas,'Voyage')
+	if not hierarchical:
+		def flatten_this(input_dict,output_dict,keychain=[]):
+			for k in input_dict:
+				if 'type' in input_dict[k]:
+					thiskey='__'.join(keychain+[k])
+					output_dict[thiskey]=input_dict[k]
+				else:
+					output_dict=flatten_this(input_dict[k],output_dict,keychain+[k])
+			return output_dict		
+		output=flatten_this(output,{},[])	
+	return output
 
 def options_handler(flatfilepath,request=None,hierarchical=True):
 	if request is not None:

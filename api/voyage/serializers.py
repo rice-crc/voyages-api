@@ -278,4 +278,4 @@ class VoyageSerializer(serializers.ModelSerializer):
 	voyage_name_outcome=VoyageOutcomeSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
-		fields='__all__'
+		exclude=['voyage_sources']

@@ -26,6 +26,7 @@ from drf_spectacular.types import OpenApiTypes
 #this isn't pretty
 #but i'm having trouble finding a more elegant way of exporting this data to an external service
 #without installing networkx on this django instance, which i don't want to do!@extend_schema(exclude=True)
+
 @extend_schema(exclude=True)
 class PastGraphMaker(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

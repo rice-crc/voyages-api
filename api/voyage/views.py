@@ -27,15 +27,6 @@ import re
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
-try:
-	voyage_options=options_handler('voyage/voyage_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK VOYAGE OPTIONS.")
-	voyage_options={}
-
-# #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
-
-
 class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
@@ -55,6 +46,7 @@ class VoyageList(generics.GenericAPIView):
 		
 		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
 		'''
+		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
@@ -79,36 +71,14 @@ class VoyageList(generics.GenericAPIView):
 @extend_schema(
         exclude=True
     )
-class SchemaAPI(generics.GenericAPIView):
+class VoyageAPISchema(generics.GenericAPIView):
 	def get(self,request):
-		r=requests.get(url=OPEN_API_BASE_API)
-# 		print(r)
-# 		print(r.text)
-		j=json.loads(r.text)
-		schemas=j['components']['schemas']
-		
-		print(schemas)
-		
-		base_obj_name='Voyage'
-		
-		def walker(output,schemas,obj_name):
-			obj=schemas[obj_name]
-			for fieldname in obj['properties']:
-				thisfield=obj['properties'][fieldname]
-				if 'type' in thisfield:
-					if thisfield['type']!='array':
-						output[fieldname]={
-							'type':thisfield['type']
-						}
-					else:
-						print(thisfield)
-				else:
-					print(thisfield)
-			return output
-		
-		output=walker({},schemas,'Voyage')
-		
-		
+		hierarchical=request.GET.get('hierarchical')
+		if hierarchical in [1,'1','t','T','true','True']:
+			hierarchical=True
+		else:
+			hierarchical=False
+		output=getJSONschema('Voyage',hierarchical)
 		resp=JsonResponse(output,safe=False)
 		return resp
 

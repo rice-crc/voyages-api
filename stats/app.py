@@ -14,11 +14,11 @@ app.config['JSON_SORT_KEYS'] = False
 options={}
 
 def load_long_df(endpoint,variables):
-	headers={'Authorization':DJANGO_AUTH_KEY}
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
-		data={'selected_fields':variables}
+		data=json.dumps({'selected_fields':variables})
 	)
 	j=json.loads(r.text)
 	df=pd.DataFrame.from_dict(j)
@@ -37,8 +37,6 @@ def load_long_df(endpoint,variables):
 
 registered_caches=[
 	voyage_bar_and_donut_charts,
-# 	voyage_maps,
-# 	enslaved_maps,
 	voyage_summary_statistics,
 	voyage_pivot_tables,
 	voyage_xyscatter
@@ -51,7 +49,7 @@ standoff_base=4
 standoff_count=0
 while True:
 	failures_count=0
-	headers={'Authorization':DJANGO_AUTH_KEY}
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
 	options=json.loads(r.text)
 	for rc in registered_caches:

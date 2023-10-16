@@ -12,7 +12,9 @@ from .models import *
 from .common import GeoTreeFilter
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-@extend_schema(exclude=True)
+
+
+
 class GeoTree(generics.GenericAPIView):
 	# serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]

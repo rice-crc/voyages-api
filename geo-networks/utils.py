@@ -60,7 +60,7 @@ def connect_to_tags(G,this_tag,tag_connections):
 def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 	graph_name=graph_params['name']
 	node_id=init_node_id
-	headers={'Authorization':DJANGO_AUTH_KEY}
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	ordered_node_classes=graph_params['ordered_node_classes']
 	prev_tag=None
 	for ordered_node_class in ordered_node_classes:
@@ -81,12 +81,14 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 			### E.G., ARE WE AFTER TRANSATLANTIC OR INTRA-AMERICAN VOYAGES?
 			for f in filter_obj:
 				payload[f]=filter_obj[f]
-				
+			
+			
+			print(headers,payload)
 			## MAKE A DATAFRAME CALL ON ALL THE VARIABLES ENUMERATED FOR THIS NODE
 			r=requests.post(
 				url=DJANGO_BASE_URL+endpoint,
 				headers=headers,
-				data=payload
+				data=json.dumps(payload)
 			)
 			
 			## TRANSFORM THE RESPONSE INTO ROWS AND DEDUPE

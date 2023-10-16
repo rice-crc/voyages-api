@@ -55,7 +55,13 @@ class VoyageList(generics.GenericAPIView):
 		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
 		'''
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			voyage_options,
+			retrieve_all=False
+		)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}
@@ -158,7 +164,6 @@ class VoyageCrossTabs(generics.GenericAPIView):
         exclude=True
     )
 class VoyageGroupBy(generics.GenericAPIView):
-	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
@@ -178,12 +183,11 @@ class VoyageGroupBy(generics.GenericAPIView):
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 		return JsonResponse(json.loads(r.text),safe=False)# 
 
-#DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
 @extend_schema(
         exclude=True
     )
+#DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
 class VoyageDataFrames(generics.GenericAPIView):
-# 	serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
@@ -192,7 +196,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 	def post(self,request):
 		print("VOYAGE DATAFRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
-		params=dict(request.POST)
 		retrieve_all=True
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
@@ -220,19 +223,12 @@ class VoyageDataFrames(generics.GenericAPIView):
         exclude=True
     )
 class VoyageGeoTreeFilter(generics.GenericAPIView):
-	if not no_auth:
-		authentication_classes=[TokenAuthentication]
-		permission_classes=[IsAuthenticated]
-	serializer_class=LocationSerializer
-	def options(self,request):
-		j=options_handler('voyage/voyage_options.json',request)
-		return JsonResponse(j,safe=False)
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		if not no_auth:
-			print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
-			
+		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
-		reqdict=dict(request.POST)
+		reqdict=dict(request.data)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=Voyage.objects.all()

@@ -11,7 +11,7 @@ import time
 
 def load_graph():
 	url=DJANGO_BASE_URL+'common/past_graph/'
-	headers={'Authorization':DJANGO_AUTH_KEY}
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	
 	G=nx.Graph()
 	

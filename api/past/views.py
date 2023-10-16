@@ -24,22 +24,37 @@ from geo.serializers import LocationSerializer
 from voyages3.localsettings import *
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-@extend_schema(exclude=True)
+
+
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	serializer_class=EnslavedSerializer
-	def options(self,request):
-		j=options_handler('past/enslaved_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
+		'''
+		This endpoint returns a list of highly nested objects, each of which contains all the available information on enslaved individuals who we know to have been transported on a voyage.
+		
+		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).
+		
+		For instance, you might search for a person who was bought, sold, or transported on a voyage owned by a known enslaver. Or, you might search for people who, based on the sound of their name as recorded, are believed to have come from a particular region in Africa where an ethnic group known to use that name was located.
+		
+		However, it must be stressed that there is a tension in this dataset: the data that we have on enslaved individuals was almost entirely recorded by the people who enslaved them, or by colonial managers who technically liberated them, but oftentimes pressed these people into military service or labor. We know the names of these people, which is grounbreaking for this project because it allows us to identify named individuals in a dataset that often records only nameless quantities of people, but as you analyze this dataset you will note that most of the data we have on these enslaved people is bio-data, such as gender, age, height, and skin color -- this is qualitatively different than the data we have on the enslavers, about whom we often have a good deal of biographical data.
+		
+		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
+		'''
 		st=time.time()
 		times=[]
 		labels=[]
 		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
 		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
 		queryset=Enslaved.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,enslaved_options,auto_prefetch=True)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			enslaved_options,
+			auto_prefetch=True
+		)
 		if len(error_messages)==0:
 			headers={"total_results_count":results_count}
 			read_serializer=EnslavedSerializer(queryset,many=True)
@@ -68,6 +83,7 @@ class EnslavedList(generics.GenericAPIView):
 			return JsonResponse(outputs,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+
 @extend_schema(exclude=True)
 class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -115,6 +131,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(res,safe=False)
+
 @extend_schema(exclude=True)
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -163,20 +180,32 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 		return JsonResponse(res,safe=False)
 
 #LONG-FORM TABULAR ENDPOINT.@extend_schema(exclude=True)
-@extend_schema(exclude=True)
 class EnslaverList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	serializer_class=EnslaverSerializer
-	def options(self,request):
-		j=options_handler('past/enslaver_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
+		'''
+		This endpoint returns a list of highly nested objects, each of which contains all the available information on named individuals we know to have participated in the slave trade.
+		
+		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).
+		
+		Before 2022, the project had only recorded ship captains and ship owners. We now have a much more robust accounting of individuals, sometimes recorded under different names, participating in multiple voyages, and operating in a range of different roles, from investors to brokers to buyers and sellers of enslaved people. In some cases, we know the names of these enslavers' spouses, and the amounts of money they willed to their descendants upon their death. We are very much looking forward to linking this network of enslavers into other public datasets such as Stanford's Kindred network in order to map the economic legacy of these ill-gotten gains.
+		
+		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
+		'''
+
 		print("ENSLAVER LIST+++++++\nusername:",request.auth.user)
 		st=time.time()
 		enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
 		queryset=EnslaverIdentity.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,enslaver_options,auto_prefetch=True)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			enslaver_options,
+			auto_prefetch=True
+		)
 		if len(error_messages)==0:
 			headers={"total_results_count":results_count}
 			read_serializer=EnslaverSerializer(queryset,many=True)
@@ -270,7 +299,6 @@ class EnslaverAggregations(generics.GenericAPIView):
 			
 @extend_schema(exclude=True)
 class EnslavedDataFrames(generics.GenericAPIView):
-	serializer_class=EnslavedSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
@@ -304,7 +332,6 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 @extend_schema(exclude=True)
 class EnslaverDataFrames(generics.GenericAPIView):
-	serializer_class=EnslaverSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
@@ -341,7 +368,6 @@ class EnslaverDataFrames(generics.GenericAPIView):
 class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=LocationSerializer
 	def options(self,request):
 		j=options_handler('past/enslaver_options.json',request)
 		return JsonResponse(j,safe=False)

@@ -159,7 +159,8 @@ ao_maps={
 					]
 				}
 			]
-		},
+		}
+		,
 		{
 			'name':'region',
 			'ordered_node_classes':[

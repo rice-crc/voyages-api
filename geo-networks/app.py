@@ -34,6 +34,10 @@ def load_graph(endpoint,graph_params):
 		## AND ADD THE RESULTING UNIQUE NODES TO THE NETWORK
 		filter_obj=rc['filter']
 		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id+1)
+		
+# 		for n in G.nodes:
+# 			print(n,G.nodes[n])
+			
 		print("added non-oceanic network nodes")
 		#then link across the ordered node classes
 		ordered_node_classes=graph_params['ordered_node_classes']
@@ -59,34 +63,34 @@ standoff_base=4
 standoff_count=0
 st=time.time()
 
-while True:
-	failures_count=0
-	for rcname in rcnames:
-		rc=registered_caches[rcname]
-		endpoint=rc['endpoint']
-		if 'graphs' not in rc:
-			rc['graphs']={}
+# while True:
+# 	failures_count=0
+for rcname in rcnames:
+	rc=registered_caches[rcname]
+	endpoint=rc['endpoint']
+	if 'graphs' not in rc:
+		rc['graphs']={}
 
-		for graph_params in rc['graph_params']:
-			try:
-				graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-				rc['graphs'][graph_name]={
-					'graph':graph,
-					'shortest_paths':shortest_paths
-				}
-			except:
-				failures_count+=1
-				print("failed on cache:",rc['name'])
-				break
-		registered_caches[rcname]=rc
-	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
-	if failures_count==len(rcnames):
-		standoff_time=standoff_base**standoff_count
-		print("retrying after %d seconds" %(standoff_time))
-		time.sleep(standoff_time)
-		standoff_count+=1
-	else:
-		break
+	for graph_params in rc['graph_params']:
+# 			try:
+		graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
+		rc['graphs'][graph_name]={
+			'graph':graph,
+			'shortest_paths':shortest_paths
+		}
+# 			except:
+# 				failures_count+=1
+# 				print("failed on cache:",rc['name'])
+# 				break
+	registered_caches[rcname]=rc
+# 	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
+# 	if failures_count==len(rcnames):
+# 		standoff_time=standoff_base**standoff_count
+# 		print("retrying after %d seconds" %(standoff_time))
+# 		time.sleep(standoff_time)
+# 		standoff_count+=1
+# 	else:
+# 		break
 # print("finished building graphs in %d seconds" %int(time.time()-st))
 
 def add_stripped_node_to_dict(graph,n_id,nodesdict):
@@ -149,12 +153,13 @@ def network_maps():
 		} for k in payload for i in k.split('__') if i != "None"
 	}
 	
-	paths=[]
 	
+	paths=[]
 	edges={}
 	
 	#iterate over the paths
 	for k in payload:
+# 		print("PAYLOAD ITEM",k)
 		weight=payload[k]
 		uuids=k.split('__')
 		# because, for now, the paths are all the same length, N, e.g.
@@ -208,6 +213,7 @@ def network_maps():
 					selfloop=False
 					if a_id==b_id and linklabel=='transportation':
 						#transportation self-loop
+# 						print("self loop")
 						selfloop=True
 						successor_ids=[
 							n_id for n_id in graph.successors(a_id)
@@ -230,16 +236,32 @@ def network_maps():
 						except:
 							spfail=True
 					
+					## We need to do one last check here
+					## Because there are many routes that can be taken in the network
+					## And because many of these are taken
+					## This means we can end up with cases where
+					## The "shortest path" for this itinerary gets routed through
+					## important geographic nodes that aren't actually in the itinerary
+					## Yikes. We need to flag that as an error and draw a straight line
+					## So that the editors know to update the map network
+					sp_export_preflight=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
+					for i in sp_export_preflight:
+						if type(i)==str and i not in uuids:
+							spfail=True
+					
 					#if all our shortest path work has failed, then return a straight line
 					## but log it!
 					if spfail:
-						print("---\nNO PATH")
-						print("from",amatch,graph.nodes[amatch])
-						print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
 						sp=[a_id,b_id]
+						if DEBUG:
+							print("---\nNO PATH")
+							print("from",amatch,graph.nodes[amatch])
+							print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
+						
 					
 					#retrieve the uuid's where applicable
 					sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
+					
 # 					print("spexport",sp_export)
 					#update the full path with this a, ... , b walk we've just performed
 					#after trimming the first entry in this walk ** if this is not our first walk
@@ -252,49 +274,47 @@ def network_maps():
 						thispath['nodes']+=sp_export
 					
 					#update the nodes dictionary with any new nodes
-					for n_id in sp_export:
-						if n_id not in nodes:
-							newnode_data=dict(graph.nodes[n_id])
-							nodes[str(n_id)]={
-								'data':newnode_data,
-								'id':n_id,
-								'weights':{}
-							}
+					node_errors=False
+					badnodes=[]
+					for i in range(len(sp_export)):
+						n_id=sp[i]
+						uuid=sp_export[i]
+						if uuid not in nodes:
+							if n_id in graph.nodes:
+								newnode_data=dict(graph.nodes[n_id])
+								nodes[str(uuid)]={
+									'data':newnode_data,
+									'id':uuid,
+									'weights':{nl:0 for nl in nodelabels}
+								}
+							else:
+								node_errors=True
+								badnodes.append(n_id)
 					#update the edges dictionary with this a, ..., b walk data
-					sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
-					for sp_DC_pair in sp_DC_pairs:
-						s,t=[str(i) for i in sp_DC_pair]
-						if s not in edges:
-							edges[s]={t:{
-								'weight':weight,
-								'type':linklabel,
-								'source':s,
-								'target':t
-							}}
-						elif t not in edges[s]:
-							edges[s][t]={
-								'weight':weight,
-								'type':linklabel,
-								'source':s,
-								'target':t
-							}
-						else:
-							edges[s][t]['weight']+=weight
-						
-# 						
-# 						sp_DC_pair_key='__'.join([str(i) for i in sp_DC_pair])
-# 						
-# 						
-# 						
-# 						if sp_DC_pair_key in edges:
-# 							edges[sp_DC_pair_key]['weight']+=weight
-# 						else:
-# 							edges[sp_DC_pair_key]={
-# 								'weight':weight,
-# 								'type':linklabel,
-# 								'source':str(sp_DC_pair[0]),
-# 								'target':str(sp_DC_pair[1])
-# 							}
+					
+					if node_errors:
+						print("failed on path-->",sp_export,"specifically on-->",badnodes)
+					else:
+						sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
+						for sp_DC_pair in sp_DC_pairs:
+							s,t=[str(i) for i in sp_DC_pair]
+							if s not in edges:
+								edges[s]={t:{
+									'weight':weight,
+									'type':linklabel,
+									'source':s,
+									'target':t
+								}}
+							elif t not in edges[s]:
+								edges[s][t]={
+									'weight':weight,
+									'type':linklabel,
+									'source':s,
+									'target':t
+								}
+							else:
+								edges[s][t]['weight']+=weight
+								
 		if len(thispath['nodes'])>0:
 			paths.append(thispath)
 			thispath={"nodes":[],"weight":weight}

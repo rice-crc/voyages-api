@@ -37,7 +37,7 @@ def connect_to_tags(G,this_tag,tag_connections):
 					s_id=closest_neighbor
 					t_id=n_id
 					concat_tag="_to_".join([connect_tag,this_tag])
-				G.add_edge(s_id,t_id,distance=distance,id=e,tags=[concat_tag])
+				G.add_edge(s_id,t_id,id=e,distance=distance,tags=[concat_tag])
 				e+=1
 			elif mode=="all":
 				for comp_node_id in comp_node_ids:
@@ -52,6 +52,7 @@ def connect_to_tags(G,this_tag,tag_connections):
 						t_id=n_id
 					G.add_edge(s_id,t_id,id=e,distance=distance,tags=[concat_tag])
 					e+=1
+# 			print(G.nodes[s_id],"-->",G.nodes[t_id])
 					
 	print("ending graph state",G)
 	print("-------------")

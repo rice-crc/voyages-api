@@ -33,7 +33,10 @@ def imgfilenamematch(django_source_pages,transkribus_page_json):
 	transkribus_imgFileName=transkribus_page_json['imgFileName']
 	matches=[]
 	for dsp in django_source_pages:
-		dsp_fname=dsp.image_filename
+# 		dsp_fname=dsp.image_filename
+ 		##Sept 27-28 uploads to transkribus had to use pk's instead of original filenames
+		##because original filenames were null
+		dsp_fname=str(dsp.id)
 		dsp_nofileextension=re.sub("\..*","",dsp_fname)
 		transkribus_imgFileName_noextension=re.sub("\..*","",transkribus_imgFileName)
 		if dsp_nofileextension==transkribus_imgFileName_noextension:

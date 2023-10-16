@@ -35,9 +35,7 @@ except:
 
 # #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 
-@extend_schema(
-        operation_id="Fetch Voyage"
-    )
+
 class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
@@ -77,6 +75,51 @@ class VoyageList(generics.GenericAPIView):
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+@extend_schema(
+        exclude=True
+    )
+class SchemaAPI(generics.GenericAPIView):
+	def get(self,request):
+		r=requests.get(url=OPEN_API_BASE_API)
+# 		print(r)
+# 		print(r.text)
+		j=json.loads(r.text)
+		schemas=j['components']['schemas']
+		
+		print(schemas)
+		
+		base_obj_name='Voyage'
+		
+		def walker(output,schemas,obj_name):
+			obj=schemas[obj_name]
+			for fieldname in obj['properties']:
+				thisfield=obj['properties'][fieldname]
+				if 'type' in thisfield:
+					if thisfield['type']!='array':
+						output[fieldname]={
+							'type':thisfield['type']
+						}
+					else:
+						print(thisfield)
+				else:
+					print(thisfield)
+			return output
+		
+		output=walker({},schemas,'Voyage')
+		
+		
+		resp=JsonResponse(output,safe=False)
+		return resp
+
+
+
+
+
+
+
+
+
 
 # # Basic statistics
 # ## takes a numeric variable

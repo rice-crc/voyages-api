@@ -176,14 +176,14 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 		fields='__all__'
  
 
-class EnslaverAliasSerializer(serializers.ModelSerializer):
+class VoyageEnslaverAliasSerializer(serializers.ModelSerializer):
 	identity=EnslaverIdentitySerializer(many=False)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
 
 class VoyageEnslaverConnectionSerializer(serializers.ModelSerializer):
-	enslaver_alias=EnslaverAliasSerializer(many=False)
+	enslaver_alias=VoyageEnslaverAliasSerializer(many=False)
 	role=VoyageEnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverVoyageConnection

@@ -148,28 +148,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	####1. autocomplete suggestions
 	####2. geo tree selects
 	
-	#INCLUDE AGGREGATION FIELDS
-	aggregation_fields=params.get('aggregate_fields')
-
-	if aggregation_fields is not None:
-		valid_aggregation_fields=[f for f in options_dict if 'Integer' in options_dict[f]['type'] or 'Decimal' in options_dict[f]['type']]
-		bad_aggregation_fields=[f for f in aggregation_fields if f not in valid_aggregation_fields]
-		if bad_aggregation_fields!=[]:
-			errormessages.append("bad aggregation fields: "+",".join(bad_aggregation_fields))
-			print(errormessages)
-		else:
-			try:
-				aggqueryset=[]
-				for aggfield in aggregation_fields:
-					for aggsuffix in ["min","max"]:
-						selected_fields.append(aggfield+"_"+aggsuffix)
-					aggqueryset.append(queryset.aggregate(Min(aggfield)))
-					aggqueryset.append(queryset.aggregate(Max(aggfield)))
-				queryset=aggqueryset
-				auto_prefetch=True		
-			except:
-				errormessages.append("aggregation error")
-
 	#ORDER RESULTS
 	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')	
 	try:
@@ -195,6 +173,31 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
 	else:
 		res=queryset
+	
+		#INCLUDE AGGREGATION FIELDS
+	aggregation_fields=params.get('aggregate_fields')
+
+	if aggregation_fields is not None:
+		valid_aggregation_fields=[f for f in options_dict if options_dict[f]['type'] in ['integer','number']]
+		bad_aggregation_fields=[f for f in aggregation_fields if f not in valid_aggregation_fields]
+		if bad_aggregation_fields!=[]:
+			errormessages.append("bad aggregation fields: "+",".join(bad_aggregation_fields))
+			print(errormessages)
+		else:
+			try:
+				aggqueryset=[]
+				for aggfield in aggregation_fields:
+					for aggsuffix in ["min","max"]:
+						selected_fields.append(aggfield+"_"+aggsuffix)
+					aggqueryset.append(queryset.aggregate(Min(aggfield)))
+					aggqueryset.append(queryset.aggregate(Max(aggfield)))
+				queryset=aggqueryset
+				res=aggqueryset
+			except:
+				errormessages.append("aggregation error")
+		
+
+	
 	return res,selected_fields,results_count,errormessages
 
 def getJSONschema(base_obj_name,hierarchical):
@@ -206,30 +209,44 @@ def getJSONschema(base_obj_name,hierarchical):
 	j=json.loads(r.text)
 	schemas=j['components']['schemas']
 	base_obj_name=base_obj_name
-	def walker(output,schemas,obj_name):
+	def walker(output,schemas,obj_name,ismany=False):
 		obj=schemas[obj_name]
 		if 'properties' in obj:
 			for fieldname in obj['properties']:
 				thisfield=obj['properties'][fieldname]
 				if 'allOf' in thisfield:
 					thisfield=thisfield['allOf'][0]
+# 					print(fieldname,'allof') ## OK THESE ARE M2M
+					ismany=True
 				if '$ref' in thisfield:
 					next_obj_name=thisfield['$ref'].replace('#/components/schemas/','')
-					output[fieldname]=walker({},schemas,next_obj_name)
+					output[fieldname]=walker({},schemas,next_obj_name,ismany)
+# 					print(fieldname,'ref')
 				elif 'type' in thisfield:
 					if thisfield['type']!='array':
 						output[fieldname]={
-							'type':thisfield['type']
+							'type':thisfield['type'],
+							'many':ismany
 						}
+						ismany=False
+# 						print(fieldname,'bottomval')
 					else:
+						
 						thisfield_items=thisfield['items']
 						if 'type' in thisfield_items:
+# 							print('array otherbottomvalue',thisfield)
 							output[fieldname]={
-								'type':thisfield_items['type']
+								'type':thisfield_items['type'],
+								'many':ismany
 							}
+							ismany=False
 						elif '$ref'	in thisfield_items:
+# 							print("array, ref???",thisfield)
+							ismany=True
 							next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
-							output[fieldname]=walker({},schemas,next_obj_name)
+							output[fieldname]=walker({},schemas,next_obj_name,ismany)
+		else:
+			print(obj)
 		return output
 	output=walker({},schemas,base_obj_name)
 	if not hierarchical:

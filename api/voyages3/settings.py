@@ -67,7 +67,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
 		'rest_framework.authentication.TokenAuthentication'
     ],
-
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
@@ -82,8 +81,10 @@ SPECTACULAR_SETTINGS = {
     # available SwaggerUI configuration parameters
     # https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
     "SWAGGER_UI_SETTINGS": {
-        "persistAuthorization": True
-    }
+        "persistAuthorization": True,
+        "displayOperationId": False
+    },
+	 'POSTPROCESSING_HOOKS': []
 }
 
 

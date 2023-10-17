@@ -120,7 +120,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	 
 	try:
 		#PREFETCH REQUISITE FIELDS
-		
 		if auto_prefetch:
 			prefetch_fields=all_fields
 		else:
@@ -135,7 +134,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		
 		for p in prefetch_vars:
 			queryset=queryset.prefetch_related(p)
-		
 	except:
 		errormessages.append("prefetch error")
 	
@@ -228,7 +226,6 @@ def getJSONschema(base_obj_name,hierarchical):
 							'type':thisfield['type'],
 							'many':ismany
 						}
-						ismany=False
 # 						print(fieldname,'bottomval')
 					else:
 						
@@ -239,12 +236,13 @@ def getJSONschema(base_obj_name,hierarchical):
 								'type':thisfield_items['type'],
 								'many':ismany
 							}
-							ismany=False
 						elif '$ref'	in thisfield_items:
 # 							print("array, ref???",thisfield)
 							ismany=True
 							next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
 							output[fieldname]=walker({},schemas,next_obj_name,ismany)
+			ismany=False
+			
 		else:
 			print(obj)
 		return output

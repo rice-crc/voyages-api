@@ -195,7 +195,7 @@ def crosstabs():
 			margins=True
 		)
 		ct.fillna(0)
-		print(ct)
+# 		print(ct)
 	else:
 		ct=pd.crosstab(
 			[df2[rows]],
@@ -295,13 +295,12 @@ def crosstabs():
 	allcolumns.insert(0,indexcol_name)
 	ct=ct.fillna(0)
 	
+# 	print(ct)
+	
 	def convertcell(cellval,valuetype):
-		if valuetype in [
-			"<class 'rest_framework.fields.FloatField'>",
-			"<class 'rest_framework.fields.DecimalField'>"
-		]:
+		if valuetype == "number":
 			return float(cellval)
-		elif valuetype=="<class 'rest_framework.fields.IntegerField'>":
+		elif valuetype=="integer":
 			return int(cellval)
 		
 	

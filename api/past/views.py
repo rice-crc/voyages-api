@@ -252,9 +252,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 			enslaver_options=getJSONschema('Enslaver',hierarchical=False)
 			params=dict(request.data)
 			aggregations=params.get('aggregate_fields')
-			print(aggregations)
 			queryset=EnslaverIdentity.objects.all()
-		
 			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,enslaver_options,retrieve_all=True)
 			output_dict={}
 			if len(error_messages)==0:

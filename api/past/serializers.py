@@ -97,13 +97,13 @@ class PastSourceSerializer(serializers.ModelSerializer):
 		model=ZoteroSource
 		fields='__all__'
 
-class ZoteroEnslaverConnectionSerializer(serializers.ModelSerializer):
+class PastZoteroEnslaverConnectionSerializer(serializers.ModelSerializer):
 	zotero_source=PastSourceSerializer(many=False)
 	class Meta:
 		model=ZoteroEnslaverConnection
 		fields='__all__'
 
-class ZoteroEnslavedConnectionSerializer(serializers.ModelSerializer):
+class PastZoteroEnslavedConnectionSerializer(serializers.ModelSerializer):
 	zotero_source=PastSourceSerializer(many=False)
 	class Meta:
 		model=ZoteroEnslavedConnection
@@ -202,7 +202,7 @@ class EnslavedSerializer(serializers.ModelSerializer):
 	enslaved_relations=EnslavedInRelationSerializer(many=True,read_only=True)
 	captive_status=CaptiveStatusSerializer(many=False)
 	language_group=LanguageGroupSerializer(many=False)
-	enslaved_zotero_connections=ZoteroEnslavedConnectionSerializer(many=True,read_only=True)
+	enslaved_zotero_connections=PastZoteroEnslavedConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=Enslaved
 		fields='__all__'
@@ -285,7 +285,7 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 )
 class EnslaverSerializer(serializers.ModelSerializer):
 	principal_location=PlaceSerializer(many=False)
-	enslaver_zotero_connections=ZoteroEnslaverConnectionSerializer(many=True,read_only=True)
+	enslaver_zotero_connections=PastZoteroEnslaverConnectionSerializer(many=True,read_only=True)
 	aliases=EnslaverAliasSerializer(many=True,read_only=True)
 	birth_place=PlaceSerializer(many=False)
 	death_place=PlaceSerializer(many=False)

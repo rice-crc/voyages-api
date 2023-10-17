@@ -87,9 +87,6 @@ class AuthorList(generics.GenericAPIView):
 	serializer_class=AuthorSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('blog/author_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("AUTHOR LIST+++++++\nusername:",request.auth.user)
 		author_options=getJSONschema('Author',hierarchical=False)

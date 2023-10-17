@@ -16,7 +16,6 @@ import time
 from .models import *
 from .serializers import *
 import pprint
-from common.nest import *
 from common.reqs import *
 from collections import Counter
 from geo.common import GeoTreeFilter
@@ -46,7 +45,7 @@ class EnslavedList(generics.GenericAPIView):
 		times=[]
 		labels=[]
 		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
-		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
@@ -59,28 +58,8 @@ class EnslavedList(generics.GenericAPIView):
 			headers={"total_results_count":results_count}
 			read_serializer=EnslavedSerializer(queryset,many=True)
 			serialized=read_serializer.data
-		
-			outputs=[]
-	
-			hierarchical=request.POST.get('hierarchical')
-			if str(hierarchical).lower() in ['false','0','f','n']:
-				hierarchical=False
-			else:
-				hierarchical=True
-	
-			if hierarchical==False:
-		
-				for s in serialized:
-					d={}
-					for selected_field in selected_fields:
-						keychain=selected_field.split('__')
-						bottomval=bottomout(s,list(keychain))
-						d[selected_field]=bottomval
-					outputs.append(d)
-			else:
-				outputs=serialized
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(outputs,safe=False,headers=headers)
+			return JsonResponse(serialized,safe=False,headers=headers)
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
 
@@ -196,8 +175,8 @@ class EnslaverList(generics.GenericAPIView):
 		'''
 
 		print("ENSLAVER LIST+++++++\nusername:",request.auth.user)
+		enslaver_options=getJSONschema('Enslaver',hierarchical=False)
 		st=time.time()
-		enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
 		queryset=EnslaverIdentity.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
@@ -236,7 +215,7 @@ class EnslavedAggregations(generics.GenericAPIView):
 			aggregations=params.get('aggregate_fields')
 			print(aggregations)
 			queryset=Enslaved.objects.all()
-			enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+			enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,enslaved_options,retrieve_all=True)
 			output_dict={}
 			if len(error_messages)==0:
@@ -270,7 +249,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 		st=time.time()
 		print("ENSLAVER AGGREGATIONS+++++++\nusername:",request.auth.user)
 		try:
-			enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
+			enslaver_options=getJSONschema('Enslaver',hierarchical=False)
 			params=dict(request.POST)
 			aggregations=params.get('aggregate_fields')
 			print(aggregations)
@@ -301,14 +280,11 @@ class EnslaverAggregations(generics.GenericAPIView):
 class EnslavedDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('past/enslaved_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("ENSLAVED DATA FRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
 		params=dict(request.POST)
-		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
@@ -334,14 +310,11 @@ class EnslavedDataFrames(generics.GenericAPIView):
 class EnslaverDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('past/enslaver_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("+++++++\nusername:",request.auth.user)
 		st=time.time()
 		params=dict(request.POST)
-		enslaved_options=options_handler('past/enslaver_options.json',hierarchical=False)
+		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=EnslaverIdentity.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
@@ -368,14 +341,11 @@ class EnslaverDataFrames(generics.GenericAPIView):
 class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('past/enslaver_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("ENSLAVER GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
 		reqdict=dict(request.POST)
-		enslaver_options=options_handler('past/enslaver_options.json',hierarchical=False)
+		enslaver_options=getJSONschema('Enslaver',hierarchical=False)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=EnslaverIdentity.objects.all()
@@ -396,14 +366,11 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 class EnslavedGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('past/enslaved_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("ENSLAVED GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
 		reqdict=dict(request.POST)
-		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=Enslaved.objects.all()
@@ -428,7 +395,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		st=time.time()
 		print("ENSLAVED AGG ROUTES+++++++\nusername:",request.auth.user)
 		params=dict(request.POST)
-		enslaved_options=options_handler('past/enslaved_options.json',hierarchical=False)
+		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,

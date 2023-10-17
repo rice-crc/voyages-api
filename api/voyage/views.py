@@ -14,7 +14,6 @@ import requests
 import time
 from .models import *
 import pprint
-from common.nest import *
 from common.reqs import *
 from geo.common import GeoTreeFilter
 import collections
@@ -61,35 +60,11 @@ class VoyageList(generics.GenericAPIView):
 			read_serializer=VoyageSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
-			resp.headers['total_results_count']=headers['total_results_count']
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return resp
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
-@extend_schema(
-        exclude=True
-    )
-class VoyageAPISchema(generics.GenericAPIView):
-	def get(self,request):
-		hierarchical=request.GET.get('hierarchical')
-		if hierarchical in [1,'1','t','T','true','True']:
-			hierarchical=True
-		else:
-			hierarchical=False
-		output=getJSONschema('Voyage',hierarchical)
-		resp=JsonResponse(output,safe=False)
-		return resp
-
-
-
-
-
-
-
-
-
 
 # # Basic statistics
 # ## takes a numeric variable
@@ -107,6 +82,7 @@ class VoyageAggregations(generics.GenericAPIView):
 		aggregations=params.get('aggregate_fields')
 		print("aggregations:",aggregations)
 		queryset=Voyage.objects.all()
+		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		output_dict={}
 		if len(error_messages)==0:
@@ -160,6 +136,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
 		params=dict(request.POST)
 		queryset=Voyage.objects.all()
+		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		if len(error_messages)==0:
 			ids=[i[0] for i in queryset.values_list('id')]
@@ -190,6 +167,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 		groupby_by=params.get('groupby_by')
 		groupby_cols=params.get('groupby_cols')
 		queryset=Voyage.objects.all()
+		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		ids=[i[0] for i in queryset.values_list('id')]
 		u2=STATS_BASE_URL+'groupby/'
@@ -206,14 +184,12 @@ class VoyageGroupBy(generics.GenericAPIView):
 class VoyageDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('voyage/voyage_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("VOYAGE DATAFRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
 		retrieve_all=True
 		queryset=Voyage.objects.all()
+		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
@@ -247,7 +223,8 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		reqdict=dict(request.data)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
-		queryset=Voyage.objects.all()
+		queryset=Voyage.objects.all(
+		voyage_options=getJSONschema('Voyage',hierarchical=False))
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,voyage_options,retrieve_all=True)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
@@ -336,6 +313,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		params=dict(request.POST)
 		zoom_level=params.get('zoom_level')
 		queryset=Voyage.objects.all()
+		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,

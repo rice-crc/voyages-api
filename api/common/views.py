@@ -20,6 +20,7 @@ import pysolr
 from voyage.models import Voyage
 from past.models import *
 from blog.models import Post
+from common.reqs import getJSONschema
 import uuid
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -181,6 +182,19 @@ class PastGraphMaker(generics.GenericAPIView):
 		}
 		print("PAST GRAPH MAKER elapsed time:",time.time()-st)
 		return JsonResponse(relation_map,safe=False)
+
+@extend_schema(exclude=True)
+class Schemas(generics.GenericAPIView):
+	def get(self,request):
+		schema_name=request.GET.get('schema_name')
+		hierarchical=request.GET.get('hierarchical')
+		if schema_name is not None and hierarchical is not None:
+			schema_json=getJSONschema(schema_name,hierarchical)
+			return JsonResponse(schema_json,safe=False)
+		else:
+			return JsonResponse({'status':'false','message':'you must specify schema_name (string) and hierarchical (boolean)'}, status=502)
+
+		
 
 @extend_schema(exclude=True)
 class GlobalSearch(generics.GenericAPIView):

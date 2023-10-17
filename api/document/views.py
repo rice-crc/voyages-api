@@ -18,7 +18,6 @@ import requests
 import time
 from .models import *
 import pprint
-from common.nest import *
 from common.reqs import *
 import collections
 import gc
@@ -29,22 +28,15 @@ from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
-try:
-	zotero_source_options=options_handler('document/zotero_source_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK ZOTERO OPTIONS.")
-	zotero_source_options={}
-@extend_schema(exclude=True)
 class ZoteroSourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('document/zotero_source_options.json',request)
-		return JsonResponse(j,safe=False)
+	serializer_class=ZoteroSourceSerializer
 	def post(self,request):
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		queryset=ZoteroSource.objects.all()
 		queryset=queryset.order_by('id')
+		zotero_source_options=getJSONschema('ZoteroSource',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,zotero_source_options,retrieve_all=False)
 		
 		if len(error_messages)==0:

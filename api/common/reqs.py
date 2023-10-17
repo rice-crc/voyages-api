@@ -3,7 +3,6 @@ import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
-from .nest import *
 from voyages3.localsettings import *
 import requests
 from django.core.paginator import Paginator
@@ -198,6 +197,11 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	return res,selected_fields,results_count,errormessages
 
 def getJSONschema(base_obj_name,hierarchical):
+	if hierarchical in [True,"true","True",1,"t","T","yes","Yes","y","Y"]:
+		hierarchical=True
+	else:
+		hierarchical=False
+	
 	r=requests.get(url=OPEN_API_BASE_API)
 	j=json.loads(r.text)
 	schemas=j['components']['schemas']
@@ -236,16 +240,3 @@ def getJSONschema(base_obj_name,hierarchical):
 			return output_dict		
 		output=flatten_this(output,{},[])	
 	return output
-
-def options_handler(flatfilepath,request=None,hierarchical=True):
-	if request is not None:
-		if 'hierarchical' in request.query_params:
-			if request.query_params['hierarchical'].lower() in ['false','0','n']:
-				hierarchical=False
-	d=open(flatfilepath,'r')
-	t=d.read()
-	j=json.loads(t)
-	d.close()
-	if hierarchical:
-		j=nest_django_dict(j)
-	return j

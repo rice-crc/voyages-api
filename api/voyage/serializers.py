@@ -4,7 +4,6 @@ import re
 from .models import *
 from document.models import *
 from geo.models import *
-from common.nest import nest_selected_fields
 from common.models import SparseDate
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
@@ -211,14 +210,14 @@ class VoyageDatesSerializer(serializers.ModelSerializer):
 		model=VoyageDates
 		fields='__all__'
 
-class SourcePageSerializer(serializers.ModelSerializer):
+class VoyageSourcePageSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model=SourcePage
 		fields='__all__'
 
 class VoyageSourcePageConnectionSerializer(serializers.ModelSerializer):
-	source_page=SourcePageSerializer(many=False)
+	source_page=VoyageSourcePageSerializer(many=False)
 	class Meta:
 		model=SourcePageConnection
 		fields='__all__'
@@ -229,7 +228,7 @@ class VoyageZoteroSourceSerializer(serializers.ModelSerializer):
 		model=ZoteroSource
 		fields='__all__'
 
-class ZoteroVoyageConnectionSerializer(serializers.ModelSerializer):
+class VoyageZoteroVoyageConnectionSerializer(serializers.ModelSerializer):
 	zotero_source=VoyageZoteroSourceSerializer(many=False,read_only=True)
 	class Meta:
 		model=ZoteroVoyageConnection
@@ -266,7 +265,7 @@ class VoyageEnslavedSerializer(serializers.ModelSerializer):
     ]
 )
 class VoyageSerializer(serializers.ModelSerializer):
-	voyage_zotero_connections=ZoteroVoyageConnectionSerializer(many=True,read_only=True)
+	voyage_zotero_connections=VoyageZoteroVoyageConnectionSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False)
 	voyage_dates=VoyageDatesSerializer(many=False)
 	voyage_enslaver_connection=VoyageEnslaverConnectionSerializer(many=True,read_only=True)

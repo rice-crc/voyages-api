@@ -4,7 +4,6 @@ import re
 from .models import *
 import pprint
 import gc
-from common.nest import nest_selected_fields
 
 class SparseDateSerializer(serializers.ModelSerializer):
 

@@ -22,6 +22,10 @@ from drf_spectacular.types import OpenApiTypes
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
+@extend_schema(
+        exclude=True
+    )
+#right now, this thing dumps all 7 MB out -- so we can't show it on swagger
 class AssessmentList(generics.GenericAPIView):
 	serializer_class=EstimateSerializer
 	authentication_classes=[TokenAuthentication]

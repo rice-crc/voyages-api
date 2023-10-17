@@ -15,6 +15,13 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 from drf_spectacular.types import OpenApiTypes
 
 class PostList(generics.GenericAPIView):
+	'''
+	The Voyages team launched its new blog interface in 2022, in order to allow for richer humanities content to be integrated into the site, and to allow for more rapid publication of project-related news.
+	
+	These blog posts come in 3 languages: English, Spanish, and Portuguese. The author writes in one language, and when they are posted, the text is sent to the Google Translate API. The translated content is then published as three separate posts. This allows the team to go back in and fine-tune translations. The output format is HTML.
+	
+	Blog posts also contain hyperlinks to images hosted by SlaveVoyages for making the posts visually appealing.
+	'''
 	serializer_class=PostSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -84,6 +91,11 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		return JsonResponse(res,safe=False)
 
 class AuthorList(generics.GenericAPIView):
+	'''
+		Blog authors are allowed to add a user profile image, affiliate themselves with a university, and give a brief bio of themselves (under the "description") field.
+		
+		The posts authored by the author are included in the response as an array of nested objects.
+	'''
 	serializer_class=AuthorSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -106,6 +118,11 @@ class AuthorList(generics.GenericAPIView):
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 class InstitutionList(generics.GenericAPIView):
+	'''
+		The institutions that the blog authors are affiliated with can be searched in their own right.
+		
+		The authors associated with these institutions are included as nested objects, and the posts by those authors are nested within these author objects.
+	'''
 	serializer_class=InstitutionSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

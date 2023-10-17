@@ -56,18 +56,8 @@ class SourcePageConnectionSerializer(serializers.ModelSerializer):
 
 @extend_schema_serializer(
 	examples = [
-         OpenApiExample(
-            'Ex. 1: numeric range',
-            summary='Filter on a numeric value',
-            description='Here, we search for documents relating to voyages with IDs between 135096 and 135099 (a trivial example)',
-            value={
-				"zotero_voyage_connections__voyage__voyage_id":[135096,135099]
-			},
-			request_only=True,
-			response_only=False,
-        ),
 		OpenApiExample(
-            'Ex. 2: array of str vals',
+            'Ex. 1: array of str vals',
             summary='OR Filter on exact matches of known str values',
             description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
             value={

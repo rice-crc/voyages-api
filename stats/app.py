@@ -27,9 +27,8 @@ def load_long_df(endpoint,variables):
 		optionsvar=options[varname]
 		vartype=optionsvar['type']	
 		if vartype in [
-			"<class 'rest_framework.fields.IntegerField'>",
-			"<class 'rest_framework.fields.FloatField'>",
-			"<class 'rest_framework.fields.DecimalField'>"
+			"integer",
+			"number"
 		]:
 			df[varname]=pd.to_numeric(df[varname])
 	print(df)
@@ -50,7 +49,7 @@ standoff_count=0
 while True:
 	failures_count=0
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
-	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
+	r=requests.get(url=DJANGO_BASE_URL+'common/schemas/?schema_name=Voyage&hierarchical=False',headers=headers)
 	options=json.loads(r.text)
 	for rc in registered_caches:
 		endpoint=rc['endpoint']

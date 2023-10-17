@@ -162,6 +162,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE GROUPBY+++++++\nusername:",request.auth.user)
+		print(request.data)
 		params=dict(request.data)
 		print(params)
 		groupby_by=params.get('groupby_by')

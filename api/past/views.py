@@ -71,7 +71,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 		print("ENSLAVED CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 # 		try:
 		st=time.time()
-		params=dict(request.POST)
+		params=dict(request.data)
 		k=list(params.keys())[0]
 		v=params[k][0]
 		
@@ -118,8 +118,8 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	def post(self,request):
 		print("ENSLAVER CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 		st=time.time()
-		params=dict(request.POST)
-		params=dict(request.POST)
+		params=dict(request.data)
+		params=dict(request.data)
 		k=list(params.keys())[0]
 		v=params[k][0]
 		
@@ -211,7 +211,7 @@ class EnslavedAggregations(generics.GenericAPIView):
 		try:
 			st=time.time()
 			print("ENSLAVED AGGREGATIONS+++++++\nusername:",request.auth.user)
-			params=dict(request.POST)
+			params=dict(request.data)
 			aggregations=params.get('aggregate_fields')
 			print(aggregations)
 			queryset=Enslaved.objects.all()
@@ -250,7 +250,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 		print("ENSLAVER AGGREGATIONS+++++++\nusername:",request.auth.user)
 		try:
 			enslaver_options=getJSONschema('Enslaver',hierarchical=False)
-			params=dict(request.POST)
+			params=dict(request.data)
 			aggregations=params.get('aggregate_fields')
 			print(aggregations)
 			queryset=EnslaverIdentity.objects.all()
@@ -283,7 +283,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 	def post(self,request):
 		print("ENSLAVED DATA FRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
-		params=dict(request.POST)
+		params=dict(request.data)
 		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
@@ -313,7 +313,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 	def post(self,request):
 		print("+++++++\nusername:",request.auth.user)
 		st=time.time()
-		params=dict(request.POST)
+		params=dict(request.data)
 		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=EnslaverIdentity.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
@@ -344,7 +344,7 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	def post(self,request):
 		print("ENSLAVER GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
-		reqdict=dict(request.POST)
+		reqdict=dict(request.data)
 		enslaver_options=getJSONschema('Enslaver',hierarchical=False)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
@@ -369,7 +369,7 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 	def post(self,request):
 		print("ENSLAVED GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
-		reqdict=dict(request.POST)
+		reqdict=dict(request.data)
 		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
@@ -394,7 +394,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("ENSLAVED AGG ROUTES+++++++\nusername:",request.auth.user)
-		params=dict(request.POST)
+		params=dict(request.data)
 		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
@@ -461,7 +461,7 @@ class PASTNetworks(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("PAST NETWORKS+++++++\nusername:",request.auth.user)
-		params=json.dumps(dict(request.POST))
+		params=json.dumps(dict(request.data))
 		print(PEOPLE_NETWORKS_BASE_URL)
 		r=requests.post(PEOPLE_NETWORKS_BASE_URL,data=params,headers={"Content-type":"application/json"})
 		j=json.loads(r.text)

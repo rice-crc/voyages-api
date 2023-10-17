@@ -78,7 +78,7 @@ class VoyageAggregations(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE AGGREGATIONS+++++++\nusername:",request.auth.user)
-		params=dict(request.POST)
+		params=dict(request.data)
 		aggregations=params.get('aggregate_fields')
 		print("aggregations:",aggregations)
 		queryset=Voyage.objects.all()
@@ -134,14 +134,14 @@ class VoyageCrossTabs(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
-		params=dict(request.POST)
+		params=dict(request.data)
 		queryset=Voyage.objects.all()
 		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
 		if len(error_messages)==0:
 			ids=[i[0] for i in queryset.values_list('id')]
 			u2=STATS_BASE_URL+'crosstabs/'
-			params=dict(request.POST)
+			params=dict(request.data)
 			d2=params
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
@@ -162,7 +162,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE GROUPBY+++++++\nusername:",request.auth.user)
-		params=dict(request.POST)
+		params=dict(request.data)
 		print(params)
 		groupby_by=params.get('groupby_by')
 		groupby_cols=params.get('groupby_cols')
@@ -254,7 +254,7 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 # 		try:
 		st=time.time()
-		params=dict(request.POST)
+		params=dict(request.data)
 		print(params)
 		k=list(params.keys())[0]
 		v=params[k][0]
@@ -310,7 +310,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 # 		try:
 		st=time.time()
 		print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
-		params=dict(request.POST)
+		params=dict(request.data)
 		zoom_level=params.get('zoom_level')
 		queryset=Voyage.objects.all()
 		voyage_options=getJSONschema('Voyage',hierarchical=False)

@@ -204,7 +204,7 @@ class GlobalSearch(generics.GenericAPIView):
 		st=time.time()
 		print("Global Search+++++++\nusername:",request.auth.user)
 		
-		params=dict(request.POST)
+		params=dict(request.data)
 		search_string=params.get('search_string')
 		# Oh, yes. Little Bobby Tables, we call him.
 		

@@ -223,8 +223,8 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		reqdict=dict(request.data)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
-		queryset=Voyage.objects.all(
-		voyage_options=getJSONschema('Voyage',hierarchical=False))
+		queryset=Voyage.objects.all()
+		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,voyage_options,retrieve_all=True)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])

@@ -257,7 +257,6 @@ class EnslaverAggregations(generics.GenericAPIView):
 		
 			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,enslaver_options,retrieve_all=True)
 			output_dict={}
-			
 			if len(error_messages)==0:
 				for a in aggregation:
 					for k in a:

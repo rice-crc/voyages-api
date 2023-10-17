@@ -124,14 +124,12 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			prefetch_fields=all_fields
 		else:
 			prefetch_fields=selected_fields
-		
 		#print(prefetch_keys)
 		##ideally, I'd run this list against the model and see
 		##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
 		prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
 		print('--prefetching %d vars--' %len(prefetch_vars))
 # 		print(prefetch_vars)
-		
 		for p in prefetch_vars:
 			queryset=queryset.prefetch_related(p)
 	except:
@@ -222,8 +220,12 @@ def getJSONschema(base_obj_name,hierarchical):
 # 					print(fieldname,'ref')
 				elif 'type' in thisfield:
 					if thisfield['type']!='array':
+						thistype=thisfield['type']
+						if 'format' in thisfield:
+							if thisfield['format']:
+								thistype='number'
 						output[fieldname]={
-							'type':thisfield['type'],
+							'type':thistype,
 							'many':ismany
 						}
 # 						print(fieldname,'bottomval')
@@ -238,11 +240,9 @@ def getJSONschema(base_obj_name,hierarchical):
 							}
 						elif '$ref'	in thisfield_items:
 # 							print("array, ref???",thisfield)
-							ismany=True
 							next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
-							output[fieldname]=walker({},schemas,next_obj_name,ismany)
+							output[fieldname]=walker({},schemas,next_obj_name,ismany=True)
 			ismany=False
-			
 		else:
 			print(obj)
 		return output

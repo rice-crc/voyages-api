@@ -14,33 +14,13 @@ from .serializers import *
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
-try:
-	post_options=options_handler('blog/post_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK POST OPTIONS.")
-	post_options={}
-
-try:
-	author_options=options_handler('blog/author_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK POST OPTIONS.")
-	author_options={}
-	
-try:
-	institution_options=options_handler('blog/institution_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK POST OPTIONS.")
-	author_options={}
-
-@extend_schema(exclude=True)
 class PostList(generics.GenericAPIView):
+	serializer_class=PostSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('blog/post_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
-		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
+		print("BLOG POST LIST+++++++\nusername:",request.auth.user)
+		post_options=getJSONschema('Post',hierarchical=False)
 		queryset=Post.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,post_options,retrieve_all=False)
 		if len(error_messages)==0:
@@ -55,16 +35,16 @@ class PostList(generics.GenericAPIView):
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
 @extend_schema(exclude=True)
 class PostTextFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		print("POST LIST+++++++\nusername:",request.auth.user)
+		print("BLOG AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 # 		try:
 		st=time.time()
-		params=dict(request.POST)
-		params=dict(request.POST)
+		params=dict(request.data)
 		k=list(params.keys())[0]
 		v=params[k][0]
 		
@@ -102,8 +82,9 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		}
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(res,safe=False)
-@extend_schema(exclude=True)
+
 class AuthorList(generics.GenericAPIView):
+	serializer_class=AuthorSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def options(self,request):
@@ -111,6 +92,7 @@ class AuthorList(generics.GenericAPIView):
 		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("AUTHOR LIST+++++++\nusername:",request.auth.user)
+		author_options=getJSONschema('Author',hierarchical=False)
 		queryset=Author.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,author_options,retrieve_all=False)
 		if len(error_messages)==0:
@@ -125,15 +107,14 @@ class AuthorList(generics.GenericAPIView):
 		else:
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-@extend_schema(exclude=True)
+
 class InstitutionList(generics.GenericAPIView):
+	serializer_class=InstitutionSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('blog/institution_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
+		institution_options=getJSONschema('Institution',hierarchical=False)
 		queryset=Institution.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,institution_options,retrieve_all=False)
 		if len(error_messages)==0:

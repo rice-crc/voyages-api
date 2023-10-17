@@ -224,7 +224,7 @@ def getJSONschema(base_obj_name,hierarchical):
 						next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
 						output[fieldname]=walker({},schemas,next_obj_name)
 		return output
-	output=walker({},schemas,'Voyage')
+	output=walker({},schemas,base_obj_name)
 	if not hierarchical:
 		def flatten_this(input_dict,output_dict,keychain=[]):
 			for k in input_dict:

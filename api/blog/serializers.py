@@ -40,6 +40,7 @@ class TagSerializer(serializers.ModelSerializer):
 		model=Tag
 		fields='__all__'
 
+
 class PostSerializer(serializers.ModelSerializer):
 	authors = PostAuthorSerializer(many=True,read_only=True)
 	tags = TagSerializer(many=True,read_only=True)

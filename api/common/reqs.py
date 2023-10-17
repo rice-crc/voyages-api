@@ -7,6 +7,7 @@ from voyages3.localsettings import *
 import requests
 from django.core.paginator import Paginator
 import html
+import re
 import pysolr
 #GENERIC FUNCTION TO RUN A CALL ON REST SERIALIZERS
 ##Default is to auto prefetch, but need to be able to turn it off.
@@ -68,7 +69,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		text_fields=[i for i in all_fields if all_fields[i]['type'] =='string']
 		numeric_fields=[i for i in all_fields if all_fields[i]['type'] in ['integer','number']]
 		boolean_fields=[i for i in all_fields if all_fields[i]['type']=='boolean']
-# 		print("FILTER FIELDS",text_fields,numeric_fields,boolean_fields)
+		#print("FILTER FIELDS",text_fields,numeric_fields,boolean_fields)
 		##build filters
 		kwargs={}
 		###numeric filters -- only accepting one range per field right now
@@ -85,7 +86,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 					kwargs['{0}__{1}'.format(field, 'gte')]=min
 				else:
 					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
-					
+				
 		###text filters (exact match, and allow for multiple entries joined by an or)
 		###this hard eval is not ideal but I can't quite see how else to do it just now?
 		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
@@ -105,7 +106,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 					searchstring=True
 				elif searchstring.lower() in ["false","f","0","no"]:
 					searchstring=False
-	
+
 				if searchstring in [True,False]:
 					kwargs[field]=searchstring
 		#print(kwargs)
@@ -201,32 +202,34 @@ def getJSONschema(base_obj_name,hierarchical):
 		hierarchical=True
 	else:
 		hierarchical=False
-	
 	r=requests.get(url=OPEN_API_BASE_API)
 	j=json.loads(r.text)
 	schemas=j['components']['schemas']
 	base_obj_name=base_obj_name
 	def walker(output,schemas,obj_name):
 		obj=schemas[obj_name]
-		for fieldname in obj['properties']:
-			thisfield=obj['properties'][fieldname]
-			if '$ref' in thisfield:
-				next_obj_name=thisfield['$ref'].replace('#/components/schemas/','')
-				output[fieldname]=walker({},schemas,next_obj_name)
-			elif 'type' in thisfield:
-				if thisfield['type']!='array':
-					output[fieldname]={
-						'type':thisfield['type']
-					}
-				else:
-					thisfield_items=thisfield['items']
-					if 'type' in thisfield_items:
+		if 'properties' in obj:
+			for fieldname in obj['properties']:
+				thisfield=obj['properties'][fieldname]
+				if 'allOf' in thisfield:
+					thisfield=thisfield['allOf'][0]
+				if '$ref' in thisfield:
+					next_obj_name=thisfield['$ref'].replace('#/components/schemas/','')
+					output[fieldname]=walker({},schemas,next_obj_name)
+				elif 'type' in thisfield:
+					if thisfield['type']!='array':
 						output[fieldname]={
-							'type':thisfield_items['type']
+							'type':thisfield['type']
 						}
-					elif '$ref'	in thisfield_items:
-						next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
-						output[fieldname]=walker({},schemas,next_obj_name)
+					else:
+						thisfield_items=thisfield['items']
+						if 'type' in thisfield_items:
+							output[fieldname]={
+								'type':thisfield_items['type']
+							}
+						elif '$ref'	in thisfield_items:
+							next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
+							output[fieldname]=walker({},schemas,next_obj_name)
 		return output
 	output=walker({},schemas,base_obj_name)
 	if not hierarchical:

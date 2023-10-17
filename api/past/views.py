@@ -446,9 +446,11 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			]
 		}
 		
-		
-		
-		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		r=requests.post(
+			url=u2,
+			data=json.dumps(d2),
+			headers={"Content-type":"application/json"}
+		)
 		print("Networkx Response Time Back to Django:", time.time()-django_query_time)
 		j=json.loads(r.text)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")

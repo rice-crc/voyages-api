@@ -12,13 +12,13 @@ from .models import *
 from .common import GeoTreeFilter
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+from .serializers import LocationSerializer
 
 
 @extend_schema(
         exclude=True
     )
 class GeoTree(generics.GenericAPIView):
-	# serializer_class=VoyageSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
@@ -28,3 +28,11 @@ class GeoTree(generics.GenericAPIView):
 		resp=JsonResponse(locationtree,safe=False)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
+
+class LocationRUD(generics.RetrieveUpdateDestroyAPIView):
+	queryset=Location.objects.all()
+	serializer_class=LocationSerializer
+	lookup_field='value'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	

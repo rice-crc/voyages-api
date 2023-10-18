@@ -117,7 +117,9 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 					lat=att_dict['lat']
 					lon=att_dict['lon']
 					if lat is not None and lon is not None:
-						if (float(lat) < -.1 or float(lat) > .1) and (float(lon) < -.1 or float(lon) > .1):
+						if (float(lat) > -.1 and float(lat) < .1) and (float(lon) > -.1 and float(lon) < .1):
+							print("BAD NODE-->",att_dict)
+						else:
 							att_dict['lat']=float(lat)
 							att_dict['lon']=float(lon)
 							query=[{"==": [(k,), att_dict[k]]} for k in att_dict]
@@ -134,8 +136,6 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 								rowdict=(node_id,att_dict)
 								G.add_nodes_from([rowdict])
 								node_id+=1
-						else:
-							print("BAD NODE-->",att_dict)
 					else:
 						print("BAD NODE-->",att_dict)
 				

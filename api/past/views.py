@@ -404,6 +404,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		)
 		queryset=queryset.order_by('id')
 		zoomlevel=params.get('zoomlevel',['region'])[0]
+		print("------>",zoomlevel)
 		if zoomlevel not in ['region','place']:
 			zoomlevel='region'
 		if zoomlevel=='place':

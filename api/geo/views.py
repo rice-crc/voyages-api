@@ -6,7 +6,7 @@ import time
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from .models import *
 from .common import GeoTreeFilter
@@ -34,5 +34,4 @@ class LocationRUD(generics.RetrieveUpdateDestroyAPIView):
 	serializer_class=LocationSerializer
 	lookup_field='value'
 	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	
+	permission_classes=[IsAdminUser]

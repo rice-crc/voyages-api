@@ -48,9 +48,14 @@ def load_graph(endpoint,graph_params):
 				tag_connections=ordered_node_class['tag_connections']
 				G=connect_to_tags(G,tag,tag_connections)
 		print("connected all remaining network edges (non-oceanic --> (non-oceanic & oceanic)) following index_vars.py file ruleset")
-	elif rc['type']=='people':
-		pass
-	return G,graph_name,None
+		def oceanic_edge_filter(s,t):
+			edgetags=G[s][t].get("tags")
+			if "oceanic_leg" in edgetags or "embarkation_to_onramp" in edgetags or "offramp_to_disembarkation" in edgetags:
+				return True
+			else:
+				return False
+		oceanic_subgraph_view=nx.subgraph_view(G,filter_edge=oceanic_edge_filter)
+	return G,oceanic_subgraph_view,graph_name,None
 
 registered_caches={
 	'voyage_maps':voyage_maps,
@@ -70,12 +75,12 @@ for rcname in rcnames:
 	endpoint=rc['endpoint']
 	if 'graphs' not in rc:
 		rc['graphs']={}
-
 	for graph_params in rc['graph_params']:
 # 			try:
-		graph,graph_name,shortest_paths=load_graph(endpoint,graph_params)
+		graph,oceanic_subgraph_view,graph_name,shortest_paths=load_graph(endpoint,graph_params)
 		rc['graphs'][graph_name]={
 			'graph':graph,
+			'oceanic_subgraph_view':oceanic_subgraph_view,
 			'shortest_paths':shortest_paths
 		}
 # 			except:
@@ -141,8 +146,10 @@ def network_maps():
 	## and classify the nodes
 	graphname=rdata['graphname']
 	graph=registered_caches[cachename]['graphs'][graphname]['graph']
+	oceanic_subgraph_view=registered_caches[cachename]['graphs'][graphname]['oceanic_subgraph_view']
 	
-	
+# 	print("ORIGINAL",graph)
+# 	print("FILTERED",oceanic_subgraph_view)
 	##somebody help me -- is there a faster pythonic way to do this?
 	nodes={i:{
 		"id":i,
@@ -216,10 +223,11 @@ def network_maps():
 # 						print("self loop")
 						selfloop=True
 						successor_ids=[
-							n_id for n_id in graph.successors(a_id)
-							if 'onramp' in graph.nodes[n_id]['tags']
+							n_id for n_id in oceanic_subgraph_view.successors(a_id)
+							if 'onramp' in oceanic_subgraph_view.nodes[n_id]['tags']
 						]
 						if len(successor_ids)==0:
+# 							print("AAAAAAAA")
 							spfail=True
 						else:
 							successor_id=successor_ids[0]
@@ -229,12 +237,23 @@ def network_maps():
 					if not spfail:
 						try:
 							if selfloop:
-								sp=nx.shortest_path(graph,successor_id,b_id,'distance')
-								sp.insert(0,a_id)
+								if linklabel=='transportation':
+									sp=nx.shortest_path(oceanic_subgraph_view,successor_id,b_id,'distance')
+									sp.insert(0,a_id)
+								else:
+									sp=nx.shortest_path(graph,successor_id,b_id,'distance')
+									sp.insert(0,a_id)
 							else:
-								sp=nx.shortest_path(graph,a_id,b_id,'distance')
+								if linklabel=='transportation':
+									sp=nx.shortest_path(oceanic_subgraph_view,a_id,b_id,'distance')
+								else:
+									sp=nx.shortest_path(graph,a_id,b_id,'distance')
 						except:
+# 							print("BBBBBBBBB")
 							spfail=True
+					
+# 					for i in sp:
+# 						print(graph.nodes[i])
 					
 					## We need to do one last check here
 					## Because there are many routes that can be taken in the network
@@ -245,18 +264,23 @@ def network_maps():
 					## Yikes. We need to flag that as an error and draw a straight line
 					## So that the editors know to update the map network
 					sp_export_preflight=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
+# 					print(sp_export_preflight)
 					for i in sp_export_preflight:
 						if type(i)==str and i not in uuids:
+# 							print("CCCCCCCC")
 							spfail=True
 					
 					#if all our shortest path work has failed, then return a straight line
 					## but log it!
+					## OCT. 18 2023: I've found that when paths are NOT provided, this process slows down dramatically.
+					## AND RESOLVED THE ISSUE THAT WAS LEADING TO THE OCEANIC NETWORK BEING SKIPPED
+					## I USED THE SUBGRAPH VIEW TO FIX THIS PROBLEM -- WE WERE GETTING PATHS LIKE
+					## EMBARKATION TO ONRAMP TO A CLOSE DISEMBARKATION NODE TO THE ACTUAL DISEMBARKATION NODE BECAUSE IT HAD A POST-DISEMBARK IN IT. OY...
 					if spfail:
 						sp=[a_id,b_id]
-						if DEBUG:
-							print("---\nNO PATH")
-							print("from",amatch,graph.nodes[amatch])
-							print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
+						print("---\nNO PATH")
+						print("from",amatch,graph.nodes[amatch])
+						print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
 						
 					
 					#retrieve the uuid's where applicable

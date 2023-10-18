@@ -5,6 +5,7 @@ from .models import *
 from geo.models import *
 from voyage.models import *
 from voyage.serializers import *
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 
 #### SERIALIZERS COMMON TO BOTH ENSLAVERS AND ENSLAVED
 
@@ -96,13 +97,13 @@ class PastSourceSerializer(serializers.ModelSerializer):
 		model=ZoteroSource
 		fields='__all__'
 
-class ZoteroEnslaverConnectionSerializer(serializers.ModelSerializer):
+class PastZoteroEnslaverConnectionSerializer(serializers.ModelSerializer):
 	zotero_source=PastSourceSerializer(many=False)
 	class Meta:
 		model=ZoteroEnslaverConnection
 		fields='__all__'
 
-class ZoteroEnslavedConnectionSerializer(serializers.ModelSerializer):
+class PastZoteroEnslavedConnectionSerializer(serializers.ModelSerializer):
 	zotero_source=PastSourceSerializer(many=False)
 	class Meta:
 		model=ZoteroEnslavedConnection
@@ -164,13 +165,44 @@ class LanguageGroupSerializer(serializers.ModelSerializer):
 		model=LanguageGroup
 		fields='__all__'
 
+
+@extend_schema_serializer(
+	examples = [
+		 OpenApiExample(
+			'Ex. 1: numeric range',
+			summary='Filter on a numeric range',
+			description='Here, we search for named enslaved individualas who were, at the time of the transportation that we have recorded for them, between 5 and 15 years of age.',
+			value={
+				"age":
+				[
+					5,15
+				]
+			},
+			request_only=True,
+			response_only=False
+		),
+		OpenApiExample(
+			'Ex. 2: array of str vals',
+			summary='OR Filter on exact matches of known str values',
+			description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching on a highly nested value: all named enslaved individuals who were on voyages that were principally disembarked in the Bahamas',
+			value={
+				"enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name":
+				[
+					"Bahamas, port unspecified"
+				]
+			},
+			request_only=True,
+			response_only=False
+		)
+	]
+)
 class EnslavedSerializer(serializers.ModelSerializer):
 	post_disembark_location=PlaceSerializer(many=False)
 	captive_fate=CaptiveFateSerializer(many=False)
 	enslaved_relations=EnslavedInRelationSerializer(many=True,read_only=True)
 	captive_status=CaptiveStatusSerializer(many=False)
 	language_group=LanguageGroupSerializer(many=False)
-	enslaved_zotero_connections=ZoteroEnslavedConnectionSerializer(many=True,read_only=True)
+	enslaved_zotero_connections=PastZoteroEnslavedConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=Enslaved
 		fields='__all__'
@@ -216,9 +248,44 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 		model=EnslaverAlias
 		fields='__all__'
 
+
+
+
+
+
+
+
+
+
+
+
+@extend_schema_serializer(
+	examples = [
+		 OpenApiExample(
+			'Ex. 1: numeric range',
+			summary='Filter on a numeric range',
+			description='Here, we search for enslavers who participated in slave-trading voyages between the years of 1720-1722',
+			value={
+				"aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":[1720,1722]
+			},
+			request_only=True,
+			response_only=False
+		),
+		OpenApiExample(
+			'Ex. 2: array of str vals',
+			summary='OR Filter on exact matches of known str values',
+			description='Here, we search for enslavers who participated in the enslavement of anyone named Bora',
+			value={
+				"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name":["Bora"]
+			},
+			request_only=True,
+			response_only=False
+		)
+	]
+)
 class EnslaverSerializer(serializers.ModelSerializer):
 	principal_location=PlaceSerializer(many=False)
-	enslaver_zotero_connections=ZoteroEnslaverConnectionSerializer(many=True,read_only=True)
+	enslaver_zotero_connections=PastZoteroEnslaverConnectionSerializer(many=True,read_only=True)
 	aliases=EnslaverAliasSerializer(many=True,read_only=True)
 	birth_place=PlaceSerializer(many=False)
 	death_place=PlaceSerializer(many=False)

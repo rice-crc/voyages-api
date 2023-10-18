@@ -14,11 +14,11 @@ app.config['JSON_SORT_KEYS'] = False
 options={}
 
 def load_long_df(endpoint,variables):
-	headers={'Authorization':DJANGO_AUTH_KEY}
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
-		data={'selected_fields':variables}
+		data=json.dumps({'selected_fields':variables})
 	)
 	j=json.loads(r.text)
 	df=pd.DataFrame.from_dict(j)
@@ -27,9 +27,8 @@ def load_long_df(endpoint,variables):
 		optionsvar=options[varname]
 		vartype=optionsvar['type']	
 		if vartype in [
-			"<class 'rest_framework.fields.IntegerField'>",
-			"<class 'rest_framework.fields.FloatField'>",
-			"<class 'rest_framework.fields.DecimalField'>"
+			"integer",
+			"number"
 		]:
 			df[varname]=pd.to_numeric(df[varname])
 	print(df)
@@ -37,8 +36,6 @@ def load_long_df(endpoint,variables):
 
 registered_caches=[
 	voyage_bar_and_donut_charts,
-# 	voyage_maps,
-# 	enslaved_maps,
 	voyage_summary_statistics,
 	voyage_pivot_tables,
 	voyage_xyscatter
@@ -51,8 +48,8 @@ standoff_base=4
 standoff_count=0
 while True:
 	failures_count=0
-	headers={'Authorization':DJANGO_AUTH_KEY}
-	r=requests.options(url=DJANGO_BASE_URL+'voyage/dataframes?hierarchical=False',headers=headers)
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
+	r=requests.get(url=DJANGO_BASE_URL+'common/schemas/?schema_name=Voyage&hierarchical=False',headers=headers)
 	options=json.loads(r.text)
 	for rc in registered_caches:
 		endpoint=rc['endpoint']
@@ -198,7 +195,7 @@ def crosstabs():
 			margins=True
 		)
 		ct.fillna(0)
-		print(ct)
+# 		print(ct)
 	else:
 		ct=pd.crosstab(
 			[df2[rows]],
@@ -298,13 +295,12 @@ def crosstabs():
 	allcolumns.insert(0,indexcol_name)
 	ct=ct.fillna(0)
 	
+# 	print(ct)
+	
 	def convertcell(cellval,valuetype):
-		if valuetype in [
-			"<class 'rest_framework.fields.FloatField'>",
-			"<class 'rest_framework.fields.DecimalField'>"
-		]:
+		if valuetype == "number":
 			return float(cellval)
-		elif valuetype=="<class 'rest_framework.fields.IntegerField'>":
+		elif valuetype=="integer":
 			return int(cellval)
 		
 	

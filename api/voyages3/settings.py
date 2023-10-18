@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'captcha',
-    'nested_admin'
+    'nested_admin',
+    'drf_spectacular'
 ]
 
 #the below are defined in localsettings.
@@ -65,8 +66,28 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
 		'rest_framework.authentication.TokenAuthentication'
-    ]
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser'
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
+
+SPECTACULAR_SETTINGS = {
+    # available SwaggerUI configuration parameters
+    # https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
+    "SWAGGER_UI_SETTINGS": {
+        "persistAuthorization": True,
+        "displayOperationId": False
+    },
+	 'POSTPROCESSING_HOOKS': []
+}
+
+
 
 MIDDLEWARE = [
 	'corsheaders.middleware.CorsMiddleware',

@@ -61,7 +61,7 @@ def connect_to_tags(G,this_tag,tag_connections):
 def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 	graph_name=graph_params['name']
 	node_id=init_node_id
-	headers={'Authorization':DJANGO_AUTH_KEY}
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	ordered_node_classes=graph_params['ordered_node_classes']
 	prev_tag=None
 	for ordered_node_class in ordered_node_classes:
@@ -82,12 +82,14 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 			### E.G., ARE WE AFTER TRANSATLANTIC OR INTRA-AMERICAN VOYAGES?
 			for f in filter_obj:
 				payload[f]=filter_obj[f]
-				
+			
+			
+			print(headers,payload)
 			## MAKE A DATAFRAME CALL ON ALL THE VARIABLES ENUMERATED FOR THIS NODE
 			r=requests.post(
 				url=DJANGO_BASE_URL+endpoint,
 				headers=headers,
-				data=payload
+				data=json.dumps(payload)
 			)
 			
 			## TRANSFORM THE RESPONSE INTO ROWS AND DEDUPE
@@ -115,7 +117,9 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 					lat=att_dict['lat']
 					lon=att_dict['lon']
 					if lat is not None and lon is not None:
-						if (float(lat) < -.1 or float(lat) > .1) and (float(lon) < -.1 or float(lon) > .1):
+						if (float(lat) > -.1 and float(lat) < .1) and (float(lon) > -.1 and float(lon) < .1):
+							print("BAD NODE-->",att_dict)
+						else:
 							att_dict['lat']=float(lat)
 							att_dict['lon']=float(lon)
 							query=[{"==": [(k,), att_dict[k]]} for k in att_dict]
@@ -132,8 +136,6 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 								rowdict=(node_id,att_dict)
 								G.add_nodes_from([rowdict])
 								node_id+=1
-						else:
-							print("BAD NODE-->",att_dict)
 					else:
 						print("BAD NODE-->",att_dict)
 				

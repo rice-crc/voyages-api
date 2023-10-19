@@ -9,6 +9,7 @@ from django.core.paginator import Paginator
 import html
 import re
 import pysolr
+import os
 #GENERIC FUNCTION TO RUN A CALL ON REST SERIALIZERS
 ##Default is to auto prefetch, but need to be able to turn it off.
 ##For instance, on our PAST graph-like data, the prefetch can overwhelm the system if you try to get everything
@@ -18,6 +19,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	errormessages=[]
 	results_count=None
+	
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
 	try:
 		if type(r)==dict:
@@ -196,7 +198,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	return res,selected_fields,results_count,errormessages
 
-def getJSONschema(base_obj_name,hierarchical):
+def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	if hierarchical in [True,"true","True",1,"t","T","yes","Yes","y","Y"]:
 		hierarchical=True
 	else:
@@ -230,7 +232,6 @@ def getJSONschema(base_obj_name,hierarchical):
 						}
 # 						print(fieldname,'bottomval')
 					else:
-						
 						thisfield_items=thisfield['items']
 						if 'type' in thisfield_items:
 # 							print('array otherbottomvalue',thisfield)
@@ -246,7 +247,9 @@ def getJSONschema(base_obj_name,hierarchical):
 		else:
 			print(obj)
 		return output
+	
 	output=walker({},schemas,base_obj_name)
+		
 	if not hierarchical:
 		def flatten_this(input_dict,output_dict,keychain=[]):
 			for k in input_dict:
@@ -256,5 +259,17 @@ def getJSONschema(base_obj_name,hierarchical):
 				else:
 					output_dict=flatten_this(input_dict[k],output_dict,keychain+[k])
 			return output_dict		
-		output=flatten_this(output,{},[])	
+		output=flatten_this(output,{},[])
+	
+	if rebuild or not os.path.exists('./common/static/'+base_obj_name+"_options.json") or not os.path.exists('./common/static/'+base_obj_name+"_options.py"):
+		flat_output=flatten_this(output,{},[])
+		d=open('./common/static/'+base_obj_name+"_options.json",'w')
+		d.write(json.dumps(flat_output))
+		d.close()
+		
+		d=open('./common/static/'+base_obj_name+"_options.py",'w')
+		d.write(base_obj_name+'_options='+str(flat_output))
+		d.close()
+
+	
 	return output

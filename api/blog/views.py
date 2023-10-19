@@ -13,6 +13,10 @@ from .models import *
 from .serializers import *
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+from common.static.Institution_options import Institution_options
+from common.static.Post_options import Post_options
+from common.static.Author_options import Author_options
+
 
 class PostList(generics.GenericAPIView):
 	'''
@@ -27,9 +31,8 @@ class PostList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		print("BLOG POST LIST+++++++\nusername:",request.auth.user)
-		post_options=getJSONschema('Post',hierarchical=False)
 		queryset=Post.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,post_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Post_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}
@@ -101,9 +104,8 @@ class AuthorList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		print("AUTHOR LIST+++++++\nusername:",request.auth.user)
-		author_options=getJSONschema('Author',hierarchical=False)
 		queryset=Author.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,author_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Author_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}
@@ -128,9 +130,8 @@ class InstitutionList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
-		institution_options=getJSONschema('Institution',hierarchical=False)
 		queryset=Institution.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,institution_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Institution_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}

@@ -27,6 +27,7 @@ import re
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+from common.static.ZoteroSource_options import ZoteroSource_options
 
 class ZoteroSourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -43,12 +44,11 @@ class ZoteroSourceList(generics.GenericAPIView):
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		queryset=ZoteroSource.objects.all()
 		queryset=queryset.order_by('id')
-		zotero_source_options=getJSONschema('ZoteroSource',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			zotero_source_options,
+			ZoteroSource_options,
 			retrieve_all=False
 		)
 		

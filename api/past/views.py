@@ -23,7 +23,8 @@ from geo.serializers import LocationSerializer
 from voyages3.localsettings import *
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-
+from common.static.Enslaver_options import Enslaver_options
+from common.static.Enslaved_options import Enslaved_options
 
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -45,13 +46,12 @@ class EnslavedList(generics.GenericAPIView):
 		times=[]
 		labels=[]
 		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
-		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			enslaved_options,
+			Enslaved_options,
 			auto_prefetch=True
 		)
 		if len(error_messages)==0:
@@ -175,14 +175,13 @@ class EnslaverList(generics.GenericAPIView):
 		'''
 
 		print("ENSLAVER LIST+++++++\nusername:",request.auth.user)
-		enslaver_options=getJSONschema('Enslaver',hierarchical=False)
 		st=time.time()
 		queryset=EnslaverIdentity.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			enslaver_options,
+			Enslaver_options,
 			auto_prefetch=True
 		)
 		if len(error_messages)==0:
@@ -215,8 +214,7 @@ class EnslavedAggregations(generics.GenericAPIView):
 			aggregations=params.get('aggregate_fields')
 			print(aggregations)
 			queryset=Enslaved.objects.all()
-			enslaved_options=getJSONschema('Enslaved',hierarchical=False)
-			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,enslaved_options,retrieve_all=True)
+			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,Enslaved_options,retrieve_all=True)
 			output_dict={}
 			if len(error_messages)==0:
 				for a in aggregation:
@@ -249,11 +247,10 @@ class EnslaverAggregations(generics.GenericAPIView):
 		st=time.time()
 		print("ENSLAVER AGGREGATIONS+++++++\nusername:",request.auth.user)
 		try:
-			enslaver_options=getJSONschema('Enslaver',hierarchical=False)
 			params=dict(request.data)
 			aggregations=params.get('aggregate_fields')
 			queryset=EnslaverIdentity.objects.all()
-			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,enslaver_options,retrieve_all=True)
+			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,Enslaver_options,retrieve_all=True)
 			output_dict={}
 			if len(error_messages)==0:
 				for a in aggregation:
@@ -281,13 +278,12 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		print("ENSLAVED DATA FRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
 		params=dict(request.data)
-		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			enslaved_options,
+			Enslaved_options,
 			auto_prefetch=True,
 			retrieve_all=True
 		)
@@ -311,13 +307,12 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		print("+++++++\nusername:",request.auth.user)
 		st=time.time()
 		params=dict(request.data)
-		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=EnslaverIdentity.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			enslaved_options,
+			Enslaved_options,
 			auto_prefetch=True,
 			retrieve_all=True
 		)
@@ -342,11 +337,10 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		print("ENSLAVER GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
 		reqdict=dict(request.data)
-		enslaver_options=getJSONschema('Enslaver',hierarchical=False)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=EnslaverIdentity.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,enslaver_options,retrieve_all=True)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,Enslaver_options,retrieve_all=True)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 			queryset=queryset.select_related(geotree_valuefield_stub)
@@ -367,11 +361,10 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		print("ENSLAVED GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
 		reqdict=dict(request.data)
-		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=Enslaved.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,enslaved_options,retrieve_all=True)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,Enslaved_options,retrieve_all=True)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 			queryset=queryset.select_related(geotree_valuefield_stub)
@@ -392,13 +385,12 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		st=time.time()
 		print("ENSLAVED AGG ROUTES+++++++\nusername:",request.auth.user)
 		params=dict(request.data)
-		enslaved_options=getJSONschema('Enslaved',hierarchical=False)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			enslaved_options,
+			Enslaved_options,
 			auto_prefetch=True,
 			retrieve_all=True
 		)

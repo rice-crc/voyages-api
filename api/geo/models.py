@@ -12,7 +12,7 @@ class Polygon(models.Model):
 		"Geojson Polygon",
 		null=True,
 		blank=True
-		)
+	)
 
 # Voyage Regions and Places
 class LocationType(models.Model):

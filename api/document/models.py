@@ -1,16 +1,21 @@
 from django.db import models
 import re
-
-from voyage.models import VoyageSources,Voyage
+from voyage.models import Voyage
 from past.models import Enslaved,EnslaverIdentity
 
 class SourcePage(models.Model):
 	"""
 	INDIVIDUAL PAGES
 	"""
-	page_url=models.URLField(max_length=400,null=True)
-	iiif_manifest_url=models.URLField(null=True,blank=True,max_length=400)
-	iiif_baseimage_url=models.URLField(null=True,blank=True,max_length=400)
+	page_url=models.URLField(
+		max_length=400,null=True
+	)
+	iiif_manifest_url=models.URLField(
+		null=True,blank=True,max_length=400
+	)
+	iiif_baseimage_url=models.URLField(
+		null=True,blank=True,max_length=400
+	)
 	image_filename=models.CharField(
 		max_length=100,
 		null=True,
@@ -19,7 +24,7 @@ class SourcePage(models.Model):
 	transcription=models.TextField(null=True,blank=True)
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
-		
+
 	def __str__(self):
 		nonnulls=[i for i in [
 				self.page_url,
@@ -44,53 +49,27 @@ class SourcePage(models.Model):
 			return None
 			
 class SourcePageConnection(models.Model):
-	zotero_source=models.ForeignKey(
-		'ZoteroSource',
+	source=models.ForeignKey(
+		'Source',
 		related_name='page_connection',
 		on_delete=models.CASCADE
 	)
 	
 	source_page=models.ForeignKey(
 		'SourcePage',
-		related_name='zotero_connection',
+		related_name='source_connection',
 		on_delete=models.CASCADE
 	)
 	
 	class Meta:
 		unique_together=[
-			['zotero_source','source_page']
+			['source','source_page']
 		]
 
-
-
-
-# >>> from document.models import *
-# >>> zoterosources=ZoteroSource.objects.all()
-# >>> for zs in zoterosources:
-# ...     if zs.voyages.all() is not None:
-# ...             for v in zs.voyages.all():
-# ...                     zvc,zvc_isnew=ZoteroVoyageConnection.objects.get_or_create(zotero_source=zs,voyage=v)
-# ...                     zvc.save()
-# ... 
-
-
-# >>> for zs in zoterosources:
-# ...     if zs.enslaved_people.all() is not None:
-# ...             for e in zs.enslaved_people.all():
-# ...                     zec,zec_isnew=ZoteroEnslavedConnection.objects.get_or_create(zotero_source=zs,enslaved=e)
-# ...                     zec.save()
-
-# for zs in zoterosources:
-# 	if zs.enslavers.all() is not None:
-# 		for e in zs.enslavers.all():
-# 			zec,zec_isnew=ZoteroEnslaverConnection.objects.get_or_create(zotero_source=zs,enslaver=e)
-# 			zec.save()
-
-
-class ZoteroVoyageConnection(models.Model):
-	zotero_source=models.ForeignKey(
-		'ZoteroSource',
-		related_name='zotero_voyage_connections',
+class VoyageConnection(models.Model):
+	source=models.ForeignKey(
+		'Source',
+		related_name='source_voyage_connections',
 		on_delete=models.CASCADE
 	)
 	voyage=models.ForeignKey(
@@ -105,18 +84,18 @@ class ZoteroVoyageConnection(models.Model):
 	)
 	class Meta:
 		unique_together=[
-			['zotero_source','voyage','page_range']
+			['source','voyage','page_range']
 		]
 
-class ZoteroEnslaverConnection(models.Model):
-	zotero_source=models.ForeignKey(
-		'ZoteroSource',
-		related_name='zotero_enslaver_connections',
+class EnslaverConnection(models.Model):
+	source=models.ForeignKey(
+		'Source',
+		related_name='source_enslaver_connections',
 		on_delete=models.CASCADE
 	)
 	enslaver=models.ForeignKey(
 		EnslaverIdentity,
-		related_name='enslaver_zotero_connections',
+		related_name='enslaver_source_connections',
 		on_delete=models.CASCADE
 	)
 	page_range=models.CharField(
@@ -126,18 +105,18 @@ class ZoteroEnslaverConnection(models.Model):
 	)
 	class Meta:
 		unique_together=[
-			['zotero_source','enslaver','page_range']
+			['source','enslaver','page_range']
 		]
 
-class ZoteroEnslavedConnection(models.Model):
-	zotero_source=models.ForeignKey(
-		'ZoteroSource',
-		related_name='zotero_enslaved_connections',
+class SourceEnslavedConnection(models.Model):
+	source=models.ForeignKey(
+		'Source',
+		related_name='source_enslaved_connections',
 		on_delete=models.CASCADE
 	)
 	enslaved=models.ForeignKey(
 		Enslaved,
-		related_name='enslaved_zotero_connections',
+		related_name='enslaved_source_connections',
 		on_delete=models.CASCADE
 	)
 	page_range=models.CharField(
@@ -147,11 +126,11 @@ class ZoteroEnslavedConnection(models.Model):
 	)
 	class Meta:
 		unique_together=[
-			['zotero_source','enslaved','page_range']
+			['source','enslaved','page_range']
 		]
 
 
-class ZoteroSource(models.Model):
+class Source(models.Model):
 	"""
 	Represents the relationship between Voyage and VoyageSources
 	source_order determines the order sources appear for each voyage
@@ -159,57 +138,72 @@ class ZoteroSource(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
 	
-	item_url=models.URLField(max_length=400,null=True)
+	item_url=models.URLField(
+		max_length=400,
+		null=True
+	)
 	
-	zotero_url=models.URLField(max_length=400)
+	zotero_group_id=models.IntegerField(
+		"Zotero Integer Group ID",
+		null=False,
+		blank=False
+	)
 	
-	legacy_source=models.ForeignKey(
-		VoyageSources,
-		related_name="source_zotero_refs",
-		null=True,
-		on_delete=models.CASCADE
+	zotero_item_id=models.CharField(
+		"Zotero Alphanumeric Item ID",
+		unique=True,
+		null=False,
+		blank=False
 	)
 	
 	short_ref=models.CharField(
-		max_length=255,
+		"Canonical, Unique Short Ref",
+		max_length=25,
 		null=True,
 		blank=True,
+		unique=True,
 	)
 	
-	zotero_title=models.CharField(
+	title=models.CharField(
+		"Title",
 		max_length=255,
 		null=False,
 		blank=False,
 	)
 	
-	zotero_date=models.CharField(
+	date=models.CharField(
+		"Date of Publication or Authorship",
 		max_length=60,
 		null=False,
 		blank=False
 	)
 	
-	is_legacy_source=models.BooleanField(default=False,blank=True,null=True)
+	last_updated=models.DateTimeField(
+		"Last Updated",
+		auto_now=True
+	)
 	
-	last_updated=models.DateTimeField(auto_now=True)
-	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
+	human_reviewed=models.BooleanField(
+		"Review ",
+		default=False,
+		blank=True,
+		null=True
+	)
 	
 	notes=models.TextField(null=True,blank=True)
 		
 	class Meta:
 		unique_together=[
-			['zotero_title','zotero_url','legacy_source']
+			['title','url','legacy_source']
 		]
 	
 	def __str__(self):
-		return self.zotero_title + " " + self.zotero_date
+		return self.title + " " + self.date
 
 	@property
 	def zotero_web_page_url(self):
 		if self.zotero_url not in (None,""):
-			url=re.sub("api\.zotero\.org","www.zotero.org",self.zotero_url)
-			return url
-		else:
-			return None
+			url="https://www.zotero.org/groups/%s/sv-docs/items/%s/library" %(self.zotero_group_id,self.zotero_item_id)
 	
 	class Meta:
 		ordering=['id']

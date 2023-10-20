@@ -10,7 +10,7 @@ class SourceVoyageSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class SourceVoyageConnectionSerializer(serializers.ModelSerializer):
-	voyage=ZoteroVoyageSerializer(many=False,read_only=True)
+	voyage=SourceVoyageSerializer(many=False,read_only=True)
 	class Meta:
 		model=SourceVoyageConnection
 		fields='__all__'

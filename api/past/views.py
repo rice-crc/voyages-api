@@ -24,11 +24,11 @@ from voyages3.localsettings import *
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
-
+@extend_schema(exclude=True)
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=EnslavedSerializer
+# 	serializer_class=EnslavedSerializer
 	def post(self,request):
 		'''
 		This endpoint returns a list of highly nested objects, each of which contains all the available information on enslaved individuals who we know to have been transported on a voyage.
@@ -159,10 +159,11 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 		return JsonResponse(res,safe=False)
 
 #LONG-FORM TABULAR ENDPOINT.@extend_schema(exclude=True)
+@extend_schema(exclude=True)
 class EnslaverList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=EnslaverSerializer
+# 	serializer_class=EnslaverSerializer
 	def post(self,request):
 		'''
 		This endpoint returns a list of highly nested objects, each of which contains all the available information on named individuals we know to have participated in the slave trade.

@@ -66,7 +66,7 @@ class SourcePageConnection(models.Model):
 			['source','source_page']
 		]
 
-class VoyageConnection(models.Model):
+class SourceVoyageConnection(models.Model):
 	source=models.ForeignKey(
 		'Source',
 		related_name='source_voyage_connections',
@@ -87,7 +87,7 @@ class VoyageConnection(models.Model):
 			['source','voyage','page_range']
 		]
 
-class EnslaverConnection(models.Model):
+class SourceEnslaverConnection(models.Model):
 	source=models.ForeignKey(
 		'Source',
 		related_name='source_enslaver_connections',

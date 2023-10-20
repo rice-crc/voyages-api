@@ -80,10 +80,3 @@ class LocationSerializer(WritableNestedModelSerializer):
 	class Meta:
 		model=Location
 		fields='__all__'
-
-class AdjacencySerializer(serializers.ModelSerializer):
-	source=LocationSerializer(many=False)
-	target=LocationSerializer(many=False)
-	class Meta:
-		model=Adjacency
-		fields='__all__'

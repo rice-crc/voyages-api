@@ -31,7 +31,7 @@ from drf_spectacular.types import OpenApiTypes
 class ZoteroSourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=ZoteroSourceSerializer
+	serializer_class=SourceSerializer
 	def post(self,request):
 		'''
 		Voyages has always been built on scholarship, with references to many different archival sources. In the legacy version of the site, the sources were organized with a unique short reference ("short_ref") and a full reference ("full_ref"), like OMNO & Outward Manifests for New Orleans. When these sources were connected to Voyages, they would oftentimes be connected along with a field called "text_ref" that pointed at a specific location in the archive, or page number in the book.

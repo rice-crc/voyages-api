@@ -3,11 +3,8 @@ from __future__ import absolute_import, unicode_literals
 import operator
 import threading
 from typing import Iterable
-
-
 from builtins import range, str
 from functools import reduce
-
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -265,33 +262,15 @@ class EnslavementRelation(models.Model):
 		help_text="Date in MM,DD,YYYY format with optional fields.")
 	amount = models.DecimalField(null=True,blank=True, decimal_places=2, max_digits=6)
 	unnamed_enslaved_count = models.IntegerField(null=True,blank=True)
-	voyage = models.ForeignKey(Voyage, related_name="+",
-							   null=True,blank=True, on_delete=models.SET_NULL)
+	voyage = models.ForeignKey(
+		Voyage,
+		related_name="voyage_enslavement_relations",
+		null=True,blank=True,
+		on_delete=models.SET_NULL
+	)
 	text_ref = models.CharField(max_length=255, null=True, blank=True, help_text="Source text reference")
 	is_from_voyages=models.BooleanField(default=False,null=True,blank=True)
-	class Meta:
-		ordering=['id']
-
-class EnslavedInRelation(models.Model):
-	"""
-	Associates an enslaved in a slave relation.
-	"""
-
-# 	id = models.IntegerField(primary_key=True)
-	relation = models.ForeignKey(
-		EnslavementRelation,
-		related_name="enslaved_in_relation",
-		null=False,
-		on_delete=models.CASCADE)
-	enslaved = models.ForeignKey(Enslaved,
-		related_name="enslaved_relations",
-		null=False,
-		on_delete=models.CASCADE)
-	class Meta:
-		unique_together = ('relation', 'enslaved')
-	class Meta:
-		ordering=['id']
-
+	enslaved_in_relation=models.ManyToManyField(Enslaved)
 
 class EnslaverInRelation(models.Model):
 	"""
@@ -310,7 +289,7 @@ class EnslaverInRelation(models.Model):
 		null=False,
 		on_delete=models.CASCADE
 	)
-	role = models.ManyToManyField(
+	roles = models.ManyToManyField(
 		EnslaverRole,
 		null=False,
 		blank=False,

@@ -6,7 +6,6 @@ import pprint
 import gc
 
 class SparseDateSerializer(serializers.ModelSerializer):
-
 	class Meta:
 		model=SparseDate
 		fields='__all__'

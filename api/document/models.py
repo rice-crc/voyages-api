@@ -74,7 +74,7 @@ class VoyageConnection(models.Model):
 	)
 	voyage=models.ForeignKey(
 		Voyage,
-		related_name='voyage_zotero_connections',
+		related_name='voyage_source_connections',
 		on_delete=models.CASCADE
 	)
 	page_range=models.CharField(

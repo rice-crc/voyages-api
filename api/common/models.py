@@ -22,7 +22,6 @@ class NamedModelAbstractBase(models.Model):
     class Meta:
         abstract = True
 
-
 class SparseDate(models.Model):
 	day = models.IntegerField(
 		null=True,

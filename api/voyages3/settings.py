@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'past',
     'common',
 #     'blog',
-#     'geo',
+    'geo',
     'document',
 # 	'contribute',
     'tinymce',

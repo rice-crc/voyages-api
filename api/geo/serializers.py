@@ -7,7 +7,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from drf_writable_nested.mixins import UniqueFieldsMixin
 
-
 class LocationTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=LocationType
@@ -43,8 +42,8 @@ class LocationChildSerializer(serializers.ModelSerializer):
 class LocationSerializerDeep(serializers.ModelSerializer):
 	parents=LocationParentSerializer(many=False)
 	children=LocationChildSerializer(many=True)
-# 	spatial_extent=PolygonSerializer(many=False)
-# 	location_type=LocationTypeSerializer(many=False)
+	spatial_extent=PolygonSerializer(many=False)
+	location_type=LocationTypeSerializer(many=False)
 	class Meta:
 		model=Location
 		fields='__all__'

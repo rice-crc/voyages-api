@@ -2,74 +2,6 @@ from builtins import str
 import uuid
 from django.db import models
 #from django.utils.translation import gettext_lazy as _
-
-class Route(models.Model):
-	"""
-	Route json store
-	"""
-	source=models.ForeignKey(
-		'Location',
-		verbose_name="Alice",
-		null=False,
-		on_delete=models.CASCADE,
-		related_name='sourceofroute'
-	)
-	target=models.ForeignKey(
-		'Location',
-		verbose_name="Bob",
-		null=False,
-		on_delete=models.CASCADE,
-		related_name='targetofroute'
-	)
-	dataset= models.IntegerField(
-		"Dataset",
-		null=True
-	)
-	
-	shortest_route=models.JSONField(
-		"Endpoint to endpoint route",
-		null=True
-	)
-
-	
-	class Meta:
-		verbose_name = "Route"
-		verbose_name_plural = "Routes"
-
-class Adjacency(models.Model):
-	"""
-	Simplified network linkages -- simple a/b connections
-	"""
-	source=models.ForeignKey(
-		'Location',
-		verbose_name="Alice",
-		null=False,
-		on_delete=models.CASCADE,
-		related_name='sourceof'
-	)
-	target=models.ForeignKey(
-		'Location',
-		verbose_name="Bob",
-		null=False,
-		on_delete=models.CASCADE,
-		related_name='targetof'
-	)
-	dataset= models.IntegerField(
-		"Dataset",
-		null=True
-	)
-	
-	distance=models.DecimalField(
-		"Distance",
-		null=True,
-		blank=True,
-		max_digits=8,
-		decimal_places=5
-	)
-	
-	class Meta:
-		verbose_name = "Location Adjacency"
-		verbose_name_plural = "Location Adjacencies"
 	
 class Polygon(models.Model):
 	"""
@@ -128,18 +60,28 @@ class Location(models.Model):
 	)
 	
 	child_of = models.ForeignKey(
-		'self',
+		'Child of',
 		verbose_name="Child of",
 		null=True,
-		on_delete=models.CASCADE,
+		blank=True,
+		on_delete=models.SET_NULL,
 		related_name='parent_of'
 	)
+	
+	child_of = models.ForeignKey(
+		'Child of',
+		verbose_name="Child of",
+		null=True,
+		blank=True,
+		on_delete=models.SET_NULL,
+		related_name='parent_of'
+	)	
 	
 	location_type = models.ForeignKey(
 		'LocationType',
 		verbose_name="Location Type",
 		null=True,
-		on_delete=models.CASCADE,
+		on_delete=models.SET_NULL,
 		related_name='type_location'
 	)
 	
@@ -148,7 +90,7 @@ class Location(models.Model):
 		verbose_name="Polygon",
 		null=True,
 		blank=True,
-		on_delete=models.CASCADE
+		on_delete=models.SET_NULL
 	)
 	
 	value = models.IntegerField(

@@ -151,6 +151,7 @@ class Source(models.Model):
 	
 	zotero_item_id=models.CharField(
 		"Zotero Alphanumeric Item ID",
+		max_length=20,
 		unique=True,
 		null=False,
 		blank=False

@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from collections import Counter
 import urllib
@@ -377,3 +377,27 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
+
+class VoyageCRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
+	
+	Previously, the SQL pk ("id") always corresponded to the "voyage_id" field. We will not be enforcing this going forward.
+	
+	M2M relations will not be writable here EXCEPT in the case of union/"through" tables.
+	
+	Examples:
+	
+		1. You CANNOT create an Enslaved (person) record as you traverse voyage_enslavement_relations >> relation_enslaved, but only the EnslavementRelation record that joins them
+		2. You CAN create an EnslaverInRelation record as you traverse voyage_enslavement_relations >> relation_enslaver >> enslaver_alias >> enslaver_identity ...
+		3. ... but you CANNOT create an EnslaverRole record during that traversal, like voyage_enslavement_relations >> relation_enslaver >> enslaver_role
+	
+	I have also, for the time, set all itinerary Location foreign keys as read_only.
+	
+	Godspeed.
+	'''
+	queryset=Voyage.objects.all()
+	serializer_class=VoyageSerializer
+	lookup_field='voyage_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]

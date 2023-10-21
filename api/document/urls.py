@@ -2,7 +2,7 @@ from django.urls import path,include
 from . import views
 
 urlpatterns = [
-	path('',views.ZoteroSourceList.as_view()),
+	path('',views.SourceList.as_view()),
 	path('gallery',views.Gallery),
 	path('gallery/<int:collection_id>',views.Gallery,name="gallery"),
 	path('gallery/<int:collection_id>/<int:pagenumber>',views.Gallery,name="gallery"),

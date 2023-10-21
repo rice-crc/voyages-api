@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from builtins import str
 from django.db import models
 from django.db.models import Prefetch
-from geo.models import *
+from geo.models import Location
 from common.models import NamedModelAbstractBase,SparseDate
 # 
 
@@ -134,7 +134,7 @@ class VoyageShip(models.Model):
 		blank=True
 	)
 	vessel_construction_place = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="vessel_construction_place",
 		verbose_name="Place where vessel constructed",
 		null=True,
@@ -142,7 +142,7 @@ class VoyageShip(models.Model):
 		on_delete=models.SET_NULL
 	)
 	vessel_construction_region = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="vessel_construction_region",
 		verbose_name="Region where vessel constructed",
 		null=True,
@@ -154,14 +154,14 @@ class VoyageShip(models.Model):
 		blank=True
 	)
 	registered_place = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="registered_place",
 		verbose_name="Place where vessel registered",
 		null=True,
 		blank=True,
 		on_delete=models.SET_NULL)
 	registered_region = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="registered_region",
 		verbose_name="Region where vessel registered",
 		null=True,
@@ -397,7 +397,7 @@ class VoyageItinerary(models.Model):
 
 	# Data variables
 	port_of_departure = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="port_of_departure",
 		verbose_name="Port of departure (PORTDEP)",
 		null=True,
@@ -406,7 +406,7 @@ class VoyageItinerary(models.Model):
 	)
 	# Intended variables
 	int_first_port_emb = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_first_port_emb",
 		verbose_name="First intended port of embarkation (EMBPORT)",
 		null=True,
@@ -414,7 +414,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_second_port_emb = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_second_port_emb",
 		verbose_name="Second intended port of embarkation (EMBPORT2)",
 		null=True,
@@ -422,7 +422,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_first_region_purchase_slaves = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_first_region_purchase_slaves",
 		verbose_name="First intended region of purchase of slaves (EMBREG)",
 		null=True,
@@ -430,7 +430,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_second_region_purchase_slaves = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_second_region_purchase_slaves",
 		verbose_name="Second intended region of purchase of slaves (EMBREG2)",
 		null=True,
@@ -438,7 +438,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_first_port_dis = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_first_port_dis",
 		verbose_name="First intended port of disembarkation (ARRPORT)",
 		null=True,
@@ -446,7 +446,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_second_port_dis = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_second_port_dis",
 		verbose_name="Second intended port of disembarkation (ARRPORT2)",
 		null=True,
@@ -454,7 +454,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_third_port_dis = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_third_port_dis",
 		verbose_name="Third intended port of disembarkation (ARRPORT3)",
 		null=True,
@@ -462,7 +462,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_fourth_port_dis = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_fourth_port_dis",
 		verbose_name="Fourth intended port of disembarkation (ARRPORT4)",
 		null=True,
@@ -470,7 +470,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_first_region_slave_landing = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_first_region_slave_landing",
 		verbose_name="First intended region of slave landing (REGARR)",
 		null=True,
@@ -478,7 +478,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_second_place_region_slave_landing = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_second_region_slave_landing",
 		verbose_name="Second intended region of slave landing (REGARR2)",
 		null=True,
@@ -486,7 +486,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_third_place_region_slave_landing = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_third_region_slave_landing",
 		verbose_name="Third intended region of slave landing (REGARR3)",
 		null=True,
@@ -494,7 +494,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	int_fourth_place_region_slave_landing = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="int_fourth_region_slave_landing",
 		verbose_name="Fourth intended region of slave landing (REGARR4)",
 		null=True,
@@ -510,7 +510,7 @@ class VoyageItinerary(models.Model):
 	)
 
 	first_place_slave_purchase = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="first_place_slave_purchase",
 		verbose_name="First place of slave purchase (PLAC1TRA)",
 		null=True,
@@ -518,7 +518,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	second_place_slave_purchase = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="second_place_slave_purchase",
 		verbose_name="Second place of slave purchase (PLAC2TRA)",
 		null=True,
@@ -526,7 +526,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	third_place_slave_purchase = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="third_place_slave_purchase",
 		verbose_name="Third place of slave purchase (PLAC3TRA)",
 		null=True,
@@ -535,7 +535,7 @@ class VoyageItinerary(models.Model):
 	)
 
 	first_region_slave_emb = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="first_region_slave_emb",
 		verbose_name="First region of embarkation of slaves (REGEM1)",
 		null=True,
@@ -543,7 +543,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	second_region_slave_emb = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="second_region_slave_emb",
 		verbose_name="Second region of embarkation of slaves (REGEM2)",
 		null=True,
@@ -551,7 +551,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	third_region_slave_emb = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="third_region_slave_emb",
 		verbose_name="Third region of embarkation of slaves (REGEM3)",
 		null=True,
@@ -560,7 +560,7 @@ class VoyageItinerary(models.Model):
 	)
 
 	port_of_call_before_atl_crossing = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="port_of_call_before_atl_crossing",
 		verbose_name="Port of call before Atlantic crossing (NPAFTTRA)",
 		null=True,
@@ -575,7 +575,7 @@ class VoyageItinerary(models.Model):
 		blank=True
 	)
 	first_landing_place = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="first_landing_place",
 		verbose_name="First place of slave landing (SLA1PORT)",
 		null=True,
@@ -583,7 +583,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	second_landing_place = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="second_landing_place",
 		verbose_name="Second place of slave landing (ADPSALE1)",
 		null=True,
@@ -591,7 +591,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	third_landing_place = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="third_landing_place",
 		verbose_name="Third place of slave landing (ADPSALE2)",
 		null=True,
@@ -600,7 +600,7 @@ class VoyageItinerary(models.Model):
 	)
 
 	first_landing_region = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="first_landing_region",
 		verbose_name="First region of slave landing (REGDIS1)",
 		null=True,
@@ -608,7 +608,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	second_landing_region = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="second_landing_region",
 		verbose_name="Second region of slave landing (REGDIS2)",
 		null=True,
@@ -616,7 +616,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	third_landing_region = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="third_landing_region",
 		verbose_name="Third region of slave landing (REGDIS3)",
 		null=True,
@@ -625,7 +625,7 @@ class VoyageItinerary(models.Model):
 	)
 
 	place_voyage_ended = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="place_voyage_ended",
 		verbose_name="Place at which voyage ended (PORTRET)",
 		null=True,
@@ -633,7 +633,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	region_of_return = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="region_of_return",
 		verbose_name="Region of return (RETRNREG)",
 		null=True,
@@ -641,7 +641,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	broad_region_of_return = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="broad_region_of_return",
 		verbose_name="Broad region of return (RETRNREG1)",
 		null=True,
@@ -651,7 +651,7 @@ class VoyageItinerary(models.Model):
 
 	# Imputed variables
 	imp_port_voyage_begin = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_port_voyage_begin",
 		verbose_name="Imputed port where voyage began (PTDEPIMP)",
 		null=True,
@@ -659,7 +659,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	imp_region_voyage_begin = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_region_voyage_begin",
 		verbose_name="Imputed region where voyage began (DEPTREGIMP)",
 		null=True,
@@ -667,7 +667,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	imp_broad_region_voyage_begin = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_broad_region_voyage_begin",
 		verbose_name="Imputed broad region where voyage began (DEPTREGIMP1)",
 		null=True,
@@ -675,7 +675,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	principal_place_of_slave_purchase = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="principal_place_of_slave_purchase",
 		verbose_name="Principal place of slave purchase (MAJBUYPT)",
 		null=True,
@@ -683,7 +683,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	imp_principal_place_of_slave_purchase = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_principal_place_of_slave_purchase",
 		verbose_name="Imputed principal place of slave purchase (MJBYPTIMP)",
 		null=True,
@@ -691,7 +691,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	imp_principal_region_of_slave_purchase = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_principal_region_of_slave_purchase",
 		verbose_name="Imputed principal region of slave purchase (MAJBYIMP)",
 		null=True,
@@ -699,7 +699,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	imp_broad_region_of_slave_purchase = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_broad_region_of_slave_purchase",
 		verbose_name="Imputed principal broad region of slave purchase "
 		"(MAJBYIMP1)",
@@ -708,7 +708,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	principal_port_of_slave_dis = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="principal_port_of_slave_dis",
 		verbose_name="Principal port of slave disembarkation (MAJSELPT)",
 		null=True,
@@ -716,7 +716,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	imp_principal_port_slave_dis = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_principal_port_slave_dis",
 		verbose_name="Imputed principal port of slave disembarkation "
 		"(MJSLPTIMP)",
@@ -725,7 +725,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	imp_principal_region_slave_dis = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_principal_region_slave_dis",
 		verbose_name="Imputed principal region of slave disembarkation "
 		"(MJSELIMP)",
@@ -734,7 +734,7 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 	imp_broad_region_slave_dis = models.ForeignKey(
-		'Location',
+		Location,
 		related_name="imp_broad_region_slave_dis",
 		verbose_name="Imputed broad region of slave disembarkation "
 		"(MJSELIMP1)",

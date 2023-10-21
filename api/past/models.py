@@ -256,7 +256,7 @@ class EnslavementRelation(models.Model):
 	individuals.
 	"""
 # 	id = models.IntegerField(primary_key=True)
-	relation_type = models.ForeignKey(EnslavementRelationType, null=False,blank=False, on_delete=models.SET_NULL)
+	relation_type = models.ForeignKey(EnslavementRelationType, null=False,blank=False, on_delete=models.DO_NOTHING)
 	place = models.ForeignKey(Location, null=True,blank=True, on_delete=models.SET_NULL, related_name='+')
 	date = models.CharField(max_length=12, null=True,blank=True,
 		help_text="Date in MM,DD,YYYY format with optional fields.")
@@ -291,8 +291,6 @@ class EnslaverInRelation(models.Model):
 	)
 	roles = models.ManyToManyField(
 		EnslaverRole,
-		null=False,
-		blank=False,
 		help_text="The role(s) of the enslaver in this relation"
 	)
 	class Meta:

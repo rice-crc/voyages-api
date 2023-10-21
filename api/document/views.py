@@ -28,7 +28,7 @@ from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
-class ZoteroSourceList(generics.GenericAPIView):
+class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	serializer_class=SourceSerializer
@@ -38,24 +38,24 @@ class ZoteroSourceList(generics.GenericAPIView):
 		
 		In this new build, we have moved all of our sources over to Zotero where they can be cleaned up -- the data got messy over the years, because bibliographical data is notoriously difficult to format. We now effectively have 2 unique keys: a Zotero ID and a "short_ref". We have also created records for individual pages that point at these new sources, because our work with several libraries on the South Seas Co. documents for an NEH grant means that we have images and page-level data for some new sources, allowing for unprecedented granularity in our work with archives.
 		
-		These changes necessitated that we create Docs as its own django app and endpoint. Now, each "ZoteroSource" points at one or more Voyages, Enslaved People, or Enslavers. In turn, some of these Sources also have page-level metadata and links to IIIF images. For more information on the IIIF specification, visit https://iiif.io/api/index.html
+		These changes necessitated that we create Docs as its own django app and endpoint. Now, each "Source" points at one or more Voyages, Enslaved People, or Enslavers. In turn, some of these Sources also have page-level metadata and links to IIIF images. For more information on the IIIF specification, visit https://iiif.io/api/index.html
 		'''
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
-		queryset=ZoteroSource.objects.all()
+		queryset=Source.objects.all()
 		queryset=queryset.order_by('id')
-		zotero_source_options=getJSONschema('ZoteroSource',hierarchical=False)
+		source_options=getJSONschema('Source',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			zotero_source_options,
+			source_options,
 			retrieve_all=False
 		)
 		
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}
-			read_serializer=ZoteroSourceSerializer(queryset,many=True)
+			read_serializer=SourceSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
 			resp.headers['total_results_count']=headers['total_results_count']
@@ -76,7 +76,7 @@ def Gallery(request,collection_id=None,pagenumber=1):
 		
 		#let's only get the zotero objects that have pages
 		#otherwise, no need for the gallery -- and it lards the gallery up
-		docs=ZoteroSource.objects.order_by().all().filter(~Q(page_connection=None))
+		docs=Source.objects.order_by().all().filter(~Q(page_connection=None))
 		
 		other_collections=[]
 		for collection_tuple in docs.values_list(
@@ -95,11 +95,11 @@ def Gallery(request,collection_id=None,pagenumber=1):
 					"label":this_collection_label
 				})
 			
-		if collection_id is None:
+# 		if collection_id is None:
+# 			
+# 			page_collection_id=min(docs.values_list('legacy_source__id'))[0]
 			
-			page_collection_id=min(docs.values_list('legacy_source__id'))[0]
-			
-			page_collection_label=docs.filter(legacy_source__id=page_collection_id).first().legacy_source.short_ref
+# 			page_collection_label=docs.filter(legacy_source__id=page_collection_id).first().legacy_source.short_ref
 			
 		docs=docs.filter(legacy_source__id=collection_id).distinct()
 		docs=docs.order_by('id')
@@ -114,7 +114,6 @@ def Gallery(request,collection_id=None,pagenumber=1):
 			{
 				"page_obj": this_page,
 				"other_collections":other_collections,
-				"page_collection_label":page_collection_label,
 				"page_collection_id":page_collection_id
 			}
 		)
@@ -137,3 +136,28 @@ def z_source_page(request,zotero_source_id=1):
 		return render(request, "single_doc.html", {'zs':doc})
 	else:
 		return HttpResponseForbidden("Forbidden")
+	
+	
+# class SourceCRUD(generics.RetrieveUpdateDestroyAPIView):
+# 	'''
+# 	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
+# 	
+# 	Previously, the SQL pk ("id") always corresponded to the "voyage_id" field. We will not be enforcing this going forward.
+# 	
+# 	M2M relations will not be writable here EXCEPT in the case of union/"through" tables.
+# 	
+# 	Examples:
+# 	
+# 		1. You CANNOT create an Enslaved (person) record as you traverse voyage_enslavement_relations >> relation_enslaved, but only the EnslavementRelation record that joins them
+# 		2. You CAN create an EnslaverInRelation record as you traverse voyage_enslavement_relations >> relation_enslaver >> enslaver_alias >> enslaver_identity ...
+# 		3. ... but you CANNOT create an EnslaverRole record during that traversal, like voyage_enslavement_relations >> relation_enslaver >> enslaver_role
+# 	
+# 	I have also, for the time, set all itinerary Location foreign keys as read_only.
+# 	
+# 	Godspeed.
+# 	'''
+# 	queryset=Source.objects.all()
+# 	serializer_class=VoyageSerializer
+# 	lookup_field='voyage_id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]

@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from collections import Counter
 import urllib
@@ -17,6 +17,8 @@ import gc
 from voyages3.localsettings import *
 import re
 import pysolr
+from .models import SparseDate
+from .serializers import *
 from voyage.models import Voyage
 from past.models import *
 from blog.models import Post
@@ -255,4 +257,19 @@ class GlobalSearch(generics.GenericAPIView):
 
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(output_dict,safe=False)
-			
+
+class SparseDateRD(generics.RetrieveDestroyAPIView):
+	'''
+	The lookup field for sparse dates is "id," the SQL primary key.
+	
+	Sparse dates consist of nullable integer month, day, and year fields. They are referenced by the voyages dates table as OneToOne relations.
+	
+	As OneToOne keys, they are built to be created for a specific field in another table to reference, updated only when that field\'s value needs updating, and destroyed as soon as they are no longer needed.
+	
+	Therefore, the "Create" (or in DRF PUT as Create) should only be used via referencing models. Here, we only want to be able to Retrieve or Destroy this data.
+	'''
+	queryset=SparseDate.objects.all()
+	serializer_class=SparseDateSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]

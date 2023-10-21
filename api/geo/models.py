@@ -60,22 +60,13 @@ class Location(models.Model):
 	)
 	
 	child_of = models.ForeignKey(
-		'Child of',
+		'self',
 		verbose_name="Child of",
 		null=True,
 		blank=True,
 		on_delete=models.SET_NULL,
 		related_name='parent_of'
 	)
-	
-	child_of = models.ForeignKey(
-		'Child of',
-		verbose_name="Child of",
-		null=True,
-		blank=True,
-		on_delete=models.SET_NULL,
-		related_name='parent_of'
-	)	
 	
 	location_type = models.ForeignKey(
 		'LocationType',

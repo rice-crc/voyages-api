@@ -9,7 +9,7 @@ from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from collections import Counter
 import urllib
@@ -136,28 +136,46 @@ def z_source_page(request,zotero_source_id=1):
 		return render(request, "single_doc.html", {'zs':doc})
 	else:
 		return HttpResponseForbidden("Forbidden")
+
+class ShortRefGET(generics.RetrieveAPIView):
+	'''
+	GET Short Ref using PK
 	
+	These used to be unique values on the sources table in Voyages. In that legacy model, we had a short_ref and a full_ref for each source, and then, in our union table with voyages, we had a text_ref field where we would put page numbers, or box and folder numbers, etc. However, this led to a good deal of schema abuse (duplication, inconsistent use of fields, etc.)
 	
-# class SourceCRUD(generics.RetrieveUpdateDestroyAPIView):
-# 	'''
-# 	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
-# 	
-# 	Previously, the SQL pk ("id") always corresponded to the "voyage_id" field. We will not be enforcing this going forward.
-# 	
-# 	M2M relations will not be writable here EXCEPT in the case of union/"through" tables.
-# 	
-# 	Examples:
-# 	
-# 		1. You CANNOT create an Enslaved (person) record as you traverse voyage_enslavement_relations >> relation_enslaved, but only the EnslavementRelation record that joins them
-# 		2. You CAN create an EnslaverInRelation record as you traverse voyage_enslavement_relations >> relation_enslaver >> enslaver_alias >> enslaver_identity ...
-# 		3. ... but you CANNOT create an EnslaverRole record during that traversal, like voyage_enslavement_relations >> relation_enslaver >> enslaver_role
-# 	
-# 	I have also, for the time, set all itinerary Location foreign keys as read_only.
-# 	
-# 	Godspeed.
-# 	'''
-# 	queryset=Source.objects.all()
-# 	serializer_class=VoyageSerializer
-# 	lookup_field='voyage_id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
+	In the new model, we maintain the uniqueness of Short Ref's but we allow many Source objects to connect to these short ref's. The new source objects have much more, and much more structured data, being managed remotely in Zotero. Each source therefore now has an additional unique identifier: its Zotero Item ID.
+	'''
+	queryset=ShortRef.objects.all()
+	serializer_class=ShortRefSerializer
+	lookup_field='name'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+	
+class SourceCREATE(generics.CreateAPIView):
+	'''
+	CREATE Source using PK
+	
+	You must provide a ShortRef, which are our legacy short-text unique identifiers for documentary sources. A valid (< 100 chars) value in a nested short_ref field will create a new short ref if it does not already exist.
+	
+	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+	
+class SourceRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	RETRIEVE, UPDATE, OR DELETE SOURCE.
+	
+	The lookup field for sources is "short_ref".
+	
+	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]

@@ -1,51 +1,58 @@
-# from django.contrib import admin
-# from document.models import *
-# from past.models import *
-# from voyage.models import *
-# 
+from django.contrib import admin
+from document.models import *
+from past.models import *
+from voyage.models import *
+
 # class SourcePageAdmin(admin.ModelAdmin):
 # 	readonly_fields=['page_url','image_filename','iiif_manifest_url','iiif_baseimage_url']
 # 	search_fields=['page_url','image_filename']
 # 	list_display=['page_url','image_filename']
 # 	model=SourcePage
-# 
-# class SourcePageConnectionInline(admin.StackedInline):
-# 	model=SourcePageConnection
-# 	extra=0
-# 	fields=['source_page']
-# 	classes = ['collapse']
-# 
-# class ZoteroEnslavedConnectionInline(admin.StackedInline):
-# 	model=ZoteroEnslavedConnection
-# 	autocomplete_fields=['enslaved']
-# 	exclude_fields=['zotero_source']
-# 	extra=0
-# 	classes=['collapse']
-# 
-# class ZoteroEnslaverConnectionInline(admin.StackedInline):
-# 	model=ZoteroEnslaverConnection
-# 	autocomplete_fields=['enslaver']
-# 	exclude_fields=['zotero_source']
-# 	extra=0
-# 	classes=['collapse']
-# 
-# class ZoteroVoyageConnectionInline(admin.StackedInline):
-# 	model=ZoteroVoyageConnection
-# 	autocomplete_fields=['voyage']
-# 	exclude_fields=['zotero_source']
-# 	extra=0
-# 	classes=['collapse']
-# 
-# class ZoteroSourceAdmin(admin.ModelAdmin):
-# 	model=ZoteroSource
+
+class ShortRefAdmin(admin.ModelAdmin):
+	model=ShortRef
+	search_fields=('name',)
+	list_display=('name',)
+
+class SourcePageConnectionInline(admin.StackedInline):
+	model=SourcePageConnection
+	extra=0
+	fields=['source_page']
+	classes = ['collapse']
+
+class SourceEnslavedConnectionInline(admin.StackedInline):
+	model=SourceEnslavedConnection
+	autocomplete_fields=['enslaved']
+	exclude_fields=['source']
+	extra=0
+	classes=['collapse']
+
+class SourceEnslaverConnectionInline(admin.StackedInline):
+	model=SourceEnslaverConnection
+	autocomplete_fields=['enslaver']
+	exclude_fields=['source']
+	extra=0
+	classes=['collapse']
+
+class SourceVoyageConnectionInline(admin.StackedInline):
+	model=SourceVoyageConnection
+	autocomplete_fields=['voyage']
+	exclude_fields=['source']
+	extra=0
+	classes=['collapse']
+
+class SourceAdmin(admin.ModelAdmin):
+	model=Source
 # 	inlines=[
-# 		ZoteroEnslavedConnectionInline,
-# 		ZoteroEnslaverConnectionInline,
-# 		ZoteroVoyageConnectionInline
+# 		SourceEnslavedConnectionInline,
+# 		SourceEnslaverConnectionInline,
+# 		SourceVoyageConnectionInline
 # 	]
-# 	search_fields=['zotero_title','zotero_date','short_ref']
-# 	readonly_fields=['item_url','legacy_source']
-# 	list_display=('zotero_title','zotero_date')
-# 
-# admin.site.register(ZoteroSource, ZoteroSourceAdmin)
+	autocomplete_fields=['short_ref']
+	search_fields=['title','short_ref']
+	readonly_fields=['item_url','zotero_item_id','zotero_group_id']
+	list_display=('title','short_ref')
+
+admin.site.register(Source, SourceAdmin)
+admin.site.register(ShortRef,ShortRefAdmin)
 # admin.site.register(SourcePage,SourcePageAdmin)

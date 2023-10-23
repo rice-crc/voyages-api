@@ -2,6 +2,7 @@ from django.db import models
 import re
 from voyage.models import Voyage
 from past.models import Enslaved,EnslaverIdentity
+from common.models import NamedModelAbstractBase,SparseDate
 
 class SourcePage(models.Model):
 	"""
@@ -129,6 +130,22 @@ class SourceEnslavedConnection(models.Model):
 			['source','enslaved','page_range']
 		]
 
+class ShortRef(models.Model):
+	"""
+	Represents a controlling collection. Necessitated by SSC docs.
+	
+	We have so many titled, individual documents micro-segmented in the IIIF manifests that we have broken the way text_ref used to be used.
+	
+	For instance, both of the below two sources belong to volume 43 in the Clements collection. Each is a "source" with a "title" that belongs to AP CLEMENTS 43
+	
+		1. Manuscript document, "An Explanation of Sundry Paper's card: with me to Peru, &amp; of other's acquired there", after 1736 February 6
+		2. Manuscript document, "John Browns Demands", after 1736
+		
+	And we have individual page numbers for both of those.
+	"""
+	name = models.CharField(max_length=255,unique=True)
+	def __str__(self):
+		return self.name
 
 class Source(models.Model):
 	"""
@@ -145,24 +162,23 @@ class Source(models.Model):
 	
 	zotero_group_id=models.IntegerField(
 		"Zotero Integer Group ID",
-		null=False,
-		blank=False
+		null=True,
+		blank=True
 	)
 	
 	zotero_item_id=models.CharField(
 		"Zotero Alphanumeric Item ID",
 		max_length=20,
 		unique=True,
-		null=False,
-		blank=False
+		null=True,
+		blank=True
 	)
 	
-	short_ref=models.CharField(
-		"Canonical, Unique Short Ref",
-		max_length=25,
-		null=True,
-		blank=True,
-		unique=True,
+	short_ref=models.ForeignKey(
+		ShortRef,
+		null=False,
+		blank=False,
+		on_delete=models.CASCADE
 	)
 	
 	title=models.CharField(
@@ -172,11 +188,13 @@ class Source(models.Model):
 		blank=False,
 	)
 	
-	date=models.CharField(
-		"Date of Publication or Authorship",
-		max_length=60,
-		null=False,
-		blank=False
+	date = models.OneToOneField(
+		SparseDate,
+		verbose_name="Date of publication or authorship",
+		null=True,
+		blank=True,
+		on_delete=models.SET_NULL,
+		related_name="+"
 	)
 	
 	last_updated=models.DateTimeField(
@@ -185,7 +203,7 @@ class Source(models.Model):
 	)
 	
 	human_reviewed=models.BooleanField(
-		"Review ",
+		"Review",
 		default=False,
 		blank=True,
 		null=True
@@ -199,7 +217,7 @@ class Source(models.Model):
 		]
 	
 	def __str__(self):
-		return self.title + " " + self.date
+		return self.title + " " + self.short_ref.name
 
 	@property
 	def zotero_web_page_url(self):

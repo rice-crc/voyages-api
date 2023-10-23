@@ -11,7 +11,7 @@ def year_mod(the_year, mod, start):
 
 class NamedModelAbstractBase(models.Model):
 	
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255,unique=True)
 
     def __str__(self):
         return self.__unicode__()

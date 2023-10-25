@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
 from .models import *
-from document.models import Source,SourcePage,SourcePageConnection,SourceVoyageConnection
+from document.models import Source,Page,SourcePageConnection,SourceVoyageConnection
 from geo.models import Location
 from common.models import SparseDate
 from past.models import *
@@ -166,7 +166,7 @@ class VoyageDatesSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 
 class VoyageSourcePageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
-		model=SourcePage
+		model=Page
 		fields='__all__'
 
 class VoyageSourcePageConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):

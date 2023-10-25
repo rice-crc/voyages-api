@@ -59,13 +59,13 @@ class Location(models.Model):
 		blank=True
 	)
 	
-	child_of = models.ForeignKey(
+	parent = models.ForeignKey(
 		'self',
 		verbose_name="Child of",
 		null=True,
 		blank=True,
 		on_delete=models.SET_NULL,
-		related_name='parent_of'
+		related_name='children'
 	)
 	
 	location_type = models.ForeignKey(

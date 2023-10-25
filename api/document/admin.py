@@ -49,7 +49,7 @@ class SourceAdmin(admin.ModelAdmin):
 # 		SourceVoyageConnectionInline
 # 	]
 	autocomplete_fields=['short_ref']
-	search_fields=['title','short_ref']
+	search_fields=['title','short_ref__name']
 	readonly_fields=['item_url','zotero_item_id','zotero_group_id']
 	list_display=('title','short_ref')
 

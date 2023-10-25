@@ -17,7 +17,7 @@ class LocationTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 		try:
 			# if there is already an instance in the database with the
 			# given value (e.g. tag='apple'), we simply return this instance
-			return LocationType.objects.get(id=validated_data['id'])
+			return LocationType.objects.get(name=validated_data['name'])
 		except ObjectDoesNotExist:
 			# else, we create a new tag with the given value
 			return super(LocationTypeSerializer, self).create(validated_data)
@@ -49,7 +49,7 @@ class LocationSerializerDeep(serializers.ModelSerializer):
 		fields='__all__'
 
 class LocationSerializer(WritableNestedModelSerializer):
-	spatial_extent=PolygonSerializer(many=False)
+	spatial_extent=PolygonSerializer(many=False,allow_null=True)
 	location_type=LocationTypeSerializer(many=False)
 	class Meta:
 		model=Location

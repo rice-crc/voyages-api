@@ -101,26 +101,32 @@ class SourceEnslaverConnectionSerializer(UniqueFieldsMixin, serializers.ModelSer
 			# else, we create a new tag with the given value
 			return super(SourceEnslaverConnectionSerializer, self).create(validated_data)
 
-class SourcePageSerializer(serializers.ModelSerializer):
+class PageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
-		model=SourcePage
+		model=Page
 		fields='__all__'
 	def create(self, validated_data):
 		#really smart get_or_create-like hack here
 		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
-		try:
-			# if there is already an instance in the database with the
-			# given value (e.g. tag='apple'), we simply return this instance
-			return SourcePage.objects.get(id=validated_data['id'])
-		except ObjectDoesNotExist:
-			# else, we create a new tag with the given value
-			return super(SourcePageSerializer, self).create(validated_data)
+		if 'id' in validated_data:
+			return Page.objects.get(id=validated_data['id'])
+		else:
+			return super(PageSerializer, self).create(validated_data)
+			
 
-class SourcePageConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	source_page=SourcePageSerializer(many=False,read_only=True)
+class SourcePageConnectionSerializer(WritableNestedModelSerializer):
+	page=PageSerializer(many=False,read_only=False)
 	class Meta:
 		model=SourcePageConnection
 		fields='__all__'
+	def create(self, validated_data):
+		#really smart get_or_create-like hack here
+		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
+		if 'id' in validated_data:
+			return SourcePageConnection.objects.get(id=validated_data['id'])
+		else:
+			return super(SourcePageConnectionSerializer, self).create(validated_data)
+
 
 class ShortRefSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
@@ -150,7 +156,7 @@ class ShortRefSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
     ]
 )
 class SourceSerializer(WritableNestedModelSerializer):
-	page_connection=SourcePageConnectionSerializer(many=True)
+	page_connections=SourcePageConnectionSerializer(many=True)
 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True)
 	source_voyage_connections=SourceVoyageConnectionSerializer(many=True)
 	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True)
@@ -166,7 +172,7 @@ class SourceSerializer(WritableNestedModelSerializer):
             summary='Nulls for all fields except short_ref',
             description='This is a good example of how you might create a placeholder source, before later filling it in with PATCH or PUT operation',
             value={
-			  "page_connection": None,
+			  "page_connections": None,
 			  "source_enslaver_connections": None,
 			  "source_voyage_connections": None,
 			  "source_enslaved_connections": None,
@@ -185,7 +191,7 @@ class SourceSerializer(WritableNestedModelSerializer):
 )
 
 class SourceCRUDSerializer(WritableNestedModelSerializer):
-	page_connection=SourcePageConnectionSerializer(many=True,allow_null=True)
+	page_connections=SourcePageConnectionSerializer(many=True,allow_null=True)
 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True,allow_null=True)
 	source_voyage_connections=SourceVoyageConnectionSerializer(many=True,allow_null=True)
 	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True,allow_null=True)

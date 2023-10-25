@@ -151,10 +151,19 @@ class ShortRefGET(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+# class PageCREATE(generics.CreateAPIView):
+# 	'''
+# 	CREATE Page without a pk
+# 	'''
+# 	queryset=Page.objects.all()
+# 	serializer_class=PageSerializer
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+
 	
 class SourceCREATE(generics.CreateAPIView):
 	'''
-	CREATE Source using PK
+	CREATE Source without a pk
 	
 	You must provide a ShortRef, which are our legacy short-text unique identifiers for documentary sources. A valid (< 100 chars) value in a nested short_ref field will create a new short ref if it does not already exist.
 	
@@ -162,7 +171,6 @@ class SourceCREATE(generics.CreateAPIView):
 	'''
 	queryset=Source.objects.all()
 	serializer_class=SourceCRUDSerializer
-	lookup_field='id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 	

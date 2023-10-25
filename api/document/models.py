@@ -4,12 +4,12 @@ from voyage.models import Voyage
 from past.models import Enslaved,EnslaverIdentity
 from common.models import NamedModelAbstractBase,SparseDate
 
-class SourcePage(models.Model):
+class Page(models.Model):
 	"""
 	INDIVIDUAL PAGES
 	"""
 	page_url=models.URLField(
-		max_length=400,null=True
+		max_length=400,null=True,blank=True
 	)
 	iiif_manifest_url=models.URLField(
 		null=True,blank=True,max_length=400
@@ -52,19 +52,25 @@ class SourcePage(models.Model):
 class SourcePageConnection(models.Model):
 	source=models.ForeignKey(
 		'Source',
-		related_name='page_connection',
+		related_name='page_connections',
 		on_delete=models.CASCADE
 	)
 	
-	source_page=models.ForeignKey(
-		'SourcePage',
-		related_name='source_connection',
+	page=models.ForeignKey(
+		'Page',
+		related_name='source_connections',
 		on_delete=models.CASCADE
+	)
+	order=models.IntegerField(
+		"Document page order",
+		null=False,
+		blank=False
 	)
 	
 	class Meta:
 		unique_together=[
-			['source','source_page']
+			['source','page'],
+			['source','order']
 		]
 
 class SourceVoyageConnection(models.Model):

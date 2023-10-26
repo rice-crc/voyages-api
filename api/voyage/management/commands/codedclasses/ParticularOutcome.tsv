@@ -1,0 +1,195 @@
+1	Voyage completed as intended	1
+2	Shipwrecked or destroyed, before slaves embarked	2
+3	Shipwrecked or destroyed, after embarkation of slaves or during slaving	3
+4	Shipwrecked or destroyed, after disembarkation	4
+5	Shipwrecked or destroyed - unspecified	5
+6	Captured by pirates or privateers - before slaves embarked	6
+7	Captured by pirates or privateers - after embarkation of slaves	7
+8	Captured by pirates or privateers - after disembarkation	8
+9	Captured by pirates or privateers - unspecified	9
+10	Captured by British - before slaves embarked	10
+12	Captured by British - after disembarkation	12
+13	Captured by British - unspecified	13
+14	Captured by Spanish - before slaves embarked	14
+15	Captured by Spanish - after embarkation of slaves	15
+16	Captured by Spanish - after disembarkation	16
+17	Captured by Spanish - unspecified	17
+18	Captured by Dutch - before slaves embarked	18
+19	Captured by Dutch - after embarkation of slaves	19
+20	Captured by Dutch - after disembarkation	20
+21	Captured by Dutch - unspecified	21
+22	Captured by Portuguese - before slaves embarked	22
+23	Captured by Portuguese - after embarkation of slaves	23
+24	Captured by Portuguese - Americas after disembarkation	24
+25	Captured by Portuguese - unspecified	25
+26	Captured - unspecified	26
+27	Condemned - before slaves embarked	27
+28	Condemned - after embarkation of slaves	28
+29	Condemned - Americas after disembarkation	29
+30	Condemned - unspecified	30
+31	Captured by the Barbary Powers before embarking slaves	31
+32	Destroyed - unspecified	39
+33	Sold	40
+34	Left coast with trading cargo intact	41
+35	Taken by Africans	42
+36	Captured by Cie du Senegal	43
+37	Abandoned and/or sold off Africa	44
+38	Captured unspecified before slaves embarked	45
+39	Captured unspecified after embarkation of slaves	46
+40	Captured unspecified after slaves disembarked	47
+41	Captured by pirates - slaves sold in Americas from another ship	48
+42	Sold slaves in Americas - subsequent fate unknown	49
+43	Captured by the French - before slaves embarked	50
+44	Captured by the French - after embarkation of slaves	51
+45	Captured by the French - after slaves disembarked	52
+46	Captured by the French - unspecified	53
+47	Condemned in the Americas by British after slaves disembarked	54
+48	Pressed into government service	55
+49	Captured by slaves: ship did not reach the Americas	56
+50	Captured by crew: fate unknown	57
+51	Condemned in the Americas by British before slaves disembarked	58
+52	Bought at least one slave in Africa - subsequent fate unknown	59
+53	Destroyed, lost or sold as result of slave rebellion	66
+54	Taken, retaken and salvaged before reaching African trade site	67
+55	Sold in the Americas after disembarking slaves	68
+56	Cut off by Africans from shore, ship did not reach the Americas	69
+57	Sold in the Americas - not known whether ship brought slaves	70
+58	Captured before disembarking slaves; vessel recaptured or released subsequently	71
+59	Driven off the African Coast with slaves on board	72
+60	Captured by slaves, unknown outcome	73
+61	Captured by crew, did not land slaves in the Americas	74
+62	Lost before reaching Americas: slaves reached port in other ships	75
+11	Some slaves removed by pirates/privateers	76
+63	Some slaves removed by pirates/privateers	76
+64	Arrived in Africa, subsequent fate unknown	77
+65	Captured and recaptured after disembarking slaves	78
+66	Crew mutiny; slaves landed in the Americas	79
+67	Cut off by Africans from shore. Recaptured and landed slaves in America	80
+68	Captured by slaves, recaptured and landed slaves in the Americas	81
+69	Captured by slaves, recaptured and landed slaves in the Americas, lost	82
+70	to be completed after Curto consulted on Arquivos Angola, II, vol 25, pp.189-91.	83
+71	ditto Arquivos Angola, II, vol 25, pp. 432-33.	84
+72	Completed voyage after slaves removed for salvage	85
+73	Ship returned direct to home port after selling slaves to another vesse	86
+74	Taken by slaves, vessel recaptured, unknown outcome	87
+75	Sold prematurely in Europe after disembarking slaves in the Americas	88
+76	Captured by the crew, slaves sold in Africa	89
+77	Captured by the crew, no slaves taken, crew sold gold in Europe	90
+78	Condemned in Africa with slaves, slaves transshipped/sold	91
+79	Returned direct to Africa after bringing slaves to the Americas	92
+80	Returned to Europe or Americas without obtaining slaves	93
+81	Laid up (disarmed) or broken up in Africa	94
+82	Laid up (disarmed) or broken up in the Americas	95
+83	Either shipwrecked or captured by pirates before slaves taken on board	96
+84	Abandoned or condemned for unseaworthiness in the Americas	97
+85	Ship and slaves sold in Africa	98
+86	Taken by slaves, recaptured, then ship lost	99
+191	Captured by British, slaves disembarked in Grenada	101
+87	Vice-Admiralty Court, St.Helena,  condemned	102
+88	Vice-Admiralty Court, St. Helena, restored	103
+89	Vice-Admiralty Court, British Guiana, condemned	104
+90	Vice-Admiralty Court, British Guiana, restored	105
+91	Vice-Admiralty Court, Cape of Good Hope, condemned	106
+92	Vice-Admiralty Court, Cape of Good Hope, restored	107
+93	Vice-Admiralty Court, Jamaica, condemned	108
+94	Vice-Admiralty Court, Jamaica, restored	109
+95	Vice-Admiralty Court, Sierra Leone, condemned    ,	110
+96	Vice-Admiralty Court, Sierra Leone, restored	111
+97	Vice-Admiralty Court, Barbados, condemned	112
+98	Vice-Admiralty Court, Barbados, restored	113
+99	Vice-Admiralty Court, Mauritius, condemned	114
+100	Vice-Admiralty Court, Mauritius, restored	115
+101	High Court of Admiralty, condemned	118
+102	High Court of Admiralty, restored	119
+103	Court of Mixed Commission, Sierra Leone, condemned	120
+104	Court of Mixed Commission, Sierra Leone, restored	121
+105	Court of Mixed Commission, Havana, condemned	122
+106	Court of Mixed Commission, Havana, restored	123
+107	Court of Mixed Commission, Rio de Janeiro, condemned	124
+108	Court of Mixed Commission, Rio de Janeiro, restored	125
+109	Court of Mixed Commission, Luanda, condemned	126
+110	Court of Mixed Commission, Luanda, restored	127
+111	Court of Mixed Commission, Cape of Good Hope, condemned	128
+112	Court of Mixed Commission, Cape of Good Hope, restored	129
+113	Lagos, Vice-Admiralty Court, condemned	130
+114	Vice-Admiralty Court, Antigua, condemned	132
+115	Vice-Admiralty Court, Tortola, condemned	134
+116	Vice-Admiralty Court, Tortola, restored	135
+178	Vice-Admiralty Court, Halifax, Condemned	136
+117	Vice-Admiralty Court, unspecified, condemned	138
+118	Vice-Admiralty Court, unspecified, restored	139
+119	Given up to the United States government	141
+120	Arrested by Brazil or given up to the Brazilian government	142
+121	Vice-Admiralty Court, Dominica, condemned	144
+122	Vice-Admiralty Court, Bahamas, condemned	148
+123	Vice-Admiralty Court, Bahamas, restored	149
+124	Captured and released without court proceedings	153
+125	Driven or run on shore in the Americas: no court proceedings	154
+126	Given up to the Mexican Government, Vera Cruz	155
+127	Taken to Genoa and given up to Sardinian authorities	156
+128	Abandoned in Europe after completing voyage	157
+129	Captured by Argentinian privateers after embarkation of slaves	159
+130	Captured by United States before slaves embarked	160
+131	Captured by United States with slaves	161
+132	Captured by United States after slaves disembarked	162
+133	Captured by United States, slave presence unspecified	163
+134	French proceedings initiated in Africa, acquittal	164
+135	French proceedings initiated in Africa, condemned	165
+136	French proceedings initiated in Africa, unknown outcome	166
+137	French proceedings, initiated in unknown location, acquittal	170
+138	French proceedings, initiated in unknown location, condemned	171
+139	French proceedings, initiated in unknown location, unknown outcome	172
+140	French proceedings initiated in Guadaloupe, acquittal	173
+141	French proceedings initiated in Guadaloupe, condemned	174
+142	French proceedings initiated in Guadaloupe, unknown outcome	175
+143	French proceedings initiated in Martinique, acquittal	176
+144	French proceedings initiated in Martinique, condemned	177
+145	French proceedings initiated in Martinique, unknown outcome	178
+146	French proceedings initiated in Cayenne, acquittal	179
+147	French proceedings initiated in Cayenne, condemned	180
+148	French proceedings initiated in Cayenne, unknown outcome	181
+149	French proceedings initiated in France, acquittal	182
+150	French proceedings initiated in France, condemned	183
+151	French proceedings initiated in France, unknown outcome	184
+152	Detained and condemned in the United States after slaves disembarked	185
+153	Captured by Dutch, slaves turned loose in Africa	186
+154	Captured by Dutch, slaves turned loose in Brazil	187
+155	Temporarily detained by the Dutch: Voyage allowed to continue with slaves	188
+156	Slaves are removed by the Dutch and vessel allowed to continue, subsequent fate unknown	189
+157	Captured by Portuguese and Dutch	191
+158	Captured by Algerian pirates	192
+159	Captured by Turks	193
+160	Captured by British, released	194
+161	Looted by Dutch at Elmina	195
+162	Captured by first by the British and then by the Dutch after slaves embarked	196
+163	Vessel driven back into Portdep by British and voyage aborted	198
+164	Arrived in Brazil and refused permission to disembark	199
+165	Ship and cargo captured by Africans and ship released	200
+166	Ship captured by Haitian navy and slaves released in Haiti	201
+167	Condemned at Goree by the British	202
+168	Captured by the British, retaken by original crew, completed voyage	203
+169	Captured by pirates after slaves embarked, ship and slaves burned.	204
+170	Captured by English, slaves turned loose on Spanish Main	205
+171	Sold slaves in Africa	206
+172	Sold slaves in Europe - subsequent fate unknown	207
+173	Left home port, no further record	208
+174	captured by pirates and burned	209
+175	looted by pirates, voyage continued	210
+176	captured by Venezuelans before disembarkation of slaves	211
+179	Captured by the Swedes	212
+180	Captured by the Dominican Republic	213
+190	No slaves embarked	214
+181	Departed an American port with slaves, subsequent fate unknown	304
+182	Returned to Port of embarkation without having sold slaves	305
+183	Privateer captured slaves at sea and delivered for sale in America	306
+184	Prisoners of war stole slaves during escape and carried to port of sale	307
+185	Captives seized from vessel by Spanish officials and sold	309
+186	Captured by slaves, slaves returned to Africa as free people	310
+187	Shipwrecked, slaves salvaged	311
+188	Captured by slaves, slaves freed by British authorities	312
+189	Shipwrecked, slaves freed by British authorities	313
+193	returned to port because of pirates	314
+192	Voyage successful, owners/captain condemned in US	315
+194	No slave vessel involved	501
+195	Unknown slave vessel	502
+177	Other (specify in note)	999

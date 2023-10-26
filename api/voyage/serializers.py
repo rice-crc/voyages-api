@@ -23,16 +23,32 @@ class RigOfVesselSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=RigOfVessel
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return RigOfVessel.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(RigOfVesselSerializer, self).create(validated_data)
 
 class NationalitySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Nationality
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return Nationality.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(NationalitySerializer, self).create(validated_data)
+
 
 class TonTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=TonType
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return TonType.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(TonTypeSerializer, self).create(validated_data)
 
 class VoyageShipSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	rig_of_vessel=RigOfVesselSerializer(many=False)
@@ -45,6 +61,17 @@ class VoyageShipSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=VoyageShip
 		fields='__all__'
+	def create(self, validated_data):
+		#really smart get_or_create-like hack here
+		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
+		try:
+			# if there is already an instance in the database with the
+			# given value (e.g. tag='apple'), we simply return this instance
+			return VoyageShip.objects.get(name=validated_data['id'])
+		except ObjectDoesNotExist:
+			# else, we create a new tag with the given value
+			return super(TonType, self).create(validated_data)
+
 
 ##### ENSLAVED NUMBERS ##### 
 
@@ -52,6 +79,17 @@ class VoyageSlavesNumbersSerializer(UniqueFieldsMixin, serializers.ModelSerializ
 	class Meta:
 		model=VoyageSlavesNumbers
 		fields='__all__'
+	def create(self, validated_data):
+		#really smart get_or_create-like hack here
+		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
+		try:
+			# if there is already an instance in the database with the
+			# given value (e.g. tag='apple'), we simply return this instance
+			return VoyageSlavesNumbers.objects.get(name=validated_data['voyage_id'])
+		except ObjectDoesNotExist:
+			# else, we create a new tag with the given value
+			return super(VoyageSlavesNumbersSerializer, self).create(validated_data)
+
 
 ##### CREW NUMBERS ##### 
 
@@ -59,6 +97,8 @@ class VoyageCrewSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=VoyageCrew
 		fields='__all__'
+
+
 
 ##### ITINERARY #####
 
@@ -109,36 +149,66 @@ class ParticularOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer
 	class Meta:
 		model=ParticularOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return ParticularOutcome.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(ParticularOutcomeSerializer, self).create(validated_data)
 
 class SlavesOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=SlavesOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return SlavesOutcome.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(SlavesOutcomeSerializer, self).create(validated_data)
 		
 class ResistanceSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Resistance
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return Resistance.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(ResistanceSerializer, self).create(validated_data)
 
 class OwnerOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=OwnerOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return OwnerOutcome.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(OwnerOutcomeSerializer, self).create(validated_data)
 
 class VesselCapturedOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=VesselCapturedOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VesselCapturedOutcome.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(VesselCapturedOutcomeSerializer, self).create(validated_data)
 		
 class VoyageOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	outcome_owner=OwnerOutcomeSerializer(many=False)
-	outcome_slaves=SlavesOutcomeSerializer(many=False)
-	particular_outcome=ParticularOutcomeSerializer(many=False)
-	resistance=ResistanceSerializer(many=False)
-	vessel_captured_outcome=VesselCapturedOutcomeSerializer(many=False)
+	outcome_owner=OwnerOutcomeSerializer(many=False,allow_null=True)
+	outcome_slaves=SlavesOutcomeSerializer(many=False,allow_null=True)
+	particular_outcome=ParticularOutcomeSerializer(many=False,allow_null=True)
+	resistance=ResistanceSerializer(many=False,allow_null=True)
+	vessel_captured_outcome=VesselCapturedOutcomeSerializer(many=False,allow_null=True)
 	class Meta:
 		model=VoyageOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VoyageOutcome.objects.get(name=validated_data['id'])
+		except ObjectDoesNotExist:
+			return super(VoyageOutcomeSerializer, self).create(validated_data)
 
 ##### DATES #####
 
@@ -148,40 +218,28 @@ class VoyageSparseDateSerializer(UniqueFieldsMixin, serializers.ModelSerializer)
 		fields='__all__'
 		
 class VoyageDatesSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False)
-	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False)
-	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False)
-	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False)
-	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False)
-	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False)
-	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False)
-	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False)
-	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False)
-	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False)
-	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False)
-	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False)
+	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
+	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=False)
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
 
-class VoyageSourcePageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	class Meta:
-		model=Page
-		fields='__all__'
-
-class VoyageSourcePageConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	source_page=VoyageSourcePageSerializer(many=False,read_only=True)
-	class Meta:
-		model=SourcePageConnection
-		fields='__all__'
-
 class VoyageSourceSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	page_connection=VoyageSourcePageConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=Source
 		fields='__all__'
 
-class VoyageSourceVoyageConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class VoyageVoyageSourceConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	source=VoyageSourceSerializer(many=False,read_only=True)
 	class Meta:
 		model=SourceVoyageConnection
@@ -197,14 +255,15 @@ class VoyageEnslaverIdentitySerializer(UniqueFieldsMixin, serializers.ModelSeria
 		model=EnslaverIdentity
 		fields='__all__'
 
-class VoyageEnslaverAliasSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class VoyageEnslaverAliasSerializer(WritableNestedModelSerializer):
+	enslaver_identity=VoyageEnslaverIdentitySerializer(many=False,)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
 
-class VoyageEnslaverInRelationSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	enslaver_roles=VoyageEnslaverRoleSerializer(many=True,read_only=True)
-	enslaver_alias=VoyageEnslaverAliasSerializer(many=False,read_only=True)
+class VoyageEnslaverInRelationSerializer(WritableNestedModelSerializer):
+	enslaver_roles=VoyageEnslaverRoleSerializer(many=True,read_only=False)
+	enslaver_alias=VoyageEnslaverAliasSerializer(many=False,read_only=False)
 	class Meta:
 		model=EnslaverRole
 		fields='__all__'
@@ -219,7 +278,7 @@ class VoyageEnslavementRelationTypeSerializer(UniqueFieldsMixin, serializers.Mod
 		model=EnslavementRelationType
 		fields='__all__'
 
-class VoyageEnslavementRelationsSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class VoyageEnslavementRelationsSerializer(WritableNestedModelSerializer):
 	relation_enslaved=VoyageEnslavedSerializer(many=True,read_only=True)
 	relation_enslavers=VoyageEnslaverInRelationSerializer(many=True)
 	relation_type=VoyageEnslavementRelationTypeSerializer(many=False,read_only=True)
@@ -252,14 +311,14 @@ class VoyageEnslavementRelationsSerializer(UniqueFieldsMixin, serializers.ModelS
     ]
 )
 class VoyageSerializer(WritableNestedModelSerializer):
-	voyage_source_connections=VoyageSourceVoyageConnectionSerializer(many=True)
-	voyage_itinerary=VoyageItinerarySerializer(many=False)
-	voyage_dates=VoyageDatesSerializer(many=False)
-	voyage_enslavement_relations=VoyageEnslavementRelationsSerializer(many=True)
-	voyage_crew=VoyageCrewSerializer(many=False)
-	voyage_ship=VoyageShipSerializer(many=False)
-	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)
-	voyage_outcome=VoyageOutcomeSerializer(many=False)
+	voyage_source_connections=VoyageVoyageSourceConnectionSerializer(many=True,allow_null=True)
+	voyage_itinerary=VoyageItinerarySerializer(many=False,allow_null=False)
+	voyage_dates=VoyageDatesSerializer(many=False,allow_null=True)
+	voyage_enslavement_relations=VoyageEnslavementRelationsSerializer(many=True,allow_null=True)
+	voyage_crew=VoyageCrewSerializer(many=False,allow_null=False)
+	voyage_ship=VoyageShipSerializer(many=False,allow_null=False)
+	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False,allow_null=False)
+	voyage_outcome=VoyageOutcomeSerializer(many=False,allow_null=False)
 	class Meta:
 		model=Voyage
 		fields='__all__'

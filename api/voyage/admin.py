@@ -1,10 +1,10 @@
-# from django.contrib import admin
-# from voyage.models import *
-# from past.models import *
-# from document.models import *
-# import nested_admin
-# from common.models import *
-# # 
+from django.contrib import admin
+from voyage.models import *
+from past.models import *
+from document.models import *
+import nested_admin
+from common.models import *
+# 
 # # # 
 # # # 
 # class VoyageCrewInline(nested_admin.NestedStackedInline):
@@ -67,40 +67,6 @@
 # 		'imp_arrival_at_port_of_dis',
 # 	]
 # 	verbose_name_plural="Voyage Dates"
-# 
-# class PlaceAdmin(admin.ModelAdmin):
-# 	model=Place
-# # 	readonly_fields=[
-# # 		'place',
-# # 		'region',
-# # 		'value',
-# # 		'show_on_main_map',
-# # 		'show_on_voyage_map',
-# # 		'geo_location'
-# # 	]
-# 	search_fields=['place']
-# 
-# class RegionAdmin(admin.ModelAdmin):
-# 	model=Region
-# # 	readonly_fields=[
-# # 		'region',
-# # 		'broad_region',
-# # 		'value',
-# # 		'show_on_map',
-# # 		'show_on_main_map',
-# # 		'geo_location'
-# # 	]
-# 	search_fields=['region']
-# 
-# class BroadRegionAdmin(admin.ModelAdmin):
-# 	model=BroadRegion
-# # 	readonly_fields=[
-# # 		'broad_region',
-# # 		'value',
-# # 		'show_on_map',
-# # 		'geo_location'
-# # 	]
-# 	search_fields=['broad_region']
 # 
 # 
 # 
@@ -319,30 +285,27 @@
 # # 	classes = ['collapse']
 # # 	extra=0
 # 
-# class VoyageAdmin(nested_admin.NestedModelAdmin):
-# 	inlines=(
+class VoyageAdmin(nested_admin.NestedModelAdmin):
+	inlines=(
 # 		VoyageDatesInline,
 # 		VoyageItineraryInline,
-# # 		VoyageSourcesConnectionInline,
+# 		VoyageSourcesConnectionInline,
 # 		VoyageZoteroConnectionInline,
-# # 		EnslaverAliasConnectionInline,
+# 		EnslaverAliasConnectionInline,
 # 		EnslavementRelationInline,
 # 		VoyageCrewInline,
 # 		VoyageOutcomeInline,
 # 		VoyageShipInline,
 # 		VoyageSlavesNumbersInline,
-# 	)
-# 	fields=['voyage_id','dataset','voyage_in_cd_rom']
-# 	list_display=('voyage_id',)
-# 	search_fields=('voyage_id',)
-# 	model=Voyage
+	)
+	fields=['voyage_id','dataset','voyage_in_cd_rom']
+	list_display=('voyage_id',)
+	search_fields=('voyage_id',)
+	model=Voyage
 # # 
 # # 
-# admin.site.register(Voyage, VoyageAdmin)
+admin.site.register(Voyage, VoyageAdmin)
 # # admin.site.register(VoyageDates)
-# admin.site.register(Place,PlaceAdmin)
-# admin.site.register(Region,RegionAdmin)
-# admin.site.register(BroadRegion,BroadRegionAdmin)
 # admin.site.register(VoyageSources, VoyageSourcesAdmin)
 # # admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
 # # admin.site.register(SlavesOutcome, SlavesOutcomeAdmin)

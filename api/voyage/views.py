@@ -401,3 +401,6 @@ class VoyageCRUD(generics.RetrieveUpdateDestroyAPIView):
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
+
+
+

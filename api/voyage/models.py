@@ -13,7 +13,7 @@ class VoyageGroupings(models.Model):
 	"""
 	Labels for groupings names.
 	"""
-	name = models.CharField(max_length=30)
+	name = models.CharField(max_length=30,unique=True)
 	value = models.IntegerField()
 
 	class Meta:
@@ -32,7 +32,7 @@ class Nationality(models.Model):
 	"""
 	Nationality of ships.
 	"""
-	name = models.CharField(max_length=255)
+	name = models.CharField(max_length=255,unique=True)
 	value = models.IntegerField()
 
 	class Meta:
@@ -51,7 +51,7 @@ class TonType(models.Model):
 	"""
 	Types of tonnage.
 	"""
-	name = models.CharField(max_length=255)
+	name = models.CharField(max_length=255,unique=True)
 	value = models.IntegerField()
 
 	class Meta:
@@ -70,7 +70,7 @@ class RigOfVessel(models.Model):
 	"""
 	Rig of Vessel.
 	"""
-	name = models.CharField(max_length=25)
+	name = models.CharField(max_length=25,unique=True)
 	value = models.IntegerField()
 
 	class Meta:
@@ -1607,7 +1607,8 @@ class Voyage(models.Model):
 		'VoyageGroupings',
 		blank=True,
 		null=True,
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		related_name='+'
 	)
 	
 	# Data and imputed variables
@@ -1615,8 +1616,8 @@ class Voyage(models.Model):
 		'VoyageOutcome',
 		blank=True,
 		null=True,
-		related_name='outcome_voyage',
-		on_delete=models.SET_NULL
+		on_delete=models.SET_NULL,
+		related_name='+'
 	)
 	
 	# Data and imputed variables
@@ -1624,49 +1625,46 @@ class Voyage(models.Model):
 		'VoyageShip',
 		blank=True,
 		null=True,
-		related_name='ship_voyage',
-		on_delete=models.SET_NULL
+		on_delete=models.SET_NULL,
+		related_name='+'
 	)
 	
 	voyage_itinerary = models.ForeignKey(
 		'VoyageItinerary',
 		blank=True,
 		null=True,
-		related_name='itinerary_voyage',
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		related_name='+'
 	)
 	voyage_dates = models.ForeignKey(
 		'VoyageDates',
 		blank=True,
 		null=True,
-		related_name='dates_voyage',
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		related_name='+'
 	)
 	voyage_crew = models.ForeignKey(
 		'VoyageCrew',
 		blank=True,
 		null=True,
-		related_name='crew_voyage',
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		related_name='+'
 	)
 	voyage_slaves_numbers = models.ForeignKey(
 		'VoyageSlavesNumbers',
 		blank=True,
 		null=True,
-		related_name='slaves_numbers_voyage',
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		related_name='+'
 	)
 
 	african_info = models.ManyToManyField(
-		AfricanInfo,
-		related_name='african_info_voyages',
-		blank=True
+		AfricanInfo
 	)
 	cargo = models.ManyToManyField(
 		CargoType,
 		through='VoyageCargoConnection',
-		blank=True,
-		related_name='cargo_voyages'
+		related_name='+'
 	)
 	last_update=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(

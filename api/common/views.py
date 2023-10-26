@@ -20,11 +20,15 @@ import pysolr
 from voyage.models import Voyage
 from past.models import *
 from blog.models import Post
+from common.reqs import getJSONschema
 import uuid
-
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 #this isn't pretty
 #but i'm having trouble finding a more elegant way of exporting this data to an external service
-#without installing networkx on this django instance, which i don't want to do!
+#without installing networkx on this django instance, which i don't want to do!@extend_schema(exclude=True)
+
+@extend_schema(exclude=True)
 class PastGraphMaker(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -179,7 +183,20 @@ class PastGraphMaker(generics.GenericAPIView):
 		print("PAST GRAPH MAKER elapsed time:",time.time()-st)
 		return JsonResponse(relation_map,safe=False)
 
+@extend_schema(exclude=True)
+class Schemas(generics.GenericAPIView):
+	def get(self,request):
+		schema_name=request.GET.get('schema_name')
+		hierarchical=request.GET.get('hierarchical')
+		if schema_name is not None and hierarchical is not None:
+			schema_json=getJSONschema(schema_name,hierarchical)
+			return JsonResponse(schema_json,safe=False)
+		else:
+			return JsonResponse({'status':'false','message':'you must specify schema_name (string) and hierarchical (boolean)'}, status=502)
 
+		
+
+@extend_schema(exclude=True)
 class GlobalSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -187,7 +204,7 @@ class GlobalSearch(generics.GenericAPIView):
 		st=time.time()
 		print("Global Search+++++++\nusername:",request.auth.user)
 		
-		params=dict(request.POST)
+		params=dict(request.data)
 		search_string=params.get('search_string')
 		# Oh, yes. Little Bobby Tables, we call him.
 		

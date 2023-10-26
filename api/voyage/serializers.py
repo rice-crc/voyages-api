@@ -4,9 +4,9 @@ import re
 from .models import *
 from document.models import *
 from geo.models import *
-from common.nest import nest_selected_fields
 from common.models import SparseDate
 from past.models import *
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 
 #### GEO
 
@@ -175,14 +175,14 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 		fields='__all__'
  
 
-class EnslaverAliasSerializer(serializers.ModelSerializer):
+class VoyageEnslaverAliasSerializer(serializers.ModelSerializer):
 	identity=EnslaverIdentitySerializer(many=False)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
 
 class VoyageEnslaverConnectionSerializer(serializers.ModelSerializer):
-	enslaver_alias=EnslaverAliasSerializer(many=False)
+	enslaver_alias=VoyageEnslaverAliasSerializer(many=False)
 	role=VoyageEnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverVoyageConnection
@@ -210,14 +210,14 @@ class VoyageDatesSerializer(serializers.ModelSerializer):
 		model=VoyageDates
 		fields='__all__'
 
-class SourcePageSerializer(serializers.ModelSerializer):
+class VoyageSourcePageSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model=SourcePage
 		fields='__all__'
 
 class VoyageSourcePageConnectionSerializer(serializers.ModelSerializer):
-	source_page=SourcePageSerializer(many=False)
+	source_page=VoyageSourcePageSerializer(many=False)
 	class Meta:
 		model=SourcePageConnection
 		fields='__all__'
@@ -228,7 +228,7 @@ class VoyageZoteroSourceSerializer(serializers.ModelSerializer):
 		model=ZoteroSource
 		fields='__all__'
 
-class ZoteroVoyageConnectionSerializer(serializers.ModelSerializer):
+class VoyageZoteroVoyageConnectionSerializer(serializers.ModelSerializer):
 	zotero_source=VoyageZoteroSourceSerializer(many=False,read_only=True)
 	class Meta:
 		model=ZoteroVoyageConnection
@@ -239,8 +239,33 @@ class VoyageEnslavedSerializer(serializers.ModelSerializer):
 		model=Enslaved
 		fields=['id','documented_name']
 
+
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+            'Ex. 1: numeric range',
+            summary='Filter on a numeric range for a nested variable',
+            description='Here, we search for voyages whose imputed year of arrival at the principal port of disembarkation was between 1820 & 1850. We choose this variable as it is one of the most fully-populated numeric variables in the dataset.',
+            value={
+				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year': [1820,1850]
+			},
+			request_only=True,
+			response_only=False,
+        ),
+		OpenApiExample(
+            'Ex. 2: array of str vals',
+            summary='OR Filter on exact matches of known str values',
+            description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for voyages that are believed to have disembarked captives principally in Barbados or Cuba',
+            value={
+				'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name': ['Barbados','Cuba']
+			},
+			request_only=True,
+			response_only=False,
+        )
+    ]
+)
 class VoyageSerializer(serializers.ModelSerializer):
-	voyage_zotero_connections=ZoteroVoyageConnectionSerializer(many=True,read_only=True)
+	voyage_zotero_connections=VoyageZoteroVoyageConnectionSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False)
 	voyage_dates=VoyageDatesSerializer(many=False)
 	voyage_enslaver_connection=VoyageEnslaverConnectionSerializer(many=True,read_only=True)
@@ -252,4 +277,4 @@ class VoyageSerializer(serializers.ModelSerializer):
 	voyage_name_outcome=VoyageOutcomeSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
-		fields='__all__'
+		exclude=['voyage_sources']

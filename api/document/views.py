@@ -18,7 +18,6 @@ import requests
 import time
 from .models import *
 import pprint
-from common.nest import *
 from common.reqs import *
 import collections
 import gc
@@ -26,28 +25,36 @@ from .serializers import *
 from voyages3.localsettings import *
 import re
 from django.db.models import Q
-
-try:
-	zotero_source_options=options_handler('document/zotero_source_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK ZOTERO OPTIONS.")
-	zotero_source_options={}
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+from common.static.ZoteroSource_options import ZoteroSource_options
 
 class ZoteroSourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('document/zotero_source_options.json',request)
-		return JsonResponse(j,safe=False)
+	serializer_class=ZoteroSourceSerializer
 	def post(self,request):
+		'''
+		Voyages has always been built on scholarship, with references to many different archival sources. In the legacy version of the site, the sources were organized with a unique short reference ("short_ref") and a full reference ("full_ref"), like OMNO & Outward Manifests for New Orleans. When these sources were connected to Voyages, they would oftentimes be connected along with a field called "text_ref" that pointed at a specific location in the archive, or page number in the book.
+		
+		In this new build, we have moved all of our sources over to Zotero where they can be cleaned up -- the data got messy over the years, because bibliographical data is notoriously difficult to format. We now effectively have 2 unique keys: a Zotero ID and a "short_ref". We have also created records for individual pages that point at these new sources, because our work with several libraries on the South Seas Co. documents for an NEH grant means that we have images and page-level data for some new sources, allowing for unprecedented granularity in our work with archives.
+		
+		These changes necessitated that we create Docs as its own django app and endpoint. Now, each "ZoteroSource" points at one or more Voyages, Enslaved People, or Enslavers. In turn, some of these Sources also have page-level metadata and links to IIIF images. For more information on the IIIF specification, visit https://iiif.io/api/index.html
+		'''
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		queryset=ZoteroSource.objects.all()
 		queryset=queryset.order_by('id')
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,zotero_source_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			ZoteroSource_options,
+			retrieve_all=False
+		)
 		
 		if len(error_messages)==0:
 			st=time.time()
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			headers={"total_results_count":results_count}
 			read_serializer=ZoteroSourceSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
@@ -60,6 +67,9 @@ class ZoteroSourceList(generics.GenericAPIView):
 
 #######################
 # default view will be a paginated gallery
+@extend_schema(
+        exclude=True
+    )
 def Gallery(request,collection_id=None,pagenumber=1):
 	
 	if request.user.is_authenticated:
@@ -114,6 +124,9 @@ def Gallery(request,collection_id=None,pagenumber=1):
 
 #######################
 # then the individual page view
+@extend_schema(
+        exclude=True
+    )
 def z_source_page(request,zotero_source_id=1):
 	
 	if request.user.is_authenticated:

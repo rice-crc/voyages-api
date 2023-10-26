@@ -3,10 +3,13 @@ import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
-from .nest import *
+from voyages3.localsettings import *
+import requests
 from django.core.paginator import Paginator
 import html
+import re
 import pysolr
+import os
 #GENERIC FUNCTION TO RUN A CALL ON REST SERIALIZERS
 ##Default is to auto prefetch, but need to be able to turn it off.
 ##For instance, on our PAST graph-like data, the prefetch can overwhelm the system if you try to get everything
@@ -15,17 +18,15 @@ import pysolr
 def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	errormessages=[]
-	next_uri=None
-	prev_uri=None
 	results_count=None
+	
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
-# 	print(all_fields)
-# 	print("----->",type(r))
 	try:
 		if type(r)==dict:
 			params=r
 		else:
-			params=dict(r.POST)
+			params=dict(r.data)
+		params={k:params[k] for k in params if params[k]!=['']}
 		pp = pprint.PrettyPrinter(indent=4)
 		print("--post req params--")
 		pp.pprint(params)
@@ -67,10 +68,10 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	try:
 		###FILTER RESULTS
 		##select text and numeric fields, ignoring those without a type
-		text_fields=[i for i in all_fields if 'CharField' in all_fields[i]['type'] or 'SlugField' in all_fields[i]['type'] or 'ChoiceField' in all_fields[i]['type']]
-		numeric_fields=[i for i in all_fields if 'IntegerField' in all_fields[i]['type'] or 'DecimalField' in all_fields[i]['type'] or 'FloatField' in all_fields[i]['type']]
-		boolean_fields=[i for i in all_fields if 'BooleanField' in all_fields[i]['type']]
-# 		print("FILTER FIELDS",text_fields,numeric_fields,boolean_fields)
+		text_fields=[i for i in all_fields if all_fields[i]['type'] =='string']
+		numeric_fields=[i for i in all_fields if all_fields[i]['type'] in ['integer','number']]
+		boolean_fields=[i for i in all_fields if all_fields[i]['type']=='boolean']
+		#print("FILTER FIELDS",text_fields,numeric_fields,boolean_fields)
 		##build filters
 		kwargs={}
 		###numeric filters -- only accepting one range per field right now
@@ -87,7 +88,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 					kwargs['{0}__{1}'.format(field, 'gte')]=min
 				else:
 					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
-					
+				
 		###text filters (exact match, and allow for multiple entries joined by an or)
 		###this hard eval is not ideal but I can't quite see how else to do it just now?
 		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
@@ -107,7 +108,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 					searchstring=True
 				elif searchstring.lower() in ["false","f","0","no"]:
 					searchstring=False
-	
+
 				if searchstring in [True,False]:
 					kwargs[field]=searchstring
 		#print(kwargs)
@@ -121,22 +122,18 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	 
 	try:
 		#PREFETCH REQUISITE FIELDS
-		
 		if auto_prefetch:
 			prefetch_fields=all_fields
 		else:
 			prefetch_fields=selected_fields
-		
 		#print(prefetch_keys)
 		##ideally, I'd run this list against the model and see
 		##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
 		prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
 		print('--prefetching %d vars--' %len(prefetch_vars))
 # 		print(prefetch_vars)
-		
 		for p in prefetch_vars:
 			queryset=queryset.prefetch_related(p)
-		
 	except:
 		errormessages.append("prefetch error")
 	
@@ -149,11 +146,37 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	####1. autocomplete suggestions
 	####2. geo tree selects
 	
-	#INCLUDE AGGREGATION FIELDS
+	#ORDER RESULTS
+	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')	
+	try:
+		order_by=params.get('order_by')
+		if order_by is not None:
+			print("---->order by---->",order_by)
+			for ob in order_by:
+				if ob.startswith('-'):
+					queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))
+				else:
+					queryset=queryset.order_by(F(ob).asc(nulls_last=True))
+		else:
+			queryset=queryset.order_by('id')
+	except:
+		errormessages.append("ordering error")
+	
+	#PAGINATION/LIMITS
+	if retrieve_all==False:
+		results_per_page=params.get('results_per_page',[10])
+		results_page=params.get('results_page',[1])
+		paginator=Paginator(queryset, results_per_page[0])
+		res=paginator.get_page(results_page[0])
+		print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
+	else:
+		res=queryset
+	
+		#INCLUDE AGGREGATION FIELDS
 	aggregation_fields=params.get('aggregate_fields')
 
 	if aggregation_fields is not None:
-		valid_aggregation_fields=[f for f in options_dict if 'Integer' in options_dict[f]['type'] or 'Decimal' in options_dict[f]['type']]
+		valid_aggregation_fields=[f for f in options_dict if options_dict[f]['type'] in ['integer','number']]
 		bad_aggregation_fields=[f for f in aggregation_fields if f not in valid_aggregation_fields]
 		if bad_aggregation_fields!=[]:
 			errormessages.append("bad aggregation fields: "+",".join(bad_aggregation_fields))
@@ -167,51 +190,86 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 					aggqueryset.append(queryset.aggregate(Min(aggfield)))
 					aggqueryset.append(queryset.aggregate(Max(aggfield)))
 				queryset=aggqueryset
-				auto_prefetch=True		
+				res=aggqueryset
 			except:
 				errormessages.append("aggregation error")
+		
 
-	#ORDER RESULTS
-	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')	
-	try:
-		order_by=params.get('order_by')
-		if order_by is not None:
-			print("---->order by---->",order_by)
-			for ob in order_by:
-				if ob.startswith('-'):
-					queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))
-				else:
-					queryset=queryset.order_by(F(ob).asc(nulls_last=True))
-	except:
-		errormessages.append("ordering error")
 	
-	#PAGINATION/LIMITS
-# 	try:
-	if retrieve_all==False:
-		results_per_page=params.get('results_per_page',[10])
-		results_page=params.get('results_page',[1])
-		paginator=Paginator(queryset, results_per_page[0])
-		res=paginator.get_page(results_page[0])
-		print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
+	return res,selected_fields,results_count,errormessages
+
+def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
+	if hierarchical in [True,"true","True",1,"t","T","yes","Yes","y","Y"]:
+		hierarchical=True
 	else:
-		res=queryset
+		hierarchical=False
+	r=requests.get(url=OPEN_API_BASE_API)
+	j=json.loads(r.text)
+	schemas=j['components']['schemas']
+	base_obj_name=base_obj_name
+	def walker(output,schemas,obj_name,ismany=False):
+		obj=schemas[obj_name]
+		if 'properties' in obj:
+			for fieldname in obj['properties']:
+				thisfield=obj['properties'][fieldname]
+				if 'allOf' in thisfield:
+					thisfield=thisfield['allOf'][0]
+# 					print(fieldname,'allof') ## OK THESE ARE M2M
+					ismany=True
+				if '$ref' in thisfield:
+					next_obj_name=thisfield['$ref'].replace('#/components/schemas/','')
+					output[fieldname]=walker({},schemas,next_obj_name,ismany)
+# 					print(fieldname,'ref')
+				elif 'type' in thisfield:
+					if thisfield['type']!='array':
+						thistype=thisfield['type']
+						if 'format' in thisfield:
+							if thisfield['format']:
+								thistype='number'
+						output[fieldname]={
+							'type':thistype,
+							'many':ismany
+						}
+# 						print(fieldname,'bottomval')
+					else:
+						thisfield_items=thisfield['items']
+						if 'type' in thisfield_items:
+# 							print('array otherbottomvalue',thisfield)
+							output[fieldname]={
+								'type':thisfield_items['type'],
+								'many':ismany
+							}
+						elif '$ref'	in thisfield_items:
+# 							print("array, ref???",thisfield)
+							next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
+							output[fieldname]=walker({},schemas,next_obj_name,ismany=True)
+			ismany=False
+		else:
+			print(obj)
+		return output
 	
+	output=walker({},schemas,base_obj_name)
+		
+	if not hierarchical:
+		def flatten_this(input_dict,output_dict,keychain=[]):
+			for k in input_dict:
+				if 'type' in input_dict[k]:
+					thiskey='__'.join(keychain+[k])
+					output_dict[thiskey]=input_dict[k]
+				else:
+					output_dict=flatten_this(input_dict[k],output_dict,keychain+[k])
+			return output_dict		
+		output=flatten_this(output,{},[])
 	
-	
-# 	except:
-# 		errormessages.append("ordering or pagination error")
-	
-	return res,selected_fields,next_uri,prev_uri,results_count,errormessages
+	if rebuild or not os.path.exists('./common/static/'+base_obj_name+"_options.json") or not os.path.exists('./common/static/'+base_obj_name+"_options.py"):
+		flat_output=flatten_this(output,{},[])
+		d=open('./common/static/'+base_obj_name+"_options.json",'w')
+		d.write(json.dumps(flat_output))
+		d.close()
+		
+		d=open('./common/static/'+base_obj_name+"_options.py",'w')
+		d.write(base_obj_name+'_options='+str(flat_output))
+		d.close()
 
-def options_handler(flatfilepath,request=None,hierarchical=True):
-	if request is not None:
-		if 'hierarchical' in request.query_params:
-			if request.query_params['hierarchical'].lower() in ['false','0','n']:
-				hierarchical=False
-	d=open(flatfilepath,'r')
-	t=d.read()
-	j=json.loads(t)
-	d.close()
-	if hierarchical:
-		j=nest_django_dict(j)
-	return j
+	
+	return output

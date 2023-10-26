@@ -15,24 +15,21 @@ import time
 from .models import *
 from .serializers import *
 import pprint
-from common.nest import *
 from common.reqs import *
 import collections
-
-try:
-	assessment_options=options_handler('assessment/assessment_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK ASSESSMENT OPTIONS.")
-	assessment_options={}
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
+@extend_schema(
+        exclude=True
+    )
+#right now, this thing dumps all 7 MB out -- so we can't show it on swagger
 class AssessmentList(generics.GenericAPIView):
+	serializer_class=EstimateSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('assessment/assessment_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		#print("username:",request.auth.user)
 		times=[]
@@ -40,19 +37,17 @@ class AssessmentList(generics.GenericAPIView):
 		print("FETCHING...")
 		times.append(time.time())
 		queryset=Estimate.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,assessment_options,auto_prefetch=True,retrieve_all=True)
-		selected_fields=list(assessment_options.keys())
-		times.append(time.time())
-		labels.append('building query')
-		times.append(time.time())
-		labels.append('sql execution')
-		output_dicts={}
-		for sf in selected_fields:
-			output_dicts[sf]=[v[0] for v in queryset.values_list(sf)]
-
-		times.append(time.time())
-		labels.append('flattening...')
-		print('--timings--')
-		for i in range(1,len(times)):
-			print(labels[i-1],times[i]-times[i-1])		
-		return JsonResponse(output_dicts,safe=False)
+		estimate_options=getJSONschema('Estimate',hierarchical=False)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			estimate_options,
+			auto_prefetch=True,
+			retrieve_all=True
+		)
+		read_serializer=EstimateSerializer(queryset,many=True)
+		serialized=read_serializer.data
+		headers={"total_results_count":results_count}
+		resp=JsonResponse(serialized,safe=False,headers=headers)
+		return resp

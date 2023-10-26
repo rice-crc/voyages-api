@@ -11,39 +11,31 @@ from django.views.generic.list import ListView
 from common.reqs import *
 from .models import *
 from .serializers import *
-
-try:
-	post_options=options_handler('blog/post_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK POST OPTIONS.")
-	post_options={}
-
-try:
-	author_options=options_handler('blog/author_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK POST OPTIONS.")
-	author_options={}
-	
-try:
-	institution_options=options_handler('blog/institution_options.json',hierarchical=False)
-except:
-	print("WARNING. BLANK POST OPTIONS.")
-	author_options={}
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
+from common.static.Institution_options import Institution_options
+from common.static.Post_options import Post_options
+from common.static.Author_options import Author_options
 
 
 class PostList(generics.GenericAPIView):
+	'''
+	The Voyages team launched its new blog interface in 2022, in order to allow for richer humanities content to be integrated into the site, and to allow for more rapid publication of project-related news.
+	
+	These blog posts come in 3 languages: English, Spanish, and Portuguese. The author writes in one language, and when they are posted, the text is sent to the Google Translate API. The translated content is then published as three separate posts. This allows the team to go back in and fine-tune translations. The output format is HTML.
+	
+	Blog posts also contain hyperlinks to images hosted by SlaveVoyages for making the posts visually appealing.
+	'''
+	serializer_class=PostSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('blog/post_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
-		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
+		print("BLOG POST LIST+++++++\nusername:",request.auth.user)
 		queryset=Post.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,post_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Post_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			headers={"total_results_count":results_count}
 			read_serializer=PostSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
@@ -54,15 +46,15 @@ class PostList(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
+@extend_schema(exclude=True)
 class PostTextFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		print("POST LIST+++++++\nusername:",request.auth.user)
+		print("BLOG AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 # 		try:
 		st=time.time()
-		params=dict(request.POST)
-		params=dict(request.POST)
+		params=dict(request.data)
 		k=list(params.keys())[0]
 		v=params[k][0]
 		
@@ -102,18 +94,21 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		return JsonResponse(res,safe=False)
 
 class AuthorList(generics.GenericAPIView):
+	'''
+		Blog authors are allowed to add a user profile image, affiliate themselves with a university, and give a brief bio of themselves (under the "description") field.
+		
+		The posts authored by the author are included in the response as an array of nested objects.
+	'''
+	serializer_class=AuthorSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('blog/author_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("AUTHOR LIST+++++++\nusername:",request.auth.user)
 		queryset=Author.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,author_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Author_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			headers={"total_results_count":results_count}
 			read_serializer=AuthorSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
@@ -125,18 +120,21 @@ class AuthorList(generics.GenericAPIView):
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 class InstitutionList(generics.GenericAPIView):
+	'''
+		The institutions that the blog authors are affiliated with can be searched in their own right.
+		
+		The authors associated with these institutions are included as nested objects, and the posts by those authors are nested within these author objects.
+	'''
+	serializer_class=InstitutionSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def options(self,request):
-		j=options_handler('blog/institution_options.json',request)
-		return JsonResponse(j,safe=False)
 	def post(self,request):
 		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
 		queryset=Institution.objects.all()
-		queryset,selected_fields,next_uri,prev_uri,results_count,error_messages=post_req(queryset,self,request,institution_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Institution_options,retrieve_all=False)
 		if len(error_messages)==0:
 			st=time.time()
-			headers={"next_uri":next_uri,"prev_uri":prev_uri,"total_results_count":results_count}
+			headers={"total_results_count":results_count}
 			read_serializer=InstitutionSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)

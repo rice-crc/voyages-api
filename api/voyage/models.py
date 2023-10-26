@@ -758,6 +758,9 @@ class VoyageDates(models.Model):
 
 	# JCM: JUNE 1 2023: LEGACY FIELDS THAT WE'LL KEEP OR TURN INTO PROPERTIES
 	
+	length_middle_passage_days = models.IntegerField(
+        "Length of Middle Passage in (days) (VOYAGE)", null=True, blank=True)
+	
 	imp_length_home_to_disembark = models.IntegerField(
 		"Voyage length from home port to disembarkation (days) (VOY1IMP)",
 		null=True,

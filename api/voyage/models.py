@@ -250,9 +250,11 @@ class VoyageCargoConnection(models.Model):
 		null=True,
 		on_delete=models.SET_NULL
 	)
-	amount = models.FloatField(
+	amount = models.DecimalField(
 		"The amount of cargo according to the unit",
-		null=True
+		null=True,
+		max_digits=7,
+		decimal_places=2
 	)
 	class Meta:
 		unique_together = ['voyage', 'cargo']
@@ -743,11 +745,11 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 
-	voyage = models.ForeignKey('Voyage',
-							   null=True,
-							   blank=True,
-							   related_name="voyage_name_itinerary",
-							   on_delete=models.SET_NULL)
+# 	voyage = models.ForeignKey('Voyage',
+# 							   null=True,
+# 							   blank=True,
+# 							   related_name="voyage_name_itinerary",
+# 							   on_delete=models.SET_NULL)
 
 	class Meta:
 		verbose_name = "Itinerary"
@@ -1514,10 +1516,10 @@ class VoyageSlavesNumbers(models.Model):
 
 	# INSERT HERE any new number variables [model]
 
-	voyage = models.ForeignKey(
-		'Voyage',
-		related_name="voyage_name_slave_characteristics",
-		on_delete=models.CASCADE)
+# 	voyage = models.ForeignKey(
+# 		'Voyage',
+# 		related_name="voyage_name_slave_characteristics",
+# 		on_delete=models.CASCADE)
 
 	# menrat7
 	percentage_men = models.FloatField("Percentage men on voyage (MENRAT7)",

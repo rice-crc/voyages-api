@@ -189,7 +189,6 @@ class SourceSerializer(WritableNestedModelSerializer):
         )
     ]
 )
-
 class SourceCRUDSerializer(WritableNestedModelSerializer):
 	page_connections=SourcePageConnectionSerializer(many=True,allow_null=True)
 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True,allow_null=True)

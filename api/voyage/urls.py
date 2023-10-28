@@ -12,7 +12,8 @@ urlpatterns = [
 	path('crosstabs/',views.VoyageCrossTabs.as_view()),
 	path('aggroutes/',views.VoyageAggRoutes.as_view()),
 	path('geotree/',views.VoyageGeoTreeFilter.as_view()),
-	path('voyage/CRUD',views.VoyageCRUD.as_view())
+	path('CREATE/',views.VoyageCREATE.as_view()),
+	path('RUD/<int:voyage_id>',views.VoyageRUD.as_view())
     ]
     
     

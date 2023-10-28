@@ -378,7 +378,18 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
 
-class VoyageCRUD(generics.RetrieveUpdateDestroyAPIView):
+class VoyageCREATE(generics.CreateAPIView):
+	'''
+	Create Voyage without a pk
+	'''
+	queryset=Voyage.objects.all()
+	serializer_class=VoyageCRUDSerializer
+	lookup_field='voyage_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+
+class VoyageRUD(generics.RetrieveUpdateDestroyAPIView):
 	'''
 	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
 	
@@ -397,7 +408,7 @@ class VoyageCRUD(generics.RetrieveUpdateDestroyAPIView):
 	Godspeed.
 	'''
 	queryset=Voyage.objects.all()
-	serializer_class=VoyageSerializer
+	serializer_class=VoyageCRUDSerializer
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]

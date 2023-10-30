@@ -22,7 +22,7 @@ class NamedModelAbstractBase(models.Model):
     class Meta:
         abstract = True
 
-class SparseDate(models.Model):
+class SparseDateAbstractBase(models.Model):
 	day = models.IntegerField(
 		null=True,
 		blank=True,
@@ -41,6 +41,9 @@ class SparseDate(models.Model):
 
 	def __str__(self):
 		return ",".join([str(i) if i is not None else "" for i in [self.month,self.day,self.year]])
+		
+	class Meta:
+		abstract = True
 
 # Create your models here.
 class SavedQuery(models.Model):

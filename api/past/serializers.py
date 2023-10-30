@@ -2,12 +2,24 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
 from .models import *
-from common.serializers import SparseDateSerializer
 from geo.models import Location
 from voyage.models import *
 from document.models import Source, SourceEnslavedConnection, SourceEnslaverConnection
-
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
+from django.core.exceptions import ObjectDoesNotExist
+from drf_writable_nested.serializers import WritableNestedModelSerializer
+from drf_writable_nested.mixins import UniqueFieldsMixin
+
+
+class PASTSparseDateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=PASTSparseDate
+		fields='__all__'
+		
+class RegisterCountrySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=RegisterCountry
+		fields='__all__'
 
 ############ SERIALIZERS COMMON TO BOTH ENSLAVERS AND ENSLAVED
 
@@ -52,7 +64,7 @@ class PastVoyageItinerarySerializer(serializers.ModelSerializer):
 		]
 	
 class PastVoyageDatesSerializer(serializers.ModelSerializer):
-	imp_arrival_at_port_of_dis_sparsedate=SparseDateSerializer(many=False)
+	imp_arrival_at_port_of_dis_sparsedate=PASTSparseDateSerializer(many=False)
 	class Meta:
 		model=VoyageDates
 		fields=['imp_arrival_at_port_of_dis_sparsedate',]
@@ -269,6 +281,43 @@ class EnslaverSerializer(serializers.ModelSerializer):
 	aliases=EnslaverAliasSerializer(many=True)
 	birth_place=PastLocationSerializer(many=False)
 	death_place=PastLocationSerializer(many=False)
+	class Meta:
+		model=EnslaverIdentity
+		fields='__all__'
+
+class EnslaverCRUDSerializer(WritableNestedModelSerializer):
+	principal_location=PastLocationSerializer(many=False,allow_null=True)
+	aliases=EnslaverAliasSerializer(many=True,allow_null=True)
+	birth_place=PastLocationSerializer(many=False,allow_null=True)
+	death_place=PastLocationSerializer(many=False,allow_null=True)
+	class Meta:
+		model=EnslaverIdentity
+		fields='__all__'
+
+class EnslavedCRUDSerializer(WritableNestedModelSerializer):
+	post_disembark_location=PastLocationSerializer(many=False,allow_null=True)
+	captive_fate=CaptiveFateSerializer(many=False,allow_null=True)
+	enslaved_relations=EnslavedEnslavementRelationSerializer(many=True,allow_null=True)
+	captive_status=CaptiveStatusSerializer(many=False,allow_null=True)
+	language_group=LanguageGroupSerializer(many=False,allow_null=True)
+	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True,allow_null=True)
+	last_known_date = PASTSparseDateSerializer(many=False,allow_null=True)
+	register_country = RegisterCountrySerializer(many=False,allow_null=True)
+	documented_name = serializers.CharField(allow_null=True)
+	name_first = serializers.CharField(allow_null=True)
+	name_second = serializers.CharField(allow_null=True)
+	name_third = serializers.CharField(allow_null=True)
+	modern_name = serializers.CharField(allow_null=True)
+	editor_modern_names_certainty = serializers.CharField(allow_null=True)
+	age = serializers.IntegerField(allow_null=True)
+	gender = serializers.IntegerField(allow_null=True)
+	height = serializers.DecimalField(decimal_places=2, max_digits=6,allow_null=True)
+	skin_color = serializers.CharField(allow_null=True)
+	dataset = serializers.IntegerField(allow_null=True)
+	notes = serializers.CharField(allow_blank=True)
+	human_reviewed=serializers.BooleanField(allow_null=True)
+	
+	
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'

@@ -2,7 +2,10 @@ from django.db import models
 import re
 from voyage.models import Voyage
 from past.models import Enslaved,EnslaverIdentity
-from common.models import NamedModelAbstractBase,SparseDate
+from common.models import NamedModelAbstractBase,SparseDateAbstractBase
+
+class DocSparseDate(SparseDateAbstractBase):
+	pass
 
 class Page(models.Model):
 	"""
@@ -15,7 +18,7 @@ class Page(models.Model):
 		null=True,blank=True,max_length=400
 	)
 	iiif_baseimage_url=models.URLField(
-		null=True,blank=True,max_length=400
+		null=True,blank=True,max_length=400,unique=True
 	)
 	image_filename=models.CharField(
 		max_length=100,
@@ -192,10 +195,11 @@ class Source(models.Model):
 		max_length=255,
 		null=False,
 		blank=False,
+		unique=True
 	)
 	
 	date = models.OneToOneField(
-		SparseDate,
+		DocSparseDate,
 		verbose_name="Date of publication or authorship",
 		null=True,
 		blank=True,

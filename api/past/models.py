@@ -16,10 +16,12 @@ from django.db.models.functions import Coalesce, Concat, Length, Substr
 from django.db.models.sql import RawQuery
 import re
 import uuid
-from common.models import NamedModelAbstractBase
-
+from common.models import NamedModelAbstractBase,SparseDateAbstractBase
 from voyage.models import Voyage
 from geo.models import Location
+
+class PASTSparseDate(SparseDateAbstractBase):
+	pass
 
 class EnslaverInfoAbstractBase(models.Model):
 	principal_alias = models.CharField(max_length=255)
@@ -185,8 +187,6 @@ class Enslaved(models.Model):
 	"""
 	Enslaved person.
 	"""
-	id = models.IntegerField(primary_key=True,blank=True)
-
 	# For African Origins dataset documented_name is an African Name.
 	# For Oceans of Kinfolk, this field is used to store the Western
 	# Name of the enslaved.
@@ -222,11 +222,13 @@ class Enslaved(models.Model):
 		db_index=True,
 		related_name='+',blank=True
 	)
-	last_known_date = models.CharField(
-		max_length=10,
-		blank=True,
+	last_known_date = models.OneToOneField(
+		PASTSparseDate,
+		verbose_name="Last known date",
 		null=True,
-		help_text="Date in format: MM,DD,YYYY"
+		blank=True,
+		on_delete=models.SET_NULL,
+		related_name="+"
 	)
 	captive_fate = models.ForeignKey(CaptiveFate, null=True, on_delete=models.SET_NULL, db_index=True,blank=True)
 	captive_status = models.ForeignKey(CaptiveStatus, null=True, on_delete=models.SET_NULL, db_index=True,blank=True)

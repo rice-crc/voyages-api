@@ -6,7 +6,7 @@ from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from django.views.generic.base import TemplateView
 import urllib
@@ -467,7 +467,48 @@ class PASTNetworks(generics.GenericAPIView):
 		j=json.loads(r.text)
 		return JsonResponse(j,safe=False)
 
-		
 
+#CONTRIBUTIONS
+
+class EnslaverCREATE(generics.CreateAPIView):
+	'''
+	Create enslaver without a pk
+	'''
+	queryset=EnslaverIdentity.objects.all()
+	serializer_class=EnslaverCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslaverRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	Fetch, update, or delete an enslaver record with their pk
+	'''
+	queryset=EnslaverIdentity.objects.all()
+	serializer_class=EnslaverCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslavedCREATE(generics.CreateAPIView):
+	'''
+	Create enslaver without a pk
+	'''
+	queryset=Enslaved.objects.all()
+	serializer_class=EnslavedCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+
+class EnslavedRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	Fetch, update, or delete an enslaver record with their pk
+	'''
+	queryset=Enslaved.objects.all()
+	serializer_class=EnslavedCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
 
 

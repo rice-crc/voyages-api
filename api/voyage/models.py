@@ -4,9 +4,10 @@ from builtins import str
 from django.db import models
 from django.db.models import Prefetch
 from geo.models import Location
-from common.models import NamedModelAbstractBase,SparseDate
-# 
+from common.models import NamedModelAbstractBase,SparseDateAbstractBase
 
+class VoyageSparseDate(SparseDateAbstractBase):
+	pass
 
 # Voyage Groupings
 class VoyageGroupings(models.Model):
@@ -185,11 +186,11 @@ class VoyageShip(models.Model):
 		blank=True
 	)
 
-	voyage = models.ForeignKey(
+	voyage = models.OneToOneField(
 		'Voyage',
-		null=True,
-		blank=True,
-		related_name="voyage_name_ship",
+		null=False,
+		blank=False,
+		related_name="voyage_ship",
 		on_delete=models.CASCADE
 	)
 
@@ -236,17 +237,15 @@ class VoyageCargoConnection(models.Model):
 	"""
 	cargo = models.ForeignKey(
 		CargoType,
-		related_name="+",
 		on_delete=models.CASCADE
 	)
 	voyage = models.ForeignKey(
 		'Voyage',
-		related_name="+",
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		related_name='cargo'
 	)
 	unit = models.ForeignKey(
 		CargoUnit,
-		related_name="+",
 		null=True,
 		on_delete=models.SET_NULL
 	)
@@ -336,6 +335,14 @@ class VoyageOutcome(models.Model):
 	"""
 	Information about Outcomes
 	"""
+	
+	voyage = models.OneToOneField(
+		'Voyage',
+		related_name='voyage_outcome',
+		blank=False,
+		null=False,
+		on_delete=models.CASCADE
+	)
 
 	# Data variables
 	particular_outcome = models.ForeignKey(
@@ -396,6 +403,13 @@ class VoyageItinerary(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.SpecificRegion`
 	related to: :class:`~voyages.apps.voyage.models.Place`
 	"""
+	voyage = models.OneToOneField(
+		'Voyage',
+		related_name='voyage_itinerary',
+		blank=False,
+		null=False,
+		on_delete=models.CASCADE
+	)
 
 	# Data variables
 	port_of_departure = models.ForeignKey(
@@ -745,19 +759,21 @@ class VoyageItinerary(models.Model):
 		on_delete=models.SET_NULL
 	)
 
-# 	voyage = models.ForeignKey('Voyage',
-# 							   null=True,
-# 							   blank=True,
-# 							   related_name="voyage_name_itinerary",
-# 							   on_delete=models.SET_NULL)
-
 	class Meta:
 		verbose_name = "Itinerary"
 		verbose_name_plural = "Itineraries"
 
 # Voyage Dates
 class VoyageDates(models.Model):
-
+	
+	voyage = models.OneToOneField(
+		'Voyage',
+		blank=False,
+		null=False,
+		related_name='voyage_dates',
+		on_delete=models.CASCADE
+	)
+	
 	# JCM: JUNE 1 2023: LEGACY FIELDS THAT WE'LL KEEP OR TURN INTO PROPERTIES
 	
 	length_middle_passage_days = models.IntegerField(
@@ -777,7 +793,7 @@ class VoyageDates(models.Model):
 	# JCM_JUNE_1_2023: SPARSE INTEGER TRIPLES
 	
 	voyage_began_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date that voyage began (DATEDEPB,A,C)",
 		null=True,
 		blank=True,
@@ -785,7 +801,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	slave_purchase_began_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date that slave purchase began (D1SLATRB,A,C)",
 		null=True,
 		blank=True,
@@ -793,7 +809,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	vessel_left_port_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date that vessel left last slaving port (DLSLATRB,A,C)",
 		null=True,
 		blank=True,
@@ -801,7 +817,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	first_dis_of_slaves_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date of first disembarkation of slaves (DATARR33,32,34)",
 		null=True,
 		blank=True,
@@ -809,7 +825,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	date_departed_africa_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date vessel departed Africa (DATELEFTAFR)",
 		null=True,
 		blank=True,
@@ -817,7 +833,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	arrival_at_second_place_landing_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date of arrival at second place of landing (DATARR37,36,38)",
 		null=True,
 		blank=True,
@@ -825,7 +841,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	third_dis_of_slaves_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date of third disembarkation of slaves (DATARR40,39,41)",
 		null=True,
 		blank=True,
@@ -833,7 +849,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	departure_last_place_of_landing_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date of departure from last place of landing (DDEPAMB,*,C)",
 		null=True,
 		blank=True,
@@ -841,7 +857,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	voyage_completed_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Date on which slave voyage completed (DATARR44,43,45)",
 		null=True,
 		blank=True,
@@ -849,7 +865,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	imp_voyage_began_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Year voyage began",
 		null=True,
 		blank=True,
@@ -857,7 +873,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	imp_departed_africa_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Year departed Africa",
 		null=True,
 		blank=True,
@@ -865,7 +881,7 @@ class VoyageDates(models.Model):
 		related_name="+"
 	)
 	imp_arrival_at_port_of_dis_sparsedate = models.OneToOneField(
-		SparseDate,
+		VoyageSparseDate,
 		verbose_name="Year of arrival at port of disembarkation (YEARAM)",
 		null=True,
 		blank=True,
@@ -882,7 +898,13 @@ class VoyageCrew(models.Model):
 	Voyage Crew.
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
-
+	voyage = models.OneToOneField(
+		'Voyage',
+		related_name='voyage_crew',
+		blank=False,
+		null=False,
+		on_delete=models.CASCADE
+	)
 	crew_voyage_outset = models.IntegerField("Crew at voyage outset",
 											 null=True,
 											 blank=True)
@@ -958,7 +980,15 @@ class VoyageSlavesNumbers(models.Model):
 	Voyage slaves (numbers).
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
-
+	
+	voyage = models.OneToOneField(
+		'Voyage',
+		blank=False,
+		null=False,
+		related_name='voyage_slaves_numbers',
+		on_delete=models.CASCADE
+	)
+	
 	slave_deaths_before_africa = models.IntegerField(
 		"Slaves death before leaving Africa (SLADAFRI)", null=True, blank=True)
 	slave_deaths_between_africa_america = models.IntegerField(
@@ -1615,61 +1645,9 @@ class Voyage(models.Model):
 		on_delete=models.CASCADE,
 		related_name='+'
 	)
-	
-	# Data and imputed variables
-	voyage_outcome = models.ForeignKey(
-		'VoyageOutcome',
-		blank=True,
-		null=True,
-		on_delete=models.SET_NULL,
-		related_name='+'
-	)
-	
-	# Data and imputed variables
-	voyage_ship = models.ForeignKey(
-		'VoyageShip',
-		blank=True,
-		null=True,
-		on_delete=models.SET_NULL,
-		related_name='+'
-	)
-	
-	voyage_itinerary = models.ForeignKey(
-		'VoyageItinerary',
-		blank=True,
-		null=True,
-		on_delete=models.CASCADE,
-		related_name='+'
-	)
-	voyage_dates = models.ForeignKey(
-		'VoyageDates',
-		blank=True,
-		null=True,
-		on_delete=models.CASCADE,
-		related_name='+'
-	)
-	voyage_crew = models.ForeignKey(
-		'VoyageCrew',
-		blank=True,
-		null=True,
-		on_delete=models.CASCADE,
-		related_name='+'
-	)
-	voyage_slaves_numbers = models.ForeignKey(
-		'VoyageSlavesNumbers',
-		blank=True,
-		null=True,
-		on_delete=models.CASCADE,
-		related_name='+'
-	)
 
 	african_info = models.ManyToManyField(
 		AfricanInfo
-	)
-	cargo = models.ManyToManyField(
-		CargoType,
-		through='VoyageCargoConnection',
-		related_name='+'
 	)
 	last_update=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(

@@ -6,6 +6,7 @@ import nested_admin
 from common.models import *
 
 
+
 class VoyageCrewInline(nested_admin.NestedStackedInline):
 	model=VoyageCrew
 	max_num=1
@@ -205,6 +206,23 @@ class SourceVoyageConnectionInline(nested_admin.NestedStackedInline):
 # 
 # 
 
+class CargoConnectionInline(nested_admin.NestedStackedInline):
+	model=VoyageCargoConnection
+	classes = ['collapse']
+	extra=0
+
+
+class AfricanInfoInline(nested_admin.NestedStackedInline):
+	model = Voyage.african_info.through
+	classes = ['collapse']
+	extra=0
+
+# class CargoInline(nested_admin.NestedStackedInline):
+# 	model = Voyage.cargo.through
+# 	classes = ['collapse']
+# 	extra=0
+
+
 class VoyageAdmin(nested_admin.NestedModelAdmin):
 	inlines=(
 		VoyageDatesInline,
@@ -215,7 +233,10 @@ class VoyageAdmin(nested_admin.NestedModelAdmin):
 		VoyageOutcomeInline,
 		VoyageShipInline,
 		VoyageSlavesNumbersInline,
+		AfricanInfoInline,
+		CargoConnectionInline
 	)
+	exclude=['african_info_voyages']
 	fields=['voyage_id','dataset','voyage_in_cd_rom']
 	list_display=('voyage_id','voyage_ship')
 	search_fields=('voyage_id','voyage_ship')
@@ -230,3 +251,5 @@ admin.site.register(VesselCapturedOutcome, VesselCapturedOutcomeAdmin)
 admin.site.register(OwnerOutcome, OwnerOutcomeAdmin)
 admin.site.register(Resistance, ResistanceAdmin)
 admin.site.register(Nationality)
+admin.site.register(CargoType)
+admin.site.register(AfricanInfo)

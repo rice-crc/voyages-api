@@ -228,7 +228,7 @@ class VoyageDatesSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
 	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
 	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
 	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
-	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=False)
+	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,allow_null=True)
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
@@ -308,6 +308,11 @@ class AfricanInfoSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=AfricanInfo
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return AfricanInfo.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(AfricanInfoSerializer, self).create(validated_data)
 
 
 class CargoTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
@@ -330,13 +335,19 @@ class CargoUnitSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 		except ObjectDoesNotExist:
 			return super(CargoUnitSerializer, self).create(validated_data)
 
-class VoyageCargoConnectionSerializer(WritableNestedModelSerializer):
-	cargo=CargoTypeSerializer(many=True,allow_null=True)
-	unit=CargoUnitSerializer(many=True,allow_null=True)
+class VoyageCargoConnectionSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	cargo=CargoTypeSerializer(many=False,allow_null=True)
+	unit=CargoUnitSerializer(many=False,allow_null=True)
 	amount=serializers.DecimalField(allow_null=True,max_digits=7,decimal_places=2)
 	class Meta:
 		model=VoyageCargoConnection
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VoyageCargoConnection.objects.get(voyage_id=validated_data['voyage'],cargo__name=validated_data['cargo']['name'])
+		except ObjectDoesNotExist:
+			return super(VoyageCargoConnectionSerializer, self).create(validated_data)
+
 
 @extend_schema_serializer(
 	examples = [

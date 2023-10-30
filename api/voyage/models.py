@@ -1647,7 +1647,8 @@ class Voyage(models.Model):
 	)
 
 	african_info = models.ManyToManyField(
-		AfricanInfo
+		AfricanInfo,
+		related_name="african_info_voyages"
 	)
 	last_update=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(

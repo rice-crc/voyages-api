@@ -1,7 +1,6 @@
-# from django.contrib import admin
-# from past.models import *
-# from document.models import *
-# from voyage.models import Place
+from django.contrib import admin
+from past.models import *
+from document.models import *
 # 
 # 
 # class EnslavedInRelationInline(admin.StackedInline):
@@ -27,10 +26,16 @@
 # 	classes = ['collapse']
 # 	extra=0
 # 
-# class EnslaverAliasAdmin(admin.ModelAdmin):
+class EnslaverAliasAdmin(admin.ModelAdmin):
 # 	inlines=[EnslaverInRelationInline]
-# 	autocomplete_fields=['identity']
-# 	search_fields=['alias']
+	autocomplete_fields=['identity']
+	search_fields=['alias']
+
+class EnslaverAliasInline(admin.StackedInline):
+	model=EnslaverAlias
+	classes=['collapse']
+	extra=0
+
 # 
 # 
 # class EnslaverZoteroConnectionInline(admin.StackedInline):
@@ -39,12 +44,17 @@
 # 	extra=0
 # 	classes=['collapse']
 # 
-# class EnslaverIdentityAdmin(admin.ModelAdmin):
+class EnslaverIdentityAdmin(admin.ModelAdmin):
+	inlines=(
+		EnslaverAliasInline,
+	)
+	
+	
 # 	inlines=(
 # 		EnslaverZoteroConnectionInline,
 # 	)
 # 	autocomplete_fields=['birth_place','death_place','principal_location']
-# 	search_fields=['principal_alias',]
+	search_fields=['principal_alias',]
 # 
 # class EnslavedZoteroConnectionInline(admin.StackedInline):
 # 	model=ZoteroEnslavedConnection
@@ -74,6 +84,6 @@
 # 	]
 # 	
 # admin.site.register(EnslavementRelation,EnslavementRelationAdmin)
-# admin.site.register(EnslaverIdentity,EnslaverIdentityAdmin)
-# admin.site.register(EnslaverAlias,EnslaverAliasAdmin)
+admin.site.register(EnslaverIdentity,EnslaverIdentityAdmin)
+admin.site.register(EnslaverAlias,EnslaverAliasAdmin)
 # admin.site.register(Enslaved,EnslavedAdmin)

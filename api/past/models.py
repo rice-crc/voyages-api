@@ -65,6 +65,9 @@ class EnslaverInfoAbstractBase(models.Model):
 	is_natural_person = models.BooleanField(null=False, default=True,blank=True)
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
+	#It's going to be hairy mapping all this data over from legacy
+	#so I'm going to have to maintain a sort of shadow pk for use in migrations
+	legacy_id=models.IntegerField(null=True,blank=True)
 
 	def __str__(self):
 		return self.__unicode__()
@@ -98,6 +101,10 @@ class EnslaverAlias(models.Model):
 	manual_id = models.CharField(max_length=30, null=True)
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
+	#It's going to be hairy mapping all this data over from legacy
+	#so I'm going to have to maintain a sort of shadow pk for use in migrations
+	legacy_id=models.IntegerField(null=True,blank=True)
+
 
 	def __str__(self):
 		return self.__unicode__()

@@ -20,23 +20,46 @@ class RegisterCountrySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=RegisterCountry
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return RegisterCountry.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(RegisterCountrySerializer, self).create(validated_data)
+
 
 ############ SERIALIZERS COMMON TO BOTH ENSLAVERS AND ENSLAVED
 
-class EnslaverRoleSerializer(serializers.ModelSerializer):
+class EnslaverRoleSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	name=serializers.CharField(allow_null=False)
 	class Meta:
 		model=EnslaverRole
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return EnslaverRole.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(EnslaverRoleSerializer, self).create(validated_data)
 
-class EnslavementRelationTypeSerializer(serializers.ModelSerializer):
+
+class EnslavementRelationTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=EnslavementRelationType
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return EnslavementRelationType.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(EnslavementRelationTypeSerializer, self).create(validated_data)
 
-class PastLocationSerializer(serializers.ModelSerializer):
+class PastLocationSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Location
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return Location.objects.get(value=validated_data['value'])
+		except ObjectDoesNotExist:
+			return super(PastLocationSerializer, self).create(validated_data)
 
 class PastSourceSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -236,10 +259,13 @@ class EnslaverInRelationSerializer(serializers.ModelSerializer):
 		model=EnslaverInRelation
 		fields='__all__'
 
-class EnslaverAliasSerializer(serializers.ModelSerializer):
-	enslaver_relations=EnslaverInRelationSerializer(
-		many=True,
-	)
+class EnslaverAliasSerializer(WritableNestedModelSerializer):
+	id=serializers.IntegerField(allow_null=False)
+	enslaver_relations=EnslaverInRelationSerializer(many=True,allow_null=True)
+	alias=serializers.CharField(allow_null=False)
+	manual_id=serializers.CharField(allow_null=True)
+	human_reviewed=serializers.BooleanField(allow_null=True)
+	legacy_id=serializers.IntegerField(allow_null=True)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
@@ -286,10 +312,29 @@ class EnslaverSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class EnslaverCRUDSerializer(WritableNestedModelSerializer):
+	id=serializers.IntegerField(allow_null=False)
 	principal_location=PastLocationSerializer(many=False,allow_null=True)
 	aliases=EnslaverAliasSerializer(many=True,allow_null=True)
 	birth_place=PastLocationSerializer(many=False,allow_null=True)
 	death_place=PastLocationSerializer(many=False,allow_null=True)
+	principal_alias=serializers.CharField(allow_null=True)
+	birth_year=serializers.IntegerField(allow_null=True)
+	birth_month=serializers.IntegerField(allow_null=True)
+	birth_day=serializers.IntegerField(allow_null=True)
+	death_year=serializers.IntegerField(allow_null=True)
+	death_month=serializers.IntegerField(allow_null=True)
+	death_day=serializers.IntegerField(allow_null=True)
+	father_name=serializers.CharField(allow_null=True)
+	father_occupation=serializers.CharField(allow_null=True)
+	mother_name=serializers.CharField(allow_null=True)
+	probate_date=serializers.CharField(allow_null=True)
+	will_value_pounds=serializers.CharField(allow_null=True)
+	will_value_dollars=serializers.CharField(allow_null=True)
+	will_court=serializers.CharField(allow_null=True)
+	notes=serializers.CharField(allow_null=True)
+	is_natural_person=serializers.BooleanField(allow_null=True)
+	human_reviewed=serializers.BooleanField(allow_null=True)
+	legacy_id=serializers.IntegerField(allow_null=True)
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'

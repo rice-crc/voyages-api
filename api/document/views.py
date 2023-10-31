@@ -178,7 +178,7 @@ class SourceRUD(generics.RetrieveUpdateDestroyAPIView):
 	'''
 	RETRIEVE, UPDATE, OR DELETE SOURCE.
 	
-	The lookup field for sources is "short_ref".
+	The lookup field for sources is "id".
 	
 	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
 	'''

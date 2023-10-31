@@ -146,7 +146,7 @@ class EnslavedEnslaverInRelationSerializer(serializers.ModelSerializer):
 		model=EnslaverInRelation
 		fields='__all__'
 
-class EnslavedEnslavementRelationSerializer(serializers.ModelSerializer):
+class EnslavedEnslavementRelationSerializer(WritableNestedModelSerializer):
 	relation_type=EnslavementRelationTypeSerializer(many=False)
 	relation_enslavers=EnslavedEnslaverInRelationSerializer(many=True)
 	voyage=PastVoyageSerializer(many=False)
@@ -166,21 +166,55 @@ class PastSourceEnslavedConnectionSerializer(serializers.ModelSerializer):
 
 #### ENSLAVED & ONE-TO-ONE RELATIONS
 
-class CaptiveFateSerializer(serializers.ModelSerializer):
+class CaptiveFateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	
 	class Meta:
 		model=CaptiveFate
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return CaptiveFate.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CaptiveFateSerializer, self).create(validated_data)
 
-class CaptiveStatusSerializer(serializers.ModelSerializer):
+
+
+class CaptiveStatusSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+
 	class Meta:
 		model=CaptiveStatus
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return CaptiveStatus.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CaptiveStatusSerializer, self).create(validated_data)
 
-class LanguageGroupSerializer(serializers.ModelSerializer):
+class LanguageGroupSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	longitude=serializers.DecimalField(max_digits=10,decimal_places=7,allow_null=True)
+	latitude=serializers.DecimalField(max_digits=10,decimal_places=7,allow_null=True)
 	class Meta:
 		model=LanguageGroup
 		fields='__all__'
-		
+	def create(self, validated_data):
+		try:
+			return LanguageGroup.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(LanguageGroupSerializer, self).create(validated_data)
+
+class RegisterCountrySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=RegisterCountry
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return RegisterCountry.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(RegisterCountrySerializer, self).create(validated_data)
+
+
+
+
 @extend_schema_serializer(
 	examples = [
 		 OpenApiExample(
@@ -312,7 +346,7 @@ class EnslaverSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class EnslaverCRUDSerializer(WritableNestedModelSerializer):
-	id=serializers.IntegerField(allow_null=False)
+	id=serializers.IntegerField(allow_null=True)
 	principal_location=PastLocationSerializer(many=False,allow_null=True)
 	aliases=EnslaverAliasSerializer(many=True,allow_null=True)
 	birth_place=PastLocationSerializer(many=False,allow_null=True)
@@ -340,6 +374,8 @@ class EnslaverCRUDSerializer(WritableNestedModelSerializer):
 		fields='__all__'
 
 class EnslavedCRUDSerializer(WritableNestedModelSerializer):
+	id=serializers.IntegerField(allow_null=True)
+	enslaved_id=serializers.IntegerField(allow_null=True)
 	post_disembark_location=PastLocationSerializer(many=False,allow_null=True)
 	captive_fate=CaptiveFateSerializer(many=False,allow_null=True)
 	enslaved_relations=EnslavedEnslavementRelationSerializer(many=True,allow_null=True)
@@ -359,10 +395,8 @@ class EnslavedCRUDSerializer(WritableNestedModelSerializer):
 	height = serializers.DecimalField(decimal_places=2, max_digits=6,allow_null=True)
 	skin_color = serializers.CharField(allow_null=True)
 	dataset = serializers.IntegerField(allow_null=True)
-	notes = serializers.CharField(allow_blank=True)
+	notes = serializers.CharField(allow_null=True)
 	human_reviewed=serializers.BooleanField(allow_null=True)
-	
-	
 	class Meta:
-		model=EnslaverIdentity
+		model=Enslaved
 		fields='__all__'

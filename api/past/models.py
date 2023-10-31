@@ -197,6 +197,7 @@ class Enslaved(models.Model):
 	# For African Origins dataset documented_name is an African Name.
 	# For Oceans of Kinfolk, this field is used to store the Western
 	# Name of the enslaved.
+	enslaved_id = models.IntegerField(unique=True,blank=False,null=False)
 	documented_name = models.CharField(max_length=100, blank=True,null=True)
 	name_first = models.CharField(max_length=100, null=True, blank=True)
 	name_second = models.CharField(max_length=100, null=True, blank=True)
@@ -279,7 +280,7 @@ class EnslavementRelation(models.Model):
 	)
 	text_ref = models.CharField(max_length=255, null=True, blank=True, help_text="Source text reference")
 	is_from_voyages=models.BooleanField(default=False,null=True,blank=True)
-	enslaved_in_relation=models.ManyToManyField(Enslaved)
+	enslaved_in_relation=models.ManyToManyField(Enslaved,related_name="enslaved_relations")
 
 class EnslaverInRelation(models.Model):
 	"""

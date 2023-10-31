@@ -238,8 +238,8 @@ class VoyageAdmin(nested_admin.NestedModelAdmin):
 	)
 	exclude=['african_info_voyages']
 	fields=['voyage_id','dataset','voyage_in_cd_rom']
-	list_display=('voyage_id','voyage_ship')
-	search_fields=('voyage_id','voyage_ship')
+	list_display=('voyage_id',)
+	search_fields=('voyage_id',)
 	model=Voyage
 # # 
 # # 

@@ -507,7 +507,7 @@ class EnslavedRUD(generics.RetrieveUpdateDestroyAPIView):
 	'''
 	queryset=Enslaved.objects.all()
 	serializer_class=EnslavedCRUDSerializer
-	lookup_field='id'
+	lookup_field='enslaved_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 

@@ -70,11 +70,11 @@ class SourcePageConnection(models.Model):
 		blank=False
 	)
 	
-	class Meta:
-		unique_together=[
-			['source','page'],
-			['source','order']
-		]
+# 	class Meta:
+# 		unique_together=[
+# 			['source','page'],
+# 			['source','order']
+# 		]
 
 class SourceVoyageConnection(models.Model):
 	source=models.ForeignKey(
@@ -92,10 +92,10 @@ class SourceVoyageConnection(models.Model):
 		null=True,
 		blank=True
 	)
-	class Meta:
-		unique_together=[
-			['source','voyage','page_range']
-		]
+# 	class Meta:
+# 		unique_together=[
+# 			['source','voyage','page_range']
+# 		]
 
 class SourceEnslaverConnection(models.Model):
 	source=models.ForeignKey(
@@ -113,10 +113,10 @@ class SourceEnslaverConnection(models.Model):
 		null=True,
 		blank=True
 	)
-	class Meta:
-		unique_together=[
-			['source','enslaver','page_range']
-		]
+# 	class Meta:
+# 		unique_together=[
+# 			['source','enslaver','page_range']
+# 		]
 
 class SourceEnslavedConnection(models.Model):
 	source=models.ForeignKey(
@@ -134,10 +134,10 @@ class SourceEnslavedConnection(models.Model):
 		null=True,
 		blank=True
 	)
-	class Meta:
-		unique_together=[
-			['source','enslaved','page_range']
-		]
+# 	class Meta:
+# 		unique_together=[
+# 			['source','enslaved','page_range']
+# 		]
 
 class ShortRef(models.Model):
 	"""

@@ -470,6 +470,27 @@ class PASTNetworks(generics.GenericAPIView):
 
 #CONTRIBUTIONS
 
+
+class EnslavementRelationCREATE(generics.CreateAPIView):
+	'''
+	Create an enslavement relation without a pk
+	'''
+	queryset=EnslavementRelation.objects.all()
+	serializer_class=EnslavementRelationCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslavementRelationRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	Fetch, update, or delete an enslavement relation record with their pk
+	'''
+	queryset=EnslavementRelation.objects.all()
+	serializer_class=EnslavementRelationCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
 class EnslaverCREATE(generics.CreateAPIView):
 	'''
 	Create enslaver without a pk

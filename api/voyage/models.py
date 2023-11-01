@@ -255,8 +255,8 @@ class VoyageCargoConnection(models.Model):
 		max_digits=7,
 		decimal_places=2
 	)
-	class Meta:
-		unique_together = ['voyage', 'cargo']
+# 	class Meta:
+# 		unique_together = ['voyage', 'cargo']
 
 # Voyage Outcome
 class ParticularOutcome(models.Model):

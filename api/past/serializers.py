@@ -284,7 +284,7 @@ class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
 	voyage=PastVoyageSerializer(many=False)
 	class Meta:
 		model=EnslavementRelation
-		exclude=['text_ref','unnamed_enslaved_count']
+		fields='__all__'
 
 class EnslaverInRelationSerializer(serializers.ModelSerializer):
 	relation = EnslaverEnslavementRelationSerializer(many=False)
@@ -310,6 +310,10 @@ class PastSourceEnslaverConnectionSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=SourceEnslavedConnection
 		fields='__all__'
+
+	
+
+
 
 @extend_schema_serializer(
 	examples = [
@@ -344,6 +348,46 @@ class EnslaverSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
+
+
+class EnslaverInRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	roles=EnslaverRoleSerializer(many=True,allow_null=False)
+	class Meta:
+		model=EnslaverInRelation
+		exclude=['relation']
+	def create(self, validated_data):
+		try:
+			return EnslaverInRelation.objects.get(id=validated_data['id'])
+		except:
+			return super(EnslaverInRelationCRUDSerializer, self).create(validated_data)
+	def update(self, instance,validated_data):
+		try:
+			return EnslaverInRelation.objects.get(id=validated_data['id'])
+		except:
+			return super(EnslaverInRelationCRUDSerializer, self).create(validated_data)
+
+class EnslavementRelationSparseDateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=VoyageSparseDate
+		fields='__all__'
+
+class EnslavementRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	relation_type=EnslavementRelationTypeSerializer(many=False,allow_null=True)
+	place=PastLocationSerializer(many=False,allow_null=True)
+	date=EnslavementRelationSparseDateSerializer(many=False,allow_null=True)
+	amount=serializers.DecimalField(decimal_places=2, max_digits=6,allow_null=True)
+	relation_enslavers=EnslaverInRelationCRUDSerializer(many=True)
+	enslaved_in_relation=serializers.PrimaryKeyRelatedField(
+		many=True,
+		queryset=Enslaved.objects.all(),
+		allow_null=True,
+		default=[]
+	)
+	class Meta:
+		model=EnslavementRelation
+		fields='__all__'
+
+
 
 class EnslaverCRUDSerializer(WritableNestedModelSerializer):
 	id=serializers.IntegerField(allow_null=True)

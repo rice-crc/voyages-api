@@ -6,7 +6,7 @@ urlpatterns = [
 	path('RUD/<int:id>',views.SourceRUD.as_view()),
 	path('CREATE/',views.SourceCREATE.as_view()),
 # 	path('page/CREATE/',views.PageCREATE.as_view()),
-	path('SHORTREF/GET/<str:name>',views.ShortRefGET.as_view()),
+# 	path('SHORTREF/GET/<str:name>',views.ShortRefGET.as_view()),
 	path('gallery',views.Gallery),
 	path('gallery/<int:collection_id>',views.Gallery,name="gallery"),
 	path('gallery/<int:collection_id>/<int:pagenumber>',views.Gallery,name="gallery"),

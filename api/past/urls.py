@@ -15,6 +15,8 @@ urlpatterns = [
     path('networks',views.PASTNetworks.as_view()),
     path('enslaved/geotree',views.EnslavedGeoTreeFilter.as_view()),
     path('enslaver/geotree',views.EnslaverGeoTreeFilter.as_view()),
+	path('enslavementrelation/CREATE/',views.EnslavementRelationCREATE.as_view()),
+	path('enslavementrelation/RUD/<int:id>',views.EnslavementRelationRUD.as_view()),
 	path('enslaver/CREATE/',views.EnslaverCREATE.as_view()),
 	path('enslaver/RUD/<int:id>',views.EnslaverRUD.as_view()),
 	path('enslaved/CREATE/',views.EnslavedCREATE.as_view()),

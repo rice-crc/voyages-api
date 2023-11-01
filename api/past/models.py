@@ -260,6 +260,9 @@ class EnslavedName(models.Model):
 class EnslavementRelationType(NamedModelAbstractBase):
 	pass
 
+
+
+
 class EnslavementRelation(models.Model):
 	"""
 	Represents a relation involving any number of enslavers and enslaved
@@ -271,16 +274,19 @@ class EnslavementRelation(models.Model):
 	date = models.CharField(max_length=12, null=True,blank=True,
 		help_text="Date in MM,DD,YYYY format with optional fields.")
 	amount = models.DecimalField(null=True,blank=True, decimal_places=2, max_digits=6)
-	unnamed_enslaved_count = models.IntegerField(null=True,blank=True)
 	voyage = models.ForeignKey(
 		Voyage,
 		related_name="voyage_enslavement_relations",
 		null=True,blank=True,
 		on_delete=models.SET_NULL
 	)
-	text_ref = models.CharField(max_length=255, null=True, blank=True, help_text="Source text reference")
 	is_from_voyages=models.BooleanField(default=False,null=True,blank=True)
 	enslaved_in_relation=models.ManyToManyField(Enslaved,related_name="enslaved_relations")
+
+class EnslavementRelationDate(SparseDateAbstractBase):
+	enslavement_relation=models.OneToOneField(EnslavementRelation,on_delete=models.CASCADE)
+	pass
+
 
 class EnslaverInRelation(models.Model):
 	"""
@@ -304,8 +310,7 @@ class EnslaverInRelation(models.Model):
 		help_text="The role(s) of the enslaver in this relation"
 	)
 	class Meta:
-		unique_together = ('relation', 'enslaver_alias','role')
-	class Meta:
+# 		unique_together = ('relation', 'enslaver_alias','role')
 		ordering=['id']
 
 

@@ -83,7 +83,7 @@ class Post(models.Model):
 
     class Meta:
         ordering = ['-created_on']
-        unique_together = ['slug', 'language']
+#         unique_together = ['slug', 'language']
 
     def __str__(self):
         return self.title

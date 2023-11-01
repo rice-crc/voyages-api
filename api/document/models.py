@@ -1,7 +1,7 @@
 from django.db import models
 import re
 from voyage.models import Voyage
-from past.models import Enslaved,EnslaverIdentity
+from past.models import Enslaved,EnslaverIdentity,EnslavementRelation
 from common.models import NamedModelAbstractBase,SparseDateAbstractBase
 
 class DocSparseDate(SparseDateAbstractBase):
@@ -134,6 +134,26 @@ class SourceEnslavedConnection(models.Model):
 		null=True,
 		blank=True
 	)
+
+class SourceEnslavementRelationConnection(models.Model):
+	source=models.ForeignKey(
+		'Source',
+		related_name='source_enslavement_relation_connections',
+		on_delete=models.CASCADE
+	)
+	enslavement_relation=models.ForeignKey(
+		EnslavementRelation,
+		related_name='enslavement_relation_source_connections',
+		on_delete=models.CASCADE
+	)
+	page_range=models.CharField(
+		max_length=250,
+		null=True,
+		blank=True
+	)
+
+
+
 # 	class Meta:
 # 		unique_together=[
 # 			['source','enslaved','page_range']

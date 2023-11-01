@@ -51,14 +51,9 @@ class SourceEnslavedSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 		model=Enslaved
 		fields='__all__'
 	def create(self, validated_data):
-		#really smart get_or_create-like hack here
-		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
 		try:
-			# if there is already an instance in the database with the
-			# given value (e.g. tag='apple'), we simply return this instance
 			return Enslaved.objects.get(enslaved_id=validated_data['enslaved_id'])
 		except ObjectDoesNotExist:
-			# else, we create a new tag with the given value
 			return super(SourceEnslavedSerializer, self).create(validated_data)
 
 class SourceEnslavedConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
@@ -81,6 +76,32 @@ class CRUDSourceEnslavedConnectionSerializer(UniqueFieldsMixin, serializers.Mode
 			return CRUDSourceEnslavedConnection.objects.get(id=validated_data['id'])
 		except:
 			return super(CRUDSourceEnslavedConnectionSerializer, self).create(validated_data)
+
+class SourceEnslavementRelationSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=EnslavementRelation
+		fields='__all__'
+
+class SourceEnslavementRelationConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	enslavement_relation=SourceEnslavementRelationSerializer(many=False)
+	class Meta:
+		model=SourceEnslavementRelationConnection
+		fields='__all__'
+
+class CRUDSourceEnslavementRelationConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=SourceEnslavementRelationConnection
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return SourceEnslavementRelationConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceEnslavementRelationConnectionSerializer, self).create(validated_data)
+	def update(self, instance,validated_data):
+		try:
+			return SourceEnslavementRelationConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceEnslavementRelationConnectionSerializer, self).create(validated_data)
 
 
 class SourceEnslaverIdentitySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
@@ -189,6 +210,7 @@ class SourceSerializer(serializers.ModelSerializer):
 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True)
 	source_voyage_connections=SourceVoyageConnectionSerializer(many=True)
 	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True)
+	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True)
 	short_ref=ShortRefSerializer(many=False,allow_null=False)
 	class Meta:
 		model=Source
@@ -205,6 +227,7 @@ class SourceSerializer(serializers.ModelSerializer):
 			  "source_enslaver_connections": None,
 			  "source_voyage_connections": None,
 			  "source_enslaved_connections": None,
+			  "source_enslavement_relation_connections":None,
 			  "item_url": None,
 			  "zotero_group_id": None,
 			  "zotero_item_id": None,
@@ -223,6 +246,7 @@ class SourceCRUDSerializer(NestedUpdateMixin, serializers.ModelSerializer):
 	source_enslaver_connections=CRUDSourceEnslaverConnectionSerializer(many=True,allow_null=True)
 	source_voyage_connections=CRUDSourceVoyageConnectionSerializer(many=True,allow_null=True)
 	source_enslaved_connections=CRUDSourceEnslavedConnectionSerializer(many=True,allow_null=True)
+	source_enslavement_relation_connections=CRUDSourceEnslavementRelationConnectionSerializer(many=True,allow_null=True)
 	item_url=serializers.URLField(allow_null=True)
 	zotero_group_id=serializers.IntegerField(allow_null=True)
 	zotero_item_id=serializers.CharField(allow_null=True)
@@ -235,4 +259,3 @@ class SourceCRUDSerializer(NestedUpdateMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Source
 		fields='__all__'
-

@@ -241,7 +241,7 @@ class SourceSerializer(serializers.ModelSerializer):
         )
     ]
 )
-class SourceCRUDSerializer(NestedUpdateMixin, serializers.ModelSerializer):
+class SourceCRUDSerializer(WritableNestedModelSerializer):
 	page_connections=SourcePageConnectionSerializer(many=True,allow_null=True)
 	source_enslaver_connections=CRUDSourceEnslaverConnectionSerializer(many=True,allow_null=True)
 	source_voyage_connections=CRUDSourceVoyageConnectionSerializer(many=True,allow_null=True)

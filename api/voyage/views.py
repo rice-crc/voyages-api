@@ -25,6 +25,7 @@ from drf_yasg.utils import swagger_auto_schema
 import re
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+from common.static.Voyage_options import Voyage_options
 
 class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
@@ -45,13 +46,12 @@ class VoyageList(generics.GenericAPIView):
 		
 		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
 		'''
-		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset=Voyage.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			voyage_options,
+			Voyage_options,
 			retrieve_all=False
 		)
 		if len(error_messages)==0:
@@ -82,8 +82,7 @@ class VoyageAggregations(generics.GenericAPIView):
 		aggregations=params.get('aggregate_fields')
 		print("aggregations:",aggregations)
 		queryset=Voyage.objects.all()
-		voyage_options=getJSONschema('Voyage',hierarchical=False)
-		aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,Voyage_options,retrieve_all=True)
 		output_dict={}
 		if len(error_messages)==0:
 			for a in aggregation:
@@ -136,8 +135,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
 		params=dict(request.data)
 		queryset=Voyage.objects.all()
-		voyage_options=getJSONschema('Voyage',hierarchical=False)
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Voyage_options,retrieve_all=True)
 		if len(error_messages)==0:
 			ids=[i[0] for i in queryset.values_list('id')]
 			u2=STATS_BASE_URL+'crosstabs/'
@@ -168,8 +166,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 		groupby_by=params.get('groupby_by')
 		groupby_cols=params.get('groupby_cols')
 		queryset=Voyage.objects.all()
-		voyage_options=getJSONschema('Voyage',hierarchical=False)
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,voyage_options,retrieve_all=True)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Voyage_options,retrieve_all=True)
 		ids=[i[0] for i in queryset.values_list('id')]
 		u2=STATS_BASE_URL+'groupby/'
 		d2=params
@@ -190,12 +187,11 @@ class VoyageDataFrames(generics.GenericAPIView):
 		st=time.time()
 		retrieve_all=True
 		queryset=Voyage.objects.all()
-		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			voyage_options,
+			Voyage_options,
 			auto_prefetch=False,
 			retrieve_all=True
 		)
@@ -225,8 +221,7 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=Voyage.objects.all()
-		voyage_options=getJSONschema('Voyage',hierarchical=False)
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,voyage_options,retrieve_all=True)
+		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,Voyage_options,retrieve_all=True)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 			queryset=queryset.select_related(geotree_valuefield_stub)
@@ -314,12 +309,11 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		params=dict(request.data)
 		zoom_level=params.get('zoom_level')
 		queryset=Voyage.objects.all()
-		voyage_options=getJSONschema('Voyage',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			voyage_options,
+			Voyage_options,
 			auto_prefetch=True,
 			retrieve_all=True
 		)

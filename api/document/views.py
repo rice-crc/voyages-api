@@ -27,6 +27,7 @@ import re
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+from common.static.ZoteroSource_options import ZoteroSource_options
 
 class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

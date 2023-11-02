@@ -29,10 +29,6 @@ class LocationAdmin(admin.ModelAdmin):
 	search_fields=('name',)
 	readonly_fields=['value','name','parent','children','location_type']
 	model=Location
-# 
-# # Voyage (main section)
-# admin.site.register(Adjacency, AdjacencyAdmin)
-# admin.site.register(Polygon, PolygonAdmin)
-# admin.site.register(LocationType,LocationTypeAdmin)
+
 admin.site.register(Location,LocationAdmin)
-# 
+

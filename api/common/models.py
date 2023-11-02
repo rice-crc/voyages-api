@@ -44,6 +44,7 @@ class SparseDateAbstractBase(models.Model):
 		
 	class Meta:
 		abstract = True
+		ordering=['year','month','day']
 
 # Create your models here.
 class SavedQuery(models.Model):

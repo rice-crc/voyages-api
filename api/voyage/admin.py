@@ -5,8 +5,6 @@ from document.models import *
 import nested_admin
 from common.models import *
 
-
-
 class VoyageCrewInline(nested_admin.NestedStackedInline):
 	model=VoyageCrew
 	max_num=1
@@ -47,12 +45,9 @@ class VoyageDatesInline(nested_admin.NestedStackedInline):
 		'imp_arrival_at_port_of_dis_sparsedate'
 	]
 	can_delete=False
-
-# 		self.fields['first_dis_of_slaves_sparsedate'].disabled = True
 	
 class VoyageSlavesNumbersInline(nested_admin.NestedTabularInline):
 	model=VoyageSlavesNumbers
-
 	classes = ['collapse']
 	max_num=1
 	can_delete=False
@@ -103,7 +98,7 @@ class VoyageShipInline(nested_admin.NestedStackedInline):
 	)
 	classes = ['collapse']
 	verbose_name_plural="Voyage Ship"
-# # 
+
 class VoyageItineraryInline(nested_admin.NestedStackedInline):
 	model = VoyageItinerary
 	max_num = 1
@@ -170,44 +165,44 @@ class SourceVoyageConnectionInline(nested_admin.NestedStackedInline):
 	autocomplete_fields=['source']
 	extra=0
 	classes=['collapse']
-# 
-# 
-# class EnslavedInRelationInline_b(nested_admin.NestedStackedInline):
-# 	model=EnslavedInRelation
-# 	autocomplete_fields=['enslaved']
-# # 	readonly_fields=['relation']
-# # 	classes = ['collapse']
-# # 	sortable_field_name='id'
-# 	extra=0
-# 
-# class EnslaverInRelationInline_b(nested_admin.NestedStackedInline):
-# 	model=EnslaverInRelation
-# 	autocomplete_fields=[
-# 		'enslaver_alias'
-# 	]
-# # 	sortable_field_name='id'
-# # 	readonly_fields=['relation']
-# # 	classes = ['collapse']
-# # 	exclude=['order']
-# 	extra=0
-# 
-# 
-# class EnslavementRelationInline(nested_admin.NestedStackedInline):
-# 	model = EnslavementRelation
-# 	inlines=[
-# 		EnslavedInRelationInline_b,
-# 		EnslaverInRelationInline_b
-# 	]
-# # 	sortable_field_name='id'
-# # 	classes = ['collapse']
-# 	extra=0
-# 	exclude=['source','place','text_ref','unnamed_enslaved_count','date','amount','is_from_voyages']
-# 
-# 
-# 
+
+
+class EnslavedInRelationInline_b(nested_admin.NestedStackedInline):
+	model=EnslavedInRelation
+	autocomplete_fields=['enslaved']
+# 	readonly_fields=['relation']
+# 	classes = ['collapse']
+# 	sortable_field_name='id'
+	extra=0
+
+
+class EnslaverInRelationInline_b(nested_admin.NestedStackedInline):
+	model=EnslaverInRelation
+	autocomplete_fields=[
+		'enslaver_alias'
+	]
+	verbose_name_plural = "Enslavers"
+	extra=0
+
+
+class EnslavementRelationInline(nested_admin.NestedStackedInline):
+	model = EnslavementRelation
+	inlines=[
+		EnslavedInRelationInline_b,
+		EnslaverInRelationInline_b
+	]
+	classes = ['collapse']
+	extra=0
+	exclude=['source','place','text_ref','unnamed_enslaved_count','date','amount','is_from_voyages']
+
+
+class CargoTypeAdmin(admin.ModelAdmin):
+	search_fields=['name']
+	list_fields=['name']
 
 class CargoConnectionInline(nested_admin.NestedStackedInline):
 	model=VoyageCargoConnection
+	autocomplete_fields=['cargo']
 	classes = ['collapse']
 	extra=0
 
@@ -217,18 +212,12 @@ class AfricanInfoInline(nested_admin.NestedStackedInline):
 	classes = ['collapse']
 	extra=0
 
-# class CargoInline(nested_admin.NestedStackedInline):
-# 	model = Voyage.cargo.through
-# 	classes = ['collapse']
-# 	extra=0
-
-
 class VoyageAdmin(nested_admin.NestedModelAdmin):
 	inlines=(
 		VoyageDatesInline,
 		VoyageItineraryInline,
 		SourceVoyageConnectionInline,
-# 		EnslavementRelationInline,
+		EnslavementRelationInline,
 		VoyageCrewInline,
 		VoyageOutcomeInline,
 		VoyageShipInline,
@@ -240,9 +229,7 @@ class VoyageAdmin(nested_admin.NestedModelAdmin):
 	fields=['voyage_id','dataset','voyage_in_cd_rom']
 	list_display=('voyage_id',)
 	search_fields=('voyage_id',)
-	model=Voyage
-# # 
-# # 
+	
 admin.site.register(Voyage, VoyageAdmin)
 admin.site.register(VoyageSparseDate,VoyageSparseDateAdmin)
 admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
@@ -251,5 +238,6 @@ admin.site.register(VesselCapturedOutcome, VesselCapturedOutcomeAdmin)
 admin.site.register(OwnerOutcome, OwnerOutcomeAdmin)
 admin.site.register(Resistance, ResistanceAdmin)
 admin.site.register(Nationality)
-admin.site.register(CargoType)
+admin.site.register(CargoType,CargoTypeAdmin)
+admin.site.register(CargoUnit)
 admin.site.register(AfricanInfo)

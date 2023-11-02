@@ -16,8 +16,6 @@ STATUS = (
     (PUBLISH_STATUS, "Publish")
 )
 
-
-
 class Institution(models.Model):
     name = models.CharField(max_length=200, unique=True)
     description = models.CharField(max_length=600,null=True, blank=True)
@@ -25,7 +23,6 @@ class Institution(models.Model):
     image = models.ImageField(upload_to='images',null=True, blank=True)
     def __str__(self):
         return self.name
-
 
 class Author(models.Model):
     name = models.CharField(max_length=200, unique=True)

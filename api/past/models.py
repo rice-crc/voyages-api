@@ -246,8 +246,11 @@ class Enslaved(models.Model):
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 
 	def __str__(self):
-		return ": ".join([i for i in [self.documented_name,str(self.id)," ".join(["voyage:", str(self.voyage_id)])] if i not in [""," ",None]])
-	
+		if self.documented_name is None:
+			return ''
+		else:
+			return self.documented_name
+			
 	class Meta:
 		verbose_name_plural = "Enslaved People"
 		ordering=['id']
@@ -259,9 +262,6 @@ class EnslavedName(models.Model):
 
 class EnslavementRelationType(NamedModelAbstractBase):
 	pass
-
-
-
 
 class EnslavementRelation(models.Model):
 	"""
@@ -281,12 +281,30 @@ class EnslavementRelation(models.Model):
 		on_delete=models.SET_NULL
 	)
 	is_from_voyages=models.BooleanField(default=False,null=True,blank=True)
-	enslaved_in_relation=models.ManyToManyField(Enslaved,related_name="enslaved_relations")
 
 class EnslavementRelationDate(SparseDateAbstractBase):
 	enslavement_relation=models.OneToOneField(EnslavementRelation,on_delete=models.CASCADE)
 	pass
 
+class EnslavedInRelation(models.Model):
+	"""
+	Associates an enslaved in a slave relation.
+	"""
+
+# 	id = models.IntegerField(primary_key=True)
+	relation = models.ForeignKey(
+		EnslavementRelation,
+		related_name="enslaved_in_relation",
+		null=False,
+		on_delete=models.CASCADE)
+	enslaved = models.ForeignKey(Enslaved,
+		related_name="enslaved_relations",
+		null=False,
+		on_delete=models.CASCADE)
+# 	class Meta:
+# 		unique_together = ('relation', 'enslaved')
+	class Meta:
+		ordering=['id']
 
 class EnslaverInRelation(models.Model):
 	"""

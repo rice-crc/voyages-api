@@ -27,7 +27,7 @@ import re
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from common.static.ZoteroSource_options import ZoteroSource_options
+from common.static.Source_options import Source_options
 
 class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -131,7 +131,7 @@ def z_source_page(request,zotero_source_id=1):
 	
 	if request.user.is_authenticated:
 # 		print(zotero_source_id)
-		doc=ZoteroSource.objects.get(id=zotero_source_id)
+		doc=Source.objects.get(id=zotero_source_id)
 		
 # 		print(doc)
 		return render(request, "single_doc.html", {'zs':doc})

@@ -4,7 +4,6 @@ import re
 from .models import *
 from document.models import *
 from geo.models import *
-from common.models import SparseDate
 from .models import *
 from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample

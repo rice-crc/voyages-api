@@ -87,7 +87,7 @@ class PastVoyageSerializer(serializers.ModelSerializer):
 	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
 	voyage_dates=PastVoyageDatesSerializer(many=False)
 	voyage_ship=PastVoyageShipSerializer(many=False)
-	voyage_name_outcome=PastVoyageOutcomeSerializer(many=True)
+	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
 	class Meta:
 		model=Voyage
 		fields=[
@@ -97,7 +97,7 @@ class PastVoyageSerializer(serializers.ModelSerializer):
 			'voyage_itinerary',
 			'voyage_dates',
 			'voyage_ship',
-			'voyage_name_outcome'
+			'voyage_outcome'
 		]
 
 ####################### ENSLAVED M2M CONNECTIONS
@@ -116,7 +116,7 @@ class EnslavedEnslaverAliasSerializer(serializers.ModelSerializer):
 
 class EnslavedEnslaverInRelationSerializer(serializers.ModelSerializer):
 	enslaver_alias=EnslavedEnslaverAliasSerializer(many=False)
-	role=EnslaverRoleSerializer(many=False)
+	roles=EnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverInRelation
 		fields='__all__'
@@ -209,6 +209,7 @@ class EnslavedSerializer(serializers.ModelSerializer):
 	enslaved_relations=EnslavedInRelationSerializer(many=True)
 	captive_status=CaptiveStatusSerializer(many=False)
 	language_group=LanguageGroupSerializer(many=False)
+	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
 	class Meta:
 		model=Enslaved
 		fields='__all__'
@@ -232,10 +233,16 @@ class PastSourceEnslaverConnectionSerializer(serializers.ModelSerializer):
 class EnslaverEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
-		fields=['id','documented_name']
+		fields=['documented_name','enslaved_id','id']
+	
+class EnslaverEnslavedInRelationSerializer(serializers.ModelSerializer):
+	enslaved=EnslaverEnslavedSerializer(many=False)
+	class Meta:
+		model=EnslavedInRelation
+		fields='__all__'
 
 class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
-	enslaved_in_relation=EnslaverEnslavedSerializer(many=True)
+	enslaved_in_relation=EnslaverEnslavedInRelationSerializer(many=True)
 	relation_type=EnslavementRelationTypeSerializer(many=False)
 	place=PastLocationSerializer(many=False)
 	voyage=PastVoyageSerializer(many=False)
@@ -273,7 +280,9 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 			description='Here, we search for enslavers who participated in slave-trading voyages between the years of 1720-1722',
 			value={
 				"aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":[1720,1722]
-			}
+			},
+			request_only=True,
+			response_only=False
 		),
 		OpenApiExample(
 			'Ex. 2: array of str vals',
@@ -281,7 +290,9 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 			description='Here, we search for enslavers who participated in the enslavement of anyone named Bora',
 			value={
 				"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name":["Bora"]
-			}
+			},
+			request_only=True,
+			response_only=False
 		)
 	]
 )

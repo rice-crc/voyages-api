@@ -112,7 +112,7 @@ class CRUDPastVoyageSerializer(serializers.ModelSerializer):
 	voyage_itinerary=CRUDPastVoyageItinerarySerializer(many=False)
 	voyage_dates=CRUDPastVoyageDatesSerializer(many=False)
 	voyage_ship=CRUDPastVoyageShipSerializer(many=False)
-	voyage_name_outcome=CRUDPastVoyageOutcomeSerializer(many=True)
+	voyage_outcome=CRUDPastVoyageOutcomeSerializer(many=False)
 	class Meta:
 		model=Voyage
 		fields=[
@@ -122,7 +122,7 @@ class CRUDPastVoyageSerializer(serializers.ModelSerializer):
 			'voyage_itinerary',
 			'voyage_dates',
 			'voyage_ship',
-			'voyage_name_outcome'
+			'voyage_outcome'
 		]
 
 ####################### ENSLAVED M2M CONNECTIONS

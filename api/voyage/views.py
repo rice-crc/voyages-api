@@ -19,6 +19,7 @@ from geo.common import GeoTreeFilter
 import collections
 import gc
 from .serializers import *
+from .serializers_READONLY import *
 from geo.serializers import LocationSerializer
 from voyages3.localsettings import *
 from drf_yasg.utils import swagger_auto_schema
@@ -199,8 +200,9 @@ class VoyageDataFrames(generics.GenericAPIView):
 		sf=list(selected_fields)
 		if len(error_messages)==0:
 			output_dicts={}
-			for s in sf:
-				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+			for i in range(len(sf)):
+				output_dicts[sf[i]]=[v[i] for v in vals]
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dicts,safe=False)
 		else:
@@ -328,16 +330,16 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		if zoomlevel=='place':
 			voys_values_list=queryset.values_list(
 				'voyage_id',
-				'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
-				'voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
+				'voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+				'voyage_itinerary__imp_principal_port_slave_dis__uuid',
 				'voyage_slaves_numbers__imp_total_num_slaves_embarked'
 			)
 			graphname='place'
 		elif zoomlevel=='region':
 			voys_values_list=queryset.values_list(
 				'voyage_id',
-				'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
-				'voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
+				'voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
+				'voyage_itinerary__imp_principal_region_slave_dis__uuid',
 				'voyage_slaves_numbers__imp_total_num_slaves_embarked'
 			)
 			graphname='region'

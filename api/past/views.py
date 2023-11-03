@@ -15,6 +15,7 @@ import requests
 import time
 from .models import *
 from .serializers import *
+from .serializers_READONLY import *
 import pprint
 from common.reqs import *
 from collections import Counter
@@ -291,8 +292,9 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		sf=list(selected_fields)
 		if len(error_messages)==0:
 			output_dicts={}
-			for s in sf:
-				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+			for i in range(len(sf)):
+				output_dicts[sf[i]]=[v[i] for v in vals]
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dicts,safe=False)
 		else:
@@ -320,8 +322,9 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		sf=list(selected_fields)
 		if len(error_messages)==0:
 			output_dicts={}
-			for s in sf:
-				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+			for i in range(len(sf)):
+				output_dicts[sf[i]]=[v[i] for v in vals]
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dicts,safe=False)
 		else:
@@ -402,17 +405,17 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		if zoomlevel=='place':
 			enslaved_values_list=queryset.values_list(
 				'language_group__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
-				'post_disembark_location__geo_location__uuid'
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__uuid',
+				'post_disembark_location__uuid'
 			)
 			graphname='place'
 		elif zoomlevel=='region':
 			enslaved_values_list=queryset.values_list(
 				'language_group__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
-				'post_disembark_location__geo_location__uuid'
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__uuid',
+				'post_disembark_location__uuid'
 			)
 			graphname='region'
 			

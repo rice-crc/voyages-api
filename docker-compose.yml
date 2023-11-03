@@ -115,13 +115,14 @@ services:
       dockerfile: "./docker/geo-networks/Dockerfile"
 
 networks:
-  voyages:
+#   voyages_voyages:
 #     external: true
-    driver: "bridge"
-    ipam:
-      driver: "default"
-      config:
-        - subnet: "172.20.0.0/16"
+    voyages:
+        driver: "bridge"
+        ipam:
+          driver: "default"
+          config:
+            - subnet: "172.20.0.0/16"
 
 volumes:
   mysql_volume: {}

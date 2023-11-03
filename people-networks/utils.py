@@ -100,7 +100,7 @@ def load_graph():
 		identity_id=enslaver_alias_map[obj['enslaver_alias']]
 		enslaver_uuid=idmap['enslavers'][identity_id]
 		relation_uuid=idmap['enslavement_relations'][obj['relation']]
-		G.add_edge(enslaver_uuid,relation_uuid,role__name=obj['role__name'])
+		G.add_edge(enslaver_uuid,relation_uuid,roles__name=obj['roles__name'])
 	
 	#then once more around to get voyages tied in to relations
 	enslavement_relations=[n for n in 
@@ -148,8 +148,8 @@ def load_graph():
 				other_node_ids.append(other)
 			if G.nodes[other]['node_class']=='enslaved':
 				has_enslaved=True
-			if G.nodes[other]['node_class']=='enslavers' and 'role__name' in edata:
-				if edata['role__name'] not in ['Investor','Captain']:
+			if G.nodes[other]['node_class']=='enslavers' and 'roles__name' in edata:
+				if edata['roles__name'] not in ['Investor','Captain']:
 					has_direct_enslavers=True
 				else:
 					has_indirect_enslavers=True
@@ -177,8 +177,8 @@ def load_graph():
 				if not skipthis:
 					if has_indirect_enslavers and snodeclass=='enslavers':
 						#in this case, we have an enslaver-to-voyage connection to make
-						role_name=G.edges[s,n]['role__name']
-						G.add_edge(s,t,role_name=role_name)
+						roles_name=G.edges[s,n]['roles__name']
+						G.add_edge(s,t,role_name=roles_name)
 					if has_enslaved:
 						G.add_edge(s,t)
 		

@@ -18,8 +18,7 @@ class Page(models.Model):
 		null=True,blank=True,max_length=400
 	)
 	iiif_baseimage_url=models.URLField(
-		null=True,blank=True,max_length=400,unique=True
-	)
+		null=True,blank=True,max_length=400)
 	image_filename=models.CharField(
 		max_length=100,
 		null=True,
@@ -64,11 +63,11 @@ class SourcePageConnection(models.Model):
 		related_name='source_connections',
 		on_delete=models.CASCADE
 	)
-	order=models.IntegerField(
-		"Document page order",
-		null=False,
-		blank=False
-	)
+# 	order=models.IntegerField(
+# 		"Document page order",
+# 		null=False,
+# 		blank=False
+# 	)
 	
 # 	class Meta:
 # 		unique_together=[

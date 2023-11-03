@@ -212,6 +212,11 @@ class RegisterCountrySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 		except ObjectDoesNotExist:
 			return super(RegisterCountrySerializer, self).create(validated_data)
 
+class EnslavedInRelationSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	relation=EnslavedEnslavementRelationSerializer(many=False)
+	class Meta:
+		model=EnslavedInRelation
+		fields='__all__'
 
 
 
@@ -248,10 +253,9 @@ class RegisterCountrySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 class EnslavedSerializer(serializers.ModelSerializer):
 	post_disembark_location=PastLocationSerializer(many=False)
 	captive_fate=CaptiveFateSerializer(many=False)
-	enslaved_relations=EnslavedEnslavementRelationSerializer(many=True)
+	enslaved_relations=EnslavedInRelationSerializer(many=True)
 	captive_status=CaptiveStatusSerializer(many=False)
 	language_group=LanguageGroupSerializer(many=False)
-	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
 	class Meta:
 		model=Enslaved
 		fields='__all__'
@@ -349,7 +353,6 @@ class EnslaverSerializer(serializers.ModelSerializer):
 		model=EnslaverIdentity
 		fields='__all__'
 
-
 class EnslaverInRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
 	roles=EnslaverRoleSerializer(many=True,allow_null=False)
 	class Meta:
@@ -365,7 +368,6 @@ class EnslaverInRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSeri
 			return EnslaverInRelation.objects.get(id=validated_data['id'])
 		except:
 			return super(EnslaverInRelationCRUDSerializer, self).create(validated_data)
-
 
 class EnslavedInRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
 	class Meta:
@@ -435,7 +437,7 @@ class EnslavedCRUDSerializer(WritableNestedModelSerializer):
 	enslaved_id=serializers.IntegerField(allow_null=True)
 	post_disembark_location=PastLocationSerializer(many=False,allow_null=True)
 	captive_fate=CaptiveFateSerializer(many=False,allow_null=True)
-	enslaved_relations=EnslavedEnslavementRelationSerializer(many=True,allow_null=True)
+	enslaved_relations=EnslavedInRelationSerializer(many=True,allow_null=True)
 	captive_status=CaptiveStatusSerializer(many=False,allow_null=True)
 	language_group=LanguageGroupSerializer(many=False,allow_null=True)
 	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True,allow_null=True)

@@ -38,8 +38,8 @@ class PastGraphMaker(generics.GenericAPIView):
 		#VOYAGE DICT
 		voys=Voyage.objects.all()
 		voys.prefetch_related(
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location'
+			'voyage_itinerary__imp_principal_place_of_slave_purchase',
+			'voyage_itinerary__imp_principal_port_slave_dis'
 		)
 		voys.select_related(
 			'voyage_ship',
@@ -49,16 +49,16 @@ class PastGraphMaker(generics.GenericAPIView):
 			'id',
 			'voyage_ship__ship_name',
 			'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name'
+			'voyage_itinerary__imp_principal_port_slave_dis__name',
+			'voyage_itinerary__imp_principal_place_of_slave_purchase__name'
 		)
 		
 		valkeys=[
 			'id',
 			'voyage_ship__ship_name',
 			'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name'
+			'voyage_itinerary__imp_principal_port_slave_dis__name',
+			'voyage_itinerary__imp_principal_place_of_slave_purchase__name'
 		]
 		
 		voy_df={
@@ -154,16 +154,16 @@ class PastGraphMaker(generics.GenericAPIView):
 		
 		#ENSLAVER IN RELATION
 		enslaver_in_relation=EnslaverInRelation.objects.all()
-		enslaver_in_relation=enslaver_in_relation.select_related('role')
+		enslaver_in_relation=enslaver_in_relation.select_related('roles')
 		enslaver_in_relation_vals=enslaver_in_relation.values_list(
 			'relation',
 			'enslaver_alias',
-			'role__name'
+			'roles__name'
 		)
 		valkeys=(
 			'relation',
 			'enslaver_alias',
-			'role__name'
+			'roles__name'
 		)
 		
 		enslaver_in_relation_df={

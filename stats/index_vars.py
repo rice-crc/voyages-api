@@ -27,7 +27,7 @@ voyage_bar_and_donut_charts={
 	'name':'voyage_bar_and_donut_charts',
 	'variables': [
 		'id',
-		'voyage_name_outcome__vessel_captured_outcome__name',
+		'voyage_outcome__vessel_captured_outcome__name',
 		'voyage_dates__length_middle_passage_days',
 		'voyage_ship__imputed_nationality__name',
 		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
@@ -49,7 +49,7 @@ voyage_bar_and_donut_charts={
 		'voyage_dates__first_dis_of_slaves_sparsedate__month',
 		'voyage_itinerary__imp_broad_region_slave_dis__name',
 		'voyage_slaves_numbers__percentage_girl',
-		'voyage_name_outcome__particular_outcome__name',
+		'voyage_outcome__particular_outcome__name',
 		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
 		'voyage_itinerary__imp_principal_port_slave_dis__name',
 		'voyage_ship__tonnage_mod',
@@ -57,10 +57,10 @@ voyage_bar_and_donut_charts={
 		'voyage_slaves_numbers__percentage_women',
 		'voyage_dates__departure_last_place_of_landing_sparsedate__month',
 		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
-		'voyage_name_outcome__outcome_owner__name',
-		'voyage_name_outcome__outcome_slaves__name',
+		'voyage_outcome__outcome_owner__name',
+		'voyage_outcome__outcome_slaves__name',
 		'voyage_itinerary__imp_principal_place_of_slave_purchase__name',
-		'voyage_name_outcome__resistance__name',
+		'voyage_outcome__resistance__name',
 		'voyage_crew__crew_first_landing',
 		'voyage_slaves_numbers__percentage_male'
 	]

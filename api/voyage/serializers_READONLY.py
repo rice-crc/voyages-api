@@ -184,8 +184,6 @@ class VoyageVoyageSourceConnectionSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class VoyageEnslaverRoleSerializer(serializers.ModelSerializer):
-	birth_place=VoyageLocationSerializer(many=False,read_only=True)
-	
 	class Meta:
 		model=EnslaverRole
 		fields='__all__'
@@ -199,13 +197,13 @@ class VoyageEnslaverIdentitySerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class VoyageEnslaverAliasSerializer(serializers.ModelSerializer):
-	enslaver_identity=VoyageEnslaverIdentitySerializer(many=False,read_only=True)
+	identity=VoyageEnslaverIdentitySerializer(many=False,read_only=True)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
 
 class VoyageEnslaverInRelationSerializer(serializers.ModelSerializer):
-	enslaver_roles=VoyageEnslaverRoleSerializer(many=True,read_only=True)
+	roles=VoyageEnslaverRoleSerializer(many=True,read_only=True)
 	enslaver_alias=VoyageEnslaverAliasSerializer(many=False,read_only=True)
 	class Meta:
 		model=EnslaverInRelation

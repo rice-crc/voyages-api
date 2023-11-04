@@ -116,7 +116,7 @@ class EnslavedEnslaverAliasSerializer(serializers.ModelSerializer):
 
 class EnslavedEnslaverInRelationSerializer(serializers.ModelSerializer):
 	enslaver_alias=EnslavedEnslaverAliasSerializer(many=False)
-	roles=EnslaverRoleSerializer(many=False)
+	roles=EnslaverRoleSerializer(many=True)
 	class Meta:
 		model=EnslaverInRelation
 		fields='__all__'

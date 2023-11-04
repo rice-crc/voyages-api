@@ -141,7 +141,7 @@ class CRUDEnslavedEnslaverAliasSerializer(serializers.ModelSerializer):
 
 class CRUDEnslavedEnslaverInRelationSerializer(serializers.ModelSerializer):
 	enslaver_alias=CRUDEnslavedEnslaverAliasSerializer(many=False)
-	role=CRUDEnslaverRoleSerializer(many=False)
+	roles=CRUDEnslaverRoleSerializer(many=True)
 	class Meta:
 		model=EnslaverInRelation
 		fields='__all__'
@@ -249,7 +249,7 @@ class CRUDEnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
 
 class CRUDEnslaverInRelationSerializer(serializers.ModelSerializer):
 	relation = CRUDEnslaverEnslavementRelationSerializer(many=False)
-	role=CRUDEnslaverRoleSerializer(many=False)
+	roles=CRUDEnslaverRoleSerializer(many=True)
 	class Meta:
 		model=EnslaverInRelation
 		fields='__all__'

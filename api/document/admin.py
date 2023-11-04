@@ -59,10 +59,10 @@ class SourceAdmin(admin.ModelAdmin):
 		SourceVoyageConnectionInline,
 		SourceEnslavementRelationConnectionInline
 	]
-	search_fields=['title']
+	search_fields=['title','zotero_item_id']
 	autocomplete_fields=['short_ref','date']
 	readonly_fields=['item_url','zotero_item_id','zotero_group_id']
-	list_display=('title','short_ref')
+	list_display=('title','short_ref','zotero_item_id')
 
 admin.site.register(Source, SourceAdmin)
 admin.site.register(ShortRef,ShortRefAdmin)

@@ -5,7 +5,7 @@ import json
 import os
 
 class Command(BaseCommand):
-	help = 'imports michigan collections -- purpose-built'
+	help = 'gets the zotero source data (pulled from content-staging on nov 2) into the system'
 	def handle(self, *args, **options):
 
 		basepath="document/management/commands/"
@@ -17,7 +17,14 @@ class Command(BaseCommand):
 		d.close()
 		sourcepages=json.loads(t)
 		print("source page",sourcepages[0])
-		
+
+		d=open("document/management/commands/zs_voyages_and_enslaved_connections.json","r")
+		t=d.read()
+		d.close()
+		zs_voyages_and_enslaved_unformatted=json.loads(t)
+		print("zs_voyages_and_enslaved",zs_voyages_and_enslaved_unformatted["100"])
+		zs_voyages_and_enslaved_formatted={int(k):zs_voyages_and_enslaved_unformatted[k] for k in zs_voyages_and_enslaved_unformatted}
+
 		
 		d=open("document/management/commands/spcs.json","r")
 		t=d.read()
@@ -35,6 +42,7 @@ class Command(BaseCommand):
 		print("zoterosource",zoterosources[0])
 		
 		sources=Source.objects.all()
+		sources=sources.prefetch_related('short_ref')
 		print("source",sources[0].__dict__)
 		
 		broken_out_shortrefs=[
@@ -56,9 +64,12 @@ class Command(BaseCommand):
 			zotero_item_id=re.search('(?<=items/)[0-9|A-Z]+',zurl).group(0)
 			item_url=zs['item_url']
 			shortref=zs['short_ref']
+			print(zotero_item_id,shortref)
 			if shortref not in broken_out_shortrefs:
 				corresponding_source=sources.filter(short_ref__name=shortref)
-				short_ref_obj=ShortRef.objects.create(name=shortref)
+				short_ref_obj,short_ref_obj_isnew=ShortRef.objects.get_or_create(
+					name=shortref
+				)
 				if len(corresponding_source)==0:
 					source=Source.objects.create(
 						item_url=zs['item_url'],
@@ -68,13 +79,11 @@ class Command(BaseCommand):
 						title=zs['zotero_title']
 					)
 				elif len(corresponding_source)==1:
-					s=corresponding_source[0]
-					source=Source.objects.update(
-						item_url=zs['item_url'],
-						zotero_group_id=zotero_group_id,
-						zotero_item_id=zotero_item_id,
-						short_ref=short_ref_obj
-					).save()
+					source=corresponding_source[0]
+					source.item_url=zs['item_url']
+					source.zotero_item_id=zotero_item_id
+					source.short_ref=short_ref_obj
+					source.save()
 				else:
 					print("too many sources, we thought we had this covered?",shortref)
 			else:
@@ -91,10 +100,11 @@ class Command(BaseCommand):
 				
 			source_id=source.id
 			
-			these_spcs = [spc for spc in sourcepageconnections if z_id==zs['id']]
+			these_spcs = [spc for spc in sourcepageconnections if z_id==spc[
+				'zotero_source_id'
+			]]
 			for spc in these_spcs:
 				page_id=spc['source_page_id']
-				id=spc['id']
 				source_page=[sp for sp in sourcepages if sp['id']==page_id][0]
 				page=Page.objects.create(
 					page_url=source_page['page_url'],
@@ -108,5 +118,30 @@ class Command(BaseCommand):
 					source_id=source_id,
 					page_id=page_id
 				)
+			
+			voyage_and_enslaved_connections=zs_voyages_and_enslaved_formatted[z_id]
+			voyage_ids=voyage_and_enslaved_connections['voyage_ids']
+			for v_id in voyage_ids:
+				voyage=Voyage.objects.get(voyage_id=v_id)
+				SourceVoyageConnection.objects.create(
+					source=source,
+					voyage=voyage
+				)
+			enslaved_ids=voyage_and_enslaved_connections['enslaved_ids']
+			for e_id in enslaved_ids:
+				enslaved=Enslaved.objects.get(enslaved_id=e_id)
+				SourceEnslavedConnection.objects.create(
+					source=source,
+					enslaved=enslaved
+				)
 
-	
+
+
+# zsconnections={}
+#  for zs in ZoteroSource.objects.all():
+# ...     zs_id=zs.id
+# ...     zsconnections[zs_id]={'voyage_ids':[],'enslaved_ids':[]}
+# ...     for zsvc in zs.zotero_voyage_connections.all():
+# ...             zsconnections[zs_id]['voyage_ids'].append(zsvc.voyage_id)
+# ...     for zsed in zs.zotero_enslaved_connections.all():
+# ...             zsconnections[zs_id]['enslaved_ids'].append(zsed.enslaved_id)

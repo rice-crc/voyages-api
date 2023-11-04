@@ -77,17 +77,18 @@ def Gallery(request,collection_id=None,pagenumber=1):
 		
 		#let's only get the zotero objects that have pages
 		#otherwise, no need for the gallery -- and it lards the gallery up
-		docs=Source.objects.order_by().all().filter(~Q(page_connection=None))
+		sources=Source.objects.order_by().all().filter(~Q(page_connections=None))
 		
 		other_collections=[]
-		for collection_tuple in docs.values_list(
-			"legacy_source__id",
-			"legacy_source__short_ref"
+		page_collection_id=None
+		page_collection_label="No Collection Selected"
+		for collection_tuple in sources.values_list(
+			"short_ref__id",
+			"short_ref__name"
 		).distinct():
-			
 			this_collection_id,this_collection_label=collection_tuple
-			
 			if this_collection_id==collection_id:
+				print(this_collection_id,this_collection_label)
 				page_collection_label=this_collection_label
 				page_collection_id=this_collection_id
 			else:
@@ -96,23 +97,16 @@ def Gallery(request,collection_id=None,pagenumber=1):
 					"label":this_collection_label
 				})
 			
-# 		if collection_id is None:
-# 			
-# 			page_collection_id=min(docs.values_list('legacy_source__id'))[0]
-			
-# 			page_collection_label=docs.filter(legacy_source__id=page_collection_id).first().legacy_source.short_ref
-			
-		docs=docs.filter(legacy_source__id=collection_id).distinct()
-		docs=docs.order_by('id')
-		docs_paginator=Paginator(docs, 12)
-		this_page=docs_paginator.get_page(pagenumber)
-		
-# 		print(other_collections)
+		sources=sources.filter(short_ref__id=collection_id).distinct()
+		sources=sources.order_by('id')
+		sources_paginator=Paginator(sources, 12)
+		this_page=sources_paginator.get_page(pagenumber)
 		
 		return render(
 			request,
 			"gallery.html",
 			{
+				"page_collection_label":page_collection_label,
 				"page_obj": this_page,
 				"other_collections":other_collections,
 				"page_collection_id":page_collection_id
@@ -127,14 +121,11 @@ def Gallery(request,collection_id=None,pagenumber=1):
 @extend_schema(
         exclude=True
     )
-def z_source_page(request,zotero_source_id=1):
+def source_page(request,source_id=1):
 	
 	if request.user.is_authenticated:
-# 		print(zotero_source_id)
-		doc=Source.objects.get(id=zotero_source_id)
-		
-# 		print(doc)
-		return render(request, "single_doc.html", {'zs':doc})
+		source=Source.objects.get(id=source_id)
+		return render(request, "single_doc.html", {'source':source})
 	else:
 		return HttpResponseForbidden("Forbidden")
 

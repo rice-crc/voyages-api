@@ -214,7 +214,9 @@ class Source(models.Model):
 		max_length=255,
 		null=False,
 		blank=False,
-		unique=True
+# They can't keep their short_refs unique, they can't keep their titles unique...
+# This dataset is such a mess.
+# 		unique=True
 	)
 	
 	date = models.OneToOneField(

@@ -12,7 +12,7 @@ services:
     ports:
       - "127.0.0.1:3306:3306"
     networks:
-      - "voyages"
+      - "voyages_voyages"
     volumes:
       - "./data:/docker-entrypoint-initdb.d"
       - "mysql_volume:/var/lib/mysql"
@@ -31,7 +31,7 @@ services:
     ports:
       - "127.0.0.1:8983:8983"
     networks:
-      - "voyages"
+      - "voyages_voyages"
     volumes:
       - "solr_volume:/var/solr"
       - "./solr:/srv/voyages/solr"
@@ -44,7 +44,7 @@ services:
     hostname: "voyages-api"
     restart: "on-failure"
     networks:
-      - "voyages"
+      - "voyages_voyages"
     depends_on:
       - "voyages-mysql"
     ports:
@@ -65,7 +65,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     networks:
-      - "voyages"
+      - "voyages_voyages"
     environment:
       ADMINER_DEFAULT_SERVER: "voyages-mysql"
 
@@ -75,7 +75,7 @@ services:
     hostname: "voyages-stats"
     restart: "on-failure"
     networks:
-      - "voyages"
+      - "voyages_voyages"
     ports:
       - "127.0.0.1:5000:5000"
     volumes:
@@ -90,7 +90,7 @@ services:
     hostname: "voyages-people-networks"
     restart: "on-failure"
     networks:
-      - "voyages"
+      - "voyages_voyages"
     ports:
       - "127.0.0.1:5006:5006"
     volumes:
@@ -105,7 +105,7 @@ services:
     hostname: "voyages-geo-networks"
     restart: "on-failure"
     networks:
-      - "voyages"
+      - "voyages_voyages"
     ports:
       - "127.0.0.1:5005:5005"
     volumes:
@@ -115,12 +115,14 @@ services:
       dockerfile: "./docker/geo-networks/Dockerfile"
 
 networks:
-    voyages:
-        driver: "bridge"
-        ipam:
-          driver: "default"
-          config:
-            - subnet: "172.20.0.0/16"
+  voyages_voyages:
+    external: true
+#     voyages:
+#         driver: "bridge"
+#         ipam:
+#           driver: "default"
+#           config:
+#             - subnet: "172.20.0.0/16"
 
 volumes:
   mysql_volume: {}

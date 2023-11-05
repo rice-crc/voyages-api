@@ -113,8 +113,12 @@ def load_graph():
 		'voyage__id',
 		'relation_type__name',
 		'enslaved_in_relation__enslaved__id',
-		'relation_enslavers__enslaver_alias__identity__id'
+		'relation_enslavers__enslaver_alias__identity__id',
+		'relation_enslavers__roles__name'
 	]
+	
+	#482149 relations without roles.
+	#517290 relations WITH roles. promising.
 	url=DJANGO_BASE_URL+'past/enslavementrelations/dataframes/'
 	payload={
 		"selected_fields":selected_fields
@@ -133,6 +137,8 @@ def load_graph():
 	
 	j=json.loads(r.text)
 	
+	print("RELATIONS COUNT------>",len(j[selected_fields[0]]),"<--------RELATIONS COUNT")
+	
 	for row_idx in range(len(j[selected_fields[0]])):
 		rowdict={}
 		for sf in selected_fields:
@@ -142,8 +148,6 @@ def load_graph():
 			relations_dict[relation_id]=[rowdict]
 		else:
 			relations_dict[relation_id].append(rowdict)
-	
-	c=1
 	
 	relation_types=[]
 	
@@ -164,7 +168,7 @@ def load_graph():
 				print("got more or fewer spouses than anticipated-->",enslaver_uuids,relation_connections)
 		elif relation_type=="Transportation":
 			if len(enslaved_uuids)==0:
-				#captain & shipowner/investor relations to voyages
+				#captain & shipowner/investor relations to voyages FOR WHICH THERE ARE NO NAMED ENSLAVED INDIVIDUALS
 				if len(voyage_uuids)==1:
 					voyage_uuid=voyage_uuids[0]
 					for enslaver_uuid in enslaver_uuids:
@@ -172,27 +176,141 @@ def load_graph():
 				else:
 					print('got more or fewer voyages than anticipated-->',relation_connections)
 			else:
-				rel_uuid=str(uuid.uuid4())
-				reldata={
-					'uuid':rel_uuid,
-					'relation_type__name':relation_type,
-					'id':relation_id,
-					'node_class':'enslavement_relations'
-				}
-				G.add_node(rel_uuid, **reldata)
+				#enslaved people connected to voyages without enslavers is a thing, apparently.
+				#bears looking into!
+				enslaver_roles=list(set([rc['relation_enslavers__roles__name'] for rc in relation_connections]))
+				if enslaver_uuids ==[]:
+					for rc in relation_connections:
+						enslaved_uuid=enslaved_dict[rc['enslaved_in_relation__enslaved__id']]['uuid']
+						voyage_uuid=voyages_dict[rc['voyage__id']]['uuid']
+						G.add_edge(enslaved_uuid,voyage_uuid)
+				else:
+					if 'Captain' in enslaver_roles or 'Investor' in enslaver_roles:
+					#this appears to be -- as it should be -- disjoint with "owner" "investor" and "consignor" relations
+						if len(voyage_uuids)>1:
+							print("more voyages than we counted on",rc)
+						elif len(voyage_uuids)==0:
+							#we can immediately connect all enslaved individuals directly to the voyage
+							for eduu in enslaved_uuids:
+								G.add_edge(eduu,voyage_uuid)
+							#and the same for the enslavers, but with their roles attached
+							enslaver_roles={}
+							for rc in relation_connections:
+								enslaver_uuid=enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid']
+								enslaver_role=rc['relation_enslavers__roles__name']
+								if enslaver_uuid not in enslaver_roles:
+									enslaver_roles[enslaver_uuid]=[enslaver_role]
+								else:
+									enslaver_roles[enslaver_uuid].append(enslaver_role)
+							for enslaver_uuid in enslaver_roles:
+								roles=', '.join(enslaver_roles[enslaver_uuid])
+								G.add_edge(enslaver_uuid,voyage_uuid,relation_enslavers__roles__name=roles)
+							for rc in relation_connections:
+								enslaved_uuid=enslaved_dict[rc['enslaved_in_relation__enslaved__id']]['uuid']
+								voyage_uuid=voyages_dict[rc['voyage__id']]['uuid']
+						else:
+							voyage_uuid=voyage_uuids[0]
+							# if we have a single voyage, then we know that we're dealing with 
+							## A. 'indirect' enslavers: captains & investors
+							## B. 'direct' enslavers: shippers, owners, consignors, etc.
+							
+							captain_or_investor=False
+							
+							enslaver_roles={}
+							for rc in relation_connections:
+								enslaver_uuid=enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid']
+								enslaver_role=rc['relation_enslavers__roles__name']
+								if enslaver_role in ['Captain','Investor']:
+									captain_or_investor=True
+								if enslaver_uuid not in enslaver_roles:
+									enslaver_roles[enslaver_uuid]=[enslaver_role]
+								else:
+									enslaver_roles[enslaver_uuid].append(enslaver_role)
+							for eduu in enslaved_uuids:
+								G.add_edge(eduu,voyage_uuid)
+							for enslaver_uuid in enslaver_roles:
+								roles=', '.join(enslaver_roles[enslaver_uuid])
+							if captain_or_investor:
+								#A. INDIRECT IS EASY
+								for enslaver_uuid in enslaver_roles:
+									roles=', '.join(enslaver_roles[enslaver_uuid])
+									G.add_edge(enslaver_uuid,voyage_uuid,relation_enslavers__roles__name=roles)
+								for eduu in enslaved_uuids:
+									G.add_edge(eduu,voyage_uuid)	
+							else:
+								#B. DIRECT IS A LITTLE MORE DIFFICULT
+								rel_uuid=str(uuid.uuid4())
+								reldata={
+									'uuid':rel_uuid,
+									'relation_type__name':relation_type,
+									'id':relation_id,
+									'node_class':'enslavement_relations'
+								}
+								G.add_node(rel_uuid, **reldata)
+								G.add_edge(rel_uuid,voyage_uuid)
+								
+								for enslaver_uuid in enslaver_roles:
+									roles=', '.join(enslaver_roles[enslaver_uuid])
+									G.add_edge(enslaver_uuid,rel_uuid,relation_enslavers__roles__name=roles)
+								for eduu in enslaved_uuids:
+									G.add_edge(eduu,rel_uuid)	
+
+# 						else:
+							
+							
+								
 				
-				if voyage_uuids is not None:
-					if len(voyage_uuids)==1:
-						voyage_uuid=voyage_uuids[0]
-						G.add_edge(rel_uuid,voyage_uuid)
-					else:
-						print('got more or fewer voyages than anticipated-->',relation_connections)
-				if enslaver_uuids is not None:
-					for enslaver_uuid in enslaver_uuids:
-						G.add_edge(rel_uuid,enslaver_uuid)
-				if enslaved_uuids is not None:
-					for enslaved_uuids in enslaved_uuids:
-						G.add_edge(rel_uuid,enslaved_uuids)
+# 					if len(enslaver_roles)>1:
+# 						print(enslaver_uuids,enslaver_roles)
+				
+				
+# 				if enslaver_uuids ==[]:
+# 					print(list(set([rc['relation_enslavers__roles__name'] for rc in relation_connections])))
+# 					
+# 					ensl
+					
+					
+					
+# 				
+# 				for rc in relation_connections:
+# 					if rc['relation_enslavers__enslaver_alias__identity__id'] is None:
+# 						
+# 						
+# 						
+# 						
+# 					if rc['relation_enslavers__roles__name'] is None:
+# 						
+# 						
+# 						
+# 						print(rc)
+# 					print(relation_id,rc['relation_enslavers__roles__name'])
+				
+			
+		
+				
+		else:
+			#this only applies to ownership and transaction relations, which are recorded in 
+			#and should not connect to voyages
+			#it's a useful artefact of jkw's data, and perhaps the only interesting thing she did
+			#not that i can be sure she could articulate its significance, that dhq article reading at its key moments like someone else's edits and turns of phrase had been dropped in
+			#do you remember that time she tried to pay you to teach her about databases? yes, i do. and how when i refused payment but offered to keep following up, she dropped the ball as always? yes, i do. some people are raised to on the one hand pretend to be above money and on the other to assume everyone wants it from them. the resolution, of course, is that they're above you.
+			rel_uuid=str(uuid.uuid4())
+			
+			reldata={
+				'uuid':rel_uuid,
+				'relation_type__name':relation_type,
+				'id':relation_id,
+				'node_class':'enslavement_relations'
+			}
+			
+			G.add_node(rel_uuid, **reldata)
+			
+			if enslaver_uuids is not None:
+				for enslaver_uuid in enslaver_uuids:
+					G.add_edge(rel_uuid,enslaver_uuid)
+			if enslaved_uuids is not None:
+				for enslaved_uuids in enslaved_uuids:
+					G.add_edge(rel_uuid,enslaved_uuids)
 				
 
 	print("WITH CONNECTIONS-->",G)

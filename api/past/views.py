@@ -355,7 +355,8 @@ class EnslavementRelationsDataFrames(generics.GenericAPIView):
 			'enslaved_in_relation__enslaved__age':{'type':'integer'},
 			'enslaved_in_relation__enslaved__gender':{'type':'string'},
 			'relation_enslavers__enslaver_alias__identity__id':{'type':'integer'},
-			'relation_enslavers__enslaver_alias__identity__principal_alias':{'type':'string'}
+			'relation_enslavers__enslaver_alias__identity__principal_alias':{'type':'string'},
+			'relation_enslavers__roles__name':{'type':'name'}
 		}
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,

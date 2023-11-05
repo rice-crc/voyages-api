@@ -252,7 +252,7 @@ class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
 
 class EnslaverInRelationSerializer(serializers.ModelSerializer):
 	relation = EnslaverEnslavementRelationSerializer(many=False)
-	role=EnslaverRoleSerializer(many=False)
+	roles=EnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverInRelation
 		fields='__all__'

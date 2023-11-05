@@ -8,290 +8,230 @@ from networkx_query import search_nodes, search_edges
 import uuid
 import time
 
-
+def get_or_create_node(G,data_dict):
+	node_class=data_dict['node_class']
+	class_id=data_dict["id"]
+	node_gquery=[{"==":[('node_class',),node_class]},{"==":[('id',),class_id]}]
+	querynodelist=list(search_nodes(G, {"and":node_gquery}))
+	if len(querynodelist)==0:
+		uid=str(uuid.uuid4())
+		G.add_node(uid, **data_dict)
+		node=G.nodes[uid]
+	elif len(querynodelist)==1:
+		uid=querynodelist[0]
+		node=G.nodes[uid]
+	else:
+		print('ruh-roh, we have too many nodes here:',querynodelist)
+		node=None
+		uid=None
+	return node,uid
+		
 def load_graph():
-	url=DJANGO_BASE_URL+'common/past_graph/'
+
+	G=nx.Graph()
+
+	#GET VOYAGES
+	
+	selected_fields=[
+		'id',
+		'voyage_ship__ship_name',
+		'voyage_itinerary__imp_principal_place_of_slave_purchase__name',
+		'voyage_itinerary__imp_principal_port_slave_dis__name',
+		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year'
+	]
+	
+	
+	url=DJANGO_BASE_URL+'voyage/dataframes/'
+	payload={
+		"selected_fields":selected_fields
+	}
+	
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	
 	G=nx.Graph()
 	
 	r=requests.post(
 		url=url,
-		headers=headers
+		headers=headers,
+		data=json.dumps(payload)
 	)
+	
+	voyages_dict={}
 	
 	j=json.loads(r.text)
 	
-# STRUCTURE	
-# 		relation_map={
-# 			'enslaved':enslaved_people_df,
-# 			'enslavers':enslaver_aliases_df,
-# 			'voyages':voy_df,
-# 			'enslavement_relations':enslavementrelation_df,
-# 			'enslaved_in_relation':enslaved_in_relation_df,
-# 			'enslavers_in_relation':enslaver_in_relation_df	
-# 		}
+	for row_idx in range(len(j[selected_fields[0]])):
+		rowdict={}
+		for sf in selected_fields:
+			rowdict[sf]=j[sf][row_idx]
+		id=rowdict['id']
+		rowdict['node_class']='voyages'
+		uid=str(uuid.uuid4())
+		G.add_node(uid, **rowdict)
+		rowdict['uuid']=uid
+		voyages_dict[id]=rowdict
 	
-	idmap={
-		'enslaved':{},
-		'enslavers':{},
-		'voyages':{},
-		'enslavement_relations':{}
+	print("WITH VOYAGES--->",G)
+
+	#GET ENSLAVERS
+	
+	selected_fields=[
+		'id',
+		'principal_alias'
+	]
+	
+	url=DJANGO_BASE_URL+'past/enslaver/dataframes/'
+	payload={
+		"selected_fields":selected_fields
 	}
 	
-	#currently, enslaver aliases are "in front" of enslaver identities
-	#which means we need the aliases to connect identities to relations
-	#but also that we get duplicate identities back
-	enslaver_alias_map={}
+	r=requests.post(
+		url=url,
+		headers=headers,
+		data=json.dumps(payload)
+	)
 	
-	for dfname in ['enslaved','enslavers','voyages','enslavement_relations']:
-		df=j[dfname]
-		for row_idx in range(len(df['id'])):
-			id=df['id'][row_idx]
-			uid=str(uuid.uuid4())
-			
-			#currently, enslaver aliases are "in front" of enslaver identities
-			#which means we need the aliases to connect identities to relations
-			#but also that we get duplicate identities back
-			if dfname=='enslavers':
-				alias_id=df['alias_id'][row_idx]
-				enslaver_alias_map[alias_id]=id
-				if id in idmap[dfname]:
-					#wanted to retain the alias ids but this is slow as hell.
-					#an alternative method would be to add an extra dataframe call connecting aliases to identities
-					#but i don't see the value here as we can always get the aliases on a call to the identity-based enslaver list endpoint
-					
-					# enslaver_node_id=[n for n in 
-# 						search_nodes(G, {"==": [('id',), id]})
-# 					][0]
-# 					enslaver_node=G.nodes[enslaver_node_id]
-# 					print("APPENDING",id,enslaver_node)
-# 					enslaver_node['alias_ids'].append(alias_id)
-					pass
-				else:
-# 					print("adding",id)
-					idmap[dfname][id]=uid
-					alias_ids=[alias_id]
-					obj={k:df[k][row_idx] for k in list(df.keys()) if k!= 'alias_id'}
-# 					obj['alias_ids']=alias_ids
-					obj['node_class']=dfname
-					obj['uuid']=uid
-					G.add_node(uid, **obj)
-			else:
-				idmap[dfname][id]=uid
-				obj={k:df[k][row_idx] for k in list(df.keys())}
-				obj['node_class']=dfname
-				obj['uuid']=uid
-				G.add_node(uid, **obj)
+	enslavers_dict={}
 	
-	eir = j['enslaved_in_relation']
-	for row_idx in range(len(eir['relation'])):
-		obj={k:eir[k][row_idx] for k in list(eir.keys())}
-		enslaved_uuid=idmap['enslaved'][obj['enslaved']]
-		relation_uuid=idmap['enslavement_relations'][obj['relation']]
-		G.add_edge(enslaved_uuid,relation_uuid)
+	j=json.loads(r.text)
 	
-	eir = j['enslavers_in_relation']
-	for row_idx in range(len(eir['relation'])):
-		obj={k:eir[k][row_idx] for k in list(eir.keys())}
-		#currently, enslaver aliases are "in front" of enslaver identities
-		#which means we need the aliases to connect identities to relations
-		#but also that we get duplicate identities back
-		identity_id=enslaver_alias_map[obj['enslaver_alias']]
-		enslaver_uuid=idmap['enslavers'][identity_id]
-		relation_uuid=idmap['enslavement_relations'][obj['relation']]
-		G.add_edge(enslaver_uuid,relation_uuid,roles__name=obj['roles__name'])
+	for row_idx in range(len(j[selected_fields[0]])):
+		rowdict={}
+		for sf in selected_fields:
+			rowdict[sf]=j[sf][row_idx]
+		id=rowdict['id']
+		rowdict['node_class']='enslavers'
+		uid=str(uuid.uuid4())
+		G.add_node(uid, **rowdict)
+		rowdict['uuid']=uid
+		enslavers_dict[id]=rowdict
 	
-	#then once more around to get voyages tied in to relations
-	enslavement_relations=[n for n in 
-		search_nodes(G, {"==": [('node_class',), 'enslavement_relations']})
+	print("WITH ENSLAVERS-->",G)
+	
+	#GET ENSLAVED
+	
+	selected_fields=[
+		'id',
+		'documented_name',
+		'age',
+		'gender'
 	]
 	
-	for n_id in enslavement_relations:
-		voyage_id=G.nodes[n_id]['voyage']
-		if voyage_id is not None:
-			voyage_uuid=idmap['voyages'][voyage_id]
-			G.add_edge(n_id,voyage_uuid)
+	url=DJANGO_BASE_URL+'past/enslaved/dataframes/'
+	payload={
+		"selected_fields":selected_fields
+	}
 	
-	#let's try to purge unnecessary enslavement relation intermediary nodes
-	#specifically, nodes where we have only enslavers tied to voyages, and no enslaved people tied to these relations
-	#those should just be treated as pass-throughs
+	r=requests.post(
+		url=url,
+		headers=headers,
+		data=json.dumps(payload)
+	)
 	
-	transportation_relations=[n for n in 
-		search_nodes(G, {
-			'and': [
-				{"==": [('node_class',), 'enslavement_relations']},
-				{"==": [('relation_type__name',), 'Transportation']}
-			]	
-		})
-	]
+	enslaved_dict={}
 	
-	nodes_to_delete=[]
+	j=json.loads(r.text)
 	
-	print("graph before disintermediating\n\
-1) investor/captain-->voyage cnx's\n\
-2) enslaved-->voyage cnx's when no shipper, consignor, etc. is present:\n",G,'\n----')
+	for row_idx in range(len(j[selected_fields[0]])):
+		rowdict={}
+		for sf in selected_fields:
+			rowdict[sf]=j[sf][row_idx]
+		id=rowdict['id']
+		rowdict['node_class']='enslaved'
+		uid=str(uuid.uuid4())
+		G.add_node(uid, **rowdict)
+		rowdict['uuid']=uid
+		enslaved_dict[id]=rowdict
 	
-	for n in transportation_relations:
-		edges=G.edges(n,data=True)
-		has_enslaved=False
-		has_direct_enslavers=False
-		has_indirect_enslavers=False
-		other_node_ids=[]
-		for edge in edges:
-			s,t,edata=edge
-			if s==n:
-				other=t
-			else:
-				other=s
-			if other is not None:
-				other_node_ids.append(other)
-			if G.nodes[other]['node_class']=='enslaved':
-				has_enslaved=True
-			if G.nodes[other]['node_class']=='enslavers' and 'roles__name' in edata:
-				if edata['roles__name'] not in ['Investor','Captain']:
-					has_direct_enslavers=True
-				else:
-					has_indirect_enslavers=True
-		if (not has_enslaved and has_indirect_enslavers) or (not has_direct_enslavers and has_enslaved):
-			
-			nodes_to_delete.append(n)
-			for pair in itertools.permutations(other_node_ids,2):
-				a,b=pair
-				anode=G.nodes[a]
-				bnode=G.nodes[b]
-				skipthis=False
-				if anode['node_class']=='voyages':
-					s=b
-					t=a
-					snodeclass=bnode['node_class']
-				elif bnode['node_class']=='voyages':
-					s=a
-					t=b
-					snodeclass=anode['node_class']
-				else:
-					# in this case, we're getting
-					## two enslavers or enslaved connected to the same relation
-					# we don't want to link them directly -- but rather through the voyage
-					skipthis=True
-				if not skipthis:
-					if has_indirect_enslavers and snodeclass=='enslavers':
-						#in this case, we have an enslaver-to-voyage connection to make
-						roles_name=G.edges[s,n]['roles__name']
-						G.add_edge(s,t,role_name=roles_name)
-					if has_enslaved:
-						G.add_edge(s,t)
+	print("WITH ENSLAVED--->",G)
 		
-	nodes_to_delete=list(set(nodes_to_delete))
+	##FINALLY, RELATIONS
 	
-	for n in nodes_to_delete:
-		G.remove_node(n)
-	print("pruned, final graph: ",G)
-	return G
-
-
-
-def add_neighbors(G,nodes_dict,n,edges_list,levels=1):
-	edges=G.edges(n,data=True)
-	selfdata=G.nodes[n]
-	if levels>0:
-		for edge in edges:
-			s,t,edata=edge
-			
-			if s==n:
-				other=t
+	selected_fields=[
+		'id',
+		'voyage__id',
+		'relation_type__name',
+		'enslaved_in_relation__enslaved__id',
+		'relation_enslavers__enslaver_alias__identity__id'
+	]
+	url=DJANGO_BASE_URL+'past/enslavementrelations/dataframes/'
+	payload={
+		"selected_fields":selected_fields
+	}
+	
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
+	
+	
+	r=requests.post(
+		url=url,
+		headers=headers,
+		data=json.dumps(payload)
+	)
+	
+	relations_dict={}
+	
+	j=json.loads(r.text)
+	
+	for row_idx in range(len(j[selected_fields[0]])):
+		rowdict={}
+		for sf in selected_fields:
+			rowdict[sf]=j[sf][row_idx]
+		relation_id=rowdict['id']
+		if relation_id not in relations_dict:
+			relations_dict[relation_id]=[rowdict]
+		else:
+			relations_dict[relation_id].append(rowdict)
+	
+	c=1
+	
+	relation_types=[]
+	
+	for relation_id in relations_dict:
+		relation_connections=relations_dict[relation_id]
+		
+		relation_type=relation_connections[0]['relation_type__name']
+		voyage_uuids=list(set([voyages_dict[rc['voyage__id']]['uuid'] for rc in relation_connections if rc['voyage__id'] is not None]))
+		enslaved_uuids=list(set([enslaved_dict[rc['enslaved_in_relation__enslaved__id']]['uuid'] for rc in relation_connections if rc['enslaved_in_relation__enslaved__id'] is not None]))
+		enslaver_uuids=list(set([enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid'] for rc in relation_connections if rc['relation_enslavers__enslaver_alias__identity__id'] is not None]))
+		##NOT YET HANDLING ENSLAVER ROLES
+		if relation_type=="Marriage":
+			#enslaver-to-enslaver marriages
+			if len(enslaver_uuids)==2:
+				alice,bob=enslaver_uuids
+				G.add_edge(alice,bob)
 			else:
-				other=s
-			otherdata=G.nodes[other]
-			other_node_class=otherdata['node_class']
-			if other_node_class=='enslavement_relations':
-				nodes_dict,edges_list=add_neighbors(G,nodes_dict,other,edges_list,levels=levels)
+				print("got more or fewer spouses than anticipated-->",enslaver_uuids,relation_connections)
+		elif relation_type=="transportation":
+			if len(enslaved_uuids)==0:
+				#captain & shipowner/investor relations to voyages
+				if len(voyage_uuids)==1:
+					voyage_uuid=voyage_uuids[0]
+					for enslaver_uuid in enslaver_uuids:
+						G.add_edge(enslaver_uuid,voyage_uuid)
+				else:
+					print('got more or fewer voyages than anticipated-->',relation_connections)
 			else:
-				nodes_dict,edges_list=add_neighbors(G,nodes_dict,other,edges_list,levels=levels-1)
-			s,t=sorted([s,t])
-			e={'source':s,'target':t,'data':edata}
-			if e not in edges_list:
-				edges_list.append(e)
-			nodes_dict[other]=otherdata
-	nodes_dict[n]=selfdata
-	return(nodes_dict,edges_list)
+				rel_uuid=str(uuid.uuid4())
+				reldata={
+					'uuid':rel_uuid,
+					'relation_type__name':relation_type,
+					'id':relation_id
+				}
+				G.add_node(rel_uuid, **rowdict)
+				
+				if voyage_uuids is not None:
+					if len(voyage_uuids)==1:
+						voyage_uuid=voyage_uuids[0]
+						G.add_edge(rel_uuid,voyage_uuid)
+					else:
+						print('got more or fewer voyages than anticipated-->',relation_connections)
+				if enslaver_uuids is not None:
+					for enslaver_uuid in enslaver_uuids:
+						G.add_edge(rel_uuid,enslaver_uuid)
+				if enslaved_uuids is not None:
+					for enslaved_uuids in enslaved_uuids:
+						G.add_edge(rel_uuid,enslaved_uuids)
+				
 
-
-## The below recursive functions were attempts to screen out the enslavement relation intermediary nodes after the fact but I had to abandon them for the sake of time
-# def add_successors(G,nodes_dict,n,edges,prior_id=None):
-# 	passthrough_node_classes=['enslavement_relations']
-# 	successors=G.successors(n)
-# # 	print("add successors to",n)
-# 	for s in successors:
-# 		sdata=G.nodes[s]
-# # 		print("s:",s,json.dumps(sdata,indent=2))
-# 		print(n,"--has successor-->",s,sdata)
-# 		if sdata['node_class'] in passthrough_node_classes:
-# 			nodes_dict,edges=add_predecessors(G,nodes_dict,s,edges,prior_id=n)
-# 			nodes_dict,edges=add_successors(G,nodes_dict,s,edges,prior_id=n)
-# 		else:
-# 			if prior_id is None:
-# 				thisnode_id=n
-# 				prior_edata={}
-# 			else:
-# 				thisnode_id=prior_id
-# 				try:
-# 					next_edata=G.edges[n,s]
-# 				except:
-# 					next_edata=G.edges[s,n]
-# 			#avoid self-loops and unnecessary interconnections
-# 			#unfortunately, this move does screen out
-# 			## spousal relations between enslavers
-# 			## mutual transaction relations between enslaved (i.e., bought/sold by the same enslaver on the same vessel)
-# 			thisnodedata=G.nodes[thisnode_id]
-# 			if thisnode_id != s and thisnodedata['node_class']!=sdata['node_class']:
-# 				nodes_dict[thisnode_id]=G.nodes[thisnode_id]
-# 				try:
-# 					this_edata=G.edges[thisnode_id,n]
-# 				except:
-# 					this_edata=G.edges[n,thisnode_id]
-# 				merged_edata=this_edata|next_edata
-# 				e={'source':thisnode_id,'target':s,'data':merged_edata}
-# 				if e not in edges:
-# 					edges.append(e)
-# 				nodes_dict[s]=G.nodes[s]
-# 	return nodes_dict,edges
-# 
-# def add_predecessors(G,nodes_dict,n,edges,prior_id=None):
-# 	passthrough_node_classes=['enslavement_relations']
-# 	predecessors=G.predecessors(n)
-# # 	print("add predecessors to",n)
-# 	for p in predecessors:
-# 		pdata=G.nodes[p]
-# # 		print("p:",p,json.dumps(pdata,indent=2))
-# 		print(n,'--has predecessor-->',p,pdata)
-# 		if pdata['node_class']==['enslavement_relations'] in passthrough_node_classes:
-# 			nodes_dict,edges=add_predecessors(G,nodes_dict,p,edges,prior_id=n)
-# 			nodes_dict,edges=add_successors(G,nodes_dict,p,edges,prior_id=n)
-# 		else:
-# 			if prior_id is None:
-# 				thisnode_id=n
-# 				prior_edata={}
-# 			else:
-# 				thisnode_id=prior_id
-# 				try:
-# 					prior_edata=G.edges[p,n]
-# 				except:
-# 					prior_edata=G.edges[n,p]
-# 			thisnodedata=G.nodes[thisnode_id]
-# 			#avoid self-loops and unnecessary interconnections
-# 			#unfortunately, this move does screen out
-# 			## spousal relations between enslavers
-# 			## mutual transaction relations between enslaved (i.e., bought/sold by the same enslaver on the same vessel)
-# 			if thisnode_id!=p and thisnodedata['node_class']!=pdata['node_class']:
-# 				nodes_dict[thisnode_id]=G.nodes[thisnode_id]
-# 				try:
-# 					this_edata=G.edges[n,thisnode_id]
-# 				except:
-# 					this_edata=G.edges[thisnode_id,n]
-# 				merged_edata=prior_edata|this_edata
-# 				e={'source':p,'target':thisnode_id,'data':merged_edata}
-# 				if e not in edges:
-# 					edges.append(e)
-# 				nodes_dict[p]=G.nodes[p]
-# 	return nodes_dict,edges
+	print("WITH CONNECTIONS-->",G)
+	return (G)

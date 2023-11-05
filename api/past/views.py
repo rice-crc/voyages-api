@@ -314,7 +314,54 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			queryset,
 			self,
 			request,
-			Enslaved_options,
+			Enslaver_options,
+			auto_prefetch=True,
+			retrieve_all=True
+		)
+		queryset=queryset.order_by('id')
+		sf=list(selected_fields)
+		if len(error_messages)==0:
+			output_dicts={}
+			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+			for i in range(len(sf)):
+				output_dicts[sf[i]]=[v[i] for v in vals]
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(output_dicts,safe=False)
+		else:
+			print("failed\n+++++++")
+			print(' | '.join(error_messages))
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+@extend_schema(exclude=True)
+class EnslavementRelationsDataFrames(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
+		st=time.time()
+		params=dict(request.data)
+		queryset=EnslavementRelation.objects.all()
+		enslavementrelationoptions={
+			'id':{'type':'integer'},
+			'voyage__voyage_id':{'type':'integer'},
+			'voyage__id':{'type':'integer'},
+			'relation_type__name':{'type':'string'},
+			'voyage__voyage_ship__ship_name':{'type':'string'},
+			'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name':{'type':'string'},
+			'voyage__voyage_itinerary__imp_principal_port_slave_dis__name':{'type':'string'},
+			'voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year':{'type':'integer'},
+			'enslaved_in_relation__enslaved__id':{'type':'integer'},
+			'enslaved_in_relation__enslaved__documented_name':{'type':'string'},
+			'enslaved_in_relation__enslaved__age':{'type':'integer'},
+			'enslaved_in_relation__enslaved__gender':{'type':'string'},
+			'relation_enslavers__enslaver_alias__identity__id':{'type':'integer'},
+			'relation_enslavers__enslaver_alias__identity__principal_alias':{'type':'string'}
+		}
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			enslavementrelationoptions,
 			auto_prefetch=True,
 			retrieve_all=True
 		)

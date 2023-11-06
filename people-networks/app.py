@@ -21,7 +21,7 @@ G=load_graph()
 # while True:
 # 	failed=False
 # 	try:
-# 	G=load_graph()
+# 		G=load_graph()
 # 	except:
 # 		failed=True
 # 	if failed:
@@ -46,7 +46,7 @@ def network_maps():
 	returns nodes and edges with attributes
 	we're now giving back 1 hop (but passing through some intermediary nodes (see utils.py))
 	'''
-	print("received",request.json)
+# 	print("received",request.json)
 	
 	nodes_dict={}
 	edges_list=[]
@@ -54,14 +54,14 @@ def network_maps():
 	
 	for nodeclass in ['enslaved','enslavers','voyages','enslavement_relations']:
 		node_id_list=request.json.get(nodeclass)
-		print("fetching",nodeclass)
+# 		print("fetching",nodeclass)
 		if node_id_list is not None:
 			node_id_int_list=[int(i) for i in node_id_list]
 			gquery=[{"==":[('node_class',),nodeclass]},{":=":[('id',),node_id_int_list]}]
 			querynodes=search_nodes(G, {"and":gquery})
 			for n in querynodes:
-				print("getting node",n)
-				nodes_dict,edges_list=add_neighbors(G,nodes_dict,n,edges_list)
+# 				print("getting node",n)
+				nodes_dict,edges_list=add_neighbors(G,nodes_dict,n,edges_list,levels=2)
 # 				nodes_dict,edges=add_predecessors(G,nodes_dict,n,edges)
 # 				nodes_dict,edges=add_successors(G,nodes_dict,n,edges)
 

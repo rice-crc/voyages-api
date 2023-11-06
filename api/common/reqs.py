@@ -121,6 +121,9 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
  		errormessages.append("search/filter error")
 	 
 	try:
+		aggregation_fields=params.get('aggregate_fields')
+		if aggregation_fields is not None:
+			selected_fields=aggregation_fields
 	#PREFETCH REQUISITE FIELDS
 		prefetch_fields=selected_fields
 		#print(prefetch_keys)
@@ -180,6 +183,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		else:
 			try:
 				aggqueryset=[]
+				selected_fields=[]
 				for aggfield in aggregation_fields:
 					for aggsuffix in ["min","max"]:
 						selected_fields.append(aggfield+"_"+aggsuffix)

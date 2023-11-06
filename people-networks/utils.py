@@ -160,13 +160,13 @@ def load_graph():
 		enslaver_uuids=list(set([enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid'] for rc in relation_connections if rc['relation_enslavers__enslaver_alias__identity__id'] is not None]))
 		
 		enslaved_ids=[rc['enslaved_in_relation__enslaved__id'] for rc in relation_connections]
-		printit=False
-		if 800102 in enslaved_ids:
-			print(relation_connections)
-			print(enslaved_dict[800102])
-			print(relation_type)
-			printit=True
-		
+# 		printit=False
+# 		if 800102 in enslaved_ids:
+# 			print(relation_connections)
+# 			print(enslaved_dict[800102])
+# 			print(relation_type)
+# 			printit=True
+# 		
 		##NOT YET HANDLING ENSLAVER ROLES
 		if relation_type=="Marriage":
 			#enslaver-to-enslaver marriages
@@ -203,9 +203,9 @@ def load_graph():
 				#bears looking into!
 				enslaver_roles=list(set([rc['relation_enslavers__roles__name'] for rc in relation_connections]))
 				
-				if printit:
-					print(enslaver_roles)
-					print(enslaver_uuids)
+# 				if printit:
+# 					print(enslaver_roles)
+# 					print(enslaver_uuids)
 				
 				if enslaver_uuids ==[]:
 					for rc in relation_connections:

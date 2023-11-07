@@ -2,57 +2,181 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
 from .models import *
-import pprint
-import gc
-from common.serializers import *
-from voyage.models import *
-from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
+from django.core.exceptions import ObjectDoesNotExist
+from drf_writable_nested.serializers import WritableNestedModelSerializer
+from drf_writable_nested.mixins import UniqueFieldsMixin,NestedUpdateMixin
 
-class ZoteroVoyageSerializer(serializers.ModelSerializer):
+class SourceVoyageSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Voyage
 		fields='__all__'
 
-class ZoteroVoyageConnectionSerializer(serializers.ModelSerializer):
-	voyage=ZoteroVoyageSerializer(many=False,read_only=True)
+class SourceVoyageConnectionSerializer(serializers.ModelSerializer):
+	voyage=SourceVoyageSerializer(many=False)
 	class Meta:
-		model=ZoteroVoyageConnection
+		model=SourceVoyageConnection
 		fields='__all__'
 
-class ZoteroEnslavedSerializer(serializers.ModelSerializer):
+
+
+class CRUDSourceVoyageConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=SourceVoyageConnection
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return SourceVoyageConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceVoyageConnectionSerializer, self).create(validated_data)
+	def update(self, instance, validated_data):
+		try:
+			return SourceVoyageConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceVoyageConnectionSerializer, self).create(validated_data)
+
+
+class SourceEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return Enslaved.objects.get(enslaved_id=validated_data['enslaved_id'])
+		except ObjectDoesNotExist:
+			return super(SourceEnslavedSerializer, self).create(validated_data)
 
-class ZoteroEnslavedConnectionSerializer(serializers.ModelSerializer):
-	enslaved=ZoteroEnslavedSerializer(many=False,read_only=True)
+class SourceEnslavedConnectionSerializer(serializers.ModelSerializer):
+	enslaved=SourceEnslavedSerializer(many=False,read_only=True)
 	class Meta:
-		model=ZoteroEnslavedConnection
+		model=SourceEnslavedConnection
 		fields='__all__'
 
-class ZoteroEnslaverIdentitySerializer(serializers.ModelSerializer):
+class CRUDSourceEnslavedConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=SourceEnslavedConnection
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return CRUDSourceEnslavedConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceEnslavedConnectionSerializer, self).create(validated_data)
+	def update(self, instance,validated_data):
+		try:
+			return CRUDSourceEnslavedConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceEnslavedConnectionSerializer, self).create(validated_data)
+
+class SourceEnslavementRelationSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=EnslavementRelation
+		fields='__all__'
+
+class SourceEnslavementRelationConnectionSerializer(serializers.ModelSerializer):
+	enslavement_relation=SourceEnslavementRelationSerializer(many=False)
+	class Meta:
+		model=SourceEnslavementRelationConnection
+		fields='__all__'
+
+class CRUDSourceEnslavementRelationConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=SourceEnslavementRelationConnection
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return SourceEnslavementRelationConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceEnslavementRelationConnectionSerializer, self).create(validated_data)
+	def update(self, instance,validated_data):
+		try:
+			return SourceEnslavementRelationConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceEnslavementRelationConnectionSerializer, self).create(validated_data)
+
+
+class SourceEnslaverIdentitySerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
 
-class ZoteroEnslaverConnectionSerializer(serializers.ModelSerializer):
-	enslaver=ZoteroEnslaverIdentitySerializer(many=False,read_only=True)
+class SourceEnslaverConnectionSerializer(serializers.ModelSerializer):
+	enslaver=SourceEnslaverIdentitySerializer(many=True,read_only=True)
 	class Meta:
-		model=ZoteroEnslaverConnection
+		model=SourceEnslaverConnection
 		fields='__all__'
 
-class SourcePageSerializer(serializers.ModelSerializer):
+class CRUDSourceEnslaverConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
-		model=SourcePage
+		model=SourceEnslaverConnection
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return SourceEnslaverConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceEnslaverConnectionSerializer, self).create(validated_data)
+	def update(self, instance, validated_data):
+		try:
+			return SourceEnslaverConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceEnslaverConnectionSerializer, self).create(validated_data)
 
-class SourcePageConnectionSerializer(serializers.ModelSerializer):
-	source_page=SourcePageSerializer(many=False,read_only=True)
+class PageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=Page
+		fields='__all__'			
+
+class SourcePageConnectionSerializer(WritableNestedModelSerializer):
+	page=PageSerializer(many=False,read_only=False)
 	class Meta:
 		model=SourcePageConnection
 		fields='__all__'
 
+class ShortRefSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=ShortRef
+		fields='__all__'
+
+class CRUDPageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=Page
+		fields='__all__'
+	def create(self, validated_data):
+		#really smart get_or_create-like hack here
+		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
+		if 'id' in validated_data:
+			return Page.objects.get(id=validated_data['id'])
+		else:
+			return super(PageSerializer, self).create(validated_data)
+			
+
+class CRUDSourcePageConnectionSerializer(WritableNestedModelSerializer):
+	page=CRUDPageSerializer(many=False,read_only=False)
+	class Meta:
+		model=SourcePageConnection
+		fields='__all__'
+	def create(self, validated_data):
+		#really smart get_or_create-like hack here
+		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
+		if 'id' in validated_data:
+			return SourcePageConnection.objects.get(id=validated_data['id'])
+		else:
+			return super(SourcePageConnectionSerializer, self).create(validated_data)
+
+
+class CRUDShortRefSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=ShortRef
+		fields='__all__'
+	def create(self, validated_data):
+		#really smart get_or_create-like hack here
+		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
+		try:
+			# if there is already an instance in the database with the
+			# given value (e.g. tag='apple'), we simply return this instance
+			return ShortRef.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			# else, we create a new tag with the given value
+			return super(ShortRefSerializer, self).create(validated_data)
 
 @extend_schema_serializer(
 	examples = [
@@ -61,19 +185,66 @@ class SourcePageConnectionSerializer(serializers.ModelSerializer):
             summary='OR Filter on exact matches of known str values',
             description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
             value={
-				"short_ref":["OMNO"]
+				"short_ref__name":["OMNO"]
 			},
 			request_only=True,
-			response_only=False,
+			response_only=False
         )
     ]
 )
-class ZoteroSourceSerializer(serializers.ModelSerializer):
-	page_connection=SourcePageConnectionSerializer(many=True,read_only=True)
-	zotero_enslaver_connections=ZoteroEnslaverConnectionSerializer(many=True,read_only=True)
-	zotero_voyage_connections=ZoteroVoyageConnectionSerializer(many=True,read_only=True)
-	zotero_enslaved_connections=ZoteroEnslavedConnectionSerializer(many=True,read_only=True)
+class SourceSerializer(serializers.ModelSerializer):
+	page_connections=SourcePageConnectionSerializer(many=True)
+	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True)
+	source_voyage_connections=SourceVoyageConnectionSerializer(many=True)
+	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True)
+	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True)
+	short_ref=ShortRefSerializer(many=False,allow_null=False)
 	class Meta:
-		model=ZoteroSource
+		model=Source
 		fields='__all__'
 
+@extend_schema_serializer(
+	examples = [
+		OpenApiExample(
+            'Ex. 1: Create a source with the bare minimum information, based on its unique short_ref (a legacy field)',
+            summary='Nulls for all fields except short_ref',
+            description='This is a good example of how you might create a placeholder source, before later filling it in with PATCH or PUT operation',
+            value={
+			  "page_connections": None,
+			  "source_enslaver_connections": None,
+			  "source_voyage_connections": None,
+			  "source_enslaved_connections": None,
+			  "source_enslavement_relation_connections":None,
+			  "item_url": None,
+			  "zotero_group_id": None,
+			  "zotero_item_id": None,
+			  "short_ref": {"name":"OMNO"},
+			  "title": None,
+			  "date": None,
+			  "last_updated": None,
+			  "human_reviewed": None,
+			  "notes": None
+			},
+			request_only=True,
+			response_only=False
+        )
+    ]
+)
+class SourceCRUDSerializer(WritableNestedModelSerializer):
+	page_connections=CRUDSourcePageConnectionSerializer(many=True,allow_null=True)
+	source_enslaver_connections=CRUDSourceEnslaverConnectionSerializer(many=True,allow_null=True)
+	source_voyage_connections=CRUDSourceVoyageConnectionSerializer(many=True,allow_null=True)
+	source_enslaved_connections=CRUDSourceEnslavedConnectionSerializer(many=True,allow_null=True)
+	source_enslavement_relation_connections=CRUDSourceEnslavementRelationConnectionSerializer(many=True,allow_null=True)
+	item_url=serializers.URLField(allow_null=True)
+	zotero_group_id=serializers.IntegerField(allow_null=True)
+	zotero_item_id=serializers.CharField(allow_null=True)
+	short_ref=CRUDShortRefSerializer(many=False,allow_null=False)
+	title=serializers.CharField(allow_null=True)
+	date=serializers.CharField(allow_null=True)
+	last_updated=serializers.DateTimeField(allow_null=True)
+	human_reviewed=serializers.BooleanField(allow_null=True)
+	notes=serializers.CharField(allow_null=True)
+	class Meta:
+		model=Source
+		fields='__all__'

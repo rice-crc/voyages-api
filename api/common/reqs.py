@@ -121,17 +121,16 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
  		errormessages.append("search/filter error")
 	 
 	try:
-		#PREFETCH REQUISITE FIELDS
-		if auto_prefetch:
-			prefetch_fields=all_fields
-		else:
-			prefetch_fields=selected_fields
+		aggregation_fields=params.get('aggregate_fields')
+		if aggregation_fields is not None:
+			selected_fields=aggregation_fields
+	#PREFETCH REQUISITE FIELDS
+		prefetch_fields=selected_fields
 		#print(prefetch_keys)
 		##ideally, I'd run this list against the model and see
 		##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
 		prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
 		print('--prefetching %d vars--' %len(prefetch_vars))
-# 		print(prefetch_vars)
 		for p in prefetch_vars:
 			queryset=queryset.prefetch_related(p)
 	except:
@@ -184,6 +183,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		else:
 			try:
 				aggqueryset=[]
+				selected_fields=[]
 				for aggfield in aggregation_fields:
 					for aggsuffix in ["min","max"]:
 						selected_fields.append(aggfield+"_"+aggsuffix)

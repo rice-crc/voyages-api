@@ -24,9 +24,9 @@ def GeoTreeFilter(spss_vals=[],select_all=False):
 		
 	else:
 		broadregions=geolocations.filter(location_type__name='Broad Region')
-		broadregions=broadregions.filter(Q(parent_of__parent_of__value__in=spss_vals)|Q(parent_of__value__in=spss_vals)|Q(value__in=spss_vals)).distinct()
+		broadregions=broadregions.filter(Q(children__children__value__in=spss_vals)|Q(children__value__in=spss_vals)|Q(value__in=spss_vals)).distinct()
 		regions=geolocations.filter(location_type__name='Region')
-		regions=regions.filter(Q(parent_of__value__in=spss_vals)|Q(value__in=spss_vals)).distinct()
+		regions=regions.filter(Q(children__value__in=spss_vals)|Q(value__in=spss_vals)).distinct()
 		places=geolocations.filter(location_type__name='Place')
 		places=places.filter(value__in=spss_vals).distinct()
 	
@@ -45,10 +45,10 @@ def GeoTreeFilter(spss_vals=[],select_all=False):
 	for br in broadregions:
 		brdict=locationdict(br)
 		brdict['children']=[]
-		childregions=regions.filter(child_of=br)
+		childregions=regions.filter(parent=br)
 		for cr in childregions:
 			crdict=locationdict(cr)
-			childplaces=places.filter(child_of=cr)
+			childplaces=places.filter(parent=cr)
 			crdict['children']=[locationdict(p) for p in childplaces]
 			brdict['children'].append(crdict)
 		locationtree.append(brdict)

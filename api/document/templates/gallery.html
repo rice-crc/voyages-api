@@ -2,7 +2,8 @@
 {% block body %}
 
 <body>
-<h1>{{ page_collection_label }}</h1>
+
+<h2>{{ page_collection_label }}</h2>
 
 <select name="collection" id="collection-select">
     <option value="">--Other collections--</option>
@@ -16,6 +17,7 @@
 </select>
 
 <hr/>
+{% if page_collection_id != None %}
 <div class="pagination">
     <span class="step-links">
         {% if page_obj.has_previous %}
@@ -34,16 +36,17 @@
     </span>
 </div>
 <hr/>
+{% endif %}
 
 <div>
 
-{% for zs in page_obj %}
+{% for s in page_obj %}
 
 	<div>
-	<p><a href="/docs/gallery/single/{{zs.id}}">{{ zs.zotero_title }}<br/>{{ zs.zotero_date }}<br/>
-	{% for spc in zs.page_connection.all %}
-		{% if spc.source_page.iiif_baseimage_url %}
-			<img src="{{spc.source_page.square_thumbnail}}"></a>
+	<p><a href="/docs/gallery/single/{{s.id}}">{{ s.title }}<br/>{{ s.date }}<br/>
+	{% for spc in s.page_connections.all %}
+		{% if spc.page.iiif_baseimage_url %}
+			<img src="{{spc.page.square_thumbnail}}"></a>
 		{% endif %}
 	{% endfor %}
 	</a>
@@ -55,6 +58,7 @@
 
 </div>
 
+{% if page_collection_id != None %}
 <div class="pagination">
     <span class="step-links">
         {% if page_obj.has_previous %}
@@ -72,6 +76,7 @@
         {% endif %}
     </span>
 </div>
+{% endif %}
 
 </body>
 

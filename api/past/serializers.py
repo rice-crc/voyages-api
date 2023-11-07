@@ -2,31 +2,79 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
 from .models import *
-from geo.models import *
+from geo.models import Location
 from voyage.models import *
-from voyage.serializers import *
+from document.models import Source, SourceEnslavedConnection, SourceEnslaverConnection
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
+from django.core.exceptions import ObjectDoesNotExist
+from drf_writable_nested.serializers import WritableNestedModelSerializer
+from drf_writable_nested.mixins import UniqueFieldsMixin
 
-#### SERIALIZERS COMMON TO BOTH ENSLAVERS AND ENSLAVED
 
-class EnslaverRoleSerializer(serializers.ModelSerializer):
+class CRUDPASTSparseDateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=PASTSparseDate
+		fields='__all__'
+		
+class CRUDRegisterCountrySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=RegisterCountry
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return RegisterCountry.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDRegisterCountrySerializer, self).create(validated_data)
+
+
+############ SERIALIZERS COMMON TO BOTH ENSLAVERS AND ENSLAVED
+
+class CRUDEnslaverRoleSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	name=serializers.CharField(allow_null=False)
 	class Meta:
 		model=EnslaverRole
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return EnslaverRole.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDEnslaverRoleSerializer, self).create(validated_data)
 
-class EnslavementRelationTypeSerializer(serializers.ModelSerializer):
+
+class CRUDEnslavementRelationTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=EnslavementRelationType
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return EnslavementRelationType.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDEnslavementRelationTypeSerializer, self).create(validated_data)
 
-############VOYAGES
-class PastVoyageItinerarySerializer(serializers.ModelSerializer):
-	imp_port_voyage_begin=PlaceSerializer(many=False)
-	imp_principal_place_of_slave_purchase=PlaceSerializer(many=False)
-	imp_principal_port_slave_dis=PlaceSerializer(many=False)
-	imp_principal_region_slave_dis=RegionSerializer(many=False)
-	imp_principal_region_of_slave_purchase=RegionSerializer(many=False)
-	int_first_port_dis=PlaceSerializer(many=False)
+class CRUDPastLocationSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=Location
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return Location.objects.get(value=validated_data['value'])
+		except ObjectDoesNotExist:
+			return super(CRUDPastLocationSerializer, self).create(validated_data)
+
+class CRUDPastSourceSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=Source
+		fields='__all__'
+ 
+############ VOYAGES
+
+class CRUDPastVoyageItinerarySerializer(serializers.ModelSerializer):
+	imp_port_voyage_begin=CRUDPastLocationSerializer(many=False)
+	imp_principal_place_of_slave_purchase=CRUDPastLocationSerializer(many=False)
+	imp_principal_port_slave_dis=CRUDPastLocationSerializer(many=False)
+	imp_principal_region_slave_dis=CRUDPastLocationSerializer(many=False)
+	imp_principal_region_of_slave_purchase=CRUDPastLocationSerializer(many=False)
+	int_first_port_dis=CRUDPastLocationSerializer(many=False)
 	class Meta:
 		model=VoyageItinerary
 		fields=[
@@ -37,34 +85,34 @@ class PastVoyageItinerarySerializer(serializers.ModelSerializer):
 			'imp_principal_region_slave_dis',
 			'int_first_port_dis'
 		]
-		
-class PastVoyageDatesSerializer(serializers.ModelSerializer):
-	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False)
+	
+class CRUDPastVoyageDatesSerializer(serializers.ModelSerializer):
+	imp_arrival_at_port_of_dis_sparsedate=CRUDPASTSparseDateSerializer(many=False)
 	class Meta:
 		model=VoyageDates
 		fields=['imp_arrival_at_port_of_dis_sparsedate',]
 
-class PastVoyageShipSerializer(serializers.ModelSerializer):
+class CRUDPastVoyageShipSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=VoyageShip
 		fields=['ship_name',]
 
-class PastVoyageParticularOutcomeSerializer(serializers.ModelSerializer):
+class CRUDPastVoyageParticularOutcomeSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=ParticularOutcome
 		fields='__all__'
 
-class PastVoyageOutcomeSerializer(serializers.ModelSerializer):
-	particular_outcome=PastVoyageParticularOutcomeSerializer(many=False)
+class CRUDPastVoyageOutcomeSerializer(serializers.ModelSerializer):
+	particular_outcome=CRUDPastVoyageParticularOutcomeSerializer(many=False)
 	class Meta:
 		model=VoyageOutcome
 		fields=['particular_outcome']
 
-class PastVoyageSerializer(serializers.ModelSerializer):
-	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
-	voyage_dates=PastVoyageDatesSerializer(many=False)
-	voyage_ship=PastVoyageShipSerializer(many=False)
-	voyage_name_outcome=PastVoyageOutcomeSerializer(many=True,read_only=True)
+class CRUDPastVoyageSerializer(serializers.ModelSerializer):
+	voyage_itinerary=CRUDPastVoyageItinerarySerializer(many=False)
+	voyage_dates=CRUDPastVoyageDatesSerializer(many=False)
+	voyage_ship=CRUDPastVoyageShipSerializer(many=False)
+	voyage_outcome=CRUDPastVoyageOutcomeSerializer(many=False)
 	class Meta:
 		model=Voyage
 		fields=[
@@ -74,221 +122,255 @@ class PastVoyageSerializer(serializers.ModelSerializer):
 			'voyage_itinerary',
 			'voyage_dates',
 			'voyage_ship',
-			'voyage_name_outcome'
+			'voyage_outcome'
 		]
 
-
-############## SOURCES
-
-class PastSourcePageSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=SourcePage
-		exclude=['transcription']
-
-class PastSourcePageConnectionSerializer(serializers.ModelSerializer):
-	source_page=PastSourcePageSerializer(many=False)
-	class Meta:
-		model=SourcePageConnection
-		fields='__all__'
-
-class PastSourceSerializer(serializers.ModelSerializer):
-	page_connection=PastSourcePageConnectionSerializer(many=True,read_only=True)
-	class Meta:
-		model=ZoteroSource
-		fields='__all__'
-
-class PastZoteroEnslaverConnectionSerializer(serializers.ModelSerializer):
-	zotero_source=PastSourceSerializer(many=False)
-	class Meta:
-		model=ZoteroEnslaverConnection
-		fields='__all__'
-
-class PastZoteroEnslavedConnectionSerializer(serializers.ModelSerializer):
-	zotero_source=PastSourceSerializer(many=False)
-	class Meta:
-		model=ZoteroEnslavedConnection
-		fields='__all__'
-
-
-
-
-#######################
+####################### ENSLAVED M2M CONNECTIONS
 
 #### FROM ENSLAVED TO ENSLAVERS
-
-
-class CaptiveFateSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=CaptiveFate
-		fields='__all__'
-		
-class CaptiveStatusSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=CaptiveStatus
-		fields='__all__'
-
-class EnslavedEnslaverIdentitySerializer(serializers.ModelSerializer):
+class CRUDEnslavedEnslaverIdentitySerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
 
-class EnslavedEnslaverAliasSerializer(serializers.ModelSerializer):
-	identity=EnslavedEnslaverIdentitySerializer(many=False)
+class CRUDEnslavedEnslaverAliasSerializer(serializers.ModelSerializer):
+	identity=CRUDEnslavedEnslaverIdentitySerializer(many=False)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
 
-class EnslavedEnslaverInRelationSerializer(serializers.ModelSerializer):
-	enslaver_alias=EnslavedEnslaverAliasSerializer(many=False)
-	role=EnslaverRoleSerializer(many=False)
+class CRUDEnslavedEnslaverInRelationSerializer(serializers.ModelSerializer):
+	enslaver_alias=CRUDEnslavedEnslaverAliasSerializer(many=False)
+	roles=CRUDEnslaverRoleSerializer(many=True)
 	class Meta:
 		model=EnslaverInRelation
 		fields='__all__'
 
-class EnslavedEnslavementRelationSerializer(serializers.ModelSerializer):
-	relation_type=EnslavementRelationTypeSerializer(many=False)
-	relation_enslavers=EnslavedEnslaverInRelationSerializer(many=True,read_only=False)
-	voyage=PastVoyageSerializer(many=False)
-	place=PlaceSerializer(many=False)
+class CRUDEnslavedEnslavementRelationSerializer(WritableNestedModelSerializer):
+	relation_type=CRUDEnslavementRelationTypeSerializer(many=False)
+	relation_enslavers=CRUDEnslavedEnslaverInRelationSerializer(many=True)
+	voyage=CRUDPastVoyageSerializer(many=False)
+	place=CRUDPastLocationSerializer(many=False)
 	class Meta:
 		model=EnslavementRelation
 		fields='__all__'
 
-class EnslavedInRelationSerializer(serializers.ModelSerializer):
-	relation=EnslavedEnslavementRelationSerializer(many=False)
+#### FROM ENSLAVED TO SOURCES
+class CRUDPastSourceEnslavedConnectionSerializer(serializers.ModelSerializer):
+	source=CRUDPastSourceSerializer(many=False)
 	class Meta:
-		model=EnslavedInRelation
+		model=SourceEnslavedConnection
 		fields='__all__'
 
-class LanguageGroupSerializer(serializers.ModelSerializer):
+#######################
+
+#### ENSLAVED & ONE-TO-ONE RELATIONS
+
+class CRUDCaptiveFateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	
+	class Meta:
+		model=CaptiveFate
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return CaptiveFate.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDCaptiveFateSerializer, self).create(validated_data)
+
+
+
+class CRUDCaptiveStatusSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+
+	class Meta:
+		model=CaptiveStatus
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return CaptiveStatus.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDCaptiveStatusSerializer, self).create(validated_data)
+
+class CRUDLanguageGroupSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	longitude=serializers.DecimalField(max_digits=10,decimal_places=7,allow_null=True)
+	latitude=serializers.DecimalField(max_digits=10,decimal_places=7,allow_null=True)
 	class Meta:
 		model=LanguageGroup
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return LanguageGroup.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDLanguageGroupSerializer, self).create(validated_data)
 
-
-@extend_schema_serializer(
-	examples = [
-		 OpenApiExample(
-			'Ex. 1: numeric range',
-			summary='Filter on a numeric range',
-			description='Here, we search for named enslaved individualas who were, at the time of the transportation that we have recorded for them, between 5 and 15 years of age.',
-			value={
-				"age":
-				[
-					5,15
-				]
-			},
-			request_only=True,
-			response_only=False
-		),
-		OpenApiExample(
-			'Ex. 2: array of str vals',
-			summary='OR Filter on exact matches of known str values',
-			description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching on a highly nested value: all named enslaved individuals who were on voyages that were principally disembarked in the Bahamas',
-			value={
-				"enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name":
-				[
-					"Bahamas, port unspecified"
-				]
-			},
-			request_only=True,
-			response_only=False
-		)
-	]
-)
-class EnslavedSerializer(serializers.ModelSerializer):
-	post_disembark_location=PlaceSerializer(many=False)
-	captive_fate=CaptiveFateSerializer(many=False)
-	enslaved_relations=EnslavedInRelationSerializer(many=True,read_only=True)
-	captive_status=CaptiveStatusSerializer(many=False)
-	language_group=LanguageGroupSerializer(many=False)
-	enslaved_zotero_connections=PastZoteroEnslavedConnectionSerializer(many=True,read_only=True)
+class CRUDRegisterCountrySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
-		model=Enslaved
+		model=RegisterCountry
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return RegisterCountry.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDRegisterCountrySerializer, self).create(validated_data)
 
+class CRUDEnslavedInRelationSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	relation=CRUDEnslavedEnslavementRelationSerializer(many=False)
+	class Meta:
+		model=EnslavedInRelation
+		fields='__all__'
 
 #######################
 
 #### FROM ENSLAVERS TO ENSLAVED
 
-class EnslaverEnslavedSerializer(serializers.ModelSerializer):
+class CRUDPastSourceEnslaverConnectionSerializer(serializers.ModelSerializer):
+	source=CRUDPastSourceSerializer(many=False)
+	class Meta:
+		model=SourceEnslaverConnection
+		fields='__all__'
+
+
+####################### ENSLAVED M2M CONNECTIONS
+
+#### FROM ENSLAVERS TO ENSLAVED
+
+class CRUDEnslaverEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
 		fields=['id','documented_name']
 
-class EnslaverEnslavedInRelationSerializer(serializers.ModelSerializer):
-	enslaved=EnslaverEnslavedSerializer(many=False)
-	class Meta:
-		model=EnslavedInRelation
-		fields='__all__'
-
-class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
-	enslaved_in_relation=EnslaverEnslavedInRelationSerializer(many=True,read_only=True)
-	relation_type=EnslavementRelationTypeSerializer(many=False)
-	place=PlaceSerializer(many=False)
-	voyage=PastVoyageSerializer(many=False)
+class CRUDEnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
+	enslaved_in_relation=CRUDEnslaverEnslavedSerializer(many=True)
+	relation_type=CRUDEnslavementRelationTypeSerializer(many=False)
+	place=CRUDPastLocationSerializer(many=False)
+	voyage=CRUDPastVoyageSerializer(many=False)
 	class Meta:
 		model=EnslavementRelation
-		exclude=['text_ref','unnamed_enslaved_count']
+		fields='__all__'
 
-class EnslaverInRelationSerializer(serializers.ModelSerializer):
-	relation = EnslaverEnslavementRelationSerializer(many=False)
-	role=EnslaverRoleSerializer(many=False)
+class CRUDEnslaverInRelationSerializer(serializers.ModelSerializer):
+	relation = CRUDEnslaverEnslavementRelationSerializer(many=False)
+	roles=CRUDEnslaverRoleSerializer(many=True)
 	class Meta:
 		model=EnslaverInRelation
-		fields=['relation','role',]
+		fields='__all__'
 
-class EnslaverAliasSerializer(serializers.ModelSerializer):
-	enslaver_relations=EnslaverInRelationSerializer(
-		many=True,
-		read_only=True
-	)
+class CRUDEnslaverAliasSerializer(WritableNestedModelSerializer):
+	id=serializers.IntegerField(allow_null=False)
+	enslaver_relations=CRUDEnslaverInRelationSerializer(many=True,allow_null=True)
+	alias=serializers.CharField(allow_null=False)
+	manual_id=serializers.CharField(allow_null=True)
+	human_reviewed=serializers.BooleanField(allow_null=True)
+	legacy_id=serializers.IntegerField(allow_null=True)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
 
+#### FROM ENSLAVERS TO SOURCES
+
+
+class EnslaverInRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	roles=CRUDEnslaverRoleSerializer(many=True,allow_null=False)
+	class Meta:
+		model=EnslaverInRelation
+		exclude=['relation']
+	def create(self, validated_data):
+		try:
+			return EnslaverInRelation.objects.get(id=validated_data['id'])
+		except:
+			return super(EnslaverInRelationCRUDSerializer, self).create(validated_data)
+	def update(self, instance,validated_data):
+		try:
+			return EnslaverInRelation.objects.get(id=validated_data['id'])
+		except:
+			return super(EnslaverInRelationCRUDSerializer, self).create(validated_data)
+
+class EnslavedInRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	class Meta:
+		model=EnslavedInRelation
+		exclude=['relation']
+	def create(self, validated_data):
+		try:
+			return EnslavedInRelation.objects.get(id=validated_data['id'])
+		except:
+			return super(EnslavedInRelationCRUDSerializer, self).create(validated_data)
+	def update(self, instance,validated_data):
+		try:
+			return EnslavedInRelation.objects.get(id=validated_data['id'])
+		except:
+			return super(EnslavedInRelationCRUDSerializer, self).create(validated_data)
 
 
 
+class CRUDEnslavementRelationSparseDateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=VoyageSparseDate
+		fields='__all__'
+
+class EnslavementRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	relation_type=CRUDEnslavementRelationTypeSerializer(many=False,allow_null=True)
+	place=CRUDPastLocationSerializer(many=False,allow_null=True)
+	date=CRUDEnslavementRelationSparseDateSerializer(many=False,allow_null=True)
+	amount=serializers.DecimalField(decimal_places=2, max_digits=6,allow_null=True)
+	relation_enslavers=EnslaverInRelationCRUDSerializer(many=True)
+	enslaved_in_relation=EnslavedInRelationCRUDSerializer(many=True)
+	class Meta:
+		model=EnslavementRelation
+		fields='__all__'
 
 
 
-
-
-
-
-
-@extend_schema_serializer(
-	examples = [
-		 OpenApiExample(
-			'Ex. 1: numeric range',
-			summary='Filter on a numeric range',
-			description='Here, we search for enslavers who participated in slave-trading voyages between the years of 1720-1722',
-			value={
-				"aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":[1720,1722]
-			},
-			request_only=True,
-			response_only=False
-		),
-		OpenApiExample(
-			'Ex. 2: array of str vals',
-			summary='OR Filter on exact matches of known str values',
-			description='Here, we search for enslavers who participated in the enslavement of anyone named Bora',
-			value={
-				"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name":["Bora"]
-			},
-			request_only=True,
-			response_only=False
-		)
-	]
-)
-class EnslaverSerializer(serializers.ModelSerializer):
-	principal_location=PlaceSerializer(many=False)
-	enslaver_zotero_connections=PastZoteroEnslaverConnectionSerializer(many=True,read_only=True)
-	aliases=EnslaverAliasSerializer(many=True,read_only=True)
-	birth_place=PlaceSerializer(many=False)
-	death_place=PlaceSerializer(many=False)
+class EnslaverCRUDSerializer(WritableNestedModelSerializer):
+	id=serializers.IntegerField(allow_null=True)
+	principal_location=CRUDPastLocationSerializer(many=False,allow_null=True)
+	aliases=CRUDEnslaverAliasSerializer(many=True,allow_null=True)
+	birth_place=CRUDPastLocationSerializer(many=False,allow_null=True)
+	death_place=CRUDPastLocationSerializer(many=False,allow_null=True)
+	principal_alias=serializers.CharField(allow_null=True)
+	birth_year=serializers.IntegerField(allow_null=True)
+	birth_month=serializers.IntegerField(allow_null=True)
+	birth_day=serializers.IntegerField(allow_null=True)
+	death_year=serializers.IntegerField(allow_null=True)
+	death_month=serializers.IntegerField(allow_null=True)
+	death_day=serializers.IntegerField(allow_null=True)
+	father_name=serializers.CharField(allow_null=True)
+	father_occupation=serializers.CharField(allow_null=True)
+	mother_name=serializers.CharField(allow_null=True)
+	probate_date=serializers.CharField(allow_null=True)
+	will_value_pounds=serializers.CharField(allow_null=True)
+	will_value_dollars=serializers.CharField(allow_null=True)
+	will_court=serializers.CharField(allow_null=True)
+	notes=serializers.CharField(allow_null=True)
+	is_natural_person=serializers.BooleanField(allow_null=True)
+	human_reviewed=serializers.BooleanField(allow_null=True)
+	legacy_id=serializers.IntegerField(allow_null=True)
 	class Meta:
 		model=EnslaverIdentity
+		fields='__all__'
+
+class EnslavedCRUDSerializer(WritableNestedModelSerializer):
+	id=serializers.IntegerField(allow_null=True)
+	enslaved_id=serializers.IntegerField(allow_null=True)
+	post_disembark_location=CRUDPastLocationSerializer(many=False,allow_null=True)
+	captive_fate=CRUDCaptiveFateSerializer(many=False,allow_null=True)
+	enslaved_relations=CRUDEnslavedInRelationSerializer(many=True,allow_null=True)
+	captive_status=CRUDCaptiveStatusSerializer(many=False,allow_null=True)
+	language_group=CRUDLanguageGroupSerializer(many=False,allow_null=True)
+	enslaved_source_connections=CRUDPastSourceEnslavedConnectionSerializer(many=True,allow_null=True)
+	last_known_date = CRUDPASTSparseDateSerializer(many=False,allow_null=True)
+	register_country = CRUDRegisterCountrySerializer(many=False,allow_null=True)
+	documented_name = serializers.CharField(allow_null=True)
+	name_first = serializers.CharField(allow_null=True)
+	name_second = serializers.CharField(allow_null=True)
+	name_third = serializers.CharField(allow_null=True)
+	modern_name = serializers.CharField(allow_null=True)
+	editor_modern_names_certainty = serializers.CharField(allow_null=True)
+	age = serializers.IntegerField(allow_null=True)
+	gender = serializers.IntegerField(allow_null=True)
+	height = serializers.DecimalField(decimal_places=2, max_digits=6,allow_null=True)
+	skin_color = serializers.CharField(allow_null=True)
+	dataset = serializers.IntegerField(allow_null=True)
+	notes = serializers.CharField(allow_null=True)
+	human_reviewed=serializers.BooleanField(allow_null=True)
+	class Meta:
+		model=Enslaved
 		fields='__all__'

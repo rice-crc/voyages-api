@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from collections import Counter
 import urllib
@@ -19,6 +19,7 @@ from geo.common import GeoTreeFilter
 import collections
 import gc
 from .serializers import *
+from .serializers_READONLY import *
 from geo.serializers import LocationSerializer
 from voyages3.localsettings import *
 from drf_yasg.utils import swagger_auto_schema
@@ -199,8 +200,9 @@ class VoyageDataFrames(generics.GenericAPIView):
 		sf=list(selected_fields)
 		if len(error_messages)==0:
 			output_dicts={}
-			for s in sf:
-				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+			for i in range(len(sf)):
+				output_dicts[sf[i]]=[v[i] for v in vals]
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dicts,safe=False)
 		else:
@@ -328,16 +330,16 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		if zoomlevel=='place':
 			voys_values_list=queryset.values_list(
 				'voyage_id',
-				'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
-				'voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
+				'voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+				'voyage_itinerary__imp_principal_port_slave_dis__uuid',
 				'voyage_slaves_numbers__imp_total_num_slaves_embarked'
 			)
 			graphname='place'
 		elif zoomlevel=='region':
 			voys_values_list=queryset.values_list(
 				'voyage_id',
-				'voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
-				'voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
+				'voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
+				'voyage_itinerary__imp_principal_region_slave_dis__uuid',
 				'voyage_slaves_numbers__imp_total_num_slaves_embarked'
 			)
 			graphname='region'
@@ -371,3 +373,41 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
+
+class VoyageCREATE(generics.CreateAPIView):
+	'''
+	Create Voyage without a pk
+	'''
+	queryset=Voyage.objects.all()
+	serializer_class=VoyageCRUDSerializer
+	lookup_field='voyage_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+
+class VoyageRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
+	
+	Previously, the SQL pk ("id") always corresponded to the "voyage_id" field. We will not be enforcing this going forward.
+	
+	M2M relations will not be writable here EXCEPT in the case of union/"through" tables.
+	
+	Examples:
+	
+		1. You CANNOT create an Enslaved (person) record as you traverse voyage_enslavement_relations >> relation_enslaved, but only the EnslavementRelation record that joins them
+		2. You CAN create an EnslaverInRelation record as you traverse voyage_enslavement_relations >> relation_enslaver >> enslaver_alias >> enslaver_identity ...
+		3. ... but you CANNOT create an EnslaverRole record during that traversal, like voyage_enslavement_relations >> relation_enslaver >> enslaver_role
+	
+	I have also, for the time, set all itinerary Location foreign keys as read_only.
+	
+	Godspeed.
+	'''
+	queryset=Voyage.objects.all()
+	serializer_class=VoyageCRUDSerializer
+	lookup_field='voyage_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+
+

@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from collections import Counter
 import urllib
@@ -17,6 +17,7 @@ import gc
 from voyages3.localsettings import *
 import re
 import pysolr
+from .serializers import *
 from voyage.models import Voyage
 from past.models import *
 from blog.models import Post
@@ -24,164 +25,6 @@ from common.reqs import getJSONschema
 import uuid
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-#this isn't pretty
-#but i'm having trouble finding a more elegant way of exporting this data to an external service
-#without installing networkx on this django instance, which i don't want to do!@extend_schema(exclude=True)
-
-@extend_schema(exclude=True)
-class PastGraphMaker(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		st=time.time()
-		#VOYAGE DICT
-		voys=Voyage.objects.all()
-		voys.prefetch_related(
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location'
-		)
-		voys.select_related(
-			'voyage_ship',
-			'voyage_dates__imp_arrival_at_port_of_dis_sparsedate'
-		)
-		voy_vals=voys.values_list(
-			'id',
-			'voyage_ship__ship_name',
-			'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name'
-		)
-		
-		valkeys=[
-			'id',
-			'voyage_ship__ship_name',
-			'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-			'voyage_itinerary__imp_principal_port_slave_dis__geo_location__name',
-			'voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__name'
-		]
-		
-		voy_df={
-			k:[
-				voy_vals[i][valkeys.index(k)] for i in range(len(voy_vals))
-			]
-			for k in valkeys
-		}
-				
-		#ENSLAVER DICT
-		enslaver_aliases=EnslaverAlias.objects.all()
-		enslaver_aliases=enslaver_aliases.select_related('identity')
-		enslaver_aliases_vals=enslaver_aliases.values_list(
-			'id',
-			'identity__id',
-			'identity__principal_alias'
-		)
-
-		valkeys=(
-			'alias_id',
-			'id',
-			'principal_alias'
-		)
-		
-		enslaver_aliases_df={
-			k:[
-				enslaver_aliases_vals[i][valkeys.index(k)] for i in range(len(enslaver_aliases_vals))
-			]
-			for k in valkeys
-		}
-		
-		#ENSLAVED PEOPLE DICT
-		enslaved_people=Enslaved.objects.all()
-		enslaved_people_vals=enslaved_people.values_list(
-			'id',
-			'documented_name',
-			'age',
-			'gender'
-		)
-		
-		valkeys=(
-			'id',
-			'documented_name',
-			'age',
-			'gender'
-		)
-		
-		enslaved_people_df={
-			k:[
-				enslaved_people_vals[i][valkeys.index(k)] for i in range(len(enslaved_people_vals))
-			]
-			for k in valkeys
-		}
-		
-		#ENSLAVEMENT RELATION DICT
-		enslavementrelations=EnslavementRelation.objects.all()
-		enslavementrelations=enslavementrelations.select_related('relation_type')
-		enslavementrelation_vals=enslavementrelations.values_list(
-			'id',
-			'relation_type__name',
-			'voyage'
-		)
-		valkeys=(
-			'id',
-			'relation_type__name',
-			'voyage'
-		)
-		
-		enslavementrelation_df={
-			k:[
-				enslavementrelation_vals[i][valkeys.index(k)] for i in range(len(enslavementrelation_vals))
-			]
-			for k in valkeys
-		}
-		
-		#ENSLAVED IN RELATION
-		enslaved_in_relation=EnslavedInRelation.objects.all()
-		enslaved_in_relation_vals=enslaved_in_relation.values_list(
-			'relation',
-			'enslaved'
-		)
-		valkeys=(
-			'relation',
-			'enslaved'
-		)
-		
-		enslaved_in_relation_df={
-			k:[
-				enslaved_in_relation_vals[i][valkeys.index(k)] for i in range(len(enslaved_in_relation_vals))
-			]
-			for k in valkeys
-		}
-		
-		#ENSLAVER IN RELATION
-		enslaver_in_relation=EnslaverInRelation.objects.all()
-		enslaver_in_relation=enslaver_in_relation.select_related('role')
-		enslaver_in_relation_vals=enslaver_in_relation.values_list(
-			'relation',
-			'enslaver_alias',
-			'role__name'
-		)
-		valkeys=(
-			'relation',
-			'enslaver_alias',
-			'role__name'
-		)
-		
-		enslaver_in_relation_df={
-			k:[
-				enslaver_in_relation_vals[i][valkeys.index(k)] for i in range(len(enslaver_in_relation_vals))
-			]
-			for k in valkeys
-		}
-		
-		relation_map={
-			'enslaved':enslaved_people_df,
-			'enslavers':enslaver_aliases_df,
-			'voyages':voy_df,
-			'enslavement_relations':enslavementrelation_df,
-			'enslaved_in_relation':enslaved_in_relation_df,
-			'enslavers_in_relation':enslaver_in_relation_df	
-		}
-		print("PAST GRAPH MAKER elapsed time:",time.time()-st)
-		return JsonResponse(relation_map,safe=False)
 
 @extend_schema(exclude=True)
 class Schemas(generics.GenericAPIView):
@@ -255,4 +98,19 @@ class GlobalSearch(generics.GenericAPIView):
 
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(output_dict,safe=False)
-			
+
+# class SparseDateRD(generics.RetrieveDestroyAPIView):
+# 	'''
+# 	The lookup field for sparse dates is "id," the SQL primary key.
+# 	
+# 	Sparse dates consist of nullable integer month, day, and year fields. They are referenced by the voyages dates table as OneToOne relations.
+# 	
+# 	As OneToOne keys, they are built to be created for a specific field in another table to reference, updated only when that field\'s value needs updating, and destroyed as soon as they are no longer needed.
+# 	
+# 	Therefore, the "Create" (or in DRF PUT as Create) should only be used via referencing models. Here, we only want to be able to Retrieve or Destroy this data.
+# 	'''
+# 	queryset=SparseDate.objects.all()
+# 	serializer_class=SparseDateSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]

@@ -32,7 +32,11 @@ class PostList(generics.GenericAPIView):
 	def post(self,request):
 		print("BLOG POST LIST+++++++\nusername:",request.auth.user)
 		queryset=Post.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Post_options,retrieve_all=False)
+		params=dict(request.data)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,self,request,Post_options,retrieve_all=True
+		)
+		print(len(queryset))
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}

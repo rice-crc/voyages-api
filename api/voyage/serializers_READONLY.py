@@ -271,7 +271,9 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
             description='Here, we search for voyages whose imputed year of arrival at the principal port of disembarkation was between 1820 & 1850. We choose this variable as it is one of the most fully-populated numeric variables in the dataset.',
             value={
 				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year': [1820,1850]
-			}
+			},
+			request_only=True,
+			response_only=False
         ),
 		OpenApiExample(
             'Ex. 2: array of str vals',
@@ -280,6 +282,8 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
             value={
 				'voyage_itinerary__imp_principal_region_slave_dis__name': ['Barbados','Cuba']
 			},
+			request_only=True,
+			response_only=False
 		)
     ]
 )

@@ -7,22 +7,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from drf_writable_nested.mixins import UniqueFieldsMixin,NestedUpdateMixin
 
-class SourceVoyageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class SourceVoyageSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Voyage
 		fields='__all__'
-	def create(self, validated_data):
-		#really smart get_or_create-like hack here
-		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
-		try:
-			# if there is already an instance in the database with the
-			# given value (e.g. tag='apple'), we simply return this instance
-			return Voyage.objects.get(id=validated_data['id'])
-		except ObjectDoesNotExist:
-			# else, we create a new tag with the given value
-			return super(SourceVoyageSerializer, self).create(validated_data)
 
-class SourceVoyageConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class SourceVoyageConnectionSerializer(serializers.ModelSerializer):
 	voyage=SourceVoyageSerializer(many=False)
 	class Meta:
 		model=SourceVoyageConnection
@@ -46,7 +36,7 @@ class CRUDSourceVoyageConnectionSerializer(UniqueFieldsMixin, serializers.ModelS
 			return super(CRUDSourceVoyageConnectionSerializer, self).create(validated_data)
 
 
-class SourceEnslavedSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class SourceEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
 		fields='__all__'
@@ -56,8 +46,8 @@ class SourceEnslavedSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 		except ObjectDoesNotExist:
 			return super(SourceEnslavedSerializer, self).create(validated_data)
 
-class SourceEnslavedConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	enslaved=SourceEnslavedSerializer(many=True,read_only=True)
+class SourceEnslavedConnectionSerializer(serializers.ModelSerializer):
+	enslaved=SourceEnslavedSerializer(many=False,read_only=True)
 	class Meta:
 		model=SourceEnslavedConnection
 		fields='__all__'
@@ -77,12 +67,12 @@ class CRUDSourceEnslavedConnectionSerializer(UniqueFieldsMixin, serializers.Mode
 		except:
 			return super(CRUDSourceEnslavedConnectionSerializer, self).create(validated_data)
 
-class SourceEnslavementRelationSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class SourceEnslavementRelationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslavementRelation
 		fields='__all__'
 
-class SourceEnslavementRelationConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class SourceEnslavementRelationConnectionSerializer(serializers.ModelSerializer):
 	enslavement_relation=SourceEnslavementRelationSerializer(many=False)
 	class Meta:
 		model=SourceEnslavementRelationConnection
@@ -104,39 +94,18 @@ class CRUDSourceEnslavementRelationConnectionSerializer(UniqueFieldsMixin, seria
 			return super(CRUDSourceEnslavementRelationConnectionSerializer, self).create(validated_data)
 
 
-class SourceEnslaverIdentitySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class SourceEnslaverIdentitySerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
-	def create(self, validated_data):
-		#really smart get_or_create-like hack here
-		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
-		try:
-			# if there is already an instance in the database with the
-			# given value (e.g. tag='apple'), we simply return this instance
-			return EnslaverIdentity.objects.get(id=validated_data['id'])
-		except ObjectDoesNotExist:
-			# else, we create a new tag with the given value
-			return super(SourceEnslaverIdentitySerializer, self).create(validated_data)
 
-class SourceEnslaverConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class SourceEnslaverConnectionSerializer(serializers.ModelSerializer):
 	enslaver=SourceEnslaverIdentitySerializer(many=True,read_only=True)
 	class Meta:
 		model=SourceEnslaverConnection
 		fields='__all__'
-	def create(self, validated_data):
-		#really smart get_or_create-like hack here
-		#https://stackoverflow.com/questions/26247192/reuse-existing-object-in-django-rest-framework-nested-serializer
-		try:
-			# if there is already an instance in the database with the
-			# given value (e.g. tag='apple'), we simply return this instance
-			return SourceEnslaverConnection.objects.get(id=validated_data['id'])
-		except ObjectDoesNotExist:
-			# else, we create a new tag with the given value
-			return super(SourceEnslaverConnectionSerializer, self).create(validated_data)
 
 class CRUDSourceEnslaverConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	enslaver=SourceEnslaverIdentitySerializer(many=True,read_only=True)
 	class Meta:
 		model=SourceEnslaverConnection
 		fields='__all__'
@@ -154,6 +123,22 @@ class CRUDSourceEnslaverConnectionSerializer(UniqueFieldsMixin, serializers.Mode
 class PageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Page
+		fields='__all__'			
+
+class SourcePageConnectionSerializer(WritableNestedModelSerializer):
+	page=PageSerializer(many=False,read_only=False)
+	class Meta:
+		model=SourcePageConnection
+		fields='__all__'
+
+class ShortRefSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=ShortRef
+		fields='__all__'
+
+class CRUDPageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=Page
 		fields='__all__'
 	def create(self, validated_data):
 		#really smart get_or_create-like hack here
@@ -164,8 +149,8 @@ class PageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 			return super(PageSerializer, self).create(validated_data)
 			
 
-class SourcePageConnectionSerializer(WritableNestedModelSerializer):
-	page=PageSerializer(many=False,read_only=False)
+class CRUDSourcePageConnectionSerializer(WritableNestedModelSerializer):
+	page=CRUDPageSerializer(many=False,read_only=False)
 	class Meta:
 		model=SourcePageConnection
 		fields='__all__'
@@ -178,7 +163,7 @@ class SourcePageConnectionSerializer(WritableNestedModelSerializer):
 			return super(SourcePageConnectionSerializer, self).create(validated_data)
 
 
-class ShortRefSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class CRUDShortRefSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=ShortRef
 		fields='__all__'
@@ -200,8 +185,10 @@ class ShortRefSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
             summary='OR Filter on exact matches of known str values',
             description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
             value={
-				"short_ref":["OMNO"]
-			}
+				"short_ref__name":["OMNO"]
+			},
+			request_only=True,
+			response_only=False
         )
     ]
 )
@@ -237,12 +224,14 @@ class SourceSerializer(serializers.ModelSerializer):
 			  "last_updated": None,
 			  "human_reviewed": None,
 			  "notes": None
-			}
+			},
+			request_only=True,
+			response_only=False
         )
     ]
 )
 class SourceCRUDSerializer(WritableNestedModelSerializer):
-	page_connections=SourcePageConnectionSerializer(many=True,allow_null=True)
+	page_connections=CRUDSourcePageConnectionSerializer(many=True,allow_null=True)
 	source_enslaver_connections=CRUDSourceEnslaverConnectionSerializer(many=True,allow_null=True)
 	source_voyage_connections=CRUDSourceVoyageConnectionSerializer(many=True,allow_null=True)
 	source_enslaved_connections=CRUDSourceEnslavedConnectionSerializer(many=True,allow_null=True)
@@ -250,7 +239,7 @@ class SourceCRUDSerializer(WritableNestedModelSerializer):
 	item_url=serializers.URLField(allow_null=True)
 	zotero_group_id=serializers.IntegerField(allow_null=True)
 	zotero_item_id=serializers.CharField(allow_null=True)
-	short_ref=ShortRefSerializer(many=False,allow_null=False)
+	short_ref=CRUDShortRefSerializer(many=False,allow_null=False)
 	title=serializers.CharField(allow_null=True)
 	date=serializers.CharField(allow_null=True)
 	last_updated=serializers.DateTimeField(allow_null=True)

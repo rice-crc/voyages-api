@@ -137,7 +137,7 @@ def load_graph():
 	
 	j=json.loads(r.text)
 	
-	print("RELATIONS COUNT------>",len(j[selected_fields[0]]),"<--------RELATIONS COUNT")
+# 	print("RELATIONS COUNT------>",len(j[selected_fields[0]]),"<--------RELATIONS COUNT")
 	
 	for row_idx in range(len(j[selected_fields[0]])):
 		rowdict={}
@@ -160,10 +160,10 @@ def load_graph():
 		enslaver_uuids=list(set([enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid'] for rc in relation_connections if rc['relation_enslavers__enslaver_alias__identity__id'] is not None]))
 		
 		enslaved_ids=[rc['enslaved_in_relation__enslaved__id'] for rc in relation_connections]
-# 		printit=False
-# 		if 800102 in enslaved_ids:
+		printit=False
+# 		if 814219 in enslaved_ids:
 # 			print(relation_connections)
-# 			print(enslaved_dict[800102])
+# 			print(enslaved_dict[814219])
 # 			print(relation_type)
 # 			printit=True
 # 		
@@ -203,9 +203,9 @@ def load_graph():
 				#bears looking into!
 				enslaver_roles=list(set([rc['relation_enslavers__roles__name'] for rc in relation_connections]))
 				
-# 				if printit:
-# 					print(enslaver_roles)
-# 					print(enslaver_uuids)
+				if printit:
+					print(enslaver_roles)
+					print(enslaver_uuids)
 				
 				if enslaver_uuids ==[]:
 					for rc in relation_connections:
@@ -215,27 +215,7 @@ def load_graph():
 				else:
 					if len(voyage_uuids)>1:
 						print("more voyages than we counted on",rc)
-					elif len(voyage_uuids)==0:
-						#we can immediately connect all enslaved individuals directly to the voyage
-						for eduu in enslaved_uuids:
-							G.add_edge(eduu,voyage_uuid)
-						#and the same for the enslavers, but with their roles attached
-						enslaver_roles={}
-						for rc in relation_connections:
-							enslaver_uuid=enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid']
-							enslaver_role=rc['relation_enslavers__roles__name']
-							if enslaver_uuid not in enslaver_roles:
-								enslaver_roles[enslaver_uuid]=[enslaver_role]
-							else:
-								enslaver_roles[enslaver_uuid].append(enslaver_role)
-						for enslaver_uuid in enslaver_roles:
-							roles=', '.join(list(set(enslaver_roles[enslaver_uuid])))
-							G.add_edge(enslaver_uuid,voyage_uuid,role_name=roles)
-						for rc in relation_connections:
-							enslaved_uuid=enslaved_dict[rc['enslaved_in_relation__enslaved__id']]['uuid']
-							voyage_uuid=voyages_dict[rc['voyage__id']]['uuid']
 					else:
-						
 						voyage_uuid=voyage_uuids[0]
 						# if we have a single voyage, then we know that we're dealing with 
 						## A. 'indirect' enslavers: captains & investors
@@ -245,16 +225,16 @@ def load_graph():
 						
 						enslaver_roles={}
 						for rc in relation_connections:
-							enslaver_uuid=enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid']
+							enslaver_identity_id=rc['relation_enslavers__enslaver_alias__identity__id']
+							enslaver_uuid=enslavers_dict[enslaver_identity_id]['uuid']
 							enslaver_role=rc['relation_enslavers__roles__name']
+							if enslaver_role in ['Captain','Investor']:
+								captain_or_investor=True
 							if enslaver_uuid not in enslaver_roles:
 								enslaver_roles[enslaver_uuid]=[enslaver_role]
 							else:
 								enslaver_roles[enslaver_uuid].append(enslaver_role)
-						for eduu in enslaved_uuids:
-							G.add_edge(eduu,voyage_uuid)
-						for enslaver_uuid in enslaver_roles:
-							roles=', '.join(list(set(enslaver_roles[enslaver_uuid])))
+						
 						if captain_or_investor:
 							#A. INDIRECT IS EASY
 							for enslaver_uuid in enslaver_roles:
@@ -263,67 +243,41 @@ def load_graph():
 							for eduu in enslaved_uuids:
 								G.add_edge(eduu,voyage_uuid)	
 						else:
-							#B. DIRECT IS A LITTLE MORE DIFFICULT
-# 							rel_uuid=str(uuid.uuid4())
-# 							reldata={
-# 								'uuid':rel_uuid,
-# 								'relation_type__name':relation_type,
-# 								'id':relation_id,
-# 								'node_class':'enslavement_relations'
-# 							}
-# 							G.add_node(rel_uuid, **reldata)
-# 							G.add_edge(rel_uuid,voyage_uuid)
-							
-							for enslaver_uuid in enslaver_roles:
-								for eduu in enslaved_uuids:
-									roles=', '.join(list(set(enslaver_roles[enslaver_uuid])))
-									G.add_edge(enslaver_uuid,eduu,role_name=roles)
-				
-		else:
-			#this only applies to ownership and transaction relations, which are recorded in 
-			#and should not connect to voyages
-			#it's a useful artefact of jkw's data, and perhaps the only interesting thing she did
-			#not that i can be sure she could articulate its significance, that dhq article reading at its key moments like someone else's edits and turns of phrase had been dropped in
-			#do you remember that time she tried to pay you to teach her about databases? yes, i do. and how when i refused payment but offered to keep following up, she dropped the ball as always? yes, i do. some people are raised to on the one hand pretend to be above money and on the other to assume everyone wants it from them. the resolution, of course, is that they're above you.
+
+							rel_uuid=str(uuid.uuid4())
+							reldata={
+								'uuid':rel_uuid,
+								'relation_type__name':relation_type,
+								'id':relation_id,
+								'node_class':'enslavement_relations'
+							}
 			
-# 			rel_uuid=str(uuid.uuid4())
-# 			
-# 			reldata={
-# 				'uuid':rel_uuid,
-# 				'relation_type__name':relation_type,
-# 				'id':relation_id,
-# 				'node_class':'enslavement_relations'
-# 			}
+							enslaver_roles={}
+							for rc in relation_connections:
+								enslaver_uuid=enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid']
+								enslaver_role=rc['relation_enslavers__roles__name']
+								if enslaver_uuid not in enslaver_roles:
+									enslaver_roles[enslaver_uuid]=[enslaver_role]
+								else:
+									enslaver_roles[enslaver_uuid].append(enslaver_role)
 			
-			enslaver_roles={}
-# 			for rc in relation_connections:
-# 				enslaver_uuid=enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid']
-# 				enslaver_role=rc['relation_enslavers__roles__name']
-# 				if enslaver_role in ['Captain','Investor']:
-# 					captain_or_investor=True
-# 				if enslaver_uuid not in enslaver_roles:
-# 					enslaver_roles[enslaver_uuid]=[enslaver_role]
-# 				else:
-# 					enslaver_roles[enslaver_uuid].append(enslaver_role)
-# 						
-# 			G.add_node(rel_uuid, **reldata)
-			
-			for enslaver_uuid in enslaver_roles:
-				for eduu in enslaved_uuids:
-					roles=', '.join(enslaver_roles[enslaver_uuid])
-					G.add_edge(enslaver_uuid,eduu,role_name=roles)
-			
-			# 
-# 			for enslaver_uuid in enslaver_uuids:
-# 				for enslaved_uuids in enslaved_uuids:
-# 					G.add_edge(enslaved_uuid,enslaver_uuid)
-# 			
-# 			if enslaver_uuids is not None:
-# 				for enslaver_uuid in enslaver_uuids:
-# 					G.add_edge(rel_uuid,enslaver_uuid)
-# 			if enslaved_uuids is not None:
-# 				for enslaved_uuids in enslaved_uuids:
-# 					G.add_edge(rel_uuid,enslaved_uuids)
+							if len(voyage_uuids)==0:
+								for enslaver_uuid in enslaver_roles:
+									for eduu in enslaved_uuids:
+										roles=', '.join(list(set(enslaver_roles[enslaver_uuid])))
+										G.add_edge(enslaver_uuid,eduu,role_name=roles)
+							else:
+								if printit:
+									print("RECORDING ALTERNATIVE")
+								G.add_node(rel_uuid, **reldata)
+								G.add_edge(rel_uuid,voyage_uuid)
+								if enslaver_uuids is not None:
+									for enslaver_uuid in enslaver_uuids:
+										roles=', '.join(list(set(enslaver_roles[enslaver_uuid])))
+										G.add_edge(rel_uuid,enslaver_uuid,role_name=roles)
+								if enslaved_uuids is not None:
+									for enslaved_uuid in enslaved_uuids:
+										G.add_edge(rel_uuid,enslaved_uuid)
 				
 
 	print("WITH CONNECTIONS-->",G)

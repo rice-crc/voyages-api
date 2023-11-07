@@ -2,279 +2,364 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
 from .models import *
-from document.models import *
-from geo.models import *
-from common.models import SparseDate
+from document.models import Source,Page,SourcePageConnection,SourceVoyageConnection
+from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
-
+from django.core.exceptions import ObjectDoesNotExist
+from drf_writable_nested.serializers import WritableNestedModelSerializer
+from drf_writable_nested.mixins import UniqueFieldsMixin
 #### GEO
 
-class VoyageLocationSerializer(serializers.ModelSerializer):
+class VoyageCRUDLocationSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Location
-		fields='__all__'
+		fields=['value',]
+	def create(self, validated_data):
+		return Location.objects.get(value=validated_data['value'])
+	def update(self, instance,validated_data):
+		return Location.objects.get(value=validated_data['value'])
 
-class PlaceSerializer(serializers.ModelSerializer):
-	geo_location=VoyageLocationSerializer(many=False)
-	class Meta:
-		model=Place
-		fields=['geo_location',]
+##### VESSEL VARIABLES ##### 
 
-class RegionSerializer(serializers.ModelSerializer):
-	geo_location=VoyageLocationSerializer(many=False)
-	class Meta:
-		model=Region
-		fields=['geo_location',]
-
-class BroadRegionSerializer(serializers.ModelSerializer):
-	geo_location=VoyageLocationSerializer(many=False)
-	class Meta:
-		model=BroadRegion
-		fields=['geo_location',]
-	
-
-# ##### VESSEL VARIABLES ##### 
-# 
-class RigOfVesselSerializer(serializers.ModelSerializer):
+class CRUDRigOfVesselSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=RigOfVessel
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return RigOfVessel.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDRigOfVesselSerializer, self).create(validated_data)
 
-class NationalitySerializer(serializers.ModelSerializer):
+class CRUDNationalitySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Nationality
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return Nationality.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDNationalitySerializer, self).create(validated_data)
 
-class TonTypeSerializer(serializers.ModelSerializer):
+
+class CRUDTonTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=TonType
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return TonType.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDTonTypeSerializer, self).create(validated_data)
 
-class VoyageShipSerializer(serializers.ModelSerializer):
-	rig_of_vessel=RigOfVesselSerializer(many=False)
-	imputed_nationality=NationalitySerializer(many=False)
-	ton_type=TonTypeSerializer(many=False)
-	vessel_construction_place=PlaceSerializer(many=False)
-	vessel_construction_region=RegionSerializer(many=False)
-	registered_place=PlaceSerializer(many=False)
-	registered_region=PlaceSerializer(many=False)
-	
+class VoyageCRUDShipSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	rig_of_vessel=CRUDRigOfVesselSerializer(many=False,allow_null=True)
+	imputed_nationality=CRUDNationalitySerializer(many=False,allow_null=True)
+	nationality_ship=CRUDNationalitySerializer(many=False,allow_null=True)
+	ton_type=CRUDTonTypeSerializer(many=False,allow_null=True)
+	vessel_construction_place=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	vessel_construction_region=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	registered_place=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	registered_region=VoyageCRUDLocationSerializer(many=False,allow_null=True)
 	class Meta:
 		model=VoyageShip
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VoyageShip.objects.get(voyage=validated_data['voyage'])
+		except ObjectDoesNotExist:
+			return super(VoyageCRUDShipSerializer, self).create(validated_data)
 
-# ##### ENSLAVED NUMBERS ##### 
 
-class VoyageSlavesNumbersSerializer(serializers.ModelSerializer):
+##### ENSLAVED NUMBERS ##### 
+
+class VoyageCRUDSlavesNumbersSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=VoyageSlavesNumbers
 		fields='__all__'
 
-# ##### CREW NUMBERS ##### 
+##### CREW NUMBERS ##### 
 
-class VoyageCrewSerializer(serializers.ModelSerializer):
+class VoyageCRUDCrewSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=VoyageCrew
 		fields='__all__'
 
-##### ITINERARY #####
-# I TRIED TO USE THE LEGACY VOYAGES GEO MODELS
-# BUT HAVING UNIQUE ID'S DISTRIBUTED ACROSS 3 NESTED TABLES IS SUCH A BRAIN-BREAKINGLY BAD DESIGN THAT IT'S NOT GOING TO FLY
-# WE NOW HAVE A UNIFIED LOCATION OBJECT
-# I HOPE THIS DOESN'T BREAK IMPUTATIONS (IT WILL)
 
-class VoyageItinerarySerializer(serializers.ModelSerializer):
-	port_of_departure=PlaceSerializer(many=False)
-	int_first_port_emb=PlaceSerializer(many=False)
-	int_second_port_emb=PlaceSerializer(many=False)
-	int_first_region_purchase_slaves=RegionSerializer(many=False)
-	int_second_region_purchase_slaves=RegionSerializer(many=False)
-	int_first_port_dis=PlaceSerializer(many=False)
-	int_second_port_dis=PlaceSerializer(many=False)
-	int_first_region_slave_landing=RegionSerializer(many=False)
-	imp_principal_region_slave_dis=RegionSerializer(many=False)
-	int_second_place_region_slave_landing=PlaceSerializer(many=False)
-	first_place_slave_purchase=PlaceSerializer(many=False)
-	second_place_slave_purchase=PlaceSerializer(many=False)
-	third_place_slave_purchase=PlaceSerializer(many=False)
-	first_region_slave_emb=RegionSerializer(many=False)
-	second_region_slave_emb=RegionSerializer(many=False)
-	third_region_slave_emb=RegionSerializer(many=False)
-	port_of_call_before_atl_crossing=PlaceSerializer(many=False)
-	first_landing_place=PlaceSerializer(many=False)
-	second_landing_place=PlaceSerializer(many=False)
-	third_landing_place=PlaceSerializer(many=False)
-	first_landing_region=RegionSerializer(many=False)
-	second_landing_region=RegionSerializer(many=False)
-	third_landing_region=RegionSerializer(many=False)
-	place_voyage_ended=PlaceSerializer(many=False)
-	region_of_return=RegionSerializer(many=False)
-	broad_region_of_return=BroadRegionSerializer(many=False)
-	imp_port_voyage_begin=PlaceSerializer(many=False)
-	imp_region_voyage_begin=RegionSerializer(many=False)
-	imp_broad_region_voyage_begin=BroadRegionSerializer(many=False)
-	principal_place_of_slave_purchase=PlaceSerializer(many=False)
-	imp_principal_place_of_slave_purchase=PlaceSerializer(many=False)
-	imp_principal_region_of_slave_purchase=RegionSerializer(many=False)
-	imp_broad_region_of_slave_purchase=BroadRegionSerializer(many=False)
-	principal_port_of_slave_dis=PlaceSerializer(many=False)
-	imp_principal_port_slave_dis=PlaceSerializer(many=False)
-	imp_broad_region_slave_dis=BroadRegionSerializer(many=False)
+
+##### ITINERARY #####
+
+class VoyageCRUDItinerarySerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	port_of_departure=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_first_port_emb=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_second_port_emb=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_first_region_purchase_slaves=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_second_region_purchase_slaves=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_first_port_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_second_port_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_first_region_slave_landing=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_principal_region_slave_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_second_place_region_slave_landing=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	first_place_slave_purchase=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	second_place_slave_purchase=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	third_place_slave_purchase=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	first_region_slave_emb=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	second_region_slave_emb=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	third_region_slave_emb=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	port_of_call_before_atl_crossing=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	first_landing_place=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	second_landing_place=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	third_landing_place=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	first_landing_region=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	second_landing_region=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	third_landing_region=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	place_voyage_ended=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	region_of_return=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	broad_region_of_return=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_port_voyage_begin=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_region_voyage_begin=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_broad_region_voyage_begin=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	principal_place_of_slave_purchase=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_principal_place_of_slave_purchase=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_principal_region_of_slave_purchase=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_broad_region_of_slave_purchase=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	principal_port_of_slave_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_principal_port_slave_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	imp_broad_region_slave_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_fourth_port_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_third_port_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_fourth_port_dis=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_third_place_region_slave_landing=VoyageCRUDLocationSerializer(many=False,allow_null=True)
+	int_fourth_place_region_slave_landing=VoyageCRUDLocationSerializer(many=False,allow_null=True)
 	class Meta:
 		model=VoyageItinerary
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VoyageItinerary.objects.get(voyage=validated_data['voyage'])
+		except ObjectDoesNotExist:
+			return super(VoyageCRUDItinerarySerializer, self).create(validated_data)
 
-# ##### OUTCOMES #####
+##### OUTCOMES #####
 
-class ParticularOutcomeSerializer(serializers.ModelSerializer):
+class ParticularCRUDOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=ParticularOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return ParticularOutcome.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(ParticularCRUDOutcomeSerializer, self).create(validated_data)
 
-class SlavesOutcomeSerializer(serializers.ModelSerializer):
+class SlavesCRUDOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=SlavesOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return SlavesOutcome.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(SlavesCRUDOutcomeSerializer, self).create(validated_data)
 		
-class ResistanceSerializer(serializers.ModelSerializer):
+class ResistanceCRUDSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Resistance
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return Resistance.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(ResistanceCRUDSerializer, self).create(validated_data)
 
-class OwnerOutcomeSerializer(serializers.ModelSerializer):
+class OwnerCRUDOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=OwnerOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return OwnerOutcome.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(OwnerCRUDOutcomeSerializer, self).create(validated_data)
 
-class VesselCapturedOutcomeSerializer(serializers.ModelSerializer):
+class VesselCRUDCapturedOutcomeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=VesselCapturedOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VesselCapturedOutcome.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(VesselCRUDCapturedOutcomeSerializer, self).create(validated_data)
 		
-class VoyageOutcomeSerializer(serializers.ModelSerializer):
-	outcome_owner=OwnerOutcomeSerializer(many=False)
-	outcome_slaves=SlavesOutcomeSerializer(many=False)
-	particular_outcome=ParticularOutcomeSerializer(many=False)
-	resistance=ResistanceSerializer(many=False)
-	vessel_captured_outcome=VesselCapturedOutcomeSerializer(many=False)
+class VoyageCRUDOutcomeSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	outcome_owner=OwnerCRUDOutcomeSerializer(many=False,allow_null=True)
+	outcome_slaves=SlavesCRUDOutcomeSerializer(many=False,allow_null=True)
+	particular_outcome=ParticularCRUDOutcomeSerializer(many=False,allow_null=True)
+	resistance=ResistanceCRUDSerializer(many=False,allow_null=True)
+	vessel_captured_outcome=VesselCRUDCapturedOutcomeSerializer(many=False,allow_null=True)
 	class Meta:
 		model=VoyageOutcome
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VoyageOutcome.objects.get(voyage=validated_data['voyage'])
+		except ObjectDoesNotExist:
+			return super(VoyageCRUDOutcomeSerializer, self).create(validated_data)
 
-#### ENSLAVERS
 
-class VoyageEnslaverRoleSerializer(serializers.ModelSerializer):
+#### DATES #####
+class VoyageCRUDSparseDateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=VoyageSparseDate
+		fields='__all__'
+		
+class VoyageCRUDDatesSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	voyage_began_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	slave_purchase_began_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	vessel_left_port_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	first_dis_of_slaves_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	date_departed_africa_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	arrival_at_second_place_landing_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	third_dis_of_slaves_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	departure_last_place_of_landing_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	voyage_completed_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	imp_voyage_began_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	imp_departed_africa_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	imp_arrival_at_port_of_dis_sparsedate=VoyageCRUDSparseDateSerializer(many=False,allow_null=True)
+	class Meta:
+		model=VoyageDates
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VoyageDates.objects.get(voyage=validated_data['voyage'])
+		except ObjectDoesNotExist:
+			return super(VoyageCRUDDatesSerializer, self).create(validated_data)
+	
+	
+
+class VoyageCRUDSourceSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=Source
+		fields='__all__'
+
+class VoyageCRUDVoyageSourceConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	source=VoyageCRUDSourceSerializer(many=False,read_only=True)
+	class Meta:
+		model=SourceVoyageConnection
+		fields='__all__'
+
+class VoyageCRUDEnslaverRoleSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverRole
 		fields='__all__'
 
-class EnslaverIdentitySerializer(serializers.ModelSerializer):
+class VoyageCRUDEnslaverIdentitySerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
- 
 
-class VoyageEnslaverAliasSerializer(serializers.ModelSerializer):
-	identity=EnslaverIdentitySerializer(many=False)
+class VoyageCRUDEnslaverAliasSerializer(WritableNestedModelSerializer):
+	identity=VoyageCRUDEnslaverIdentitySerializer(many=False,)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
 
-class VoyageEnslaverConnectionSerializer(serializers.ModelSerializer):
-	enslaver_alias=VoyageEnslaverAliasSerializer(many=False)
-	role=VoyageEnslaverRoleSerializer(many=False)
+class VoyageCRUDEnslaverInRelationSerializer(WritableNestedModelSerializer):
+	roles=VoyageCRUDEnslaverRoleSerializer(many=True,read_only=False)
+	enslaver_alias=VoyageCRUDEnslaverAliasSerializer(many=False,read_only=False)
 	class Meta:
-		model=EnslaverVoyageConnection
-		fields=['id','enslaver_alias','role']
-
-class VoyageSparseDateSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=SparseDate
-		exclude=['id',]
-
-class VoyageDatesSerializer(serializers.ModelSerializer):
-	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False)
-	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False)
-	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False)
-	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False)
-	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False)
-	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False)
-	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False)
-	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False)
-	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False)
-	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False)
-	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False)
-	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False)
-	class Meta:
-		model=VoyageDates
+		model=EnslaverInRelation
 		fields='__all__'
 
-class VoyageSourcePageSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model=SourcePage
-		fields='__all__'
-
-class VoyageSourcePageConnectionSerializer(serializers.ModelSerializer):
-	source_page=VoyageSourcePageSerializer(many=False)
-	class Meta:
-		model=SourcePageConnection
-		fields='__all__'
-
-class VoyageZoteroSourceSerializer(serializers.ModelSerializer):
-	page_connection=VoyageSourcePageConnectionSerializer(many=True,read_only=True)
-	class Meta:
-		model=ZoteroSource
-		fields='__all__'
-
-class VoyageZoteroVoyageConnectionSerializer(serializers.ModelSerializer):
-	zotero_source=VoyageZoteroSourceSerializer(many=False,read_only=True)
-	class Meta:
-		model=ZoteroVoyageConnection
-		fields='__all__'
-
-class VoyageEnslavedSerializer(serializers.ModelSerializer):
+class VoyageCRUDEnslavedSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
 		fields=['id','documented_name']
 
+class VoyageCRUDEnslavementRelationTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=EnslavementRelationType
+		fields='__all__'
 
-@extend_schema_serializer(
-	examples = [
-         OpenApiExample(
-            'Ex. 1: numeric range',
-            summary='Filter on a numeric range for a nested variable',
-            description='Here, we search for voyages whose imputed year of arrival at the principal port of disembarkation was between 1820 & 1850. We choose this variable as it is one of the most fully-populated numeric variables in the dataset.',
-            value={
-				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year': [1820,1850]
-			},
-			request_only=True,
-			response_only=False,
-        ),
-		OpenApiExample(
-            'Ex. 2: array of str vals',
-            summary='OR Filter on exact matches of known str values',
-            description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for voyages that are believed to have disembarked captives principally in Barbados or Cuba',
-            value={
-				'voyage_itinerary__imp_principal_region_slave_dis__geo_location__name': ['Barbados','Cuba']
-			},
-			request_only=True,
-			response_only=False,
-        )
-    ]
-)
-class VoyageSerializer(serializers.ModelSerializer):
-	voyage_zotero_connections=VoyageZoteroVoyageConnectionSerializer(many=True,read_only=True)
-	voyage_itinerary=VoyageItinerarySerializer(many=False)
-	voyage_dates=VoyageDatesSerializer(many=False)
-	voyage_enslaver_connection=VoyageEnslaverConnectionSerializer(many=True,read_only=True)
-	voyage_enslaved_people=VoyageEnslavedSerializer(many=True,read_only=True)
-	voyage_crew=VoyageCrewSerializer(many=False)
-	voyage_ship=VoyageShipSerializer(many=False)
-	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False)
-	#WHY! WHY??? THERE'S ONLY ONE OUTCOME PER VOYAGE! WHY??????
-	voyage_name_outcome=VoyageOutcomeSerializer(many=True,read_only=True)
+class VoyageCRUDEnslavementRelationsSerializer(WritableNestedModelSerializer):
+	relation_enslaved=VoyageCRUDEnslavedSerializer(many=True,read_only=True)
+	relation_enslavers=VoyageCRUDEnslaverInRelationSerializer(many=True)
+	relation_type=VoyageCRUDEnslavementRelationTypeSerializer(many=False,read_only=True)
+	class Meta:
+		model=EnslavementRelation
+		fields='__all__'
+
+
+
+class VoyageCRUDGroupingsSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=VoyageGroupings
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VoyageGroupings.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(VoyageCRUDGroupingsSerializer, self).create(validated_data)
+
+class AfricanCRUDInfoSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=AfricanInfo
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return AfricanInfo.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(AfricanCRUDInfoSerializer, self).create(validated_data)
+
+
+class CRUDCargoTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=CargoType
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return CargoType.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDCargoTypeSerializer, self).create(validated_data)
+
+class CRUDCargoUnitSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=CargoUnit
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return CargoUnit.objects.get(name=validated_data['name'])
+		except ObjectDoesNotExist:
+			return super(CRUDCargoUnitSerializer, self).create(validated_data)
+
+class VoyageCRUDCargoConnectionSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
+	cargo=CRUDCargoTypeSerializer(many=False,allow_null=True)
+	unit=CRUDCargoUnitSerializer(many=False,allow_null=True)
+	amount=serializers.DecimalField(allow_null=True,max_digits=7,decimal_places=2)
+	class Meta:
+		model=VoyageCargoConnection
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return VoyageCargoConnection.objects.get(voyage_id=validated_data['voyage'],cargo__name=validated_data['cargo']['name'])
+		except ObjectDoesNotExist:
+			return super(VoyageCRUDCargoConnectionSerializer, self).create(validated_data)
+
+
+class VoyageCRUDSerializer(WritableNestedModelSerializer):
+	voyage_source_connections=VoyageCRUDVoyageSourceConnectionSerializer(many=True,allow_null=True)
+	voyage_itinerary=VoyageCRUDItinerarySerializer(many=False,allow_null=True)
+	voyage_dates=VoyageCRUDDatesSerializer(many=False,allow_null=True)
+	voyage_enslavement_relations=VoyageCRUDEnslavementRelationsSerializer(many=True,allow_null=True)
+	voyage_crew=VoyageCRUDCrewSerializer(many=False,allow_null=True)
+	voyage_ship=VoyageCRUDShipSerializer(many=False,allow_null=True)
+	voyage_slaves_numbers=VoyageCRUDSlavesNumbersSerializer(many=False,allow_null=True)
+	voyage_outcome=VoyageCRUDOutcomeSerializer(many=False,allow_null=True)
+	voyage_groupings=VoyageCRUDGroupingsSerializer(many=False,allow_null=True)
+	cargo=VoyageCRUDCargoConnectionSerializer(many=True,allow_null=True)
+	african_info=AfricanCRUDInfoSerializer(many=True,allow_null=True)
 	class Meta:
 		model=Voyage
-		exclude=['voyage_sources']
+		fields='__all__'

@@ -34,7 +34,6 @@ urlpatterns = [
     path('geo/',include('geo.urls')),
     path('blog/',include('blog.urls')),
     path('common/',include('common.urls')),
-#     path('contribute/',include('contribute.urls')),
     path('captcha/', include('captcha.urls')),
     path('filebrowser/', site.urls),
     path('tinymce/', site.urls),

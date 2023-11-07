@@ -11,7 +11,7 @@ def year_mod(the_year, mod, start):
 
 class NamedModelAbstractBase(models.Model):
 	
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255,unique=True)
 
     def __str__(self):
         return self.__unicode__()
@@ -22,8 +22,7 @@ class NamedModelAbstractBase(models.Model):
     class Meta:
         abstract = True
 
-
-class SparseDate(models.Model):
+class SparseDateAbstractBase(models.Model):
 	day = models.IntegerField(
 		null=True,
 		blank=True,
@@ -42,6 +41,10 @@ class SparseDate(models.Model):
 
 	def __str__(self):
 		return ",".join([str(i) if i is not None else "" for i in [self.month,self.day,self.year]])
+		
+	class Meta:
+		abstract = True
+		ordering=['year','month','day']
 
 # Create your models here.
 class SavedQuery(models.Model):

@@ -15,7 +15,7 @@ class Command(BaseCommand):
 			"Institution",
 			"Post",
 			"Voyage",
-			"ZoteroSource"
+			"Source"
 		]
 		
 		for base_obj_name in base_obj_names:

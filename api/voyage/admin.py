@@ -4,9 +4,7 @@ from past.models import *
 from document.models import *
 import nested_admin
 from common.models import *
-# 
-# # 
-# # 
+
 class VoyageCrewInline(nested_admin.NestedStackedInline):
 	model=VoyageCrew
 	max_num=1
@@ -15,6 +13,18 @@ class VoyageCrewInline(nested_admin.NestedStackedInline):
 		'crew_voyage_outset',
 		'crew_died_complete_voyage'
 	]
+	verbose_name_plural="Voyage Crew"
+	can_delete=False
+	
+class VoyageSparseDateAdmin(nested_admin.NestedModelAdmin):
+	model=VoyageSparseDate
+	max_num=1
+	search_fields=['month','day','year']
+	list_fields=['month','day','year']
+	classes=['collapse']
+	class Meta:
+		fields='__all__'
+
 
 class VoyageDatesInline(nested_admin.NestedStackedInline):
 	model = VoyageDates
@@ -34,163 +44,61 @@ class VoyageDatesInline(nested_admin.NestedStackedInline):
 		'imp_departed_africa_sparsedate',
 		'imp_arrival_at_port_of_dis_sparsedate'
 	]
-
-# 	inlines=SparseDateInline
+	can_delete=False
 	
-	
-	exclude = [
-# 		'voyage_began_sparsedate',
-# 		'slave_purchase_began_sparsedate',
-# 		'vessel_left_port_sparsedate',
-# 		'first_dis_of_slaves_sparsedate',
-# 		'date_departed_africa_sparsedate',
-# 		'arrival_at_second_place_landing_sparsedate',
-# 		'third_dis_of_slaves_sparsedate',
-# 		'departure_last_place_of_landing_sparsedate',
-# 		'voyage_completed_sparsedate',
-# 		'imp_voyage_began_sparsedate',
-# 		'imp_departed_africa_sparsedate',
-# 		'imp_arrival_at_port_of_dis_sparsedate',
-# 		'imp_length_home_to_disembark',
-# 		'imp_length_leaving_africa_to_disembark',
-		'voyage_began',
-		'slave_purchase_began',
-		'vessel_left_port',
-		'first_dis_of_slaves',
-		'date_departed_africa',
-		'arrival_at_second_place_landing',
-		'third_dis_of_slaves',
-		'departure_last_place_of_landing',
-		'voyage_completed',
-		'imp_voyage_began',
-		'imp_departed_africa',
-		'imp_arrival_at_port_of_dis',
-	]
-	verbose_name_plural="Voyage Dates"
-
-class PlaceAdmin(admin.ModelAdmin):
-	model=Place
-# 	readonly_fields=[
-# 		'place',
-# 		'region',
-# 		'value',
-# 		'show_on_main_map',
-# 		'show_on_voyage_map',
-# 		'geo_location'
-# 	]
-	search_fields=['place']
-
-class RegionAdmin(admin.ModelAdmin):
-	model=Region
-# 	readonly_fields=[
-# 		'region',
-# 		'broad_region',
-# 		'value',
-# 		'show_on_map',
-# 		'show_on_main_map',
-# 		'geo_location'
-# 	]
-	search_fields=['region']
-
-class BroadRegionAdmin(admin.ModelAdmin):
-	model=BroadRegion
-# 	readonly_fields=[
-# 		'broad_region',
-# 		'value',
-# 		'show_on_map',
-# 		'geo_location'
-# 	]
-	search_fields=['broad_region']
-
-
-
-
-# # 
-class VoyageSlavesNumbersInline(nested_admin.NestedStackedInline):
+class VoyageSlavesNumbersInline(nested_admin.NestedTabularInline):
 	model=VoyageSlavesNumbers
-
 	classes = ['collapse']
 	max_num=1
-# 
-# class ParticularOutcomeAdmin(admin.ModelAdmin):
-# 	list_display = ('name','value')
-# 	list_display_links = ('name',)
-# 	model=ParticularOutcome
-# 	search_fields=['name']
-# 	classes = ['collapse']
-# 
-# class SlavesOutcomeAdmin(admin.ModelAdmin):
-# 	list_display = ('name','value')
-# 	list_display_links = ('name',)
-# 	model=SlavesOutcome
-# 	search_fields=['name']
-# 	classes = ['collapse']
-# 	
-# class VesselCapturedOutcomeAdmin(admin.ModelAdmin):
-# 	list_display = ('name','value')
-# 	list_display_links = ('name',)
-# 	model=VesselCapturedOutcome
-# 	search_fields=['name']
-# 	classes = ['collapse']
-# 
-# class OwnerOutcomeAdmin(admin.ModelAdmin):
-# 	list_display = ('name','value')
-# 	list_display_links = ('name',)
-# 	model=OwnerOutcome
-# 	search_fields=['name']
-# 	classes = ['collapse']
-# 
-# class ResistanceAdmin(admin.ModelAdmin):
-# 	list_display = ('name','value')
-# 	list_display_links = ('name',)
-# 	model=Resistance
-# 	search_fields=['name']
-# 	classes = ['collapse']
-# # 
-# # ##Autocomplete won't work on this
-# # ##Until we update the voyages table to explicitly point at outcomes
-# # ##Which I'm still unclear about why it wasn't done that way
-# # ##But the number of selections on the outcome table is small enough
-# # ##That we don't hit any performance issues here
-# # ##So it can stay for now
-# # ##Until I figure out what's going to break when I migrate that.
-# # ##It is worth saying that I think it's currently broken
-# # ##Insofar as you can apply more than one outcome entry to each voyage
-# # ##But it doesn't appear that this has ever been done
-# # ##which on this admin page results in multiple possible outcome fields being allowed
-class VoyageOutcomeInline(nested_admin.NestedStackedInline):
-	max_num = 0
-	classes = ['collapse']
-	model=VoyageOutcome
-# 
-# class NationalityAdmin(admin.ModelAdmin):
-# 	search_fields=['name']
-# 	model=Nationality
-# 
-# class TonTypeAdmin(admin.ModelAdmin):
-# 	search_fields=['name']
-# 	model=TonType
-# 
-# class RigOfVesselAdmin(admin.ModelAdmin):
-# 	model=RigOfVessel
-# 	search_fields=['name']
+	can_delete=False
 
-# 
+class ParticularOutcomeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=ParticularOutcome
+	search_fields=['name']
+	classes = ['collapse']
+
+class SlavesOutcomeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=SlavesOutcome
+	search_fields=['name']
+	classes = ['collapse']
+	
+class VesselCapturedOutcomeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=VesselCapturedOutcome
+	search_fields=['name']
+	classes = ['collapse']
+
+class OwnerOutcomeAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=OwnerOutcome
+	search_fields=['name']
+	classes = ['collapse']
+
+class ResistanceAdmin(admin.ModelAdmin):
+	list_display = ('name','value')
+	list_display_links = ('name',)
+	model=Resistance
+	search_fields=['name']
+	classes = ['collapse']
+
 class VoyageShipInline(nested_admin.NestedStackedInline):
 	model = VoyageShip
 	max_num = 1
-# 	autocomplete_fields=[
-# 		'nationality_ship',
-# 		'ton_type',
-# 		'rig_of_vessel',
-# 		'vessel_construction_place',
-# 		'vessel_construction_region',
-# 		'registered_place',
-# 		'registered_region',
-# 		'imputed_nationality'
-# 	]
+	autocomplete_fields=(
+		'vessel_construction_place',
+		'vessel_construction_region',
+		'registered_place',
+		'registered_region'
+	)
 	classes = ['collapse']
-# 
+	verbose_name_plural="Voyage Ship"
+
 class VoyageItineraryInline(nested_admin.NestedStackedInline):
 	model = VoyageItinerary
 	max_num = 1
@@ -232,6 +140,7 @@ class VoyageItineraryInline(nested_admin.NestedStackedInline):
 		'imp_principal_port_slave_dis',
 		'imp_broad_region_slave_dis'
 	]
+	verbose_name_plural="Itinerary"
 	exclude= [
 		'port_of_call_before_atl_crossing',
 		'number_of_ports_of_call',
@@ -242,39 +151,18 @@ class VoyageItineraryInline(nested_admin.NestedStackedInline):
 		
 	]
 	classes = ['collapse']
-# 
+	can_delete=False
 
-# class VoyageSourcesConnectionInline(nested_admin.NestedStackedInline):
-# 	model=VoyageSourcesConnection
-# 	autocomplete_fields=['source']
-# 	fields=[
-# 		'source',
-# 		'text_ref'
-# 	]
-# 	classes = ['collapse']
-# 	extra=0
-# # 
-class VoyageSourcesAdmin(admin.ModelAdmin):
-	search_fields=['full_ref','short_ref']
-	list_display=['short_ref','full_ref']
-	model=VoyageSources
-# 
 class VoyageOutcomeInline(nested_admin.NestedStackedInline):
 	model=VoyageOutcome
 	extra=0
-# 	autocomplete_fields=[
-# 		'particular_outcome',
-# 		'resistance',
-# 		'outcome_slaves',
-# 		'vessel_captured_outcome',
-# 		'outcome_owner'
-# 	]
 	classes = ['collapse']
+	can_delete=False
 
-class VoyageZoteroConnectionInline(nested_admin.NestedStackedInline):
-	model=ZoteroVoyageConnection
-	autocomplete_fields=['zotero_source']
-# 	fields=['__all__',]
+class SourceVoyageConnectionInline(nested_admin.NestedStackedInline):
+	ordering=['id']
+	model=SourceVoyageConnection
+	autocomplete_fields=['source']
 	extra=0
 	classes=['collapse']
 
@@ -287,15 +175,13 @@ class EnslavedInRelationInline_b(nested_admin.NestedStackedInline):
 # 	sortable_field_name='id'
 	extra=0
 
+
 class EnslaverInRelationInline_b(nested_admin.NestedStackedInline):
 	model=EnslaverInRelation
 	autocomplete_fields=[
 		'enslaver_alias'
 	]
-# 	sortable_field_name='id'
-# 	readonly_fields=['relation']
-# 	classes = ['collapse']
-# 	exclude=['order']
+	verbose_name_plural = "Enslavers"
 	extra=0
 
 
@@ -305,50 +191,53 @@ class EnslavementRelationInline(nested_admin.NestedStackedInline):
 		EnslavedInRelationInline_b,
 		EnslaverInRelationInline_b
 	]
-# 	sortable_field_name='id'
-# 	classes = ['collapse']
+	classes = ['collapse']
 	extra=0
 	exclude=['source','place','text_ref','unnamed_enslaved_count','date','amount','is_from_voyages']
 
 
+class CargoTypeAdmin(admin.ModelAdmin):
+	search_fields=['name']
+	list_fields=['name']
 
-# class EnslaverAliasConnectionInline(nested_admin.NestedStackedInline):
-# 	model = EnslaverVoyageConnection
-# # 	readonly_fields=['enslaver_alias','role','order']
-# 	autocomplete_fields=['enslaver_alias',]
-# 	classes = ['collapse']
-# 	extra=0
+class CargoConnectionInline(nested_admin.NestedStackedInline):
+	model=VoyageCargoConnection
+	autocomplete_fields=['cargo']
+	classes = ['collapse']
+	extra=0
+
+
+class AfricanInfoInline(nested_admin.NestedStackedInline):
+	model = Voyage.african_info.through
+	classes = ['collapse']
+	extra=0
 
 class VoyageAdmin(nested_admin.NestedModelAdmin):
 	inlines=(
 		VoyageDatesInline,
 		VoyageItineraryInline,
-# 		VoyageSourcesConnectionInline,
-		VoyageZoteroConnectionInline,
-# 		EnslaverAliasConnectionInline,
+		SourceVoyageConnectionInline,
 		EnslavementRelationInline,
 		VoyageCrewInline,
 		VoyageOutcomeInline,
 		VoyageShipInline,
 		VoyageSlavesNumbersInline,
+		AfricanInfoInline,
+		CargoConnectionInline
 	)
+	exclude=['african_info_voyages']
 	fields=['voyage_id','dataset','voyage_in_cd_rom']
 	list_display=('voyage_id',)
 	search_fields=('voyage_id',)
-	model=Voyage
-# 
-# 
+	
 admin.site.register(Voyage, VoyageAdmin)
-# admin.site.register(VoyageDates)
-admin.site.register(Place,PlaceAdmin)
-admin.site.register(Region,RegionAdmin)
-admin.site.register(BroadRegion,BroadRegionAdmin)
-admin.site.register(VoyageSources, VoyageSourcesAdmin)
-# admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
-# admin.site.register(SlavesOutcome, SlavesOutcomeAdmin)
-# admin.site.register(VesselCapturedOutcome, VesselCapturedOutcomeAdmin)
-# admin.site.register(OwnerOutcome, OwnerOutcomeAdmin)
-# admin.site.register(Resistance, ResistanceAdmin)
-# admin.site.register(Nationality, NationalityAdmin)
-# admin.site.register(TonType, TonTypeAdmin)
-admin.site.register(RigOfVessel)
+admin.site.register(VoyageSparseDate,VoyageSparseDateAdmin)
+admin.site.register(ParticularOutcome, ParticularOutcomeAdmin)
+admin.site.register(SlavesOutcome, SlavesOutcomeAdmin)
+admin.site.register(VesselCapturedOutcome, VesselCapturedOutcomeAdmin)
+admin.site.register(OwnerOutcome, OwnerOutcomeAdmin)
+admin.site.register(Resistance, ResistanceAdmin)
+admin.site.register(Nationality)
+admin.site.register(CargoType,CargoTypeAdmin)
+admin.site.register(CargoUnit)
+admin.site.register(AfricanInfo)

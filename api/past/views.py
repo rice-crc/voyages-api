@@ -6,7 +6,7 @@ from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from django.views.generic.base import TemplateView
 import urllib
@@ -15,6 +15,7 @@ import requests
 import time
 from .models import *
 from .serializers import *
+from .serializers_READONLY import *
 import pprint
 from common.reqs import *
 from collections import Counter
@@ -158,7 +159,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(res,safe=False)
 
-#LONG-FORM TABULAR ENDPOINT.@extend_schema(exclude=True)
+#LONG-FORM TABULAR ENDPOINT
 class EnslaverList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -291,8 +292,9 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		sf=list(selected_fields)
 		if len(error_messages)==0:
 			output_dicts={}
-			for s in sf:
-				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+			for i in range(len(sf)):
+				output_dicts[sf[i]]=[v[i] for v in vals]
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dicts,safe=False)
 		else:
@@ -312,7 +314,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			queryset,
 			self,
 			request,
-			Enslaved_options,
+			Enslaver_options,
 			auto_prefetch=True,
 			retrieve_all=True
 		)
@@ -320,8 +322,57 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		sf=list(selected_fields)
 		if len(error_messages)==0:
 			output_dicts={}
-			for s in sf:
-				output_dicts[s]=[i[0] for i in queryset.values_list(s)]
+			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+			for i in range(len(sf)):
+				output_dicts[sf[i]]=[v[i] for v in vals]
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(output_dicts,safe=False)
+		else:
+			print("failed\n+++++++")
+			print(' | '.join(error_messages))
+			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+@extend_schema(exclude=True)
+class EnslavementRelationsDataFrames(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		print("+++++++\nusername:",request.auth.user)
+		st=time.time()
+		params=dict(request.data)
+		queryset=EnslavementRelation.objects.all()
+		enslavementrelationoptions={
+			'id':{'type':'integer'},
+			'voyage__voyage_id':{'type':'integer'},
+			'voyage__id':{'type':'integer'},
+			'relation_type__name':{'type':'string'},
+			'voyage__voyage_ship__ship_name':{'type':'string'},
+			'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name':{'type':'string'},
+			'voyage__voyage_itinerary__imp_principal_port_slave_dis__name':{'type':'string'},
+			'voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year':{'type':'integer'},
+			'enslaved_in_relation__enslaved__id':{'type':'integer'},
+			'enslaved_in_relation__enslaved__documented_name':{'type':'string'},
+			'enslaved_in_relation__enslaved__age':{'type':'integer'},
+			'enslaved_in_relation__enslaved__gender':{'type':'string'},
+			'relation_enslavers__enslaver_alias__identity__id':{'type':'integer'},
+			'relation_enslavers__enslaver_alias__identity__principal_alias':{'type':'string'},
+			'relation_enslavers__roles__name':{'type':'name'}
+		}
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			enslavementrelationoptions,
+			auto_prefetch=True,
+			retrieve_all=True
+		)
+		queryset=queryset.order_by('id')
+		sf=list(selected_fields)
+		if len(error_messages)==0:
+			output_dicts={}
+			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+			for i in range(len(sf)):
+				output_dicts[sf[i]]=[v[i] for v in vals]
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(output_dicts,safe=False)
 		else:
@@ -402,17 +453,17 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		if zoomlevel=='place':
 			enslaved_values_list=queryset.values_list(
 				'language_group__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__geo_location__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__uuid',
-				'post_disembark_location__geo_location__uuid'
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__uuid',
+				'post_disembark_location__uuid'
 			)
 			graphname='place'
 		elif zoomlevel=='region':
 			enslaved_values_list=queryset.values_list(
 				'language_group__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__geo_location__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__geo_location__uuid',
-				'post_disembark_location__geo_location__uuid'
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__uuid',
+				'post_disembark_location__uuid'
 			)
 			graphname='region'
 			
@@ -459,7 +510,69 @@ class PASTNetworks(generics.GenericAPIView):
 		j=json.loads(r.text)
 		return JsonResponse(j,safe=False)
 
-		
 
+#CONTRIBUTIONS
+
+
+class EnslavementRelationCREATE(generics.CreateAPIView):
+	'''
+	Create an enslavement relation without a pk
+	'''
+	queryset=EnslavementRelation.objects.all()
+	serializer_class=EnslavementRelationCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslavementRelationRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	Fetch, update, or delete an enslavement relation record with their pk
+	'''
+	queryset=EnslavementRelation.objects.all()
+	serializer_class=EnslavementRelationCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslaverCREATE(generics.CreateAPIView):
+	'''
+	Create enslaver without a pk
+	'''
+	queryset=EnslaverIdentity.objects.all()
+	serializer_class=EnslaverCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslaverRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	Fetch, update, or delete an enslaver record with their pk
+	'''
+	queryset=EnslaverIdentity.objects.all()
+	serializer_class=EnslaverCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslavedCREATE(generics.CreateAPIView):
+	'''
+	Create enslaver without a pk
+	'''
+	queryset=Enslaved.objects.all()
+	serializer_class=EnslavedCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+
+class EnslavedRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	Fetch, update, or delete an enslaver record with their pk
+	'''
+	queryset=Enslaved.objects.all()
+	serializer_class=EnslavedCRUDSerializer
+	lookup_field='enslaved_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
 
 

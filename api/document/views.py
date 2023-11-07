@@ -9,7 +9,7 @@ from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
 from collections import Counter
 import urllib
@@ -27,35 +27,36 @@ import re
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from common.static.ZoteroSource_options import ZoteroSource_options
+from common.static.Source_options import Source_options
 
-class ZoteroSourceList(generics.GenericAPIView):
+class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=ZoteroSourceSerializer
+	serializer_class=SourceSerializer
 	def post(self,request):
 		'''
 		Voyages has always been built on scholarship, with references to many different archival sources. In the legacy version of the site, the sources were organized with a unique short reference ("short_ref") and a full reference ("full_ref"), like OMNO & Outward Manifests for New Orleans. When these sources were connected to Voyages, they would oftentimes be connected along with a field called "text_ref" that pointed at a specific location in the archive, or page number in the book.
 		
 		In this new build, we have moved all of our sources over to Zotero where they can be cleaned up -- the data got messy over the years, because bibliographical data is notoriously difficult to format. We now effectively have 2 unique keys: a Zotero ID and a "short_ref". We have also created records for individual pages that point at these new sources, because our work with several libraries on the South Seas Co. documents for an NEH grant means that we have images and page-level data for some new sources, allowing for unprecedented granularity in our work with archives.
 		
-		These changes necessitated that we create Docs as its own django app and endpoint. Now, each "ZoteroSource" points at one or more Voyages, Enslaved People, or Enslavers. In turn, some of these Sources also have page-level metadata and links to IIIF images. For more information on the IIIF specification, visit https://iiif.io/api/index.html
+		These changes necessitated that we create Docs as its own django app and endpoint. Now, each "Source" points at one or more Voyages, Enslaved People, or Enslavers. In turn, some of these Sources also have page-level metadata and links to IIIF images. For more information on the IIIF specification, visit https://iiif.io/api/index.html
 		'''
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
-		queryset=ZoteroSource.objects.all()
+		queryset=Source.objects.all()
 		queryset=queryset.order_by('id')
+		source_options=getJSONschema('Source',hierarchical=False)
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
 			request,
-			ZoteroSource_options,
+			source_options,
 			retrieve_all=False
 		)
 		
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}
-			read_serializer=ZoteroSourceSerializer(queryset,many=True)
+			read_serializer=SourceSerializer(queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
 			resp.headers['total_results_count']=headers['total_results_count']
@@ -76,17 +77,18 @@ def Gallery(request,collection_id=None,pagenumber=1):
 		
 		#let's only get the zotero objects that have pages
 		#otherwise, no need for the gallery -- and it lards the gallery up
-		docs=ZoteroSource.objects.order_by().all().filter(~Q(page_connection=None))
+		sources=Source.objects.order_by().all().filter(~Q(page_connections=None))
 		
 		other_collections=[]
-		for collection_tuple in docs.values_list(
-			"legacy_source__id",
-			"legacy_source__short_ref"
+		page_collection_id=None
+		page_collection_label="No Collection Selected"
+		for collection_tuple in sources.values_list(
+			"short_ref__id",
+			"short_ref__name"
 		).distinct():
-			
 			this_collection_id,this_collection_label=collection_tuple
-			
 			if this_collection_id==collection_id:
+				print(this_collection_id,this_collection_label)
 				page_collection_label=this_collection_label
 				page_collection_id=this_collection_id
 			else:
@@ -95,26 +97,18 @@ def Gallery(request,collection_id=None,pagenumber=1):
 					"label":this_collection_label
 				})
 			
-		if collection_id is None:
-			
-			page_collection_id=min(docs.values_list('legacy_source__id'))[0]
-			
-			page_collection_label=docs.filter(legacy_source__id=page_collection_id).first().legacy_source.short_ref
-			
-		docs=docs.filter(legacy_source__id=collection_id).distinct()
-		docs=docs.order_by('id')
-		docs_paginator=Paginator(docs, 12)
-		this_page=docs_paginator.get_page(pagenumber)
-		
-# 		print(other_collections)
+		sources=sources.filter(short_ref__id=collection_id).distinct()
+		sources=sources.order_by('id')
+		sources_paginator=Paginator(sources, 12)
+		this_page=sources_paginator.get_page(pagenumber)
 		
 		return render(
 			request,
 			"gallery.html",
 			{
+				"page_collection_label":page_collection_label,
 				"page_obj": this_page,
 				"other_collections":other_collections,
-				"page_collection_label":page_collection_label,
 				"page_collection_id":page_collection_id
 			}
 		)
@@ -127,13 +121,61 @@ def Gallery(request,collection_id=None,pagenumber=1):
 @extend_schema(
         exclude=True
     )
-def z_source_page(request,zotero_source_id=1):
+def source_page(request,source_id=1):
 	
 	if request.user.is_authenticated:
-# 		print(zotero_source_id)
-		doc=ZoteroSource.objects.get(id=zotero_source_id)
-		
-# 		print(doc)
-		return render(request, "single_doc.html", {'zs':doc})
+		source=Source.objects.get(id=source_id)
+		return render(request, "single_doc.html", {'source':source})
 	else:
 		return HttpResponseForbidden("Forbidden")
+
+class ShortRefGET(generics.RetrieveAPIView):
+	'''
+	GET Short Ref using PK
+	
+	These used to be unique values on the sources table in Voyages. In that legacy model, we had a short_ref and a full_ref for each source, and then, in our union table with voyages, we had a text_ref field where we would put page numbers, or box and folder numbers, etc. However, this led to a good deal of schema abuse (duplication, inconsistent use of fields, etc.)
+	
+	In the new model, we maintain the uniqueness of Short Ref's but we allow many Source objects to connect to these short ref's. The new source objects have much more, and much more structured data, being managed remotely in Zotero. Each source therefore now has an additional unique identifier: its Zotero Item ID.
+	'''
+	queryset=ShortRef.objects.all()
+	serializer_class=ShortRefSerializer
+	lookup_field='name'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+# class PageCREATE(generics.CreateAPIView):
+# 	'''
+# 	CREATE Page without a pk
+# 	'''
+# 	queryset=Page.objects.all()
+# 	serializer_class=PageSerializer
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+
+	
+class SourceCREATE(generics.CreateAPIView):
+	'''
+	CREATE Source without a pk
+	
+	You must provide a ShortRef, which are our legacy short-text unique identifiers for documentary sources. A valid (< 100 chars) value in a nested short_ref field will create a new short ref if it does not already exist.
+	
+	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceCRUDSerializer
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+	
+class SourceRUD(generics.RetrieveUpdateDestroyAPIView):
+	'''
+	RETRIEVE, UPDATE, OR DELETE SOURCE.
+	
+	The lookup field for sources is "id".
+	
+	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]

@@ -1,41 +1,43 @@
-<h2>{{ zs.zotero_title }}</h2>
-<h3>{{ zs.zotero_date }} --> <a href="/admin/document/zoterosource/{{ zs.id }}/change/" target="_blank">Edit</a></h3>
-<p>Zotero link: <a href="{{ zs.zotero_web_page_url }}">{{ zs.zotero_web_page_url }}</a></p>
-<p>Library collection item listing: <a href="{{ zs.item_url }}">{{ zs.item_url }}</a></p>
+<h2>{{ source.title }}</h2>
+<h3><a href="/admin/document/source/{{ source.id }}/change/" target="_blank">Edit</a></h3>
+<p><a href="https://www.zotero.org/groups/{{source.zotero_group_id}}/sv-docs/items/{{source.zotero_item_id}}/item-list">Zotero Item Link</a></p>
+{% if source.item_url %}
+<p>Library collection item listing: <a href="{{ source.item_url }}">{{ source.item_url }}</a></p>
+{% endif %}
 <hr/>
 <h4>Legacy Voyages Source Data</h4>
 
-{{ zs.legacy_source.short_ref }}
+{{ source.short_ref__name }}
 <br/>
-{{ zs.legacy_source.full_ref }}
+{{ source.title }}
 </p>
 <hr/>
 <h4>Pages</h4>
 
 <ol>
 
-{% for spc in zs.page_connection.all %}
+{% for spc in source.page_connections.all %}
 <table border=1>
 	<tr>
 		<td>
 			<a href="{{ spc.source_page.page_url }}">Item page</a>
 			<br/>
 
-			{% if spc.source_page.iiif_baseimage_url %}
-				Link to full image: <br/><a href="{{ spc.source_page.iiif_baseimage_url }}" target="_blank"><img src="{{ spc.source_page.square_thumbnail }}"></a></li></ul>
+			{% if spc.page.iiif_baseimage_url %}
+				Link to full image: <br/><a href="{{ spc.page.iiif_baseimage_url }}" target="_blank"><img src="{{ spc.page.square_thumbnail }}"></a></li></ul>
 			{% endif %}
 		</td>
+		{% if spc.page.transcription %}
 		<td>
-			{% if spc.source_page.transcription %}
-				<p><b><a href="/admin/document/sourcepage/{{ spc.source_page.id }}/change/" target="_blank">Edit Transcript Here</a></b></p>
+				<p><b><a href="/admin/document/page/{{ spc.page.id }}/change/" target="_blank">Edit Transcript Here</a></b></p>
 				<p>
-				 {{ spc.source_page.transcription }}
+				 {{ spc.page.transcription }}
 				</p>
 				<p></p>
-			{% endif %}
+			
 		</td>
+		{% endif %}
 	</tr>
-	
 </table>
 {% endfor %}
 
@@ -44,13 +46,13 @@
 <h4>Linked entities</h4>
 
 <ol>
-{% for zsvc in zs.zotero_voyage_connections.all %}
-	<li>Voyage #{{ zsvc.voyage.id }} : {{ zsvc.voyage.ship.ship_name}} --> <a href="/admin/voyage/voyage/{{ zsvc.voyage.id }}/change/" target="_blank">Edit</a></li>
+{% for svc in source.source_voyage_connections.all %}
+	<li>Voyage #{{ svc.voyage.id }} : {{ svc.voyage.ship.ship_name}} --> <a href="/admin/voyage/voyage/{{ svc.voyage.id }}/change/" target="_blank">Edit</a></li>
 {% endfor %}
 </ol>
 
 <ol>
-{% for zsepc in zs.zotero_enslaved_connections.all %}
-	<li>Person: {{ zsepc.enslaved.id }} : {{ zsepc.enslaved.documented_name }} --> <a href="/admin/past/enslaved/{{ zsepc.enslaved.id }}/change/" target="_blank">Edit</a></li>
+{% for sepc in source.source_enslaved_connections.all %}
+	<li>Person: {{ sepc.enslaved.id }} : {{ sepc.enslaved.documented_name }} --> <a href="/admin/past/enslaved/{{ sepc.enslaved.id }}/change/" target="_blank">Edit</a></li>
 {% endfor %}
 </ol>

@@ -3,49 +3,68 @@ from document.models import *
 from past.models import *
 from voyage.models import *
 
-class SourcePageAdmin(admin.ModelAdmin):
-	readonly_fields=['page_url','image_filename','iiif_manifest_url','iiif_baseimage_url']
-	search_fields=['page_url','image_filename']
-	list_display=['page_url','image_filename']
-	model=SourcePage
+# class PageAdmin(admin.ModelAdmin):
+# 	readonly_fields=['page_url','image_filename','iiif_manifest_url','iiif_baseimage_url']
+# 	search_fields=['page_url','image_filename']
+# 	list_display=['page_url','image_filename']
+# 	model=Page
 
-class SourcePageConnectionInline(admin.StackedInline):
-	model=SourcePageConnection
-	extra=0
-	fields=['source_page']
-	classes = ['collapse']
+class ShortRefAdmin(admin.ModelAdmin):
+	model=ShortRef
+	search_fields=('name',)
+	list_display=('name',)
 
-class ZoteroEnslavedConnectionInline(admin.StackedInline):
-	model=ZoteroEnslavedConnection
+class SourceEnslavedConnectionInline(admin.StackedInline):
+	model=SourceEnslavedConnection
 	autocomplete_fields=['enslaved']
-	exclude_fields=['zotero_source']
+	exclude_fields=['source']
 	extra=0
 	classes=['collapse']
+	verbose_name_plural="Enslaved People"
 
-class ZoteroEnslaverConnectionInline(admin.StackedInline):
-	model=ZoteroEnslaverConnection
+class SourceEnslaverConnectionInline(admin.StackedInline):
+	model=SourceEnslaverConnection
 	autocomplete_fields=['enslaver']
-	exclude_fields=['zotero_source']
+	exclude_fields=['source']
 	extra=0
 	classes=['collapse']
-
-class ZoteroVoyageConnectionInline(admin.StackedInline):
-	model=ZoteroVoyageConnection
+	verbose_name_plural="Enslavers"
+	
+class SourceVoyageConnectionInline(admin.StackedInline):
+	model=SourceVoyageConnection
 	autocomplete_fields=['voyage']
-	exclude_fields=['zotero_source']
+	exclude_fields=['source']
 	extra=0
 	classes=['collapse']
+	verbose_name_plural="Voyages"
 
-class ZoteroSourceAdmin(admin.ModelAdmin):
-	model=ZoteroSource
+class DocSparseDateAdmin(admin.ModelAdmin):
+	model=DocSparseDate
+	search_fields=['m','d','y']
+
+class SourceEnslavementRelationConnectionInline(admin.StackedInline):
+	model=SourceEnslavementRelationConnection
+	autocomplete_fields=['enslavement_relation']
+	extra=0
+	search_fields=['id']
+	classes=['collapse']
+	verbose_name_plural="Enslavement Relations"
+
+
+class SourceAdmin(admin.ModelAdmin):
+	model=Source
 	inlines=[
-		ZoteroEnslavedConnectionInline,
-		ZoteroEnslaverConnectionInline,
-		ZoteroVoyageConnectionInline
+		SourceEnslavedConnectionInline,
+		SourceEnslaverConnectionInline,
+		SourceVoyageConnectionInline,
+		SourceEnslavementRelationConnectionInline
 	]
-	search_fields=['zotero_title','zotero_date','short_ref']
-	readonly_fields=['item_url','legacy_source']
-	list_display=('zotero_title','zotero_date')
+	search_fields=['title','zotero_item_id']
+	autocomplete_fields=['short_ref','date']
+	readonly_fields=['item_url','zotero_item_id','zotero_group_id']
+	list_display=('title','short_ref','zotero_item_id')
 
-admin.site.register(ZoteroSource, ZoteroSourceAdmin)
-admin.site.register(SourcePage,SourcePageAdmin)
+admin.site.register(Source, SourceAdmin)
+admin.site.register(ShortRef,ShortRefAdmin)
+admin.site.register(DocSparseDate,DocSparseDateAdmin)
+# admin.site.register(Page,PageAdmin)

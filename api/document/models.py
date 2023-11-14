@@ -63,11 +63,11 @@ class SourcePageConnection(models.Model):
 		related_name='source_connections',
 		on_delete=models.CASCADE
 	)
-# 	order=models.IntegerField(
-# 		"Document page order",
-# 		null=False,
-# 		blank=False
-# 	)
+	order=models.IntegerField(
+		"Document page order",
+		null=True,
+		blank=True
+	)
 	
 # 	class Meta:
 # 		unique_together=[
@@ -150,9 +150,6 @@ class SourceEnslavementRelationConnection(models.Model):
 		null=True,
 		blank=True
 	)
-
-
-
 # 	class Meta:
 # 		unique_together=[
 # 			['source','enslaved','page_range']
@@ -206,17 +203,15 @@ class Source(models.Model):
 		ShortRef,
 		null=False,
 		blank=False,
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		related_name='short_ref_sources'
 	)
 	
 	title=models.CharField(
 		"Title",
 		max_length=255,
 		null=False,
-		blank=False,
-# They can't keep their short_refs unique, they can't keep their titles unique...
-# This dataset is such a mess.
-# 		unique=True
+		blank=False
 	)
 	
 	date = models.OneToOneField(

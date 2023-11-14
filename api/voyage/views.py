@@ -20,7 +20,7 @@ import collections
 import gc
 from .serializers import *
 from .serializers_READONLY import *
-from geo.serializers import LocationSerializer
+from geo.serializers_READONLY import LocationSerializer
 from voyages3.localsettings import *
 from drf_yasg.utils import swagger_auto_schema
 import re
@@ -385,7 +385,17 @@ class VoyageCREATE(generics.CreateAPIView):
 	permission_classes=[IsAdminUser]
 
 
-class VoyageRUD(generics.RetrieveUpdateDestroyAPIView):
+class VoyageRETRIEVE(generics.RetrieveAPIView):
+	'''
+	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
+	'''
+	queryset=Voyage.objects.all()
+	serializer_class=VoyageSerializer
+	lookup_field='voyage_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class VoyageUPDATE(generics.UpdateAPIView):
 	'''
 	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
 	
@@ -409,5 +419,14 @@ class VoyageRUD(generics.RetrieveUpdateDestroyAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+class VoyageDESTROY(generics.DestroyAPIView):
+	'''
+	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
+	'''
+	queryset=Voyage.objects.all()
+	serializer_class=VoyageCRUDSerializer
+	lookup_field='voyage_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
 
 

@@ -20,7 +20,7 @@ import pprint
 from common.reqs import *
 from collections import Counter
 from geo.common import GeoTreeFilter
-from geo.serializers import LocationSerializer
+from geo.serializers_READONLY import LocationSerializer
 from voyages3.localsettings import *
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -524,9 +524,30 @@ class EnslavementRelationCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-class EnslavementRelationRUD(generics.RetrieveUpdateDestroyAPIView):
+class EnslavementRelationRETRIEVE(generics.RetrieveAPIView):
 	'''
-	Fetch, update, or delete an enslavement relation record with their pk
+	Retrieve an enslavement relation record with their pk
+	'''
+	queryset=EnslavementRelation.objects.all()
+	serializer_class=EnslavementRelationPKSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+class EnslavementRelationUPDATE(generics.UpdateAPIView):
+	'''
+	Update an enslavement relation record with their pk
+	'''
+	queryset=EnslavementRelation.objects.all()
+	serializer_class=EnslavementRelationCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+
+class EnslavementRelationDESTROY(generics.DestroyAPIView):
+	'''
+	Delete an enslavement relation record with their pk
 	'''
 	queryset=EnslavementRelation.objects.all()
 	serializer_class=EnslavementRelationCRUDSerializer
@@ -544,9 +565,29 @@ class EnslaverCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-class EnslaverRUD(generics.RetrieveUpdateDestroyAPIView):
+class EnslaverRETRIEVE(generics.RetrieveAPIView):
 	'''
-	Fetch, update, or delete an enslaver record with their pk
+	Retrieve an enslaver record with their pk
+	'''
+	queryset=EnslaverIdentity.objects.all()
+	serializer_class=EnslaverPKSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+class EnslaverUPDATE(generics.UpdateAPIView):
+	'''
+	Update an enslaver record with their pk
+	'''
+	queryset=EnslaverIdentity.objects.all()
+	serializer_class=EnslaverCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslaverDESTROY(generics.DestroyAPIView):
+	'''
+	Delete an enslaver record with their pk
 	'''
 	queryset=EnslaverIdentity.objects.all()
 	serializer_class=EnslaverCRUDSerializer
@@ -564,10 +605,29 @@ class EnslavedCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-
-class EnslavedRUD(generics.RetrieveUpdateDestroyAPIView):
+class EnslavedRETRIEVE(generics.RetrieveAPIView):
 	'''
-	Fetch, update, or delete an enslaver record with their pk
+	Retrieve an enslaver record with their pk
+	'''
+	queryset=Enslaved.objects.all()
+	serializer_class=EnslavedPKSerializer
+	lookup_field='enslaved_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+class EnslavedUPDATE(generics.UpdateAPIView):
+	'''
+	Update an enslaver record with their pk
+	'''
+	queryset=Enslaved.objects.all()
+	serializer_class=EnslavedCRUDSerializer
+	lookup_field='enslaved_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class EnslavedDESTROY(generics.DestroyAPIView):
+	'''
+	Delete an enslaver record with their pk
 	'''
 	queryset=Enslaved.objects.all()
 	serializer_class=EnslavedCRUDSerializer

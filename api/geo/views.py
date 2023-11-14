@@ -11,7 +11,8 @@ from django.views.generic.list import ListView
 from .models import *
 from .common import GeoTreeFilter
 from drf_spectacular.utils import extend_schema
-from .serializers import LocationSerializer
+from .serializers import CRUDLocationSerializer
+from .serializers_READONLY import LocationSerializer,LocationSerializerDeep
 
 
 @extend_schema(
@@ -37,15 +38,13 @@ class LocationCREATE(generics.CreateAPIView):
 	For places and regions you *should* provide a parent in child_of field
 	'''
 	queryset=Location.objects.all()
-	serializer_class=LocationSerializer
+	serializer_class=CRUDLocationSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
 
-class LocationRUD(generics.RetrieveUpdateDestroyAPIView):
+class LocationRETRIEVE(generics.RetrieveAPIView):
 	'''
-	Retrieve, update, or delete a location.
-	
 	The lookup field for contributions is "VALUE". This corresponds to the legacy SPSS codes used for geo data -- first for voyage itineraries and ship construction/registration locations, but later on for enslaved peoples\' origins and final known locations, as well as for Enslavers\' place of birth etc. In the legacy SV website db, these 'Locations' were stored as separate models, hierarchically ordered.
 	
 		1. Place
@@ -55,8 +54,33 @@ class LocationRUD(generics.RetrieveUpdateDestroyAPIView):
 	While the SPSS codes / "value" fields in these models were supposed to be unique, this was not always the case. I therefore decided to collapse these into a single model, enforce the uniqueness of the value fields, create a location_type model to store these locations, and store the hierarchical relation through a child_of foreign key.
 	'''
 	queryset=Location.objects.all()
-	serializer_class=LocationSerializer
+	serializer_class=LocationSerializerDeep
+	lookup_field='value'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+class LocationUPDATE(generics.UpdateAPIView):
+	'''
+	The lookup field for contributions is "VALUE". This corresponds to the legacy SPSS codes used for geo data -- first for voyage itineraries and ship construction/registration locations, but later on for enslaved peoples\' origins and final known locations, as well as for Enslavers\' place of birth etc. In the legacy SV website db, these 'Locations' were stored as separate models, hierarchically ordered.
+	
+		1. Place
+		2. Region
+		3. Broad Region
+	
+	While the SPSS codes / "value" fields in these models were supposed to be unique, this was not always the case. I therefore decided to collapse these into a single model, enforce the uniqueness of the value fields, create a location_type model to store these locations, and store the hierarchical relation through a child_of foreign key.
+	'''
+	queryset=Location.objects.all()
+	serializer_class=CRUDLocationSerializer
 	lookup_field='value'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
-	
+
+class LocationDESTROY(generics.DestroyAPIView):
+	'''
+	The lookup field for contributions is "VALUE". This corresponds to the legacy SPSS codes used for geo data -- first for voyage itineraries and ship construction/registration locations, but later on for enslaved peoples\' origins and final known locations, as well as for Enslavers\' place of birth etc. In the legacy SV website db, these 'Locations' were stored as separate models, hierarchically ordered.
+	'''
+	queryset=Location.objects.all()
+	serializer_class=CRUDLocationSerializer
+	lookup_field='value'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]

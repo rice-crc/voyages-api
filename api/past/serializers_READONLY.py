@@ -214,6 +214,17 @@ class EnslavedSerializer(serializers.ModelSerializer):
 		model=Enslaved
 		fields='__all__'
 
+class EnslavedPKSerializer(serializers.ModelSerializer):
+	post_disembark_location=PastLocationSerializer(many=False)
+	captive_fate=CaptiveFateSerializer(many=False)
+	enslaved_relations=EnslavedInRelationSerializer(many=True)
+	captive_status=CaptiveStatusSerializer(many=False)
+	language_group=LanguageGroupSerializer(many=False)
+	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
+	class Meta:
+		model=Enslaved
+		fields='__all__'
+
 
 #######################
 
@@ -305,3 +316,32 @@ class EnslaverSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
+		
+
+class EnslaverPKSerializer(serializers.ModelSerializer):
+	principal_location=PastLocationSerializer(many=False)
+	enslaver_source_connections=PastSourceEnslaverConnectionSerializer(many=True)
+	aliases=EnslaverAliasSerializer(many=True)
+	birth_place=PastLocationSerializer(many=False)
+	death_place=PastLocationSerializer(many=False)
+	class Meta:
+		model=EnslaverIdentity
+		fields='__all__'
+
+
+
+class EnslavementRelationSparseDateSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=VoyageSparseDate
+		fields='__all__'
+
+class EnslavementRelationPKSerializer(serializers.ModelSerializer):
+	relation_type=EnslavementRelationTypeSerializer(many=False,allow_null=True)
+	place=PastLocationSerializer(many=False,allow_null=True)
+	date=EnslavementRelationSparseDateSerializer(many=False,allow_null=True)
+	relation_enslavers=EnslaverInRelationSerializer(many=True)
+	enslaved_in_relation=EnslavedInRelationSerializer(many=True)
+	class Meta:
+		model=EnslavementRelation
+		fields='__all__'
+

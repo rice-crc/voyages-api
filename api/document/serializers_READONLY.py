@@ -81,6 +81,11 @@ class ShortRefSerializer(serializers.ModelSerializer):
 		model=ShortRef
 		fields='__all__'
 
+class SourceShortRefSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=ShortRef
+		fields=['id','name']
+
 @extend_schema_serializer(
 	examples = [
 		OpenApiExample(
@@ -101,7 +106,7 @@ class SourceSerializer(serializers.ModelSerializer):
 	source_voyage_connections=SourceVoyageConnectionSerializer(many=True)
 	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True)
 	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True)
-	short_ref=ShortRefSerializer(many=False,allow_null=False)
+	short_ref=SourceShortRefSerializer(many=False,allow_null=False)
 	date=DocSparseDateSerializer(many=False,allow_null=True)
 	class Meta:
 		model=Source

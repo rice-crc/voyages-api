@@ -69,12 +69,6 @@ class SourceList(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-
-class NestedSourceDataIsGigantic(PageNumberPagination):
-    page_size = 5
-    page_size_query_param = 'page_size'
-    max_page_size = 5
-
 class SourceListGENERIC(generics.ListAPIView):
 	'''
 	TESTING A GENERIC, EASY-TO-SEARCH, PAGINATED LIST OF SOURCES FOR DELLAMONICA & SSC
@@ -107,7 +101,6 @@ class SourceListGENERIC(generics.ListAPIView):
 	permission_classes=[IsAuthenticated]
 	serializer_class=SourceSerializer
 	filter_backends = [filters.SearchFilter]
-	pagination_class = NestedSourceDataIsGigantic
 	search_fields = ['title','=date__year','short_ref__name','=zotero_item_id']
 
 #######################

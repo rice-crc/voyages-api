@@ -3,16 +3,16 @@ from document.models import *
 from past.models import *
 from voyage.models import *
 
-# class PageAdmin(admin.ModelAdmin):
-# 	readonly_fields=['page_url','image_filename','iiif_manifest_url','iiif_baseimage_url']
-# 	search_fields=['page_url','image_filename']
-# 	list_display=['page_url','image_filename']
-# 	model=Page
+class PageAdmin(admin.ModelAdmin):
+	readonly_fields=['page_url','image_filename','iiif_manifest_url','iiif_baseimage_url']
+	search_fields=['page_url','image_filename']
+	list_display=['page_url','image_filename']
+	model=Page
 
 class ShortRefAdmin(admin.ModelAdmin):
 	model=ShortRef
-	search_fields=('name',)
-	list_display=('name',)
+	search_fields=('name','transkribus_docId')
+	list_display=('name','transkribus_docId')
 
 class SourceEnslavedConnectionInline(admin.StackedInline):
 	model=SourceEnslavedConnection
@@ -62,9 +62,9 @@ class SourceAdmin(admin.ModelAdmin):
 	search_fields=['title','zotero_item_id','short_ref__name']
 	autocomplete_fields=['short_ref','date']
 	readonly_fields=['item_url','zotero_item_id','zotero_group_id']
-	list_display=('title','short_ref','zotero_item_id','short_ref')
+	list_display=('title','short_ref','zotero_item_id','human_reviewed')
 
 admin.site.register(Source, SourceAdmin)
 admin.site.register(ShortRef,ShortRefAdmin)
 admin.site.register(DocSparseDate,DocSparseDateAdmin)
-# admin.site.register(Page,PageAdmin)
+admin.site.register(Page,PageAdmin)

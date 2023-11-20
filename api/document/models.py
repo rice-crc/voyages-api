@@ -27,7 +27,13 @@ class Page(models.Model):
 	transcription=models.TextField(null=True,blank=True)
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
-
+	
+	is_british_library=models.BooleanField(
+		"BL docs have been problematic, need a quick handle for them",
+		default=False,blank=True,null=True
+	)
+	transkribus_pageid=models.IntegerField(null=True,blank=True,unique=True)
+	
 	def __str__(self):
 		nonnulls=[i for i in [
 				self.page_url,
@@ -169,6 +175,13 @@ class ShortRef(models.Model):
 	And we have individual page numbers for both of those.
 	"""
 	name = models.CharField(max_length=255,unique=True)
+	transkribus_docId = models.CharField(
+		max_length=10,
+		unique=True,
+		blank=True,
+		null=True
+	)
+	
 	def __str__(self):
 		return self.name
 
@@ -199,6 +212,13 @@ class Source(models.Model):
 		blank=True
 	)
 	
+	zotero_grouplibrary_name=models.CharField(
+		max_length=255,
+		null=False,
+		blank=False,
+		default="sv-docs"
+	)
+	
 	short_ref=models.ForeignKey(
 		ShortRef,
 		null=False,
@@ -212,6 +232,11 @@ class Source(models.Model):
 		max_length=255,
 		null=False,
 		blank=False
+	)
+	
+	is_british_library=models.BooleanField(
+		"BL docs have been problematic, need a quick handle for them",
+		default=False,blank=True,null=True
 	)
 	
 	date = models.OneToOneField(
@@ -235,7 +260,20 @@ class Source(models.Model):
 		null=True
 	)
 	
+	has_published_manifest=models.BooleanField(
+		"Is there a published manifest on dellamonica's server?",
+		default=False,
+		blank=False,
+		null=False
+	)
+	
 	notes=models.TextField(null=True,blank=True)
+	
+	order_in_shortref=models.IntegerField(
+		"Now that we're splitting shortrefs, sources should be ordered under them",
+		null=True,
+		blank=True
+	)
 		
 	class Meta:
 		unique_together=[

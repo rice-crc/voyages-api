@@ -255,6 +255,11 @@ class VoyageCargoConnection(models.Model):
 		max_digits=7,
 		decimal_places=2
 	)
+	is_purchasing_commmodity=models.BooleanField(
+		"Was this a commodity used to purchase enslaved people",
+		default=False,
+		blank=True
+	)
 # 	class Meta:
 # 		unique_together = ['voyage', 'cargo']
 
@@ -892,6 +897,7 @@ class VoyageDates(models.Model):
 	class Meta:
 		verbose_name = 'Date'
 		verbose_name_plural = 'Dates'
+		
 
 class VoyageCrew(models.Model):
 	"""
@@ -1682,6 +1688,19 @@ class Voyage(models.Model):
 		]
 		verbose_name = 'Voyage'
 		verbose_name_plural = "Voyages"
+	
+	def get_ship(self):
+		return self.voyage_ship
+	
+	def get_yearam(self):
+		yearam=self.voyage_dates.imp_arrival_at_port_of_dis_sparsedate
+		
+		if yearam is not None:
+			yearam=yearam.year
+		else:
+			yearam=None
+		
+		return yearam
 
 	def __str__(self):
 		return self.__unicode__()

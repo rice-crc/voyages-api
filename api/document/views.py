@@ -69,12 +69,6 @@ class SourceList(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-
-class NestedSourceDataIsGigantic(PageNumberPagination):
-    page_size = 5
-    page_size_query_param = 'page_size'
-    max_page_size = 5
-
 class SourceListGENERIC(generics.ListAPIView):
 	'''
 	TESTING A GENERIC, EASY-TO-SEARCH, PAGINATED LIST OF SOURCES FOR DELLAMONICA & SSC
@@ -107,7 +101,6 @@ class SourceListGENERIC(generics.ListAPIView):
 	permission_classes=[IsAuthenticated]
 	serializer_class=SourceSerializer
 	filter_backends = [filters.SearchFilter]
-	pagination_class = NestedSourceDataIsGigantic
 	search_fields = ['title','=date__year','short_ref__name','=zotero_item_id']
 
 #######################
@@ -172,6 +165,9 @@ def source_page(request,source_id=1):
 	else:
 		return HttpResponseForbidden("Forbidden")
 
+@extend_schema(
+		exclude=True
+	)
 class ShortRefCREATE(generics.CreateAPIView):
 	'''
 	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
@@ -182,6 +178,9 @@ class ShortRefCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class ShortRefRETRIEVE(generics.RetrieveAPIView):
 	'''
 	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
@@ -198,6 +197,9 @@ class ShortRefRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(
+		exclude=True
+	)
 class ShortRefUPDATE(generics.UpdateAPIView):
 	'''
 	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
@@ -208,6 +210,9 @@ class ShortRefUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class ShortRefDESTROY(generics.DestroyAPIView):
 	'''
 	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
@@ -218,7 +223,9 @@ class ShortRefDESTROY(generics.DestroyAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-	
+@extend_schema(
+		exclude=True
+	)
 class SourceCREATE(generics.CreateAPIView):
 	'''
 	CREATE Source without a pk
@@ -242,6 +249,9 @@ class SourceRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(
+		exclude=True
+	)
 class SourceUPDATE(generics.UpdateAPIView):
 	'''
 	The lookup field for sources is the pk (id)
@@ -254,6 +264,9 @@ class SourceUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class SourceDESTROY(generics.DestroyAPIView):
 	'''
 	The lookup field for sources is the pk (id)

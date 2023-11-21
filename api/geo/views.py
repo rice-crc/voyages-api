@@ -29,6 +29,9 @@ class GeoTree(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
 
+@extend_schema(
+		exclude=True
+	)
 class LocationCREATE(generics.CreateAPIView):
 	'''
 	CREATE Source without a pk
@@ -59,6 +62,9 @@ class LocationRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(
+		exclude=True
+	)
 class LocationUPDATE(generics.UpdateAPIView):
 	'''
 	The lookup field for contributions is "VALUE". This corresponds to the legacy SPSS codes used for geo data -- first for voyage itineraries and ship construction/registration locations, but later on for enslaved peoples\' origins and final known locations, as well as for Enslavers\' place of birth etc. In the legacy SV website db, these 'Locations' were stored as separate models, hierarchically ordered.
@@ -75,6 +81,9 @@ class LocationUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class LocationDESTROY(generics.DestroyAPIView):
 	'''
 	The lookup field for contributions is "VALUE". This corresponds to the legacy SPSS codes used for geo data -- first for voyage itineraries and ship construction/registration locations, but later on for enslaved peoples\' origins and final known locations, as well as for Enslavers\' place of birth etc. In the legacy SV website db, these 'Locations' were stored as separate models, hierarchically ordered.

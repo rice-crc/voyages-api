@@ -513,7 +513,9 @@ class PASTNetworks(generics.GenericAPIView):
 
 #CONTRIBUTIONS
 
-
+@extend_schema(
+		exclude=True
+	)
 class EnslavementRelationCREATE(generics.CreateAPIView):
 	'''
 	Create an enslavement relation without a pk
@@ -534,6 +536,9 @@ class EnslavementRelationRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(
+		exclude=True
+	)
 class EnslavementRelationUPDATE(generics.UpdateAPIView):
 	'''
 	Update an enslavement relation record with their pk
@@ -544,7 +549,9 @@ class EnslavementRelationUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-
+@extend_schema(
+		exclude=True
+	)
 class EnslavementRelationDESTROY(generics.DestroyAPIView):
 	'''
 	Delete an enslavement relation record with their pk
@@ -555,6 +562,9 @@ class EnslavementRelationDESTROY(generics.DestroyAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class EnslaverCREATE(generics.CreateAPIView):
 	'''
 	Create enslaver without a pk
@@ -575,6 +585,9 @@ class EnslaverRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(
+		exclude=True
+	)
 class EnslaverUPDATE(generics.UpdateAPIView):
 	'''
 	Update an enslaver record with their pk
@@ -585,6 +598,9 @@ class EnslaverUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class EnslaverDESTROY(generics.DestroyAPIView):
 	'''
 	Delete an enslaver record with their pk
@@ -595,6 +611,9 @@ class EnslaverDESTROY(generics.DestroyAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class EnslavedCREATE(generics.CreateAPIView):
 	'''
 	Create enslaver without a pk
@@ -615,6 +634,9 @@ class EnslavedRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(
+		exclude=True
+	)
 class EnslavedUPDATE(generics.UpdateAPIView):
 	'''
 	Update an enslaver record with their pk
@@ -625,6 +647,9 @@ class EnslavedUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class EnslavedDESTROY(generics.DestroyAPIView):
 	'''
 	Delete an enslaver record with their pk

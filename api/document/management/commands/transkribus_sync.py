@@ -9,6 +9,7 @@ from voyage.models import *
 from voyages3.localsettings import transkribus_credentials,transkribus_collection_ids
 import requests
 import re
+import os
 
 def authenticate():
 	
@@ -29,24 +30,13 @@ def authenticate():
 	headers['Cookie']='='.join([ 'JSESSIONID',sessionId])
 	return headers
 
-def imgfilenamematch(django_source_pages,transkribus_page_json):
-	transkribus_imgFileName=transkribus_page_json['imgFileName']
-	matches=[]
-	for dsp in django_source_pages:
-# 		dsp_fname=dsp.image_filename
- 		##Sept 27-28 uploads to transkribus had to use pk's instead of original filenames
-		##because original filenames were null
-		dsp_fname=str(dsp.id)
-		dsp_nofileextension=re.sub("\..*","",dsp_fname)
-		transkribus_imgFileName_noextension=re.sub("\..*","",transkribus_imgFileName)
-		if dsp_nofileextension==transkribus_imgFileName_noextension:
-			matches.append(dsp)
-	return matches
-
 
 class Command(BaseCommand):
 	help = 'hits transkribus, pulls down image transcriptions'
 	def handle(self, *args, **options):
+		
+		#when the non-BL images were re-uploaded using their smaller jpg files to be processable
+		#we lost the filenames. so now we're just going to have to count on pagination doing the trick for us
 		
 		#1. authenticate
 		auth_headers=authenticate()
@@ -59,116 +49,99 @@ class Command(BaseCommand):
 		
 		j=json.loads(resp.text)
 		
-		print(resp,json.dumps(j,indent=2))
+# 		print(resp,json.dumps(j,indent=2))
 		
-		#2. flag all legacy sources with transkribus ids
+		transkribus_shortrefs=ShortRef.objects.all().exclude(transkribus_docId=None)
+		transkribus_shortrefs=transkribus_shortrefs.exclude(name__icontains="SSC Add Ms")
+# 		transkribus_shortrefs=transkribus_shortrefs.exclude(transkribus_docId__in=[1301052,1594526])
 		
-		legacysources=VoyageSources.objects.all()
-		transkribus_sources=legacysources.exclude(transkribus_docid=None)
-		transkribus_sources={s.transkribus_docid:s for s in transkribus_sources}
-
-		#now pull all docs, and flag those with transkribus ids in the db
+# 		transkribus_shortrefs=transkribus_shortrefs.filter(transkribus_docId=1296568)
 		
-		flagged_transkribus_documents=[]
+		# transkribus_shortrefs=transkribus_shortrefs.exclude(transkribus_docId__in=[1301052,1594526])
 		
-		for transkribus_collection_id in transkribus_collection_ids:
+		print(transkribus_shortrefs)
 		
-			collection_url="https://transkribus.eu/TrpServer/rest/collections/%s/list" %transkribus_collection_id
+		transkribus_collection_id=transkribus_collection_ids[0]
+		
+		page_pks=transkribus_shortrefs.values_list('transkribus_docId','short_ref_sources__page_connections__page__id')
+		
+		pd={}
+		for ppk in page_pks:
+			a,b=ppk
+			if a in pd:
+				pd[a].append(b)
+			else:
+				pd[a]=[b]
+		
+		for docId in pd:
+			print(docId)
+			pages=pd[docId]
+			pages.sort()
 			
-			resp=requests.get(collection_url,headers=auth_headers)
+			for pagepk in pages:
+				page=Page.objects.get(id=pagepk)
+				page.transkribus_pageid=None
+				page.transcription=None
+				page.save()
 			
-			collection_documents=json.loads(resp.text)
-		
-# 			print(resp,json.dumps(j,indent=2))
-			
-			for document_listing in collection_documents:
-				if document_listing['docId'] in transkribus_sources:
-					flagged_transkribus_documents.append(document_listing)
-		
-		print("-----------PULLING THESE DOCUMENTS\n",[[d['docId'],d['title']] for d in flagged_transkribus_documents])
-		
-		
-		
-		
-		for transkribus_doc in flagged_transkribus_documents:
-			source_pages=[]
-			
-			legacy_source=transkribus_sources[transkribus_doc['docId']]
-			zotero_refs=legacy_source.source_zotero_refs.all()
-			for zotero_ref in zotero_refs:
-				page_connections=zotero_ref.page_connection.all()
-				for page_connection in page_connections:
-					source_page=page_connection.source_page
-					source_pages.append(source_page)
-			print(source_pages)
-			for sp in source_pages:
-				print(sp.image_filename)
-			
-			docId=transkribus_doc['docId']
 			doc_url="https://transkribus.eu/TrpServer/rest/collections/%s/%s/fulldoc" %(transkribus_collection_id,docId)
 			resp=requests.get(doc_url,headers=auth_headers)
-			
 			doc=json.loads(resp.text)
-# 			print(resp,json.dumps(doc,indent=2),doc.keys())
 			
-			
+			c=1
 			for transkribus_page in doc['pageList']['pages']:
-# 				print("??????",transkribus_page)
-				imgFileName=transkribus_page['imgFileName']
-				imagfilenamematches=imgfilenamematch(source_pages,transkribus_page)
-				
-				
-				if len(imagfilenamematches)==1:
-					print('---')
-					print("matched",imgFileName,imagfilenamematches)
-					django_source_page=imagfilenamematches[0]
-# 					print(transkribus_page)
-					if len(transkribus_page['tsList'])>0:
-						transcriptsbundle=transkribus_page['tsList']
-						if len(transcriptsbundle)>0:
-							transcripts=transcriptsbundle['transcripts']
-							nonblank_transcript_urls=[]
-							for transcript in transcripts:
-								if transcript['nrOfCharsInLines'] > 0:
-									nonblank_transcript_urls.append([transcript['fileName'],transcript['url']])
-							if len(nonblank_transcript_urls)>0:
-								print("transcription urls-->",nonblank_transcript_urls)
-							else:
-								print('only blank transcripts')
-								
-							for transcript_data in nonblank_transcript_urls:
-								transcript_fname,transcript_url=transcript_data
-								connection_pool = urllib3.PoolManager()
-								resp = connection_pool.request('GET',transcript_url,headers=auth_headers)
-								f = open("tmp/"+transcript_fname, 'wb')
-								f.write(resp.data)
-								f.close()
-								resp.release_conn()
-								d=open("tmp/"+transcript_fname,"r")
-								t=d.read()
-								d.close()
-								pagetree=ET.fromstring(t)
-								textlines=[e.text for e in pagetree.iter() if e.tag=='{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}Unicode']
-								textlines=[l for l in textlines if l is not None]
-								pagetext='\n'.join(textlines)
-								if django_source_page.transcription is None:
-									django_source_page.transcription=pagetext
-									django_source_page.save()
-# 								print(pagetext)
-
-									
-						
-						
-					print("---")
-					
-				
+				pagetexturls=[]
+				sp=Page.objects.get(id=pages[c])
+				print(c)
+				print(sp.source_connections.first().source)
+				if sp.transcription not in ['',None]:
+					print("transcription already exists")
 				else:
-					print("problem matching:",imgFileName,imagfilenamematches)
-			
-# 			
+					imgFileName=transkribus_page['imgFileName']
+					## but as a backstop we can capture the pageid on the transkribus side as well
+					## and then bump them as necessary and re-pull (i don't want to do this!!!!)
+					transkribus_pageId=transkribus_page['pageId']
+					transcripts=transkribus_page['tsList']['transcripts']
+# 					if c==8:
+# 						print(json.dumps(transkribus_page,indent=2))
+					
+					pagetext=''
+					for transcript in transcripts:
+						wordcount=transcript['nrOfCharsInLines']
+						if wordcount>0:
+							transcript_url=transcript['url']
+	# 							print(transcript_url)
+							connection_pool = urllib3.PoolManager()
+							resp = connection_pool.request('GET',transcript_url,headers=auth_headers)
+							tmpfilename="tmp/%s.xml" %docId
+							f = open(tmpfilename, 'wb')
+							f.write(resp.data)
+							f.close()
+							resp.release_conn()
+							d=open(tmpfilename,"r")
+							t=d.read()
+							
+							d.close()
+							pagetree=ET.fromstring(t)
+							textlines_trees=[e for e in pagetree.iter() if e.tag=="{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}TextLine"]
+							textlines=[]
+							
+							os.remove(tmpfilename)
+							
+							for textline_tree in textlines_trees:
+								linetext=[e.text for e in textline_tree.iter() if e.tag=='{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}Unicode' and e.text is not None]
+								textlines.append(' '.join(linetext))
+							pagetext+='\n'.join(textlines)
+# 					print(pagetext)
+					if re.match('\s+',pagetext,re.S):
+						pagetext=None
+					
+					sp.transkribus_pageid=transkribus_pageId
+					sp.transcription=pagetext
+					sp.save()
+					
+					
 
-			
-			
-			
-					
-					
+				c+=1
+# 				if c>10:
+# 					exit()

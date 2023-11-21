@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from drf_writable_nested.mixins import UniqueFieldsMixin
 
-class LocationTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+class CRUDLocationTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=LocationType
 		fields='__all__'
@@ -23,34 +23,14 @@ class LocationTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 			return super(LocationTypeSerializer, self).create(validated_data)
 
 
-class PolygonSerializer(serializers.ModelSerializer):
+class CRUDPolygonSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Polygon
 		fields='__all__'
 
-class LocationParentSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=Location
-		fields='__all__'
-
-class LocationChildSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=Location
-		fields='__all__'
-
-
-class LocationSerializerDeep(serializers.ModelSerializer):
-	parents=LocationParentSerializer(many=False)
-	children=LocationChildSerializer(many=True)
-	spatial_extent=PolygonSerializer(many=False)
-	location_type=LocationTypeSerializer(many=False)
-	class Meta:
-		model=Location
-		fields='__all__'
-
-class LocationSerializer(WritableNestedModelSerializer):
-	spatial_extent=PolygonSerializer(many=False,allow_null=True)
-	location_type=LocationTypeSerializer(many=False)
+class CRUDLocationSerializer(WritableNestedModelSerializer):
+	spatial_extent=CRUDPolygonSerializer(many=False,allow_null=True)
+	location_type=CRUDLocationTypeSerializer(many=False)
 	latitude=serializers.DecimalField(allow_null=True,max_digits=10,decimal_places=7)
 	longitude=serializers.DecimalField(allow_null=True,max_digits=10,decimal_places=7)
 	class Meta:

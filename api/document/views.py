@@ -8,6 +8,7 @@ from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
@@ -22,12 +23,14 @@ from common.reqs import *
 import collections
 import gc
 from .serializers import *
+from .serializers_READONLY import *
 from voyages3.localsettings import *
 import re
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from common.static.Source_options import Source_options
+from rest_framework import filters
 
 class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -41,7 +44,7 @@ class SourceList(generics.GenericAPIView):
 		
 		These changes necessitated that we create Docs as its own django app and endpoint. Now, each "Source" points at one or more Voyages, Enslaved People, or Enslavers. In turn, some of these Sources also have page-level metadata and links to IIIF images. For more information on the IIIF specification, visit https://iiif.io/api/index.html
 		'''
-		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
+		print("SOURCE LIST+++++++\nusername:",request.auth.user)
 		queryset=Source.objects.all()
 		queryset=queryset.order_by('id')
 		source_options=getJSONschema('Source',hierarchical=False)
@@ -66,11 +69,45 @@ class SourceList(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
+class SourceListGENERIC(generics.ListAPIView):
+	'''
+	TESTING A GENERIC, EASY-TO-SEARCH, PAGINATED LIST OF SOURCES FOR DELLAMONICA & SSC
+	
+	GET queries to this endpoint with the param "search" will search the following:
+	
+		A. EXACT on 
+			1. "short_ref__name", e.g. 1713Poll
+			2. "date__year", e.g. 1982
+			3. "zotero_item_id", e.g. FPGTSQXM
+		B. ICOMPLETE on "title"
+	
+	Because sources have massively nested data in some cases, I have had to restrict us to a maximum of 5 results per page.
+	
+	DON'T search OMNO in Swagger. My server can take Daniel Domingues Texas data, but your browser cannot :)
+	'''
+	queryset=Source.objects.all()
+	queryset.prefetch_related(
+		'page_connections',
+		'source_enslaver_connections',
+		'source_voyage_connections',
+		'source_enslaved_connections',
+		'source_enslavement_relation_connections'
+	)
+	queryset.select_related(
+		'short_ref',
+		'date'
+	)
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	serializer_class=SourceSerializer
+	filter_backends = [filters.SearchFilter]
+	search_fields = ['title','=date__year','short_ref__name','=zotero_item_id']
+
 #######################
 # default view will be a paginated gallery
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 def Gallery(request,collection_id=None,pagenumber=1):
 	
 	if request.user.is_authenticated:
@@ -119,40 +156,76 @@ def Gallery(request,collection_id=None,pagenumber=1):
 #######################
 # then the individual page view
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 def source_page(request,source_id=1):
-	
 	if request.user.is_authenticated:
 		source=Source.objects.get(id=source_id)
 		return render(request, "single_doc.html", {'source':source})
 	else:
 		return HttpResponseForbidden("Forbidden")
 
-class ShortRefGET(generics.RetrieveAPIView):
+@extend_schema(
+		exclude=True
+	)
+class ShortRefCREATE(generics.CreateAPIView):
 	'''
-	GET Short Ref using PK
+	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
+	'''
+	queryset=ShortRef.objects.all()
+	serializer_class=CRUDShortRefSerializer
+	lookup_field='name'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+@extend_schema(
+		exclude=True
+	)
+class ShortRefRETRIEVE(generics.RetrieveAPIView):
+	'''
+	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
 	
 	These used to be unique values on the sources table in Voyages. In that legacy model, we had a short_ref and a full_ref for each source, and then, in our union table with voyages, we had a text_ref field where we would put page numbers, or box and folder numbers, etc. However, this led to a good deal of schema abuse (duplication, inconsistent use of fields, etc.)
 	
 	In the new model, we maintain the uniqueness of Short Ref's but we allow many Source objects to connect to these short ref's. The new source objects have much more, and much more structured data, being managed remotely in Zotero. Each source therefore now has an additional unique identifier: its Zotero Item ID.
+	
+	It could make sense to give these short refs their own Zotero listings.
 	'''
 	queryset=ShortRef.objects.all()
 	serializer_class=ShortRefSerializer
 	lookup_field='name'
 	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+@extend_schema(
+		exclude=True
+	)
+class ShortRefUPDATE(generics.UpdateAPIView):
+	'''
+	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
+	'''
+	queryset=ShortRef.objects.all()
+	serializer_class=CRUDShortRefSerializer
+	lookup_field='name'
+	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-# class PageCREATE(generics.CreateAPIView):
-# 	'''
-# 	CREATE Page without a pk
-# 	'''
-# 	queryset=Page.objects.all()
-# 	serializer_class=PageSerializer
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
+@extend_schema(
+		exclude=True
+	)
+class ShortRefDESTROY(generics.DestroyAPIView):
+	'''
+	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
+	'''
+	queryset=ShortRef.objects.all()
+	serializer_class=CRUDShortRefSerializer
+	lookup_field='name'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
 
-	
+@extend_schema(
+		exclude=True
+	)
 class SourceCREATE(generics.CreateAPIView):
 	'''
 	CREATE Source without a pk
@@ -166,11 +239,37 @@ class SourceCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 	
-class SourceRUD(generics.RetrieveUpdateDestroyAPIView):
+class SourceRETRIEVE(generics.RetrieveAPIView):
 	'''
-	RETRIEVE, UPDATE, OR DELETE SOURCE.
+	The lookup field for sources is the pk (id)
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+@extend_schema(
+		exclude=True
+	)
+class SourceUPDATE(generics.UpdateAPIView):
+	'''
+	The lookup field for sources is the pk (id)
 	
-	The lookup field for sources is "id".
+	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceCRUDSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+@extend_schema(
+		exclude=True
+	)
+class SourceDESTROY(generics.DestroyAPIView):
+	'''
+	The lookup field for sources is the pk (id)
 	
 	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
 	'''

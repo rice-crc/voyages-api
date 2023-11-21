@@ -207,10 +207,10 @@ class CargoConnectionInline(nested_admin.NestedStackedInline):
 	extra=0
 
 
-class AfricanInfoInline(nested_admin.NestedStackedInline):
-	model = Voyage.african_info.through
-	classes = ['collapse']
-	extra=0
+# class AfricanInfoInline(nested_admin.NestedStackedInline):
+# 	model = Voyage.african_info.through
+# 	classes = ['collapse']
+# 	extra=0
 
 class VoyageAdmin(nested_admin.NestedModelAdmin):
 	inlines=(
@@ -222,13 +222,13 @@ class VoyageAdmin(nested_admin.NestedModelAdmin):
 		VoyageOutcomeInline,
 		VoyageShipInline,
 		VoyageSlavesNumbersInline,
-		AfricanInfoInline,
+# 		AfricanInfoInline,
 		CargoConnectionInline
 	)
 	exclude=['african_info_voyages']
 	fields=['voyage_id','dataset','voyage_in_cd_rom']
-	list_display=('voyage_id',)
-	search_fields=('voyage_id',)
+	list_display=('voyage_id','get_ship','get_yearam')
+	search_fields=('voyage_id','voyage_ship__ship_name')
 	
 admin.site.register(Voyage, VoyageAdmin)
 admin.site.register(VoyageSparseDate,VoyageSparseDateAdmin)
@@ -240,4 +240,4 @@ admin.site.register(Resistance, ResistanceAdmin)
 admin.site.register(Nationality)
 admin.site.register(CargoType,CargoTypeAdmin)
 admin.site.register(CargoUnit)
-admin.site.register(AfricanInfo)
+# admin.site.register(AfricanInfo)

@@ -4,10 +4,11 @@ networks/tmp/
 *.sql
 dbconf.json
 
-
+django/document/management/commands/BL_Sources/
 
 django/document/management/commands/*.txt
 django/document/management/commands/*.csv
+django/document/management/commands/*.json
 
 tmp/
 

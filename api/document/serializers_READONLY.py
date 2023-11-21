@@ -54,7 +54,7 @@ class SourceEnslaverIdentitySerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class SourceEnslaverConnectionSerializer(serializers.ModelSerializer):
-	enslaver=SourceEnslaverIdentitySerializer(many=True,read_only=True)
+	enslaver=SourceEnslaverIdentitySerializer(many=False,read_only=True)
 	class Meta:
 		model=SourceEnslaverConnection
 		fields='__all__'

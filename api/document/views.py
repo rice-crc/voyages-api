@@ -165,6 +165,9 @@ def source_page(request,source_id=1):
 	else:
 		return HttpResponseForbidden("Forbidden")
 
+@extend_schema(
+		exclude=True
+	)
 class ShortRefCREATE(generics.CreateAPIView):
 	'''
 	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
@@ -175,6 +178,9 @@ class ShortRefCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class ShortRefRETRIEVE(generics.RetrieveAPIView):
 	'''
 	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
@@ -191,6 +197,9 @@ class ShortRefRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(
+		exclude=True
+	)
 class ShortRefUPDATE(generics.UpdateAPIView):
 	'''
 	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
@@ -201,6 +210,9 @@ class ShortRefUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class ShortRefDESTROY(generics.DestroyAPIView):
 	'''
 	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
@@ -211,7 +223,9 @@ class ShortRefDESTROY(generics.DestroyAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-	
+@extend_schema(
+		exclude=True
+	)
 class SourceCREATE(generics.CreateAPIView):
 	'''
 	CREATE Source without a pk
@@ -235,6 +249,9 @@ class SourceRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(
+		exclude=True
+	)
 class SourceUPDATE(generics.UpdateAPIView):
 	'''
 	The lookup field for sources is the pk (id)
@@ -247,6 +264,9 @@ class SourceUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class SourceDESTROY(generics.DestroyAPIView):
 	'''
 	The lookup field for sources is the pk (id)

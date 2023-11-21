@@ -247,19 +247,15 @@ class Command(BaseCommand):
 # 						pre_existing_source_connections.delete()
 					
 						try:
-							date=re.search("[0-9]*\-[0-9]*\-[0-9]*",SourceB).group(0)
+							date=re.search("[0-9]{4}",SourceB).group(0)
 						except:
 # 							print(SourceB)
-							date='--'
-					
-						mm,dd,yyyy=[int(i.strip()) if i.strip() not in [None,''] else None for i in date.split('-')]
+							date=None
 						
-						mm_str,dd_str,yyyy_str=[i.strip() if i.strip() not in [None,''] else '' for i in date.split('-')]
+						title=re.sub("OPNA,* *","",SourceB)
 						
-						datestr="%s/%s/%s" %(yyyy_str,mm_str,dd_str)
-
 						SourceB_obj,sourceb_isnew=Source.objects.get_or_create(
-							title=SourceB,
+							title=title,
 							short_ref=opnashortref
 						)
 					
@@ -267,11 +263,12 @@ class Command(BaseCommand):
 
 							template = zot.item_template('manuscript')
 							template['itemType'] = "Manuscript"
-							template['title'] = SourceB
-							template['date'] = datestr
+							template['title'] = title
+							if date is not None:
+								template['date'] = date
 							template['language']='en-US'
 							template['shortTitle']="OPNA"
-							template["archive"]="Orleans Parish Notarial Archvies (New Orleans, USA)"
+							template["archive"]="Orleans Parish Notarial Archive (New Orleans, US)"
 					
 							while True:
 								try:
@@ -291,11 +288,9 @@ class Command(BaseCommand):
 							group_id=int(re.search("(?<=groups/)[0-9]+",zotero_url).group(0))
 							item_id=re.search("(?<=items/)[A-Z|0-9]+",zotero_url).group(0)
 							
-							if not (mm is None and yyyy is None and dd is None):
+							if date is not None:
 								docsparsedate=DocSparseDate.objects.create(
-									month=mm,
-									day=dd,
-									year=yyyy
+									year=int(yyyy)
 								)
 							else:
 								docsparsedate=None

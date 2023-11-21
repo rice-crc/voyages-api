@@ -7,6 +7,20 @@ maybe try to split some blocks like on 25561, where we see numerous notes within
 
 If there is a column like "VID" then we want to tag that voyage when we create the source!! -- see MS 25575
 
+**** Apparently no good transcriptions on:
+
+SSC Add MS 25499
+SSC Add MS 25557
+SSC Add MS 25558
+SSC Add MS 25559
+SSC Add MS 25560
+SSC Add MS 25561
+SSC Add MS 25562
+SSC Add MS 25563
+SSC Add MS 25564
+SSC Add MS 25565
+
+
 
 **** 25560 HAD THE HEADER NOTE: "Henry Kelsall, Under-Secretary to the Treasury: 
 Letters to, from the South Sea Company: 1721-1730."

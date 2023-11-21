@@ -374,6 +374,9 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
 
+@extend_schema(
+		exclude=True
+	)
 class VoyageCREATE(generics.CreateAPIView):
 	'''
 	Create Voyage without a pk
@@ -395,6 +398,9 @@ class VoyageRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class VoyageUPDATE(generics.UpdateAPIView):
 	'''
 	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
@@ -419,6 +425,9 @@ class VoyageUPDATE(generics.UpdateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class VoyageDESTROY(generics.DestroyAPIView):
 	'''
 	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.

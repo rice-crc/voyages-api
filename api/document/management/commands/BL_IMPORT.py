@@ -31,7 +31,7 @@ class Command(BaseCommand):
 			
 			MS_ID=int(re.search("(?<=MS\s)[0-9]+",fpath).group(0).strip())
 			print(MS_ID)
-			with open(fpath,'r') as csvfile:
+			with open(fpath,'r',encoding='ISO-8859-1') as csvfile:
 				reader=csv.DictReader(csvfile)
 				printedalready=False
 				
@@ -44,12 +44,15 @@ class Command(BaseCommand):
 # 					print(row)
 					page_label=row['Page Label']
 					date=row['Date']
-					if re.match('[0-9]+,[0-9]+,[0-9]+',date):
-						mm,dd,yyyy=[d if d!='' else None for d in re.search('[0-9]+,[0-9]+,[0-9]+',date).group(0).split(',')]
+					if re.match('[0-9]+,\s*[0-9]+,\s*[0-9]+',date):
+						dd,mm,yyyy=[d.strip() if d!='' else None for d in re.search('[0-9]+,\s*[0-9]+,\s*[0-9]+',date).group(0).split(',')]
 						mm=int(mm)
 						dd=int(dd)
+# 						print("----->",dd,mm,yyyy,len(yyyy))
 						if len(yyyy)==2:
-							yyyy=int("18"+yyyy)
+							yyyy=int("17"+yyyy)
+						elif len(yyyy)==1:
+							yyyy=int("170"+yyyy)
 						else:
 							yyyy=int(yyyy)
 							
@@ -57,6 +60,8 @@ class Command(BaseCommand):
 					else:
 						date=None
 					doctype=row['Type']
+					
+# 					print(date)
 					
 					if 'Note' in row:
 						note=row['Note']
@@ -130,6 +135,8 @@ class Command(BaseCommand):
 # 							else:
 # 								title="%s %s" %(datestr,thisdoc['doctype'])
 							
+							title= thisdoc['doctype']
+							
 							docdict["archiveLocation"]= "%s, %s" %(callNumber,pagelabels_str)
 							docdict['url']=thisdoc['uv_url']
 							docdict['shortTitle']=shortTitle
@@ -147,9 +154,7 @@ class Command(BaseCommand):
 								name=shortTitle
 							)
 							
-							
-							if thisdocdate is None:
-								docdict['title']+=': %s' %pagelabels_str
+							docdict['title']+=': %s' %pagelabels_str
 							
 							thisdocpages=[]
 							

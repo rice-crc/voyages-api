@@ -9,14 +9,15 @@ from utils import *
 import networkx as nx
 from networkx_query import search_nodes, search_edges
 import re
+import gc
 from maps import rnconversion
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
 def load_graph(endpoint,graph_params):
-	graph_name=graph_params['name']
-	print("loading network:",graph_name)
+	graphname=graph_params['name']
+	print("loading network:",graphname)
 	headers={'Authorization':DJANGO_AUTH_KEY}
 	G=nx.DiGraph()
 	if rc['type']=='oceanic':
@@ -24,20 +25,12 @@ def load_graph(endpoint,graph_params):
 		## AS POINTED TO IN THE INDEX_VARS.PY FILE
 		oceanic_network_file=rc['oceanic_network_file']
 		oceanic_network=rnconversion.main(oceanic_network_file)
-# 		d=open(oceanic_network_file,'r')
-# 		t=d.read()
-# 		d.close()
-# 		oceanic_network=json.loads(t)
 		G,max_node_id=add_oceanic_network(G,oceanic_network,init_node_id=0)
 		print("created oceanic network",G)
 		# THEN ITERATE OVER THE GEO VARS IN THE INDEX
 		## AND ADD THE RESULTING UNIQUE NODES TO THE NETWORK
 		filter_obj=rc['filter']
 		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id+1)
-		
-# 		for n in G.nodes:
-# 			print(n,G.nodes[n])
-			
 		print("added non-oceanic network nodes")
 		#then link across the ordered node classes
 		ordered_node_classes=graph_params['ordered_node_classes']
@@ -55,11 +48,11 @@ def load_graph(endpoint,graph_params):
 			else:
 				return False
 		oceanic_subgraph_view=nx.subgraph_view(G,filter_edge=oceanic_edge_filter)
-	return G,oceanic_subgraph_view,graph_name,None
+	return G,oceanic_subgraph_view,graphname
 
 registered_caches={
 	'voyage_maps':voyage_maps,
-	'ao_maps':ao_maps
+# 	'ao_maps':ao_maps
 }
 
 #on initialization, load every index as a graph, via a call to the django api
@@ -70,26 +63,55 @@ st=time.time()
 
 while True:
 	failures_count=0
+	print('BUILDING GRAPHS')
 	for rcname in rcnames:
 		rc=registered_caches[rcname]
-		endpoint=rc['endpoint']
+		dataframe_endpoint=rc['endpoint']
 		if 'graphs' not in rc:
 			rc['graphs']={}
 		for graph_params in rc['graph_params']:
 			try:
-				graph,oceanic_subgraph_view,graph_name,shortest_paths=load_graph(endpoint,graph_params)
-				rc['graphs'][graph_name]={
+				graph,oceanic_subgraph_view,graphname=load_graph(dataframe_endpoint,graph_params)
+				rc['graphs'][graphname]={
 					'graph':graph,
-					'oceanic_subgraph_view':oceanic_subgraph_view,
-					'shortest_paths':shortest_paths
+					'oceanic_subgraph_view':oceanic_subgraph_view
 				}
 			except:
 				failures_count+=1
 				print("failed on cache:",rc['name'])
-				break
-		registered_caches[rcname]=rc
+	print('CACHING ROUTES')
+	for rcname in rcnames:
+		rc=registered_caches[rcname]
+		dataframe_endpoint=rc['endpoint']
+# 		for graphname in ['region','place']:
+		for graphname in ['region']:
+			print("caching",rcname,graphname)
+			graphs=rc['graphs'][graphname]
+			graph=graphs['graph']
+			oceanic_subgraph_view=graphs['oceanic_subgraph_view']
+			
+			linklabels=rc['indices']['linklabels']
+			nodelabels=rc['indices']['nodelabels']
+			
+			oceanic_subgraph_view=rc['graphs'][graphname]['oceanic_subgraph_view']
+			graph_idx=rc['indices'][graphname]
+			pk_var=graph_idx['pk']
+			itinerary_vars=graph_idx['itinerary']
+			weight_vars=graph_idx['weight']
+			graph_index=build_index(
+				dataframe_endpoint,
+				graph,
+				oceanic_subgraph_view,
+				pk_var,
+				itinerary_vars,
+				weight_vars,
+				linklabels,
+				nodelabels
+			)
+			rc['graphs'][graphname]['index']=graph_index
+			del(rc['graphs'][graphname]['graph'])
 	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
-	if failures_count==len(rcnames):
+	if failures_count>=len(rcnames):
 		standoff_time=standoff_base**standoff_count
 		print("retrying after %d seconds" %(standoff_time))
 		time.sleep(standoff_time)
@@ -97,6 +119,9 @@ while True:
 	else:
 		break
 print("finished building graphs in %d seconds" %int(time.time()-st))
+
+
+
 
 def add_stripped_node_to_dict(graph,n_id,nodesdict):
 	node=dict(graph.nodes[n_id])
@@ -124,245 +149,86 @@ def network_maps():
 	
 	st=time.time()
 	rdata=request.json
-	
-	
-	# I'd like to unite the different caches
-	## all we * really * need is a single oceanic network to plug everything into
 	cachename=rdata['cachename']
-	# 1-level kvpair dict in the form of
-	## keys: double-underscored node uuid's of length N (with "None" as the null value)
-	## values: integers
-	## e.g. "None__b3199d76-bf58-40fb-8eeb-be3986df6113__6e66dc3f-b124-446d-ba28-dee1f3e1fe6b__6e66dc3f-b124-446d-ba28-dee1f3e1fe6b": 404,
-	payload=rdata['payload']
-	# linklabels are an array (length N-1)
-	## that classify the edges
-	## e.g., in the AO map, ['origination','transportation','disposition']
-	## NOTE -- "TRANSPORTATION" IS SPECIAL
-	## IT EXPANDS THE PATH BY TRAVERSING THE OCEANIC NETWORK (IF THE GRAPH WAS BUILT PROPERLY)
-	## AND ON SELF-LOOPS IT ENTERS INTO THE OCEANIC NETWORK AND THEN FINDS A PATH BACK
-	linklabels=rdata['linklabels']
-	# nodelabels are N long
-	nodelabels=rdata['nodelabels']
-	## and classify the nodes
 	graphname=rdata['graphname']
-	graph=registered_caches[cachename]['graphs'][graphname]['graph']
-	oceanic_subgraph_view=registered_caches[cachename]['graphs'][graphname]['oceanic_subgraph_view']
+	pks=rdata['pks']
 	
-# 	print("ORIGINAL",graph)
-# 	print("FILTERED",oceanic_subgraph_view)
-	##somebody help me -- is there a faster pythonic way to do this?
-	nodes={i:{
-		"id":i,
-		"weights":{
-			nl:0 for nl in nodelabels
-		},
-		"data":{}
-		} for k in payload for i in k.split('__') if i != "None"
-	}
+	#first we get our index, which consists of the full weighted routes
+	#keyed to each entity, whether that be a voyage or an enslaved person
 	
+	routes_index=registered_caches[cachename]['graphs'][graphname]['index']
 	
-	paths=[]
-	edges={}
+	#then we subset the index (which are nodes and paths)
+	#according to the entities that have been requested
+	routes_subset=[routes_index[pk] for pk in pks]
 	
-	#iterate over the paths
-	for k in payload:
-# 		print("PAYLOAD ITEM",k)
-		weight=payload[k]
-		uuids=k.split('__')
-		# because, for now, the paths are all the same length, N, e.g.
-		## people: [origin,embarkation,disembarkation,disposition]
-		## voyages: [embarkation,disembarkation]
-		# and each (nullable) position in the path carries semantic value
-		# to apply the weight of this path across all the affected nodes
-		# while retaining that semantic value
-		for idx in range(len(uuids)):
-			uuid=uuids[idx]
-			if uuid not in [None,'None']:
-				nodelabel=nodelabels[idx]
-				nodes[uuid]['weights'][nodelabel]+=weight
-		#similarly for linklabels, which are N-1 long
-		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
-		thispath={"nodes":[],"weight":weight}
-# 		print("abpairs",abpairs)
-		for idx in range(len(linklabels)):
-			abpair=abpairs[idx]
-			linklabel=linklabels[idx]
-# 			print(abpair)
-			if "None" in abpair or None in abpair:
-				#if we hit a break in the path then we want to reset
-				#but still record the discontinuous segments
-				if len(thispath['nodes'])>0:
-					paths.append(thispath)
-					thispath={"nodes":[],"weight":weight}
+	#now we add up the various weights of each node
+	#this is super fast
+	st=time.time()
+	aggregated_nodes={}
+	for r in routes_subset:
+		for n_id in r['nodes']:
+			node=r['nodes'][n_id]
+			if n_id in aggregated_nodes:
+				for wk in node['weights']:
+					aggregated_nodes[n_id]['weights'][wk]+=node['weights'][wk]
 			else:
-				a_uuid,b_uuid=abpair
-				amatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",a_uuid]})]),None)
-				bmatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",b_uuid]})]),None)
-# 				print("A",a_uuid,amatch)
-# 				print("B",b_uuid,bmatch)
-				#the db can still return path node uuid's for places that don't have good geo data (nulled or zeroed lat/long)
-				#so we have to screen those out, as they have been excluded from the networkx graph db
-				if amatch is not None and bmatch is not None:
-					a_id=amatch
-# 					if len(thispath['nodes'])==0:
-# 						thispath['nodes'].append(a_uuid)
-					b_id=bmatch
-# 					print("-->",a_id,b_id)
-					nodes=add_stripped_node_to_dict(graph,a_id,nodes)
-					nodes=add_stripped_node_to_dict(graph,b_id,nodes)
-					
-# 					print(nodes)
-					
-					#get the shortest path from a to b, according to the graph
-					
-					#but also handle transportation self-loops...
-					spfail=False
-					selfloop=False
-					if a_id==b_id and linklabel=='transportation':
-						#transportation self-loop
-# 						print("self loop")
-						selfloop=True
-						successor_ids=[
-							n_id for n_id in oceanic_subgraph_view.successors(a_id)
-							if 'onramp' in oceanic_subgraph_view.nodes[n_id]['tags']
+				aggregated_nodes[n_id]=node
+	nodesflat=[aggregated_nodes[n_id] for n_id in aggregated_nodes]
+	print("time aggregating nodes:",time.time()-st)
+	
+	#edges, however, remain tricky
+	
+	paths_subset=[r['edges'] for r in routes_subset]
+	#first we aggregate the weights and gather the control points
+	st=time.time()
+	aggregated_paths={}
+	for path in paths_subset:
+		for s in path:
+			for t in path[s]:
+				edge=path[s][t]
+				edgecontrols=edge['controls']
+				edgeweight=edge['weight']
+				if s in aggregated_paths:
+					if t in aggregated_paths[s]:
+						aggregated_paths[s][t]['weight']+=edgeweight
+						aggregated_paths[s][t]['controls'].append(
+							{
+								'weight':edgeweight,
+								'control':edgecontrols
+							}
+						)
+					else:
+						edge['controls']=[
+							{
+								'weight':edgeweight,
+								'control':edgecontrols
+							}
 						]
-						if len(successor_ids)==0:
-# 							print("AAAAAAAA")
-							spfail=True
-						else:
-							successor_id=successor_ids[0]
-					else:
-						selfloop=False
-					
-					if not spfail:
-						try:
-							if selfloop:
-								if linklabel=='transportation':
-									sp=nx.shortest_path(oceanic_subgraph_view,successor_id,b_id,'distance')
-									sp.insert(0,a_id)
-								else:
-									sp=nx.shortest_path(graph,successor_id,b_id,'distance')
-									sp.insert(0,a_id)
-							else:
-								if linklabel=='transportation':
-									sp=nx.shortest_path(oceanic_subgraph_view,a_id,b_id,'distance')
-								else:
-									sp=nx.shortest_path(graph,a_id,b_id,'distance')
-						except:
-# 							print("BBBBBBBBB")
-							spfail=True
-					
-# 					for i in sp:
-# 						print(graph.nodes[i])
-					
-					## We need to do one last check here
-					## Because there are many routes that can be taken in the network
-					## And because many of these are taken
-					## This means we can end up with cases where
-					## The "shortest path" for this itinerary gets routed through
-					## important geographic nodes that aren't actually in the itinerary
-					## Yikes. We need to flag that as an error and draw a straight line
-					## So that the editors know to update the map network
-					sp_export_preflight=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
-# 					print(sp_export_preflight)
-					for i in sp_export_preflight:
-						if type(i)==str and i not in uuids:
-# 							print("CCCCCCCC")
-							spfail=True
-					
-					#if all our shortest path work has failed, then return a straight line
-					## but log it!
-					## OCT. 18 2023: I've found that when paths are NOT provided, this process slows down dramatically.
-					## AND RESOLVED THE ISSUE THAT WAS LEADING TO THE OCEANIC NETWORK BEING SKIPPED
-					## I USED THE SUBGRAPH VIEW TO FIX THIS PROBLEM -- WE WERE GETTING PATHS LIKE
-					## EMBARKATION TO ONRAMP TO A CLOSE DISEMBARKATION NODE TO THE ACTUAL DISEMBARKATION NODE BECAUSE IT HAD A POST-DISEMBARK IN IT. OY...
-					if spfail:
-						sp=[a_id,b_id]
-						print("---\nNO PATH")
-						print("from",amatch,graph.nodes[amatch])
-						print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
-						
-					
-					#retrieve the uuid's where applicable
-					sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
-					
-# 					print("spexport",sp_export)
-					#update the full path with this a, ... , b walk we've just performed
-					#after trimming the first entry in this walk ** if this is not our first walk
-					#otherwise, we get overlaps / false self-loops in our path
-					#this crops up in paths that are more than 1 hop long
-					if len(thispath['nodes'])>0:
-						if thispath['nodes'][-1]==sp_export[0]:
-							thispath['nodes']+=sp_export[1:]
-					else:
-						thispath['nodes']+=sp_export
-					
-					#update the nodes dictionary with any new nodes
-					node_errors=False
-					badnodes=[]
-					for i in range(len(sp_export)):
-						n_id=sp[i]
-						uuid=sp_export[i]
-						if uuid not in nodes:
-							if n_id in graph.nodes:
-								newnode_data=dict(graph.nodes[n_id])
-								nodes[str(uuid)]={
-									'data':newnode_data,
-									'id':uuid,
-									'weights':{nl:0 for nl in nodelabels}
-								}
-							else:
-								node_errors=True
-								badnodes.append(n_id)
-					#update the edges dictionary with this a, ..., b walk data
-					
-					if node_errors:
-						print("failed on path-->",sp_export,"specifically on-->",badnodes)
-					else:
-						sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
-						for sp_DC_pair in sp_DC_pairs:
-							s,t=[str(i) for i in sp_DC_pair]
-							if s not in edges:
-								edges[s]={t:{
-									'weight':weight,
-									'type':linklabel,
-									'source':s,
-									'target':t
-								}}
-							elif t not in edges[s]:
-								edges[s][t]={
-									'weight':weight,
-									'type':linklabel,
-									'source':s,
-									'target':t
-								}
-							else:
-								edges[s][t]['weight']+=weight
-								
-		if len(thispath['nodes'])>0:
-			paths.append(thispath)
-			thispath={"nodes":[],"weight":weight}
-			
-	splined=True
-	
-	if splined:
-		edges=spline_curves(nodes,edges,paths,graph)
-	
-	edgesvals=[edges[k] for k in edges]
-	
+						aggregated_paths[s][t]=edge
+				else:
+					edge['controls']=[
+						{
+							'weight':edgeweight,
+							'control':edgecontrols
+						}
+					]
+					aggregated_paths[s]={t:edge}
+	print("aggregating edge weights time:",time.time()-st)
+	del(paths_subset)
+	st = time.time()
 	edgesflat=[]
-	for s in edges:
-		for t in edges[s]:
-			edge=edges[s][t]
+	for s in aggregated_paths:
+		for t in aggregated_paths[s]:
+			edge=aggregated_paths[s][t]
 			thisedge={'source':s,'target':t,'weight':edge['weight'],'type':edge['type']}
 			if 'controls' in edge:
-				thisedge['controls']= edge['controls']
+				final_edge=weightedaverage_tuple(edge['controls'])
+				thisedge['controls']=final_edge
 			edgesflat.append(thisedge)
-	outputs={
-		"nodes":[nodes[k] for k in nodes],
-		"edges":edgesflat,
-		"paths":paths
-	}
+	print("flattening & control weighted averages time:",time.time()-st)
+	
+	outputs= {'nodes':nodesflat,'edges':edgesflat}
 	
 	return jsonify(outputs)
 
@@ -386,7 +252,6 @@ def simple_map(cachename):
 		features=[]
 		for n in graph.nodes:
 			node=(graph.nodes[n])
-# 			print(node)
 			feature={
 				"type": "Feature",
 				"properties": {},

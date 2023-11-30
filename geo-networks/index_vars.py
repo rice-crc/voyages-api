@@ -12,49 +12,47 @@ voyage_maps={
 	### THE NAME OF THE GRAPH (E.G., PLACE ROUTES)
 	### THE NODES, IN ORDER (E.G., ORIGIN, EMBARK, OCEAN, DISEMBARK, POST-DISEMBARK)
 	'graph_params': [
-		{
-			'name':'place',
-			'ordered_node_classes':[
-				{
-					## BECAUSE WE WILL ENCOUNTER SOME NODES IN DIFFERENT CONTEXTS
-					### E.G., THE BIGHT OF BIAFRA AS A REGION OF EMBARK & AS DISEMBARK
-					### WE WILL WANT TO MAKE SURE THAT WE 
-					### SO THAT
-					#### A. SUB-GRAPH CALLS WORK PROPERLY
-					###### LIKE WHEN WE'RE LINKING ORIGINS TO EMBARKATIONS TO OCEANIC...
-					#### B. WE DON'T DUPLICATE, OR TOO AGGRESSIVELY DE-DUPLICATE
-					'tag':'embarkation',
-					'values':{
-						'uuid':'voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
-						'name':'voyage_itinerary__imp_principal_place_of_slave_purchase__name',
-						'lat':'voyage_itinerary__imp_principal_place_of_slave_purchase__latitude',
-						'lon':'voyage_itinerary__imp_principal_place_of_slave_purchase__longitude',
-						'val':'voyage_itinerary__imp_principal_place_of_slave_purchase__value'
-					},
-					'tag_connections':[
-						("onramp","source","closest")
-					]
-				},
-				## THE OCEANIC GRAPH IS A SPECIAL CASE
-				## IT COMES FROM A FLAT FILE, NOT AN API CALL
-				{
-					'tag':'oceanic_waypoint',
-				},
-				{
-					'tag':'disembarkation',
-					'values':{
-						'uuid':'voyage_itinerary__imp_principal_port_slave_dis__uuid',
-						'name':'voyage_itinerary__imp_principal_port_slave_dis__name',
-						'lat':'voyage_itinerary__imp_principal_port_slave_dis__latitude',
-						'lon':'voyage_itinerary__imp_principal_port_slave_dis__longitude',
-						'val':'voyage_itinerary__imp_principal_port_slave_dis__value'
-					},
-					'tag_connections':[
-						("offramp","target","closest")
-					]
-				}
-			]
-		},
+# 		{
+# 			'name':'place',
+# 			'ordered_node_classes':[
+# 				{
+# 					## BECAUSE WE WILL ENCOUNTER SOME NODES IN DIFFERENT CONTEXTS
+# 					### E.G., THE BIGHT OF BIAFRA AS A REGION OF EMBARK & AS DISEMBARK
+# 					### WE WILL WANT TO MAKE SURE THAT WE 
+# 					### SO THAT
+# 					#### A. SUB-GRAPH CALLS WORK PROPERLY
+# 					###### LIKE WHEN WE'RE LINKING ORIGINS TO EMBARKATIONS TO OCEANIC...
+# 					#### B. WE DON'T DUPLICATE, OR TOO AGGRESSIVELY DE-DUPLICATE
+# 					'tag':'embarkation',
+# 					'values':{
+# 						'uuid':'voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+# 						'name':'voyage_itinerary__imp_principal_place_of_slave_purchase__name',
+# 						'lat':'voyage_itinerary__imp_principal_place_of_slave_purchase__latitude',
+# 						'lon':'voyage_itinerary__imp_principal_place_of_slave_purchase__longitude',
+# 						'val':'voyage_itinerary__imp_principal_place_of_slave_purchase__value'
+# 					},
+# 					'tag_connections':[
+# 						("onramp","source","closest")
+# 					]
+# 				},
+# 				{
+# 					'tag':'oceanic_waypoint',
+# 				},
+# 				{
+# 					'tag':'disembarkation',
+# 					'values':{
+# 						'uuid':'voyage_itinerary__imp_principal_port_slave_dis__uuid',
+# 						'name':'voyage_itinerary__imp_principal_port_slave_dis__name',
+# 						'lat':'voyage_itinerary__imp_principal_port_slave_dis__latitude',
+# 						'lon':'voyage_itinerary__imp_principal_port_slave_dis__longitude',
+# 						'val':'voyage_itinerary__imp_principal_port_slave_dis__value'
+# 					},
+# 					'tag_connections':[
+# 						("offramp","target","closest")
+# 					]
+# 				}
+# 			]
+# 		},
 		{
 			'name':'region',
 			'ordered_node_classes':[
@@ -90,6 +88,29 @@ voyage_maps={
 			]
 		}
 	],
+	'indices':{
+# 		'place':{
+# 			'pk':'voyage_id',
+# 			'itinerary':[
+# 				'voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+# 				'voyage_itinerary__imp_principal_port_slave_dis__uuid'
+# 			],
+# 			'weight':'voyage_slaves_numbers__imp_total_num_slaves_embarked'
+# 		},
+		'region':{
+			'pk':'voyage_id',
+			'itinerary':[
+				'voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
+				'voyage_itinerary__imp_principal_region_slave_dis__uuid'
+			],
+			'weight':'voyage_slaves_numbers__imp_total_num_slaves_embarked'
+		},
+		'linklabels':['transportation'],
+		'nodelabels':[
+			'embarkation',
+			'disembarkation'
+		]
+	},
 	'oceanic_network_file':'maps/all_routes.js'
 }
 
@@ -222,5 +243,34 @@ ao_maps={
 			]
 		}
 	],
+	'indices':{
+		'place':{
+			'pk':'enslaved_id',
+			'itinerary':[
+				'language_group__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__uuid',
+				'post_disembark_location__uuid'
+			],
+			'weight':None
+		},
+		'region':{
+			'pk':'enslaved_id',
+			'itinerary':[
+				'language_group__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__uuid',
+				'post_disembark_location__uuid'
+			],
+			'weight':None
+		},
+		'linklabels':['origination','transportation','disposition'],
+		'nodelabels':[
+			'origin',
+			'embarkation',
+			'disembarkation',
+			'post-disembarkation'
+		]
+	},
 	'oceanic_network_file':'maps/ao_routes.js'
 }

@@ -447,29 +447,8 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		)
 		queryset=queryset.order_by('id')
 		zoomlevel=params.get('zoomlevel',['region'])[0]
-		print("------>",zoomlevel)
-		if zoomlevel not in ['region','place']:
-			zoomlevel='region'
-		if zoomlevel=='place':
-			enslaved_values_list=queryset.values_list(
-				'language_group__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__uuid',
-				'post_disembark_location__uuid'
-			)
-			graphname='place'
-		elif zoomlevel=='region':
-			enslaved_values_list=queryset.values_list(
-				'language_group__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
-				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__uuid',
-				'post_disembark_location__uuid'
-			)
-			graphname='region'
-			
-		
-		counter=Counter(list(enslaved_values_list))
-		counter2={"__".join([str(i) for i in c]):counter[c] for c in counter}
+		values_list=queryset.values_list('id')
+		pks=[v[0] for v in values_list]
 		
 		django_query_time=time.time()
 		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
@@ -477,14 +456,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		d2={
 			'graphname':graphname,
 			'cachename':'ao_maps',
-			'payload':counter2,
-			'linklabels':['origination','transportation','disposition'],
-			'nodelabels':[
-				'origin',
-				'embarkation',
-				'disembarkation',
-				'post-disembarkation'
-			]
+			'pks':pks
 		}
 		
 		r=requests.post(

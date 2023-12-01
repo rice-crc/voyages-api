@@ -3,6 +3,7 @@ import networkx as nx
 from localsettings import *
 import requests
 import json
+import pandas as pd
 from networkx_query import search_nodes, search_edges
 
 def geteuclideandistance(Ay,Ax,By,Bx):
@@ -295,7 +296,6 @@ def weightedaverage(controlpoints):
 
 def weightedaverage_tuple(controlpoints):
 	
-# 	print("----->",controlpoints)
 	denominator=sum([wxy['weight'] for wxy in controlpoints])
 	if denominator!=0:
 		numeratorXa=sum([wxy['weight']*wxy['control'][0][0] for wxy in controlpoints])
@@ -423,6 +423,14 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 # 	print(results.keys())
 
 	cachedpaths={}
+	
+	nodesdf=pd.DataFrame(columns=[
+		'pk','id','origin','embarkation','disembarkation','post-disembarkation'
+	])
+	edgesdf=pd.DataFrame(columns=[
+		'pk','weight','type','source','target','c1x','c1y','c2x','c2y'
+	])
+	nodesdatadict={}
 	
 	amount_of_work=len(results[pk_var])
 	prevpercentdone=0
@@ -630,40 +638,57 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 								}
 							else:
 								edges[s][t]['weight']+=weight
-							
 		if len(thispath['nodes'])>0:
 			paths.append(thispath)
 			thispath={"nodes":[],"weight":weight}
-			
 		splined=True
-	
 		if splined:
 			edges=spline_curves(nodes,edges,paths,graph)
 		
-# 		print(nodes)
-	
-# 		edgesvals=[edges[k] for k in edges]
-# 	
-# 		edgesflat=[]
-# 		for s in edges:
-# 			for t in edges[s]:
-# 				edge=edges[s][t]
-# 				thisedge={'source':s,'target':t,'weight':edge['weight'],'type':edge['type']}
-# 				if 'controls' in edge:
-# 					thisedge['controls']= edge['controls']
-# 				edgesflat.append(thisedge)
-		outputs={
-			"nodes":nodes,
-			"edges":edges
-		}
+		for n_id in nodes:
+			nodesdatadict[n_id]=nodes[n_id]['data']
+			node=nodes[n_id]
+			dfrow={}
+			dfrow['pk']=pk
+			dfrow['id']=n_id
+			origin=node['weights'].get('origin')
+			embarkation=node['weights'].get('embarkation')
+			disembarkation=node['weights'].get('disembarkation')
+			post_disembarkation=node['weights'].get('post-disembarkation')
+			dfrow['origin']=origin
+			dfrow['embarkation']=embarkation
+			dfrow['disembarkation']=disembarkation
+			dfrow['post-disembarkation']=post_disembarkation
+			nodesdf=pd.concat([nodesdf, pd.DataFrame([dfrow])], ignore_index=True)
 		
-		cachedpaths[pk]=outputs
+		for s in edges:
+			for t in edges[s]:
+				edge=edges[s][t]
+				dfrow={k:edge[k] for k in ['weight','type','source','target']}
+				controls=edge['controls']
+				dfrow['pk']=pk
+				dfrow['c1x']=controls[0][0]
+				dfrow['c1y']=controls[0][1]
+				dfrow['c2x']=controls[1][0]
+				dfrow['c2y']=controls[1][1]
+				edgesdf=pd.concat([edgesdf,pd.DataFrame([dfrow])],ignore_index=True)
 		
 		
 		
+		# outputs={
+# 			"nodes":nodes,
+# 			"edges":edges
+# 		}
+		
+		
+		
+# 		cachedpaths[pk]=outputs
 		percentdone=(idx+1)/amount_of_work
 		if percentdone>prevpercentdone+.1:
 			print("%d percent done" %(percentdone*100))
 			prevpercentdone=percentdone
 	
-	return cachedpaths
+	print('NODES',nodesdf)
+	print('EDGES',edgesdf)
+	
+	return {'nodes':nodesdf,'edges':edgesdf,'nodesdata':nodesdatadict}

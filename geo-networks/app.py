@@ -9,7 +9,7 @@ from utils import *
 import networkx as nx
 from networkx_query import search_nodes, search_edges
 import re
-import gc
+import pandas as pd
 from maps import rnconversion
 
 app = Flask(__name__)
@@ -47,12 +47,14 @@ def load_graph(endpoint,graph_params):
 				return True
 			else:
 				return False
+# 		for node in graph.nodes:
+# 			print(node)
 		oceanic_subgraph_view=nx.subgraph_view(G,filter_edge=oceanic_edge_filter)
 	return G,oceanic_subgraph_view,graphname
 
 registered_caches={
-	'voyage_maps':voyage_maps,
-# 	'ao_maps':ao_maps
+# 	'voyage_maps':voyage_maps,
+	'ao_maps':ao_maps
 }
 
 #on initialization, load every index as a graph, via a call to the django api
@@ -89,10 +91,8 @@ while True:
 			graphs=rc['graphs'][graphname]
 			graph=graphs['graph']
 			oceanic_subgraph_view=graphs['oceanic_subgraph_view']
-			
 			linklabels=rc['indices']['linklabels']
 			nodelabels=rc['indices']['nodelabels']
-			
 			oceanic_subgraph_view=rc['graphs'][graphname]['oceanic_subgraph_view']
 			graph_idx=rc['indices'][graphname]
 			pk_var=graph_idx['pk']
@@ -109,7 +109,6 @@ while True:
 				nodelabels
 			)
 			rc['graphs'][graphname]['index']=graph_index
-			del(rc['graphs'][graphname]['graph'])
 	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
 	if failures_count>=len(rcnames):
 		standoff_time=standoff_base**standoff_count
@@ -120,24 +119,6 @@ while True:
 		break
 print("finished building graphs in %d seconds" %int(time.time()-st))
 
-
-
-
-def add_stripped_node_to_dict(graph,n_id,nodesdict):
-	node=dict(graph.nodes[n_id])
-	if 'uuid' in node:
-		#if it has a uuid from the database
-		#then its id will be like b3199d76-bf58-40fb-8eeb-be3986df6113
-		n_uuid=node['uuid']
-	else:
-		#else, its id in the nodesdict is the string representation
-		#of its id in the networkx graph, which was assigned at service instantiation
-		#as an auto-increment
-		n_uuid=str(n_id)
-	if 'tags' in node:
-		del node['tags']
-	nodesdict[n_uuid]['data']=node
-	return nodesdict
 
 @app.route('/network_maps/',methods=['POST'])
 def network_maps():
@@ -151,7 +132,33 @@ def network_maps():
 	rdata=request.json
 	cachename=rdata['cachename']
 	graphname=rdata['graphname']
+	
 	pks=rdata['pks']
+	
+	graph=registered_caches[cachename]['graphs'][graphname]['graph']
+	nodes=registered_caches[cachename]['graphs'][graphname]['index']['nodes']
+	edges=registered_caches[cachename]['graphs'][graphname]['index']['edges']
+	nodesdata=registered_caches[cachename]['graphs'][graphname]['index']['nodesdata']
+	
+	aggnodes=nodes[nodes['pk'].isin(pks)].drop(columns=(['pk'])).groupby('id').agg('sum')
+		
+	finalnodes=[
+		{	
+			'id':row_id,
+			'lat':nodesdata[row_id]['lat'],
+			'lon':nodesdata[row_id]['lon'],
+			'name':nodesdata[row_id]['name'],
+			'weights':{
+				'origin':row['origin'],
+				'embarkation':row['embarkation'],
+				'disembarkation':row['disembarkation'],
+				'post-disembarkation':row['post-disembarkation']
+			}
+		}
+		for row_id,row in aggnodes.iterrows()
+	]
+	
+	return(jsonify({'nodes':finalnodes}))
 	
 	#first we get our index, which consists of the full weighted routes
 	#keyed to each entity, whether that be a voyage or an enslaved person
@@ -215,7 +222,6 @@ def network_maps():
 					]
 					aggregated_paths[s]={t:edge}
 	print("aggregating edge weights time:",time.time()-st)
-	del(paths_subset)
 	st = time.time()
 	edgesflat=[]
 	for s in aggregated_paths:
@@ -226,6 +232,7 @@ def network_maps():
 				final_edge=weightedaverage_tuple(edge['controls'])
 				thisedge['controls']=final_edge
 			edgesflat.append(thisedge)
+	aggregated_paths={}
 	print("flattening & control weighted averages time:",time.time()-st)
 	
 	outputs= {'nodes':nodesflat,'edges':edgesflat}
@@ -236,10 +243,8 @@ def network_maps():
 @app.route('/simple_map/<cachename>',methods=['GET'])
 # @app.route('/simple_map',methods=['GET'])
 def simple_map(cachename):
-
 	st=time.time()
 	cachegraphs=registered_caches[cachename]['graphs']
-	
 	resp=[]
 	for graphname in cachegraphs:
 		featurecollection={
@@ -261,7 +266,6 @@ def simple_map(cachename):
 				}
 			}
 			feature['properties']['name']=node['name']
-
 			if 'lat' in node and 'lon' in node:
 				lat=node['lat']
 				lon=node['lon']
@@ -286,7 +290,6 @@ def simple_map(cachename):
 			}
 			s_id,t_id=e
 			edge=graph.edges[[s_id,t_id]]
-# 			print(edge)
 			edge_id=edge['id']
 			edge_tags=edge['tags']
 			s=graph.nodes[s_id]

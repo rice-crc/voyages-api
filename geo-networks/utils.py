@@ -410,8 +410,6 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	
 	payload={'selected_fields':selected_fields}
 	
-# 	print(headers,payload)
-	
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
@@ -419,8 +417,6 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	)
 	
 	results=json.loads(r.text)
-	
-# 	print(results.keys())
 
 	cachedpaths={}
 	
@@ -449,14 +445,7 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 		else:
 			weight=1
 		
-# 		print("------")
-# 		print("pk",pk)
-# 		print("itinerary",itinerary)
-# 		print("weight",weight)
-		
 		uuids=itinerary
-		
-		
 		
 		nodes={uuid:{
 			"id":uuid,
@@ -466,8 +455,7 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 			"data":{}
 			} for uuid in uuids if uuid != None
 		}
-	
-	
+		
 		paths=[]
 		edges={}
 	
@@ -485,13 +473,10 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 		#similarly for linklabels, which are N-1 long
 		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
 		thispath={"nodes":[],"weight":weight}
-	# 		print("abpairs",abpairs)
 	
 		for apbair_idx in range(len(linklabels)):
 			abpair=abpairs[apbair_idx]
-# 			print(abpair)
 			linklabel=linklabels[apbair_idx]
-	# 			print(abpair)
 			if "None" in abpair or None in abpair:
 				#if we hit a break in the path then we want to reset
 				#but still record the discontinuous segments
@@ -502,20 +487,13 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 				a_uuid,b_uuid=abpair
 				amatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",a_uuid]})]),None)
 				bmatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",b_uuid]})]),None)
-	# 				print("A",a_uuid,amatch)
-	# 				print("B",b_uuid,bmatch)
 				#the db can still return path node uuid's for places that don't have good geo data (nulled or zeroed lat/long)
 				#so we have to screen those out, as they have been excluded from the networkx graph db
 				if amatch is not None and bmatch is not None:
 					a_id=amatch
-	# 					if len(thispath['nodes'])==0:
-	# 						thispath['nodes'].append(a_uuid)
 					b_id=bmatch
-	# 					print("-->",a_id,b_id)
 					nodes=add_stripped_node_to_dict(graph,a_id,nodes)
 					nodes=add_stripped_node_to_dict(graph,b_id,nodes)
-				
-	# 					print(nodes)
 				
 					#get the shortest path from a to b, according to the graph
 				
@@ -524,14 +502,12 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 					selfloop=False
 					if a_id==b_id and linklabel=='transportation':
 						#transportation self-loop
-	# 						print("self loop")
 						selfloop=True
 						successor_ids=[
 							n_id for n_id in oceanic_subgraph_view.successors(a_id)
 							if 'onramp' in oceanic_subgraph_view.nodes[n_id]['tags']
 						]
 						if len(successor_ids)==0:
-	# 							print("AAAAAAAA")
 							spfail=True
 						else:
 							successor_id=successor_ids[0]
@@ -553,11 +529,7 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 								else:
 									sp=nx.shortest_path(graph,a_id,b_id,'distance')
 						except:
-	# 							print("BBBBBBBBB")
 							spfail=True
-				
-	# 					for i in sp:
-	# 						print(graph.nodes[i])
 				
 					## We need to do one last check here
 					## Because there are many routes that can be taken in the network
@@ -568,10 +540,8 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 					## Yikes. We need to flag that as an error and draw a straight line
 					## So that the editors know to update the map network
 					sp_export_preflight=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
-	# 					print(sp_export_preflight)
 					for i in sp_export_preflight:
 						if type(i)==str and i not in uuids:
-	# 							print("CCCCCCCC")
 							spfail=True
 				
 					#if all our shortest path work has failed, then return a straight line
@@ -590,7 +560,6 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 					#retrieve the uuid's where applicable
 					sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
 				
-	# 					print("spexport",sp_export)
 					#update the full path with this a, ... , b walk we've just performed
 					#after trimming the first entry in this walk ** if this is not our first walk
 					#otherwise, we get overlaps / false self-loops in our path
@@ -664,7 +633,6 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 			dfrow['disembarkation']=disembarkation
 			dfrow['post-disembarkation']=post_disembarkation
 			nodesdfrows.append(dfrow)
-# 			nodesdf=pd.concat([nodesdf, pd.DataFrame([dfrow])], ignore_index=True)
 		
 		
 		for s in edges:
@@ -678,36 +646,18 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 				dfrow['c2x']=controls[1][0]
 				dfrow['c2y']=controls[1][1]
 				edgesdfrows.append(dfrow)
-# 				edgesdf=pd.concat([edgesdf,pd.DataFrame([dfrow])],ignore_index=True)
 				edgesdatakey='__'.join([str(s),str(t)])
-				edgesdatadict[edgesdatakey]={'type':edge['type']}
+				edgesdatadict[edgesdatakey]={'type':edge['type'],'weight':edge['weight']}
 		
-		
-		
-		# outputs={
-# 			"nodes":nodes,
-# 			"edges":edges
-# 		}
-		
-		
-		
-# 		cachedpaths[pk]=outputs
 		percentdone=(idx+1)/amount_of_work
-		if percentdone>prevpercentdone+.05:
+		if percentdone>prevpercentdone+.02:
 			print("%d percent done" %(percentdone*100))
 			prevpercentdone=percentdone
 			nodesdf=pd.concat([nodesdf,pd.DataFrame.from_records(nodesdfrows)],ignore_index=True)
 			edgesdf=pd.concat([edgesdf,pd.DataFrame.from_records(edgesdfrows)],ignore_index=True)
 			nodesdfrows=[]
 			edgesdfrows=[]
-	
-	
-	
-# 	nodesdf=pd.DataFrame.from_records(nodesdfrows)
-# 	
-# 	
-# 	edgesdf=pd.DataFrame.from_records(edgesdfrows)
-	
+		
 	print('NODES',nodesdf)
 	print('EDGES',edgesdf)
 	

@@ -72,28 +72,28 @@ while True:
 		if 'graphs' not in rc:
 			rc['graphs']={}
 		for graph_params in rc['graph_params']:
-			try:
-				graph,oceanic_subgraph_view,graphname=load_graph(dataframe_endpoint,graph_params)
-				rc['graphs'][graphname]={
-					'graph':graph,
-					'oceanic_subgraph_view':oceanic_subgraph_view
-				}
-			except:
-				failures_count+=1
-				print("failed on cache:",rc['name'])
-	print('CACHING ROUTES')
-	for rcname in rcnames:
-		rc=registered_caches[rcname]
-		dataframe_endpoint=rc['endpoint']
-# 		for graphname in ['region','place']:
-		for graphname in ['region']:
-			print("caching",rcname,graphname)
-			graphs=rc['graphs'][graphname]
-			graph=graphs['graph']
-			oceanic_subgraph_view=graphs['oceanic_subgraph_view']
+# 			try:
+			graph,oceanic_subgraph_view,graphname=load_graph(dataframe_endpoint,graph_params)
+# 				rc['graphs'][graphname]={
+# 					'graph':graph,
+# 					'oceanic_subgraph_view':oceanic_subgraph_view
+# 				}
+# 			except:
+# 				failures_count+=1
+# 				print("failed on cache:",rc['name'])
+# 	print('CACHING ROUTES')
+# 	for rcname in rcnames:
+# 		rc=registered_caches[rcname]
+# 		dataframe_endpoint=rc['endpoint']
+# # 		for graphname in ['region','place']:
+# 		for graphname in ['region']:
+# 			print("caching",rcname,graphname)
+# 			graphs=rc['graphs'][graphname]
+# 			graph=graphs['graph']
+# 			oceanic_subgraph_view=graphs['oceanic_subgraph_view']
 			linklabels=rc['indices']['linklabels']
 			nodelabels=rc['indices']['nodelabels']
-			oceanic_subgraph_view=rc['graphs'][graphname]['oceanic_subgraph_view']
+# 			oceanic_subgraph_view=rc['graphs'][graphname]['oceanic_subgraph_view']
 			graph_idx=rc['indices'][graphname]
 			pk_var=graph_idx['pk']
 			itinerary_vars=graph_idx['itinerary']
@@ -108,7 +108,10 @@ while True:
 				linklabels,
 				nodelabels
 			)
-			rc['graphs'][graphname]['index']=graph_index
+			if graphname not in rc['graphs']:
+				rc['graphs'][graphname]={'index':graph_index}
+			else:	
+				rc['graphs'][graphname]['index']=graph_index
 	print("failed on %d of %d caches" %(failures_count,len(rcnames)))
 	if failures_count>=len(rcnames):
 		standoff_time=standoff_base**standoff_count
@@ -135,7 +138,6 @@ def network_maps():
 	
 	pks=rdata['pks']
 	
-	graph=registered_caches[cachename]['graphs'][graphname]['graph']
 	nodes=registered_caches[cachename]['graphs'][graphname]['index']['nodes']
 	edges=registered_caches[cachename]['graphs'][graphname]['index']['edges']
 	nodesdata=registered_caches[cachename]['graphs'][graphname]['index']['nodesdata']
@@ -143,15 +145,10 @@ def network_maps():
 	
 	aggnodes=nodes[nodes['pk'].isin(pks)].drop(columns=(['pk'])).groupby('id').agg('sum')
 	
-# 	for row_id,row in aggnodes.iterrows():
-# 		print(row_id,nodesdata[row_id])
-	
 	finalnodes=[
 		{	
 			'id':row_id,
-			'lat':nodesdata[row_id]['lat'],
-			'lon':nodesdata[row_id]['lon'],
-			'name':nodesdata[row_id]['name'],
+			'data':nodesdata[row_id],
 			'weights':{
 				'origin':row['origin'],
 				'embarkation':row['embarkation'],
@@ -160,117 +157,42 @@ def network_maps():
 			}
 		}
 		for row_id,row in aggnodes.iterrows()
-		##it's weird -- nodes that i screened out for lack of good lat/lng
-		##are reappearing and breaking this iterator
+		##nodes that i screened out for lack of good lat/lng are reappearing and breaking this iterator?
 		if 'lat' in nodesdata[row_id]
 	]
 	
-	totalweight=sum(edges[edges['pk'].isin(pks)][['pk','weight']].groupby('pk').agg('mean')['weight'].to_list())
+# 	totalweight=sum(edges[edges['pk'].isin(pks)][['pk','weight']].groupby('pk').agg('mean')['weight'].to_list())
 	
-	edges['c1x']=edges['c1x']*edges['weight']
-	edges['c2x']=edges['c2x']*edges['weight']
-	edges['c1y']=edges['c1y']*edges['weight']
-	edges['c2y']=edges['c2y']*edges['weight']
+	print(edges)
+	aggedges=edges.copy()
 	
-	aggedges=edges.drop(columns=(['pk'])).groupby(['source','target']).agg('sum').reset_index()
+	aggedges['c1x']=aggedges['c1x']*aggedges['weight']
+	aggedges['c2x']=aggedges['c2x']*aggedges['weight']
+	aggedges['c1y']=aggedges['c1y']*aggedges['weight']
+	aggedges['c2y']=aggedges['c2y']*aggedges['weight']
 	
-	aggedges['c1x']=aggedges['c1x']/totalweight
-	aggedges['c2x']=aggedges['c2x']/totalweight
-	aggedges['c1y']=aggedges['c1y']/totalweight
-	aggedges['c2y']=aggedges['c2y']/totalweight
+	aggedges=aggedges.drop(columns=(['pk'])).groupby(['source','target']).agg('sum').reset_index()
 	
-# 	print(aggedges)
+	print(aggedges[['weight','c1x']])
+	
+	aggedges['c1x']=aggedges['c1x']/aggedges['weight']
+	aggedges['c2x']=aggedges['c2x']/aggedges['weight']
+	aggedges['c1y']=aggedges['c1y']/aggedges['weight']
+	aggedges['c2y']=aggedges['c2y']/aggedges['weight']
+	
+	print(aggedges[['weight','c1x']])
 	
 	finaledges=[
 		{
 			'source':row['source'],
 			'target':row['target'],
-			'weight':row['weight'],
+			'weight':edgesdata['__'.join([str(row['source']),str(row['target'])])]['weight'],
 			'controls':[[row['c1x'],row['c1y']],[row['c2x'],row['c2y']]],
 			'type':edgesdata['__'.join([str(row['source']),str(row['target'])])]['type']
 		} for row_id,row in aggedges.iterrows()
 	]
 	
 	return(jsonify({'nodes':finalnodes,'edges':finaledges}))
-	
-	#first we get our index, which consists of the full weighted routes
-	#keyed to each entity, whether that be a voyage or an enslaved person
-	
-	routes_index=registered_caches[cachename]['graphs'][graphname]['index']
-	
-	#then we subset the index (which are nodes and paths)
-	#according to the entities that have been requested
-	routes_subset=[routes_index[pk] for pk in pks]
-	
-	#now we add up the various weights of each node
-	#this is super fast
-	st=time.time()
-	aggregated_nodes={}
-	for r in routes_subset:
-		for n_id in r['nodes']:
-			node=r['nodes'][n_id]
-			if n_id in aggregated_nodes:
-				for wk in node['weights']:
-					aggregated_nodes[n_id]['weights'][wk]+=node['weights'][wk]
-			else:
-				aggregated_nodes[n_id]=node
-	nodesflat=[aggregated_nodes[n_id] for n_id in aggregated_nodes]
-	print("time aggregating nodes:",time.time()-st)
-	
-	#edges, however, remain tricky
-	
-	paths_subset=[r['edges'] for r in routes_subset]
-	#first we aggregate the weights and gather the control points
-	st=time.time()
-	aggregated_paths={}
-	for path in paths_subset:
-		for s in path:
-			for t in path[s]:
-				edge=path[s][t]
-				edgecontrols=edge['controls']
-				edgeweight=edge['weight']
-				if s in aggregated_paths:
-					if t in aggregated_paths[s]:
-						aggregated_paths[s][t]['weight']+=edgeweight
-						aggregated_paths[s][t]['controls'].append(
-							{
-								'weight':edgeweight,
-								'control':edgecontrols
-							}
-						)
-					else:
-						edge['controls']=[
-							{
-								'weight':edgeweight,
-								'control':edgecontrols
-							}
-						]
-						aggregated_paths[s][t]=edge
-				else:
-					edge['controls']=[
-						{
-							'weight':edgeweight,
-							'control':edgecontrols
-						}
-					]
-					aggregated_paths[s]={t:edge}
-	print("aggregating edge weights time:",time.time()-st)
-	st = time.time()
-	edgesflat=[]
-	for s in aggregated_paths:
-		for t in aggregated_paths[s]:
-			edge=aggregated_paths[s][t]
-			thisedge={'source':s,'target':t,'weight':edge['weight'],'type':edge['type']}
-			if 'controls' in edge:
-				final_edge=weightedaverage_tuple(edge['controls'])
-				thisedge['controls']=final_edge
-			edgesflat.append(thisedge)
-	aggregated_paths={}
-	print("flattening & control weighted averages time:",time.time()-st)
-	
-	outputs= {'nodes':nodesflat,'edges':edgesflat}
-	
-	return jsonify(outputs)
 
 #GEOJSON
 @app.route('/simple_map/<cachename>',methods=['GET'])

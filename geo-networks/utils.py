@@ -6,6 +6,41 @@ import json
 import pandas as pd
 from networkx_query import search_nodes, search_edges
 
+def load_graph(endpoint,graph_params):
+	graphname=graph_params['name']
+	print("loading network:",graphname)
+	headers={'Authorization':DJANGO_AUTH_KEY}
+	G=nx.DiGraph()
+	if rc['type']=='oceanic':
+		# FIRST, ADD THE OCEANIC NETWORK FROM THE APPROPRIATE JSON FLATFILE
+		## AS POINTED TO IN THE INDEX_VARS.PY FILE
+		oceanic_network_file=rc['oceanic_network_file']
+		oceanic_network=rnconversion.main(oceanic_network_file)
+		G,max_node_id=add_oceanic_network(G,oceanic_network,init_node_id=0)
+		print("created oceanic network",G)
+		# THEN ITERATE OVER THE GEO VARS IN THE INDEX
+		## AND ADD THE RESULTING UNIQUE NODES TO THE NETWORK
+		filter_obj=rc['filter']
+		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id+1)
+		print("added non-oceanic network nodes")
+		#then link across the ordered node classes
+		ordered_node_classes=graph_params['ordered_node_classes']
+		prev_tag=None
+		for ordered_node_class in ordered_node_classes:
+			tag=ordered_node_class['tag']
+			if 'tag_connections' in ordered_node_class:
+				tag_connections=ordered_node_class['tag_connections']
+				G=connect_to_tags(G,tag,tag_connections)
+		print("connected all remaining network edges (non-oceanic --> (non-oceanic & oceanic)) following index_vars.py file ruleset")
+		def oceanic_edge_filter(s,t):
+			edgetags=G[s][t].get("tags")
+			if "oceanic_leg" in edgetags or "embarkation_to_onramp" in edgetags or "offramp_to_disembarkation" in edgetags:
+				return True
+			else:
+				return False
+		oceanic_subgraph_view=nx.subgraph_view(G,filter_edge=oceanic_edge_filter)
+	return G,oceanic_subgraph_view,graphname
+
 def geteuclideandistance(Ay,Ax,By,Bx):
 	distance=sqrt(
 		(Ay-By)**2 +
@@ -632,9 +667,9 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 			dfrow['embarkation']=embarkation
 			dfrow['disembarkation']=disembarkation
 			dfrow['post-disembarkation']=post_disembarkation
-			nodesdfrows.append(dfrow)
-		
-		
+			nonnullvalcount=len([dfrow[k] for k in dfrow if dfrow[k] is not None])
+			if nonnullvalcount>0:
+				nodesdfrows.append(dfrow)
 		for s in edges:
 			for t in edges[s]:
 				edge=edges[s][t]
@@ -647,7 +682,8 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 				dfrow['c2y']=controls[1][1]
 				edgesdfrows.append(dfrow)
 				edgesdatakey='__'.join([str(s),str(t)])
-				edgesdatadict[edgesdatakey]={'type':edge['type'],'weight':edge['weight']}
+				if edge['type'] is not None and edge['weight'] is not None:
+					edgesdatadict[edgesdatakey]={'type':edge['type'],'weight':edge['weight']}
 		
 		percentdone=(idx+1)/amount_of_work
 		if percentdone>prevpercentdone+.02:

@@ -280,7 +280,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		st=time.time()
 		params=dict(request.data)
 		queryset=Enslaved.objects.all()
-		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
+# 		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,
 			self,
@@ -447,7 +447,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			auto_prefetch=True,
 			retrieve_all=True
 		)
-		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
+# 		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
 		print("--->",queryset.count())
 		queryset=queryset.order_by('id')
 		zoomlevel=params.get('zoomlevel',['region'])[0]

@@ -53,8 +53,8 @@ def load_graph(endpoint,graph_params):
 	return G,oceanic_subgraph_view,graphname
 
 registered_caches={
-# 	'voyage_maps':voyage_maps,
-	'ao_maps':ao_maps
+	'voyage_maps':voyage_maps,
+# 	'ao_maps':ao_maps
 }
 
 #on initialization, load every index as a graph, via a call to the django api
@@ -139,9 +139,13 @@ def network_maps():
 	nodes=registered_caches[cachename]['graphs'][graphname]['index']['nodes']
 	edges=registered_caches[cachename]['graphs'][graphname]['index']['edges']
 	nodesdata=registered_caches[cachename]['graphs'][graphname]['index']['nodesdata']
+	edgesdata=registered_caches[cachename]['graphs'][graphname]['index']['edgesdata']
 	
 	aggnodes=nodes[nodes['pk'].isin(pks)].drop(columns=(['pk'])).groupby('id').agg('sum')
-		
+	
+# 	for row_id,row in aggnodes.iterrows():
+# 		print(row_id,nodesdata[row_id])
+	
 	finalnodes=[
 		{	
 			'id':row_id,
@@ -156,9 +160,38 @@ def network_maps():
 			}
 		}
 		for row_id,row in aggnodes.iterrows()
+		##it's weird -- nodes that i screened out for lack of good lat/lng
+		##are reappearing and breaking this iterator
+		if 'lat' in nodesdata[row_id]
 	]
 	
-	return(jsonify({'nodes':finalnodes}))
+	totalweight=sum(edges[edges['pk'].isin(pks)][['pk','weight']].groupby('pk').agg('mean')['weight'].to_list())
+	
+	edges['c1x']=edges['c1x']*edges['weight']
+	edges['c2x']=edges['c2x']*edges['weight']
+	edges['c1y']=edges['c1y']*edges['weight']
+	edges['c2y']=edges['c2y']*edges['weight']
+	
+	aggedges=edges.drop(columns=(['pk'])).groupby(['source','target']).agg('sum').reset_index()
+	
+	aggedges['c1x']=aggedges['c1x']/totalweight
+	aggedges['c2x']=aggedges['c2x']/totalweight
+	aggedges['c1y']=aggedges['c1y']/totalweight
+	aggedges['c2y']=aggedges['c2y']/totalweight
+	
+# 	print(aggedges)
+	
+	finaledges=[
+		{
+			'source':row['source'],
+			'target':row['target'],
+			'weight':row['weight'],
+			'controls':[[row['c1x'],row['c1y']],[row['c2x'],row['c2y']]],
+			'type':edgesdata['__'.join([str(row['source']),str(row['target'])])]['type']
+		} for row_id,row in aggedges.iterrows()
+	]
+	
+	return(jsonify({'nodes':finalnodes,'edges':finaledges}))
 	
 	#first we get our index, which consists of the full weighted routes
 	#keyed to each entity, whether that be a voyage or an enslaved person

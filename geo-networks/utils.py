@@ -427,10 +427,14 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	nodesdf=pd.DataFrame(columns=[
 		'pk','id','origin','embarkation','disembarkation','post-disembarkation'
 	])
+	nodesdfrows=[]
 	edgesdf=pd.DataFrame(columns=[
-		'pk','weight','type','source','target','c1x','c1y','c2x','c2y'
+		'pk','weight','source','target','c1x','c1y','c2x','c2y'
 	])
+	edgesdfrows=[]
 	nodesdatadict={}
+	edgesdatadict={}
+
 	
 	amount_of_work=len(results[pk_var])
 	prevpercentdone=0
@@ -659,19 +663,24 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 			dfrow['embarkation']=embarkation
 			dfrow['disembarkation']=disembarkation
 			dfrow['post-disembarkation']=post_disembarkation
-			nodesdf=pd.concat([nodesdf, pd.DataFrame([dfrow])], ignore_index=True)
+			nodesdfrows.append(dfrow)
+# 			nodesdf=pd.concat([nodesdf, pd.DataFrame([dfrow])], ignore_index=True)
+		
 		
 		for s in edges:
 			for t in edges[s]:
 				edge=edges[s][t]
-				dfrow={k:edge[k] for k in ['weight','type','source','target']}
+				dfrow={k:edge[k] for k in ['weight','source','target']}
 				controls=edge['controls']
 				dfrow['pk']=pk
 				dfrow['c1x']=controls[0][0]
 				dfrow['c1y']=controls[0][1]
 				dfrow['c2x']=controls[1][0]
 				dfrow['c2y']=controls[1][1]
-				edgesdf=pd.concat([edgesdf,pd.DataFrame([dfrow])],ignore_index=True)
+				edgesdfrows.append(dfrow)
+# 				edgesdf=pd.concat([edgesdf,pd.DataFrame([dfrow])],ignore_index=True)
+				edgesdatakey='__'.join([str(s),str(t)])
+				edgesdatadict[edgesdatakey]={'type':edge['type']}
 		
 		
 		
@@ -684,11 +693,22 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 		
 # 		cachedpaths[pk]=outputs
 		percentdone=(idx+1)/amount_of_work
-		if percentdone>prevpercentdone+.1:
+		if percentdone>prevpercentdone+.05:
 			print("%d percent done" %(percentdone*100))
 			prevpercentdone=percentdone
+			nodesdf=pd.concat([nodesdf,pd.DataFrame.from_records(nodesdfrows)],ignore_index=True)
+			edgesdf=pd.concat([edgesdf,pd.DataFrame.from_records(edgesdfrows)],ignore_index=True)
+			nodesdfrows=[]
+			edgesdfrows=[]
+	
+	
+	
+# 	nodesdf=pd.DataFrame.from_records(nodesdfrows)
+# 	
+# 	
+# 	edgesdf=pd.DataFrame.from_records(edgesdfrows)
 	
 	print('NODES',nodesdf)
 	print('EDGES',edgesdf)
 	
-	return {'nodes':nodesdf,'edges':edgesdf,'nodesdata':nodesdatadict}
+	return {'nodes':nodesdf,'edges':edgesdf,'nodesdata':nodesdatadict,'edgesdata':edgesdatadict}

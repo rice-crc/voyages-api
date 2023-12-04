@@ -9,8 +9,9 @@ from utils import *
 import networkx as nx
 from networkx_query import search_nodes, search_edges
 import re
+import pickle
+import os
 import pandas as pd
-from maps import rnconversion
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -36,29 +37,33 @@ while True:
 			rc['graphs']={}
 		for graph_params in rc['graph_params']:
 # 			try:
-			##NEXT: I SHOULD CHECK TO SEE IF THERE'S AN ALREADY-EXISTING INDEX
-			##AND IF NOT BUILD IT
-			##I'LL NEED VOLUME STORAGE IN DOCKER
-			##AND A FILENAME CONVENTION
-			##AND A MEANS OF FORCING A REINDEX
-			##BUT THIS IS SOMETHING WE LACKED FOR A LONG TIME IN SOLR--THE CORE DUMP/LOAD PROCEDURE
-			graph,oceanic_subgraph_view,graphname=load_graph(dataframe_endpoint,graph_params)
-			linklabels=rc['indices']['linklabels']
-			nodelabels=rc['indices']['nodelabels']
-			graph_idx=rc['indices'][graphname]
-			pk_var=graph_idx['pk']
-			itinerary_vars=graph_idx['itinerary']
-			weight_vars=graph_idx['weight']
-			graph_index=build_index(
-				dataframe_endpoint,
-				graph,
-				oceanic_subgraph_view,
-				pk_var,
-				itinerary_vars,
-				weight_vars,
-				linklabels,
-				nodelabels
-			)
+			graphname=graph_params['name']
+			picklefilepath='tmp/%s__%s.pickle' %(rcname,graphname)
+			
+			if os.path.exists(picklefilepath):
+				with open(picklefilepath, 'rb') as f:
+					graph_index = pickle.load(f)
+			else:
+				graph,oceanic_subgraph_view,graphname=load_graph(dataframe_endpoint,graph_params,rc)
+				linklabels=rc['indices']['linklabels']
+				nodelabels=rc['indices']['nodelabels']
+				graph_idx=rc['indices'][graphname]
+				pk_var=graph_idx['pk']
+				itinerary_vars=graph_idx['itinerary']
+				weight_vars=graph_idx['weight']
+				graph_index=build_index(
+					dataframe_endpoint,
+					graph,
+					oceanic_subgraph_view,
+					pk_var,
+					itinerary_vars,
+					weight_vars,
+					linklabels,
+					nodelabels
+				)
+				with open(picklefilepath, 'wb') as f:
+					pickle.dump(graph_index, f, pickle.HIGHEST_PROTOCOL)
+			
 			if graphname not in rc['graphs']:
 				rc['graphs'][graphname]={'index':graph_index}
 			else:	

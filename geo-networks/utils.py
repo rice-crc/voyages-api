@@ -5,8 +5,9 @@ import requests
 import json
 import pandas as pd
 from networkx_query import search_nodes, search_edges
+from maps import rnconversion
 
-def load_graph(endpoint,graph_params):
+def load_graph(endpoint,graph_params,rc):
 	graphname=graph_params['name']
 	print("loading network:",graphname)
 	headers={'Authorization':DJANGO_AUTH_KEY}

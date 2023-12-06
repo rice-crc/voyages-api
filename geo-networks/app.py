@@ -116,9 +116,15 @@ def network_maps():
 			}
 		}
 		for row_id,row in aggnodes.iterrows()
-		##nodes that i screened out for lack of good lat/lng are reappearing and breaking this iterator?
-		if 'lat' in nodesdata[row_id]
+		if row_id in nodesdata
 	]
+	
+	
+	for node in finalnodes:
+		if 'name' in node['data']:
+			if node['data']['name']=="Sierra Leone":
+				print(node)
+	
 	
 	## HAVE TO DROP EDGES WHERE WEIGHT IS ZERO BEFORE I DO THE BELOW:
 	

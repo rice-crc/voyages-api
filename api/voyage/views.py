@@ -197,6 +197,9 @@ class VoyageDataFrames(generics.GenericAPIView):
 			retrieve_all=True
 		)
 # 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
+# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
+# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of # Benin')
+				
 		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
 		if len(error_messages)==0:
@@ -321,6 +324,8 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			retrieve_all=True
 		)
 # 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
+# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
+# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of Benin')
 		queryset=queryset.order_by('id')
 		zoomlevel=params.get('zoomlevel',['region'])[0]
 		values_list=queryset.values_list('id')

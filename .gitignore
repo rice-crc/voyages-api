@@ -10,7 +10,8 @@ django/document/management/commands/*.txt
 django/document/management/commands/*.csv
 django/document/management/commands/*.json
 
-tmp/
+geo-networks/tmp/*.pickle
+geo-networks/tmp/*.json
 
 app_secrets.py
 

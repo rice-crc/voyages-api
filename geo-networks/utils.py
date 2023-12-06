@@ -420,6 +420,9 @@ def spline_curves(nodes,edges,paths,G):
 
 def add_stripped_node_to_dict(graph,n_id,nodesdict):
 	node=dict(graph.nodes[n_id])
+	##Difficulty rendering Sierra Leone?
+# 	if node['name']=="Sierra Leone":
+# 		print(node)
 	if 'uuid' in node:
 		#if it has a uuid from the database
 		#then its id will be like b3199d76-bf58-40fb-8eeb-be3986df6113
@@ -655,8 +658,10 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 			edges=spline_curves(nodes,edges,paths,graph)
 		
 		for n_id in nodes:
-			nodesdatadict[n_id]=nodes[n_id]['data']
 			node=nodes[n_id]
+			if node['data']!={}:
+				nodesdatadict[n_id]=node['data']
+					
 			dfrow={}
 			dfrow['pk']=pk
 			dfrow['id']=n_id
@@ -671,6 +676,7 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 			nonnullvalcount=len([dfrow[k] for k in dfrow if dfrow[k] is not None])
 			if nonnullvalcount>0:
 				nodesdfrows.append(dfrow)
+
 		for s in edges:
 			for t in edges[s]:
 				edge=edges[s][t]

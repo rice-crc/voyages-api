@@ -3,7 +3,44 @@ import networkx as nx
 from localsettings import *
 import requests
 import json
+import pandas as pd
 from networkx_query import search_nodes, search_edges
+from maps import rnconversion
+
+def load_graph(endpoint,graph_params,rc):
+	graphname=graph_params['name']
+	print("loading network:",graphname)
+	headers={'Authorization':DJANGO_AUTH_KEY}
+	G=nx.DiGraph()
+	if rc['type']=='oceanic':
+		# FIRST, ADD THE OCEANIC NETWORK FROM THE APPROPRIATE JSON FLATFILE
+		## AS POINTED TO IN THE INDEX_VARS.PY FILE
+		oceanic_network_file=rc['oceanic_network_file']
+		oceanic_network=rnconversion.main(oceanic_network_file)
+		G,max_node_id=add_oceanic_network(G,oceanic_network,init_node_id=0)
+		print("created oceanic network",G)
+		# THEN ITERATE OVER THE GEO VARS IN THE INDEX
+		## AND ADD THE RESULTING UNIQUE NODES TO THE NETWORK
+		filter_obj=rc['filter']
+		G,max_node_id=add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=max_node_id+1)
+		print("added non-oceanic network nodes")
+		#then link across the ordered node classes
+		ordered_node_classes=graph_params['ordered_node_classes']
+		prev_tag=None
+		for ordered_node_class in ordered_node_classes:
+			tag=ordered_node_class['tag']
+			if 'tag_connections' in ordered_node_class:
+				tag_connections=ordered_node_class['tag_connections']
+				G=connect_to_tags(G,tag,tag_connections)
+		print("connected all remaining network edges (non-oceanic --> (non-oceanic & oceanic)) following index_vars.py file ruleset")
+		def oceanic_edge_filter(s,t):
+			edgetags=G[s][t].get("tags")
+			if "oceanic_leg" in edgetags or "embarkation_to_onramp" in edgetags or "offramp_to_disembarkation" in edgetags:
+				return True
+			else:
+				return False
+		oceanic_subgraph_view=nx.subgraph_view(G,filter_edge=oceanic_edge_filter)
+	return G,oceanic_subgraph_view,graphname
 
 def geteuclideandistance(Ay,Ax,By,Bx):
 	distance=sqrt(
@@ -276,6 +313,48 @@ def getnodefromdict(node_id,nodesdict,G):
 		print("failed on",node_id,"data in graph is-->",node)
 	return node
 
+def weightedaverage(controlpoints):
+	
+	denominator=sum([wxy['weight'] for wxy in controlpoints])
+	if denominator!=0:
+		numeratorX=sum([wxy['weight']*wxy['control'][0] for wxy in controlpoints])
+		numeratorY=sum([wxy['weight']*wxy['control'][1] for wxy in controlpoints])
+		finalX=numeratorX/denominator
+		finalY=numeratorY/denominator
+	else:
+		denominator=len(controlpoints)
+		numeratorX=sum([denominator*wxy['control'][0] for wxy in controlpoints])
+		numeratorY=sum([denominator*wxy['control'][1] for wxy in controlpoints])
+		finalX=numeratorX/denominator
+		finalY=numeratorY/denominator
+	
+	return [finalX,finalY]
+
+def weightedaverage_tuple(controlpoints):
+	
+	denominator=sum([wxy['weight'] for wxy in controlpoints])
+	if denominator!=0:
+		numeratorXa=sum([wxy['weight']*wxy['control'][0][0] for wxy in controlpoints])
+		numeratorYa=sum([wxy['weight']*wxy['control'][0][1] for wxy in controlpoints])
+		finalXa=numeratorXa/denominator
+		finalYa=numeratorYa/denominator
+		numeratorXb=sum([wxy['weight']*wxy['control'][1][0] for wxy in controlpoints])
+		numeratorYb=sum([wxy['weight']*wxy['control'][1][1] for wxy in controlpoints])
+		finalXb=numeratorXb/denominator
+		finalYb=numeratorYb/denominator
+	else:
+		denominator=len(controlpoints)
+		numeratorXa=sum([denominator*wxy['control'][0][0] for wxy in controlpoints])
+		numeratorYa=sum([denominator*wxy['control'][0][1] for wxy in controlpoints])
+		finalXa=numeratorXa/denominator
+		finalYa=numeratorYa/denominator
+		numeratorXb=sum([denominator*wxy['control'][1][0] for wxy in controlpoints])
+		numeratorYb=sum([denominator*wxy['control'][1][1] for wxy in controlpoints])
+		finalXb=numeratorXb/denominator
+		finalYb=numeratorYb/denominator
+	
+	return [[finalXa,finalYa],[finalXb,finalYb]]
+
 
 def spline_curves(nodes,edges,paths,G):
 # 	print("edges",edges)
@@ -327,23 +406,6 @@ def spline_curves(nodes,edges,paths,G):
 		else:
 			print("bad path -- only one node?",path)
 	
-	def weightedaverage(controlpoints):
-		
-		denominator=sum([wxy['weight'] for wxy in controlpoints])
-		if denominator!=0:
-			numeratorX=sum([wxy['weight']*wxy['control'][0] for wxy in controlpoints])
-			numeratorY=sum([wxy['weight']*wxy['control'][1] for wxy in controlpoints])
-			finalX=numeratorX/denominator
-			finalY=numeratorY/denominator
-		else:
-			denominator=len(controlpoints)
-			numeratorX=sum([denominator*wxy['control'][0] for wxy in controlpoints])
-			numeratorY=sum([denominator*wxy['control'][1] for wxy in controlpoints])
-			finalX=numeratorX/denominator
-			finalY=numeratorY/denominator
-		
-		return [finalX,finalY]
-	
 	for s in edges:
 		for t in edges[s]:
 			controls=edges[s][t]['controls']
@@ -355,5 +417,291 @@ def spline_curves(nodes,edges,paths,G):
 				print("FAILED CURVING",nodes[s],nodes[t],edges[s][t])
 	
 	return edges
-			
+
+def add_stripped_node_to_dict(graph,n_id,nodesdict):
+	node=dict(graph.nodes[n_id])
+	##Difficulty rendering Sierra Leone?
+# 	if node['name']=="Sierra Leone":
+# 		print(node)
+	if 'uuid' in node:
+		#if it has a uuid from the database
+		#then its id will be like b3199d76-bf58-40fb-8eeb-be3986df6113
+		n_uuid=node['uuid']
+	else:
+		#else, its id in the nodesdict is the string representation
+		#of its id in the networkx graph, which was assigned at service instantiation
+		#as an auto-increment
+		n_uuid=str(n_id)
+	if 'tags' in node:
+		del node['tags']
+	nodesdict[n_uuid]['data']=node
+	return nodesdict
+
 	
+def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weight_var,linklabels,nodelabels):
+	
+	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
+	
+	if weight_var is not None:
+		selected_fields=[pk_var]+itinerary_vars+[weight_var]
+	else:
+		selected_fields=[pk_var]+itinerary_vars
+	
+	payload={'selected_fields':selected_fields}
+	
+	r=requests.post(
+		url=DJANGO_BASE_URL+endpoint,
+		headers=headers,
+		data=json.dumps(payload)
+	)
+	
+	results=json.loads(r.text)
+
+	cachedpaths={}
+	
+	nodesdf=pd.DataFrame(columns=[
+		'pk','id','origin','embarkation','disembarkation','post-disembarkation'
+	])
+	nodesdfrows=[]
+	edgesdf=pd.DataFrame(columns=[
+		'pk','weight','source','target','c1x','c1y','c2x','c2y'
+	])
+	edgesdfrows=[]
+	nodesdatadict={}
+	edgesdatadict={}
+
+	
+	amount_of_work=len(results[pk_var])
+	prevpercentdone=0
+	
+	for idx in range(len(results[pk_var])):
+		pk=results[pk_var][idx]
+		itinerary=[results[iv][idx] for iv in itinerary_vars]
+		if weight_var is not None:
+			weight=results[weight_var][idx]
+			if weight is None:
+				weight=0
+		else:
+			weight=1
+		
+		uuids=itinerary
+		
+		nodes={uuid:{
+			"id":uuid,
+			"weights":{
+				nl:0 for nl in nodelabels
+			},
+			"data":{}
+			} for uuid in uuids if uuid != None
+		}
+		
+		paths=[]
+		edges={}
+	
+		# because, for now, the paths are all the same length, N, e.g.
+		## people: [origin,embarkation,disembarkation,disposition]
+		## voyages: [embarkation,disembarkation]
+		# and each (nullable) position in the path carries semantic value
+		# to apply the weight of this path across all the affected nodes
+		# while retaining that semantic value
+		for uuid_idx in range(len(uuids)):
+			uuid=uuids[uuid_idx]
+			if uuid not in [None,'None']:
+				nodelabel=nodelabels[uuid_idx]
+				nodes[uuid]['weights'][nodelabel]+=weight
+		#similarly for linklabels, which are N-1 long
+		abpairs=[(uuids[i],uuids[i+1]) for i in range(len(uuids)-1)]
+		thispath={"nodes":[],"weight":weight}
+	
+		for apbair_idx in range(len(linklabels)):
+			abpair=abpairs[apbair_idx]
+			linklabel=linklabels[apbair_idx]
+			if "None" in abpair or None in abpair:
+				#if we hit a break in the path then we want to reset
+				#but still record the discontinuous segments
+				if len(thispath['nodes'])>0:
+					paths.append(thispath)
+					thispath={"nodes":[],"weight":weight}
+			else:
+				a_uuid,b_uuid=abpair
+				amatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",a_uuid]})]),None)
+				bmatch=next(iter([n for n in search_nodes(graph,{"==":["uuid",b_uuid]})]),None)
+				#the db can still return path node uuid's for places that don't have good geo data (nulled or zeroed lat/long)
+				#so we have to screen those out, as they have been excluded from the networkx graph db
+				if amatch is not None and bmatch is not None:
+					a_id=amatch
+					b_id=bmatch
+					nodes=add_stripped_node_to_dict(graph,a_id,nodes)
+					nodes=add_stripped_node_to_dict(graph,b_id,nodes)
+				
+					#get the shortest path from a to b, according to the graph
+				
+					#but also handle transportation self-loops...
+					spfail=False
+					selfloop=False
+					if a_id==b_id and linklabel=='transportation':
+						#transportation self-loop
+						selfloop=True
+						successor_ids=[
+							n_id for n_id in oceanic_subgraph_view.successors(a_id)
+							if 'onramp' in oceanic_subgraph_view.nodes[n_id]['tags']
+						]
+						if len(successor_ids)==0:
+							spfail=True
+						else:
+							successor_id=successor_ids[0]
+					else:
+						selfloop=False
+				
+					if not spfail:
+						try:
+							if selfloop:
+								if linklabel=='transportation':
+									sp=nx.shortest_path(oceanic_subgraph_view,successor_id,b_id,'distance')
+									sp.insert(0,a_id)
+								else:
+									sp=nx.shortest_path(graph,successor_id,b_id,'distance')
+									sp.insert(0,a_id)
+							else:
+								if linklabel=='transportation':
+									sp=nx.shortest_path(oceanic_subgraph_view,a_id,b_id,'distance')
+								else:
+									sp=nx.shortest_path(graph,a_id,b_id,'distance')
+						except:
+							spfail=True
+				
+					## We need to do one last check here
+					## Because there are many routes that can be taken in the network
+					## And because many of these are taken
+					## This means we can end up with cases where
+					## The "shortest path" for this itinerary gets routed through
+					## important geographic nodes that aren't actually in the itinerary
+					## Yikes. We need to flag that as an error and draw a straight line
+					## So that the editors know to update the map network
+					sp_export_preflight=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
+					for i in sp_export_preflight:
+						if type(i)==str and i not in uuids:
+							spfail=True
+				
+					#if all our shortest path work has failed, then return a straight line
+					## but log it!
+					## OCT. 18 2023: I've found that when paths are NOT provided, this process slows down dramatically.
+					## AND RESOLVED THE ISSUE THAT WAS LEADING TO THE OCEANIC NETWORK BEING SKIPPED
+					## I USED THE SUBGRAPH VIEW TO FIX THIS PROBLEM -- WE WERE GETTING PATHS LIKE
+					## EMBARKATION TO ONRAMP TO A CLOSE DISEMBARKATION NODE TO THE ACTUAL DISEMBARKATION NODE BECAUSE IT HAD A POST-DISEMBARK IN IT. OY...
+					if spfail:
+						sp=[a_id,b_id]
+						print("---\nNO PATH")
+						print("from",amatch,graph.nodes[amatch])
+						print("to",bmatch,graph.nodes[bmatch]," -- drawing straight line.\n---")
+					
+				
+					#retrieve the uuid's where applicable
+					sp_export=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
+				
+					#update the full path with this a, ... , b walk we've just performed
+					#after trimming the first entry in this walk ** if this is not our first walk
+					#otherwise, we get overlaps / false self-loops in our path
+					#this crops up in paths that are more than 1 hop long
+					if len(thispath['nodes'])>0:
+						if thispath['nodes'][-1]==sp_export[0]:
+							thispath['nodes']+=sp_export[1:]
+					else:
+						thispath['nodes']+=sp_export
+				
+					#update the nodes dictionary with any new nodes
+					node_errors=False
+					badnodes=[]
+					for i in range(len(sp_export)):
+						n_id=sp[i]
+						uuid=sp_export[i]
+						if uuid not in nodes:
+							if n_id in graph.nodes:
+								newnode_data=dict(graph.nodes[n_id])
+								nodes[str(uuid)]={
+									'data':newnode_data,
+									'id':uuid,
+									'weights':{nl:0 for nl in nodelabels}
+								}
+							else:
+								node_errors=True
+								badnodes.append(n_id)
+					#update the edges dictionary with this a, ..., b walk data
+				
+					if node_errors:
+						print("failed on path-->",sp_export,"specifically on-->",badnodes)
+					else:
+						sp_DC_pairs=[(sp_export[i],sp_export[i+1]) for i in range(len(sp_export)-1)]
+						for sp_DC_pair in sp_DC_pairs:
+							s,t=[str(i) for i in sp_DC_pair]
+							if s not in edges:
+								edges[s]={t:{
+									'weight':weight,
+									'type':linklabel,
+									'source':s,
+									'target':t
+								}}
+							elif t not in edges[s]:
+								edges[s][t]={
+									'weight':weight,
+									'type':linklabel,
+									'source':s,
+									'target':t
+								}
+							else:
+								edges[s][t]['weight']+=weight
+		if len(thispath['nodes'])>0:
+			paths.append(thispath)
+			thispath={"nodes":[],"weight":weight}
+		splined=True
+		if splined:
+			edges=spline_curves(nodes,edges,paths,graph)
+		
+		for n_id in nodes:
+			node=nodes[n_id]
+			if node['data']!={}:
+				nodesdatadict[n_id]=node['data']
+					
+			dfrow={}
+			dfrow['pk']=pk
+			dfrow['id']=n_id
+			origin=node['weights'].get('origin')
+			embarkation=node['weights'].get('embarkation')
+			disembarkation=node['weights'].get('disembarkation')
+			post_disembarkation=node['weights'].get('post-disembarkation')
+			dfrow['origin']=origin
+			dfrow['embarkation']=embarkation
+			dfrow['disembarkation']=disembarkation
+			dfrow['post-disembarkation']=post_disembarkation
+			nonnullvalcount=len([dfrow[k] for k in dfrow if dfrow[k] is not None])
+			if nonnullvalcount>0:
+				nodesdfrows.append(dfrow)
+
+		for s in edges:
+			for t in edges[s]:
+				edge=edges[s][t]
+				dfrow={k:edge[k] for k in ['weight','source','target']}
+				controls=edge['controls']
+				dfrow['pk']=pk
+				dfrow['c1x']=controls[0][0]
+				dfrow['c1y']=controls[0][1]
+				dfrow['c2x']=controls[1][0]
+				dfrow['c2y']=controls[1][1]
+				edgesdfrows.append(dfrow)
+				edgesdatakey='__'.join([str(s),str(t)])
+				if edge['type'] is not None and edge['weight'] is not None:
+					edgesdatadict[edgesdatakey]={'type':edge['type'],'weight':edge['weight']}
+		
+		percentdone=(idx+1)/amount_of_work
+		if percentdone>prevpercentdone+.02:
+			print("%d percent done" %(percentdone*100))
+			prevpercentdone=percentdone
+			nodesdf=pd.concat([nodesdf,pd.DataFrame.from_records(nodesdfrows)],ignore_index=True)
+			edgesdf=pd.concat([edgesdf,pd.DataFrame.from_records(edgesdfrows)],ignore_index=True)
+			nodesdfrows=[]
+			edgesdfrows=[]
+		
+	print('NODES',nodesdf)
+	print('EDGES',edgesdf)
+	
+	return {'nodes':nodesdf,'edges':edgesdf,'nodesdata':nodesdatadict,'edgesdata':edgesdatadict}

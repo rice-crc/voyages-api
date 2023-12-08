@@ -35,8 +35,6 @@ voyage_maps={
 						("onramp","source","closest")
 					]
 				},
-				## THE OCEANIC GRAPH IS A SPECIAL CASE
-				## IT COMES FROM A FLAT FILE, NOT AN API CALL
 				{
 					'tag':'oceanic_waypoint',
 				},
@@ -90,6 +88,29 @@ voyage_maps={
 			]
 		}
 	],
+	'indices':{
+		'place':{
+			'pk':'voyage_id',
+			'itinerary':[
+				'voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+				'voyage_itinerary__imp_principal_port_slave_dis__uuid'
+			],
+			'weight':'voyage_slaves_numbers__imp_total_num_slaves_embarked'
+		},
+		'region':{
+			'pk':'voyage_id',
+			'itinerary':[
+				'voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
+				'voyage_itinerary__imp_principal_region_slave_dis__uuid'
+			],
+			'weight':'voyage_slaves_numbers__imp_total_num_slaves_embarked'
+		},
+		'linklabels':['transportation'],
+		'nodelabels':[
+			'embarkation',
+			'disembarkation'
+		]
+	},
 	'oceanic_network_file':'maps/all_routes.js'
 }
 
@@ -222,5 +243,34 @@ ao_maps={
 			]
 		}
 	],
+	'indices':{
+		'place':{
+			'pk':'enslaved_id',
+			'itinerary':[
+				'language_group__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__uuid',
+				'post_disembark_location__uuid'
+			],
+			'weight':None
+		},
+		'region':{
+			'pk':'enslaved_id',
+			'itinerary':[
+				'language_group__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
+				'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__uuid',
+				'post_disembark_location__uuid'
+			],
+			'weight':None
+		},
+		'linklabels':['origination','transportation','disposition'],
+		'nodelabels':[
+			'origin',
+			'embarkation',
+			'disembarkation',
+			'post-disembarkation'
+		]
+	},
 	'oceanic_network_file':'maps/ao_routes.js'
 }

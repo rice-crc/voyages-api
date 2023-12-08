@@ -322,3 +322,45 @@ class Command(BaseCommand):
 # # 
 # 
 
+# they were imported as 1800's -- have bumped them down to the 1700's
+## squash them in django
+# from document.models import *
+# bl_sources=Source.objects.all().filter(short_ref__name__icontains='SSC Add MS')
+# bl_sources.count()
+# bl_sources.filter(date__year__lte=1799).count()
+# bl_sources.filter(date__year__gte=1799).count()
+# 
+# for bls in bl_sources:
+# 	bls_date=bls.date
+# 	if bls_date is not None:
+# 		if bls_date.year is not None:
+# 			if bls_date.year > 1800:
+# 				bls_date.year=bls_date.year-100
+# 				bls_date.save()
+# 
+# bl_sources.filter(date__year__lte=1799).count()
+# bl_sources.filter(date__year__gte=1799).count()
+
+## and now do it for Zotero
+# import re
+# for page in range(259):
+# 	offset=pagelength*page
+# 	page_items=zot.items(limit=pagelength,start=offset)
+# 	print(page,offset)
+# 	updateitems=[]
+# 	for pi in page_items:
+# 		pi_date=pi['data']['date']
+# 		if pi_date not in ['',None]:
+# 			dateyear=re.findall('[0-9]{4}',pi_date)
+# 			if len(dateyear)>0:
+# 				year=int(dateyear[0])
+# 				if year > 1799:
+# 					newyear=year-100
+# 					pi2=dict(pi)
+# 					newdate=re.sub(str(year),str(newyear),pi_date)
+# 					pi2['data']['date']=newdate
+# 					pi2['meta']['parsedDate']=re.sub("/",'-',newdate)
+# 					updateitems.append(pi2)
+# 	if len(updateitems)>0:
+# 		print("updating-->",[i['key'] for i in updateitems])
+# 		zot.update_items(updateitems)

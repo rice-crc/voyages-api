@@ -196,6 +196,10 @@ class VoyageDataFrames(generics.GenericAPIView):
 			auto_prefetch=False,
 			retrieve_all=True
 		)
+# 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
+# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
+# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of # Benin')
+				
 		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
 		if len(error_messages)==0:
@@ -319,54 +323,21 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			auto_prefetch=True,
 			retrieve_all=True
 		)
-		
+# 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
+# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
+# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of Benin')
 		queryset=queryset.order_by('id')
-
 		zoomlevel=params.get('zoomlevel',['region'])[0]
+		values_list=queryset.values_list('id')
+		pks=[v[0] for v in values_list]
 		
-		if zoomlevel not in ['region','place']:
-			zoomlevel='region'
-		
-		if zoomlevel=='place':
-			voys_values_list=queryset.values_list(
-				'voyage_id',
-				'voyage_itinerary__imp_principal_place_of_slave_purchase__uuid',
-				'voyage_itinerary__imp_principal_port_slave_dis__uuid',
-				'voyage_slaves_numbers__imp_total_num_slaves_embarked'
-			)
-			graphname='place'
-		elif zoomlevel=='region':
-			voys_values_list=queryset.values_list(
-				'voyage_id',
-				'voyage_itinerary__imp_principal_region_of_slave_purchase__uuid',
-				'voyage_itinerary__imp_principal_region_slave_dis__uuid',
-				'voyage_slaves_numbers__imp_total_num_slaves_embarked'
-			)
-			graphname='region'
-		
-		voys_vals_dict={"__".join([str(i) for i in vvs[1:3]]):0 for vvs in voys_values_list}
-		
-		bad_voyages=[]
-		for v in voys_values_list:
-			vk="__".join([str(i) for i in v[1:3]])
-			val=v[3]
-			if val is not None:
-				voys_vals_dict[vk]+=val
-			else:
-				bad_voyages.append(val)
-		
-		print("COULD NOT MAP %d VOYAGES" %len(bad_voyages))
-		
+		django_query_time=time.time()
+		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
 		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
 		d2={
-			'graphname':graphname,
+			'graphname':zoomlevel,
 			'cachename':'voyage_maps',
-			'payload':voys_vals_dict,
-			'linklabels':['transportation'],
-			'nodelabels':[
-				'embarkation',
-				'disembarkation'
-			]
+			'pks':pks
 		}
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 		j=json.loads(r.text)

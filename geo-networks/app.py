@@ -26,15 +26,12 @@ class User(UserMixin):
         self.name = name
         self.id = id
         self.active = active
-
     def is_active(self):
         # Here you should write whatever the code is
         # that checks the database if your user is active
         return self.active
-
     def is_anonymous(self):
         return False
-
     def is_authenticated(self):
         return True
 
@@ -43,9 +40,6 @@ def load_user(userid):
 	return USERS.get(int(userid))
 
 login_manager.setup_app(app)
-
-
-
 
 def load_index(rcname,graphname):
 	rc=registered_caches[rcname]
@@ -193,7 +187,6 @@ def rebuild_index(indexname):
 @app.route('/displayindices', methods=['GET'])
 @login_required
 def displayindices():
-		
 	indices=[
 		[
 			'__'.join([rcname,graph_params['name']]),
@@ -201,7 +194,6 @@ def displayindices():
 		] for rcname in rcnames
 		for graph_params in registered_caches[rcname]['graph_params']
 	]
-
 	return render_template(
 		'displayindices.html',
 		indices=indices
@@ -217,8 +209,6 @@ def login():
 			# Login and validate the user.
 			# user should be an instance of your `User` class
 			login_user(USER_NAMES[username])
-
 			flash('Logged in successfully.')
-
 			return redirect('/displayindices')
 	return render_template('login.html')

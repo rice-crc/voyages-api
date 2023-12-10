@@ -88,9 +88,7 @@ def connect_to_tags(G,this_tag,tag_connections):
 						s_id=comp_node_id
 						t_id=n_id
 					G.add_edge(s_id,t_id,id=e,distance=distance,tags=[concat_tag])
-					e+=1
-# 			print(G.nodes[s_id],"-->",G.nodes[t_id])
-					
+					e+=1		
 	print("ending graph state",G)
 	print("-------------")
 	return G
@@ -105,7 +103,6 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 		## OCEANIC SUBGRAPH COMES FROM A FLATFILE
 		tag=ordered_node_class['tag']
 		if tag != 'oceanic_waypoint':
-			
 			# ON THIS GRAPH, SAY, TRANSATLANTIC REGIONAL ROUTES:
 			## WE WANT TO GET EACH GEOGRAPHIC NODE'S VALUES
 			## AND APPLY ITS TAG, SAY, EMBARK OR DISEMBARK
@@ -120,7 +117,6 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 			for f in filter_obj:
 				payload[f]=filter_obj[f]
 			
-			
 			print(headers,payload)
 			## MAKE A DATAFRAME CALL ON ALL THE VARIABLES ENUMERATED FOR THIS NODE
 			r=requests.post(
@@ -128,7 +124,6 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 				headers=headers,
 				data=json.dumps(payload)
 			)
-			
 			## TRANSFORM THE RESPONSE INTO ROWS AND DEDUPE
 			results=json.loads(r.text)
 			rows=[]
@@ -140,17 +135,14 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 					rows.append(row)
 			## PUSH THE UNIQUE NODES (LAT,LONG,UUID,NAME,VALUE...) INTO THE GRAPH
 			for row in rows:
-				
 				## BUT WE HAVE TO BE CAREFUL AND TAG THE NODES
 				### (E.G., DID WE FIND THIS AS AN EMBARKATION OR DISEMBARKATION?)
 				### (AND IF IT ALREADY EXISTS, THEN WE WANT TO LAYER THAT NEW TAG IN)
 				### RATHER THAN DUPLICATING
 				att_dict={att_name:row[att_names.index(att_name)] for att_name in att_names}
-				
 				#WE'VE GOT TO SCREEN OUT AND PROPERLY FORMAT NULL LAT & LONGS...
 				#SO THIS IS A GEO-ONLY NETWORK FOR NOW...
 				if 'lat' in att_dict and 'lon' in att_dict:
-					
 					lat=att_dict['lat']
 					lon=att_dict['lon']
 					if lat is not None and lon is not None:
@@ -175,7 +167,6 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 								node_id+=1
 					else:
 						print("BAD NODE-->",att_dict)
-				
 	return G,node_id
 
 def add_oceanic_network(G,oceanic_network,init_node_id=0):
@@ -220,7 +211,6 @@ def get_geo_edge_distance(s_id,t_id,G):
 	t_lat=t['lat']
 	t_lon=t['lon']
 	distance=geteuclideandistance(s_lat,s_lon,t_lat,t_lon)
-# 	print(s_id,s,t_id,t,distance)
 	return(distance)
 
 def getclosestneighbor(G,thisnode_id,comp_nodes_ids):
@@ -275,7 +265,6 @@ def straightab(A,B,ab_id,result):
 	isstraight=True
 	return result,Control
 
-
 def retrieve_nodeXY(node):
 	nodeX=node['data']['lat']
 	nodeY=node['data']['lon']
@@ -314,7 +303,6 @@ def getnodefromdict(node_id,nodesdict,G):
 	return node
 
 def weightedaverage(controlpoints):
-	
 	denominator=sum([wxy['weight'] for wxy in controlpoints])
 	if denominator!=0:
 		numeratorX=sum([wxy['weight']*wxy['control'][0] for wxy in controlpoints])
@@ -327,11 +315,9 @@ def weightedaverage(controlpoints):
 		numeratorY=sum([denominator*wxy['control'][1] for wxy in controlpoints])
 		finalX=numeratorX/denominator
 		finalY=numeratorY/denominator
-	
 	return [finalX,finalY]
 
 def weightedaverage_tuple(controlpoints):
-	
 	denominator=sum([wxy['weight'] for wxy in controlpoints])
 	if denominator!=0:
 		numeratorXa=sum([wxy['weight']*wxy['control'][0][0] for wxy in controlpoints])
@@ -352,18 +338,14 @@ def weightedaverage_tuple(controlpoints):
 		numeratorYb=sum([denominator*wxy['control'][1][1] for wxy in controlpoints])
 		finalXb=numeratorXb/denominator
 		finalYb=numeratorYb/denominator
-	
 	return [[finalXa,finalYa],[finalXb,finalYb]]
 
 
 def spline_curves(nodes,edges,paths,G):
-# 	print("edges",edges)
 	for path in paths:
-# 		print(path)
 		pathnodes=path['nodes']
 		pathweight=path['weight']
 		i=0
-# 		print("pathnodes-->",pathnodes)
 		if len(pathnodes)>2:
 			prev_controlXY=None
 			while i<len(pathnodes)-2:
@@ -420,9 +402,6 @@ def spline_curves(nodes,edges,paths,G):
 
 def add_stripped_node_to_dict(graph,n_id,nodesdict):
 	node=dict(graph.nodes[n_id])
-	##Difficulty rendering Sierra Leone?
-# 	if node['name']=="Sierra Leone":
-# 		print(node)
 	if 'uuid' in node:
 		#if it has a uuid from the database
 		#then its id will be like b3199d76-bf58-40fb-8eeb-be3986df6113

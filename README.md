@@ -1,5 +1,14 @@
 # VOYAGES API
 
+The following notes provide an overview of how to install and run the SV API project, which is a restructuring of SlaveVoyages.org to bring it closer to a true microservices model.
+
+For notes on how to use the API, see the [Project Structure readme file](PROJECT_STRUCTURE.md)
+
+For a Swagger UI presentation of the API documentation's generic public endpoints, go to the root url of the endpoint:
+
+* Running locally: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+* Current public location (subject to change): [https://voyages-api-staging.crc.rice.edu/](https://voyages-api-staging.crc.rice.edu/)
+
 ## System Requirements
 
 For reference, this document was written while testing on a 2022 MacBook Pro 

@@ -53,9 +53,7 @@ def load_index(rcname,graphname):
 	if 'graphs' not in rc:
 		rc['graphs']={}
 	picklefilepath='tmp/%s__%s.pickle' %(rcname,graphname)
-	
 	graph_params=[gp for gp in registered_caches[rcname]['graph_params'] if gp['name']==graphname][0]
-	
 	if os.path.exists(picklefilepath):
 		with open(picklefilepath, 'rb') as f:
 			graph_index = pickle.load(f)
@@ -92,13 +90,9 @@ def kickoff():
 		failures_count=0
 		print('BUILDING GRAPHS')
 		for rcname in rcnames:
-# 			try:
 			for graph_params in registered_caches[rcname]['graph_params']:
 				graphname=graph_params['name']
 				load_index(rcname,graphname)
-# 			except:
-# 				failures_count+=1
-# 				print("failed on cache:",rcname)
 		print("failed on %d of %d caches" %(failures_count,len(rcnames)))
 		if failures_count>=len(rcnames):
 			standoff_time=standoff_base**standoff_count
@@ -155,15 +149,12 @@ def network_maps():
 		if row_id in nodesdata
 	]
 	
-	
-# 	for node in finalnodes:
-# 		if 'name' in node['data']:
-# 			if node['data']['name']=="Sierra Leone":
-# 				print(node)
-	
 	## HAVE TO DROP EDGES WHERE WEIGHT IS ZERO BEFORE I DO THE BELOW:
 	
 	aggedges=aggedges[aggedges['weight']>0]
+	aggedges=aggedges[aggedges['pk'].isin(pks)]
+	
+	print("unique pks",len(aggedges['pk'].unique()))
 	
 	aggedges['c1x']=aggedges['c1x']*aggedges['weight']
 	aggedges['c2x']=aggedges['c2x']*aggedges['weight']

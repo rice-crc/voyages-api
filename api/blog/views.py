@@ -61,15 +61,11 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		params=dict(request.data)
 		k=list(params.keys())[0]
 		v=params[k][0]
-		
 		print("past/enslavers/autocomplete",k,v)
 		queryset=Post.objects.all()
 		if '__' in k:
 			kstub='__'.join(k.split('__')[:-1])
-			k_id_field=kstub+"__id"
 			queryset=queryset.prefetch_related(kstub)
-		else:
-			k_id_field="id"
 		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
 		queryset=queryset.filter(**kwargs)
 		queryset=queryset.order_by(k)
@@ -79,7 +75,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		fetchcount=30
 		## Have to use this ugliness b/c we're not in postgres
 		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
-		for v in queryset.values_list(k_id_field,k).iterator():
+		for v in queryset.values_list(k).iterator():
 			if v[1] not in candidate_vals:
 				candidates.append(v)
 				candidate_vals.append(v[1])
@@ -87,12 +83,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 				break
 		res={
 			"total_results_count":total_results_count,
-			"results":[
-				{
-					"id":c[0],
-					"label":c[1]
-				} for c in candidates
-			]
+			"results":candidates
 		}
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(res,safe=False)
@@ -135,7 +126,9 @@ class InstitutionList(generics.GenericAPIView):
 	def post(self,request):
 		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
 		queryset=Institution.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Institution_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,self,request,Institution_options,retrieve_all=False
+		)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}

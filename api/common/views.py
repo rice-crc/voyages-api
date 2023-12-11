@@ -98,19 +98,3 @@ class GlobalSearch(generics.GenericAPIView):
 
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(output_dict,safe=False)
-
-# class SparseDateRD(generics.RetrieveDestroyAPIView):
-# 	'''
-# 	The lookup field for sparse dates is "id," the SQL primary key.
-# 	
-# 	Sparse dates consist of nullable integer month, day, and year fields. They are referenced by the voyages dates table as OneToOne relations.
-# 	
-# 	As OneToOne keys, they are built to be created for a specific field in another table to reference, updated only when that field\'s value needs updating, and destroyed as soon as they are no longer needed.
-# 	
-# 	Therefore, the "Create" (or in DRF PUT as Create) should only be used via referencing models. Here, we only want to be able to Retrieve or Destroy this data.
-# 	'''
-# 	queryset=SparseDate.objects.all()
-# 	serializer_class=SparseDateSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]

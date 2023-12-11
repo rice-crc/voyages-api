@@ -196,10 +196,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 			auto_prefetch=False,
 			retrieve_all=True
 		)
-# 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
-# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
-# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of # Benin')
-				
 		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
 		if len(error_messages)==0:
@@ -254,52 +250,52 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
 		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-# 		try:
-		st=time.time()
-		params=dict(request.data)
-		print(params)
-		k=list(params.keys())[0]
-		v=params[k][0]
+		try:
+			st=time.time()
+			params=dict(request.data)
+			print(params)
+			k=list(params.keys())[0]
+			v=params[k][0]
 		
-		print("voyage/autocomplete",k,v)
-		queryset=Voyage.objects.all()
-		if '__' in k:
-			kstub='__'.join(k.split('__')[:-1])
-			k_id_field=kstub+"__id"
-			queryset=queryset.prefetch_related(kstub)
-		else:
-			k_id_field="id"
-		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-		queryset=queryset.filter(**kwargs)
-		queryset=queryset.order_by(k)
-		total_results_count=queryset.count()
-		candidates=[]
-		candidate_vals=[]
-		fetchcount=30
-		## Have to use this ugliness b/c we're not in postgres
-		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
-		for v in queryset.values_list(k_id_field,k).iterator():
-			if v[1] not in candidate_vals:
-				candidates.append(v)
-				candidate_vals.append(v[1])
-			if len(candidates)>=fetchcount:
-				break
+			print("voyage/autocomplete",k,v)
+			queryset=Voyage.objects.all()
+			if '__' in k:
+				kstub='__'.join(k.split('__')[:-1])
+				k_id_field=kstub+"__id"
+				queryset=queryset.prefetch_related(kstub)
+			else:
+				k_id_field="id"
+			kwargs={'{0}__{1}'.format(k, 'icontains'):v}
+			queryset=queryset.filter(**kwargs)
+			queryset=queryset.order_by(k)
+			total_results_count=queryset.count()
+			candidates=[]
+			candidate_vals=[]
+			fetchcount=30
+			## Have to use this ugliness b/c we're not in postgres
+			## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
+			for v in queryset.values_list(k_id_field,k).iterator():
+				if v[1] not in candidate_vals:
+					candidates.append(v)
+					candidate_vals.append(v[1])
+				if len(candidates)>=fetchcount:
+					break
 
-		res={
-			"total_results_count":total_results_count,
-			"results":[
-				{
-					"id":c[0],
-					"label":c[1]
-				} for c in candidates
-			]
-		}
+			res={
+				"total_results_count":total_results_count,
+				"results":[
+					{
+						"id":c[0],
+						"label":c[1]
+					} for c in candidates
+				]
+			}
 		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(res,safe=False)
-# 		except:
-# 			print("failed\n+++++++")
-# 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(res,safe=False)
+		except:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
 
 #This endpoint will build a geographic sankey diagram based on a voyages query
 @extend_schema(
@@ -309,41 +305,40 @@ class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-# 		try:
-		st=time.time()
-		print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
-		params=dict(request.data)
-		zoom_level=params.get('zoom_level')
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,
-			self,
-			request,
-			Voyage_options,
-			auto_prefetch=True,
-			retrieve_all=True
-		)
-# 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
-# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
-# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of Benin')
-		queryset=queryset.order_by('id')
-		zoomlevel=params.get('zoomlevel',['region'])[0]
-		values_list=queryset.values_list('id')
-		pks=[v[0] for v in values_list]
-		
-		django_query_time=time.time()
-		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
-		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
-		d2={
-			'graphname':zoomlevel,
-			'cachename':'voyage_maps',
-			'pks':pks
-		}
-		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		j=json.loads(r.text)
-		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(j,safe=False)
+		try:
+			st=time.time()
+			print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
+			params=dict(request.data)
+			zoom_level=params.get('zoom_level')
+			queryset=Voyage.objects.all()
+			queryset,selected_fields,results_count,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=True,
+				retrieve_all=True
+			)
+			queryset=queryset.order_by('id')
+			zoomlevel=params.get('zoomlevel',['region'])[0]
+			values_list=queryset.values_list('id')
+			pks=[v[0] for v in values_list]
+			django_query_time=time.time()
+			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
+			u2=GEO_NETWORKS_BASE_URL+'network_maps/'
+			d2={
+				'graphname':zoomlevel,
+				'cachename':'voyage_maps',
+				'pks':pks
+			}
+			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+			j=json.loads(r.text)
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(j,safe=False)
+		except:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+
 
 @extend_schema(
 		exclude=True
@@ -357,7 +352,6 @@ class VoyageCREATE(generics.CreateAPIView):
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
-
 
 class VoyageRETRIEVE(generics.RetrieveAPIView):
 	'''

@@ -200,10 +200,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 			auto_prefetch=False,
 			retrieve_all=True
 		)
-# 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
-# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
-# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of # Benin')
-				
 		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
 		if len(error_messages)==0:
@@ -356,41 +352,40 @@ class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-# 		try:
-		st=time.time()
-		print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
-		params=dict(request.data)
-		zoom_level=params.get('zoom_level')
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,
-			self,
-			request,
-			Voyage_options,
-			auto_prefetch=True,
-			retrieve_all=True
-		)
-# 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
-# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
-# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of Benin')
-		queryset=queryset.order_by('id')
-		zoomlevel=params.get('zoomlevel',['region'])[0]
-		values_list=queryset.values_list('id')
-		pks=[v[0] for v in values_list]
-		
-		django_query_time=time.time()
-		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
-		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
-		d2={
-			'graphname':zoomlevel,
-			'cachename':'voyage_maps',
-			'pks':pks
-		}
-		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		j=json.loads(r.text)
-		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(j,safe=False)
+		try:
+			st=time.time()
+			print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
+			params=dict(request.data)
+			zoom_level=params.get('zoom_level')
+			queryset=Voyage.objects.all()
+			queryset,selected_fields,results_count,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=True,
+				retrieve_all=True
+			)
+			queryset=queryset.order_by('id')
+			zoomlevel=params.get('zoomlevel',['region'])[0]
+			values_list=queryset.values_list('id')
+			pks=[v[0] for v in values_list]
+			django_query_time=time.time()
+			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
+			u2=GEO_NETWORKS_BASE_URL+'network_maps/'
+			d2={
+				'graphname':zoomlevel,
+				'cachename':'voyage_maps',
+				'pks':pks
+			}
+			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+			j=json.loads(r.text)
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			return JsonResponse(j,safe=False)
+		except:
+			print("failed\n+++++++")
+			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+
 
 @extend_schema(
 		exclude=True
@@ -404,7 +399,6 @@ class VoyageCREATE(generics.CreateAPIView):
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
-
 
 class VoyageRETRIEVE(generics.RetrieveAPIView):
 	'''

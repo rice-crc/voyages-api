@@ -179,7 +179,9 @@ class InstitutionList(generics.GenericAPIView):
 	def post(self,request):
 		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
 		queryset=Institution.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Institution_options,retrieve_all=False)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,self,request,Institution_options,retrieve_all=False
+		)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}

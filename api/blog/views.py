@@ -16,7 +16,7 @@ from drf_spectacular.types import OpenApiTypes
 from common.static.Institution_options import Institution_options
 from common.static.Post_options import Post_options
 from common.static.Author_options import Author_options
-
+from common.serializers import *
 
 class PostList(generics.GenericAPIView):
 	'''
@@ -50,52 +50,96 @@ class PostList(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-@extend_schema(exclude=True)
+
+
+
 class PostTextFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	queryset=Enslaved.objects.all()
+	@extend_schema(
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the blog post). It also accepts filters.",
+		request=autocompleterequestserializer,
+		responses=autocompleteresponseserializer,
+		examples = [
+			OpenApiExample(
+				'Autocomplete on any blog-related field',
+				summary='Autocomplete for blog tags like "ma"',
+				description='Here, we search blog tags for values like "ma". We request the first 10 of these.',
+				value={
+					"varname":"tags__name",
+					"querystr":"ma",
+					"limit":10,
+					"offset":0,
+					"filter":{}
+				},
+				request_only=True,
+				response_only=False
+			),
+			OpenApiExample(
+				'Suggested values are returned',
+				summary='Autocomplete for blog tags like "ma"',
+				description='Here, we see the first and only 2 blog tags that are like "ma"',
+				value={
+					"varname": "tags__name",
+					"querystr": "ma",
+					"offset": 0,
+					"limit": 10,
+					"filter": {},
+					"suggested_values": [
+						{
+							"value": "Diaspora Maps"
+						},
+						{
+							"value": "Introductory Maps"
+						}
+					]
+				},
+				request_only=False,
+				response_only=True
+			)
+		]
+	)
 	def post(self,request):
-		print("BLOG AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-# 		try:
 		st=time.time()
-		params=dict(request.data)
-		k=list(params.keys())[0]
-		v=params[k][0]
-		
-		print("past/enslavers/autocomplete",k,v)
 		queryset=Post.objects.all()
-		if '__' in k:
-			kstub='__'.join(k.split('__')[:-1])
-			k_id_field=kstub+"__id"
-			queryset=queryset.prefetch_related(kstub)
+		print("BLOG POST CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		
+		options=Post_options
+		
+		rdata=request.data
+
+		varname=str(rdata.get('varname'))
+		querystr=str(rdata.get('querystr'))
+		offset=int(rdata.get('offset'))
+		limit=int(rdata.get('limit'))
+	
+		max_offset=500
+	
+		if offset>max_offset:
+			final_vals=[]
 		else:
-			k_id_field="id"
-		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-		queryset=queryset.filter(**kwargs)
-		queryset=queryset.order_by(k)
-		total_results_count=queryset.count()
-		candidates=[]
-		candidate_vals=[]
-		fetchcount=30
-		## Have to use this ugliness b/c we're not in postgres
-		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
-		for v in queryset.values_list(k_id_field,k).iterator():
-			if v[1] not in candidate_vals:
-				candidates.append(v)
-				candidate_vals.append(v[1])
-			if len(candidates)>=fetchcount:
-				break
-		res={
-			"total_results_count":total_results_count,
-			"results":[
-				{
-					"id":c[0],
-					"label":c[1]
-				} for c in candidates
-			]
-		}
+			queryset,selected_fields,results_count,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				options,
+				auto_prefetch=False,
+				retrieve_all=True
+			)
+			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
+		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(res,safe=False)
+		
+		resp=dict(rdata)
+		resp['suggested_values']=final_vals
+		
+		read_serializer=autocompleteresponseserializer(resp)
+		serialized=read_serializer.data
+		
+		return JsonResponse(serialized,safe=False)
+
+
 
 class AuthorList(generics.GenericAPIView):
 	'''

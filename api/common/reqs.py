@@ -1,3 +1,4 @@
+import time
 import json
 import pprint
 import urllib
@@ -26,10 +27,11 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			params=r
 		else:
 			params=dict(r.data)
-		params={k:params[k] for k in params if params[k]!=['']}
+		filter_obj=params['filter']
+		filter_obj={k:filter_obj[k] for k in filter_obj if filter_obj[k]!=['']}
 		pp = pprint.PrettyPrinter(indent=4)
 		print("--post req params--")
-		pp.pprint(params)
+		pp.pprint(filter_obj)
 	except:
 		errormessages.append("error parsing parameters")
 	
@@ -75,10 +77,10 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		##build filters
 		kwargs={}
 		###numeric filters -- only accepting one range per field right now
-		active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
+		active_numeric_search_fields=[i for i in set(filter_obj).intersection(set(numeric_fields))]
 		if len(active_numeric_search_fields)>0:
 			for field in active_numeric_search_fields:
-				fieldvals=params.get(field)
+				fieldvals=filter_obj.get(field)
 				if len(fieldvals)==2 and '*' not in fieldvals:
 					range=fieldvals
 					vals=[float(i) for i in range]
@@ -91,19 +93,19 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 				
 		###text filters (exact match, and allow for multiple entries joined by an or)
 		###this hard eval is not ideal but I can't quite see how else to do it just now?
-		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
+		active_text_search_fields=[i for i in set(filter_obj).intersection(set(text_fields))]
 		if len(active_text_search_fields)>0:
 			for field in active_text_search_fields:
-				vals=params.get(field)
+				vals=filter_obj.get(field)
 				qobjstrs=["Q({0}={1})".format(field,json.dumps(re.sub("\\\\+","",val))) for val in vals]
 				#print(vals,qobjstrs)
 				queryset=queryset.filter(eval('|'.join(qobjstrs)))
 				#print(queryset)
 		##boolean filters -- only accepting one range per field right now
-		active_boolean_search_fields=[i for i in set(params).intersection(set(boolean_fields))]
+		active_boolean_search_fields=[i for i in set(filter_obj).intersection(set(boolean_fields))]
 		if len(active_boolean_search_fields)>0:
 			for field in active_boolean_search_fields:
-				searchstring=params.get(field)[0]
+				searchstring=filter_obj.get(field)[0]
 				if searchstring.lower() in ["true","t","1","yes"]:
 					searchstring=True
 				elif searchstring.lower() in ["false","f","0","no"]:
@@ -125,14 +127,17 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		if aggregation_fields is not None:
 			selected_fields=aggregation_fields
 	#PREFETCH REQUISITE FIELDS
-		prefetch_fields=selected_fields
-		#print(prefetch_keys)
-		##ideally, I'd run this list against the model and see
-		##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
-		prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
-		print('--prefetching %d vars--' %len(prefetch_vars))
-		for p in prefetch_vars:
-			queryset=queryset.prefetch_related(p)
+		if auto_prefetch:
+			prefetch_fields=selected_fields
+			#print(prefetch_keys)
+			##ideally, I'd run this list against the model and see
+			##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
+			prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
+			print('--prefetching %d vars--' %len(prefetch_vars))
+			for p in prefetch_vars:
+				queryset=queryset.prefetch_related(p)
+		else:
+			print("not prefetching")
 	except:
 		errormessages.append("prefetch error")
 	
@@ -273,3 +278,50 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 
 	
 	return output
+
+
+def autocomplete_req(queryset,varname,querystr,offset,max_offset,limit):
+	
+	pagesize=500
+
+	if '__' in varname:
+		kstub='__'.join(varname.split('__')[:-1])
+		queryset=queryset.prefetch_related(kstub)
+
+	kwargs={'{0}__{1}'.format(varname, 'icontains'):querystr}
+	queryset=queryset.filter(**kwargs)
+	queryset=queryset.order_by(varname)
+	allcandidates=queryset.values_list(varname)
+	allcandidatescount=allcandidates.count()
+	
+	st=time.time()
+	
+	if allcandidatescount < limit:
+		final_vals=list(set([i[0] for i in allcandidates]))
+	else:
+		candidate_vals=[]
+		start=0
+		end=pagesize
+		c=0
+		while len(candidate_vals)<end:
+			candidates=allcandidates[start:end]
+			candidate_vals+=list(set([i[0] for i in candidates]))
+			candidate_vals=list(set(candidate_vals))
+			candidates_count=candidates.count()
+			if candidates_count>=allcandidatescount or end >= allcandidatescount or len(candidate_vals)>=(offset+limit) or time.time()-st>5:
+				break
+			end+=pagesize
+			start+=pagesize
+	
+		candidate_vals.sort()
+		start=offset
+		end=offset+limit
+		if start >= candidates_count:
+			final_vals=[]
+		else:
+			if end >= candidates_count:
+				final_vals=candidate_vals[start:]
+			else:
+				final_vals=candidate_vals[start:end]
+	response=[{"value":v} for v in final_vals]
+	return response

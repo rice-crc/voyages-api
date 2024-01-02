@@ -26,6 +26,8 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 from drf_spectacular.types import OpenApiTypes
 from common.static.Enslaver_options import Enslaver_options
 from common.static.Enslaved_options import Enslaved_options
+from common.serializers import *
+
 
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -64,100 +66,287 @@ class EnslavedList(generics.GenericAPIView):
 		else:
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
 
-@extend_schema(exclude=True)
+
 class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]				
+	permission_classes=[IsAuthenticated]
+	queryset=Enslaved.objects.all()
+	@extend_schema(
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=autocompleterequestserializer,
+		responses=autocompleteresponseserializer,
+		examples = [
+			OpenApiExample(
+				'Autocomplete on any enslaved-related field',
+				summary='Autocomplete for names like bo',
+				description='Here, we search for enslaved peoples names that are like "bo". From the offset and limit values, you can see that we are requesting the first 20 entries.',
+				value={
+					"varname":"documented_name",
+					"querystr":"bo",
+					"offset":0,
+					"limit":20,
+					"filter":{}
+				},
+				request_only=True,
+				response_only=False
+			),
+			OpenApiExample(
+				'Suggested values are returned',
+				summary='Autocomplete for names like "bo"',
+				description='Here, we see the first 20 entries like "bo" in our list of enslaved peoples names',
+				value={
+					"varname": "documented_name",
+					"querystr": "bo",
+					"offset": 0,
+					"limit": 20,
+					"filter": {},
+					"suggested_values": [
+						{
+							"value": "?, Bob"
+						},
+						{
+							"value": "?, Claborne"
+						},
+						{
+							"value": "?, Claiborne"
+						},
+						{
+							"value": "??bon"
+						},
+						{
+							"value": "?ill, Bob"
+						},
+						{
+							"value": "?way, Bob"
+						},
+						{
+							"value": "A Bossuh"
+						},
+						{
+							"value": "A. Bossou"
+						},
+						{
+							"value": "Abalobo"
+						},
+						{
+							"value": "Abamboh"
+						},
+						{
+							"value": "Abanaboo"
+						},
+						{
+							"value": "Abaraboo"
+						},
+						{
+							"value": "Abbaboo"
+						},
+						{
+							"value": "Abbeeboo"
+						},
+						{
+							"value": "Abbo"
+						},
+						{
+							"value": "Abbobocah"
+						},
+						{
+							"value": "Abboboday"
+						},
+						{
+							"value": "Abbochay"
+						},
+						{
+							"value": "Abbodoo"
+						},
+						{
+							"value": "Abboe"
+						}
+					]
+				},
+				request_only=False,
+				response_only=True
+			)
+		]
+	)
 	def post(self,request):
-		print("ENSLAVED CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-# 		try:
 		st=time.time()
-		params=dict(request.data)
-		k=list(params.keys())[0]
-		v=params[k][0]
-		
-		print(k,v)
 		queryset=Enslaved.objects.all()
-		if '__' in k:
-			kstub='__'.join(k.split('__')[:-1])
-			k_id_field=kstub+"__id"
-			queryset=queryset.prefetch_related(kstub)
+		print("ENSLAVED CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		
+		options=Enslaved_options
+		
+		rdata=request.data
+
+		varname=str(rdata.get('varname'))
+		querystr=str(rdata.get('querystr'))
+		offset=int(rdata.get('offset'))
+		limit=int(rdata.get('limit'))
+	
+		max_offset=500
+	
+		if offset>max_offset:
+			final_vals=[]
 		else:
-			k_id_field="id"
-		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-		queryset=queryset.filter(**kwargs)
-		queryset=queryset.order_by(k)
-		total_results_count=queryset.count()
-		candidates=[]
-		candidate_vals=[]
-		fetchcount=30
-		## Have to use this ugliness b/c we're not in postgres
-		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
-		for v in queryset.values_list(k_id_field,k).iterator():
-			if v[1] not in candidate_vals:
-				candidates.append(v)
-				candidate_vals.append(v[1])
-			if len(candidates)>=fetchcount:
-				break
-		res={
-			"total_results_count":total_results_count,
-			"results":[
-				{
-					"id":c[0],
-					"label":c[1]
-				} for c in candidates
-			]
-		}
+			queryset,selected_fields,results_count,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				options,
+				auto_prefetch=False,
+				retrieve_all=True
+			)
+			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(res,safe=False)
+		
+		resp=dict(rdata)
+		resp['suggested_values']=final_vals
+		
+		read_serializer=autocompleteresponseserializer(resp)
+		serialized=read_serializer.data
+		
+		return JsonResponse(serialized,safe=False)
 
-@extend_schema(exclude=True)
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	queryset=Enslaved.objects.all()
+	@extend_schema(
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the enslavers list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=autocompleterequestserializer,
+		responses=autocompleteresponseserializer,
+		examples = [
+			OpenApiExample(
+				'Autocomplete on any enslavers-related field',
+				summary='Autocomplete for enslaved names related to enslavers',
+				description='Here, we search for the names of enslaved people that are like "sal" IN RELATION TO the enslavers. From the offset and limit values, you can see that we are requesting the first 20 entries.',
+				value={
+					"varname":"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name",
+					"querystr":"sal",
+					"offset":0,
+					"limit":20,
+					"filter":{}
+				},
+				request_only=True,
+				response_only=False
+			),
+			OpenApiExample(
+				'Suggested values are returned',
+				summary='Autocomplete for enslaved names related to enslavers',
+				description='Here, we see the first 20 names like "sal" for enslaved people through the enslaver model.',
+				value={
+					"varname": "aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name",
+					"querystr": "sal",
+					"offset": 0,
+					"limit": 20,
+					"filter": {},
+					"suggested_values": [
+						{
+							"value": "? (Sally's), child"
+						},
+						{
+							"value": "?, Sally"
+						},
+						{
+							"value": "?field, Sally"
+						},
+						{
+							"value": "Abissala"
+						},
+						{
+							"value": "Abissalah"
+						},
+						{
+							"value": "Absalon"
+						},
+						{
+							"value": "Achasaloh"
+						},
+						{
+							"value": "Adesalar"
+						},
+						{
+							"value": "Adosalah"
+						},
+						{
+							"value": "Afosalah"
+						},
+						{
+							"value": "Ahdaisaloo"
+						},
+						{
+							"value": "Ahdasalee"
+						},
+						{
+							"value": "Ahlarsalah"
+						},
+						{
+							"value": "Ahmesallah"
+						},
+						{
+							"value": "Ahsalah"
+						},
+						{
+							"value": "Ahsalla"
+						},
+						{
+							"value": "Ahsally"
+						},
+						{
+							"value": "Ahsaloe"
+						},
+						{
+							"value": "Alasalhee"
+						},
+						{
+							"value": "Alasallagee"
+						}
+					]
+				},
+				request_only=False,
+				response_only=True
+			)
+		]
+	)
 	def post(self,request):
-		print("ENSLAVER CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 		st=time.time()
-		params=dict(request.data)
-		params=dict(request.data)
-		k=list(params.keys())[0]
-		v=params[k][0]
-		
-		print(k,v)
 		queryset=EnslaverIdentity.objects.all()
-		if '__' in k:
-			kstub='__'.join(k.split('__')[:-1])
-			k_id_field=kstub+"__id"
-			queryset=queryset.prefetch_related(kstub)
+		print("ENSLAVER CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		
+		options=Enslaver_options
+		
+		rdata=request.data
+
+		varname=str(rdata.get('varname'))
+		querystr=str(rdata.get('querystr'))
+		offset=int(rdata.get('offset'))
+		limit=int(rdata.get('limit'))
+	
+		max_offset=500
+	
+		if offset>max_offset:
+			final_vals=[]
 		else:
-			k_id_field="id"
-		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-		queryset=queryset.filter(**kwargs)
-		queryset=queryset.order_by(k)
-		total_results_count=queryset.count()
-		candidates=[]
-		candidate_vals=[]
-		fetchcount=30
-		## Have to use this ugliness b/c we're not in postgres
-		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
-		for v in queryset.values_list(k_id_field,k).iterator():
-			if v[1] not in candidate_vals:
-				candidates.append(v)
-				candidate_vals.append(v[1])
-			if len(candidates)>=fetchcount:
-				break
-		res={
-			"total_results_count":total_results_count,
-			"results":[
-				{
-					"id":c[0],
-					"label":c[1]
-				} for c in candidates
-			]
-		}
+			queryset,selected_fields,results_count,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				options,
+				auto_prefetch=False,
+				retrieve_all=True
+			)
+			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
+		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(res,safe=False)
+		
+		resp=dict(rdata)
+		resp['suggested_values']=final_vals
+		
+		read_serializer=autocompleteresponseserializer(resp)
+		serialized=read_serializer.data
+		
+		return JsonResponse(serialized,safe=False)
+
 
 #LONG-FORM TABULAR ENDPOINT
 class EnslaverList(generics.GenericAPIView):

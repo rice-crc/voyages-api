@@ -117,8 +117,9 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 			
 			## MAKE SURE YOU APPLY THE FILTER TO THE QUERY
 			### E.G., ARE WE AFTER TRANSATLANTIC OR INTRA-AMERICAN VOYAGES?
+			payload['filter']={}
 			for f in filter_obj:
-				payload[f]=filter_obj[f]
+				payload['filter'][f]=filter_obj[f]
 			
 			
 			print(headers,payload)

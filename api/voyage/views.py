@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
+from rest_framework.pagination import PageNumberPagination
 from collections import Counter
 import urllib
 import json
@@ -14,17 +15,20 @@ import requests
 import time
 from .models import *
 import pprint
+from rest_framework import filters
 from common.reqs import *
+from common.serializers import *
 from geo.common import GeoTreeFilter
 import collections
 import gc
 from .serializers import *
 from .serializers_READONLY import *
 from geo.serializers_READONLY import LocationSerializer
+from rest_framework import serializers
 from voyages3.localsettings import *
 from drf_yasg.utils import swagger_auto_schema
 import re
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
 from drf_spectacular.types import OpenApiTypes
 from common.static.Voyage_options import Voyage_options
 
@@ -71,8 +75,8 @@ class VoyageList(generics.GenericAPIView):
 # ## takes a numeric variable
 # ## returns its sum, average, max, min, and stdv
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -103,8 +107,8 @@ class VoyageAggregations(generics.GenericAPIView):
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 class VoyageStatsOptions(generics.GenericAPIView):
 	'''
 	Need to make the stats engine's indexed variables transparent to the user
@@ -121,8 +125,8 @@ class VoyageStatsOptions(generics.GenericAPIView):
 		return JsonResponse(json.loads(r.text),safe=False)
 
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 class VoyageCrossTabs(generics.GenericAPIView):
 	'''
 	I was only able to figure out how to output a true pivot table (multi levels and columns) as a straight html dump from pandas.
@@ -153,8 +157,8 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 class VoyageGroupBy(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -177,8 +181,8 @@ class VoyageGroupBy(generics.GenericAPIView):
 		return JsonResponse(json.loads(r.text),safe=False)# 
 
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 #DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
 class VoyageDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -215,8 +219,8 @@ class VoyageDataFrames(generics.GenericAPIView):
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 class VoyageGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -241,70 +245,113 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		return resp
 
 
-#This will only accept one field at a time
-#Should only be a text field
-#And it will only return max 10 results
-#It will therefore serve as an autocomplete endpoint
-#I should make all text queries into 'or' queries
-@extend_schema(
-        exclude=True
-    )
+
 class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	queryset=Voyage.objects.all()
+	@extend_schema(
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=autocompleterequestserializer,
+		responses=autocompleteresponseserializer,
+		examples = [
+			OpenApiExample(
+				'Autocomplete on any voyages-related field',
+				summary='Filtered autocomplete for enslaver names like George',
+				description='Here, we search for voyages that arrived btw 1820-1850 associated with enslavers whose names are like "George". As you can see from the "offset" and "limit" values, we are requesting five suggestions after 10, meaning we want 11,12,13,14,15. In other words, this is most likely a request for page 3.',
+				value={
+					"varname":"voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
+					"querystr":"george",
+					"offset":10,
+					"limit":5,
+					"filter":{
+						"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":[1820,1840]
+					}
+				},
+				request_only=True,
+				response_only=False
+			),
+			OpenApiExample(
+				'Suggested values are returned',
+				summary='Filtered autocomplete for enslaver names like George',
+				description='Here, we search for voyages that arrived btw 1820-1850 associated with enslavers whose names are like "George". We see five items (# 11,12,13,14,15) returned.',
+				value={
+					"varname":"voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
+					"querystr":"george",
+					"offset":10,
+					"limit":5,
+					"filter":{
+						"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":[1820,1840]
+					},
+					"suggested_values":[
+						{
+							"value": "Brown, George"
+						},
+						{
+							"value": "Bulloch, George L"
+						},
+						{
+							"value": "Burdick, George"
+						},
+						{
+							"value": "Burke, George"
+						},
+						{
+							"value": "Burkley, George W"
+						},
+						{
+							"value": "Callahan, George"
+						}
+					]
+				},
+				request_only=False,
+				response_only=True
+			)
+		]
+	)
 	def post(self,request):
-		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-# 		try:
 		st=time.time()
-		params=dict(request.data)
-		print(params)
-		k=list(params.keys())[0]
-		v=params[k][0]
-		
-		print("voyage/autocomplete",k,v)
 		queryset=Voyage.objects.all()
-		if '__' in k:
-			kstub='__'.join(k.split('__')[:-1])
-			k_id_field=kstub+"__id"
-			queryset=queryset.prefetch_related(kstub)
-		else:
-			k_id_field="id"
-		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-		queryset=queryset.filter(**kwargs)
-		queryset=queryset.order_by(k)
-		total_results_count=queryset.count()
-		candidates=[]
-		candidate_vals=[]
-		fetchcount=30
-		## Have to use this ugliness b/c we're not in postgres
-		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
-		for v in queryset.values_list(k_id_field,k).iterator():
-			if v[1] not in candidate_vals:
-				candidates.append(v)
-				candidate_vals.append(v[1])
-			if len(candidates)>=fetchcount:
-				break
+		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		
+		options=Voyage_options
+		
+		rdata=request.data
 
-		res={
-			"total_results_count":total_results_count,
-			"results":[
-				{
-					"id":c[0],
-					"label":c[1]
-				} for c in candidates
-			]
-		}
+		varname=str(rdata.get('varname'))
+		querystr=str(rdata.get('querystr'))
+		offset=int(rdata.get('offset'))
+		limit=int(rdata.get('limit'))
+	
+		max_offset=500
+	
+		if offset>max_offset:
+			final_vals=[]
+		else:
+			queryset,selected_fields,results_count,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				options,
+				auto_prefetch=False,
+				retrieve_all=True
+			)
+			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(res,safe=False)
-# 		except:
-# 			print("failed\n+++++++")
-# 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+		
+		resp=dict(rdata)
+		resp['suggested_values']=final_vals
+		
+		read_serializer=autocompleteresponseserializer(resp)
+		serialized=read_serializer.data
+		
+		return JsonResponse(serialized,safe=False)
 
 #This endpoint will build a geographic sankey diagram based on a voyages query
 @extend_schema(
-        exclude=True
-    )
+		exclude=True
+	)
 class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

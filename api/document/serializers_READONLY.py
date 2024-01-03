@@ -93,7 +93,7 @@ class SourceShortRefSerializer(serializers.ModelSerializer):
             summary='OR Filter on exact matches of known str values',
             description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
             value={
-				"short_ref__name":["OMNO"]
+				"short_ref__name__exact":"OMNO"
 			},
 			request_only=True,
 			response_only=False

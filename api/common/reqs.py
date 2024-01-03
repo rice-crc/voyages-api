@@ -16,6 +16,24 @@ import os
 ##For instance, on our PAST graph-like data, the prefetch can overwhelm the system if you try to get everything
 ##can also just pass an array of prefetch vars
 
+
+def parse_filter_obj(filter_obj_in,all_fields):
+	filter_obj_out={}
+	errors=[]
+	for suffixedvarname in filter_obj_in:
+		if not re.match('[a-z|_]+[__exact|__gte|__lte|__in]$',suffixedvarname):
+			errors.append("BAD FILTER: %s" %suffixedvarname)
+		else:
+			varnamedecomposed=suffixedvarname.split('__')
+			varname='__'.join(varnamedecomposed[:-1])
+			suffix=varnamedecomposed[-1]
+			queryval=filter_obj_in[suffixedvarname]
+			if varname not in filter_obj_out:
+				filter_obj_out[varname]={suffixedvarname:queryval}
+			else:
+				filter_obj_out[varname][suffixedvarname]=queryval
+	return filter_obj_out,errors
+
 def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	errormessages=[]
@@ -27,13 +45,25 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			params=r
 		else:
 			params=dict(r.data)
-		filter_obj=params['filter']
-		filter_obj={k:filter_obj[k] for k in filter_obj if filter_obj[k]!=['']}
-		pp = pprint.PrettyPrinter(indent=4)
-		print("--post req params--")
-		pp.pprint(filter_obj)
 	except:
-		errormessages.append("error parsing parameters")
+		errormessages.append("error parsing request")
+		return None,None,None,errormessages
+	
+	print("----\npost req params:",json.dumps(params,indent=1))
+	
+	try:
+		filter_obj=params.get('filter')
+	
+		if filter_obj is not None:
+			filter_obj,errors=parse_filter_obj(filter_obj,all_fields)
+			errormessages+=errors
+		else:
+			filter_obj={}
+	except:
+		errormessages.append("error parsing filter obj")
+	
+	print("----\nfilter obj:",json.dumps(filter_obj,indent=1))
+
 	
 	if 'global_search' in params:
 		qsetclassstr=str(queryset[0].__class__)
@@ -67,60 +97,18 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	if len(bad_fields)>0:
 		errormessages.append("the following fields are not in the models: %s" %', '.join(bad_fields))
 	
-	try:
-		###FILTER RESULTS
-		##select text and numeric fields, ignoring those without a type
-		text_fields=[i for i in all_fields if all_fields[i]['type'] =='string']
-		numeric_fields=[i for i in all_fields if all_fields[i]['type'] in ['integer','number']]
-		boolean_fields=[i for i in all_fields if all_fields[i]['type']=='boolean']
-		#print("FILTER FIELDS",text_fields,numeric_fields,boolean_fields)
-		##build filters
-		kwargs={}
-		###numeric filters -- only accepting one range per field right now
-		active_numeric_search_fields=[i for i in set(filter_obj).intersection(set(numeric_fields))]
-		if len(active_numeric_search_fields)>0:
-			for field in active_numeric_search_fields:
-				fieldvals=filter_obj.get(field)
-				if len(fieldvals)==2 and '*' not in fieldvals:
-					range=fieldvals
-					vals=[float(i) for i in range]
-					vals.sort()
-					min,max=vals
-					kwargs['{0}__{1}'.format(field, 'lte')]=max
-					kwargs['{0}__{1}'.format(field, 'gte')]=min
-				else:
-					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
-				
-		###text filters (exact match, and allow for multiple entries joined by an or)
-		###this hard eval is not ideal but I can't quite see how else to do it just now?
-		active_text_search_fields=[i for i in set(filter_obj).intersection(set(text_fields))]
-		if len(active_text_search_fields)>0:
-			for field in active_text_search_fields:
-				vals=filter_obj.get(field)
-				qobjstrs=["Q({0}={1})".format(field,json.dumps(re.sub("\\\\+","",val))) for val in vals]
-				#print(vals,qobjstrs)
-				queryset=queryset.filter(eval('|'.join(qobjstrs)))
-				#print(queryset)
-		##boolean filters -- only accepting one range per field right now
-		active_boolean_search_fields=[i for i in set(filter_obj).intersection(set(boolean_fields))]
-		if len(active_boolean_search_fields)>0:
-			for field in active_boolean_search_fields:
-				searchstring=filter_obj.get(field)[0]
-				if searchstring.lower() in ["true","t","1","yes"]:
-					searchstring=True
-				elif searchstring.lower() in ["false","f","0","no"]:
-					searchstring=False
-
-				if searchstring in [True,False]:
-					kwargs[field]=searchstring
-		#print(kwargs)
-		###apply filters
-		queryset=queryset.filter(**kwargs)
-		results_count=queryset.count()
-		print('--counts--')
-		print("resultset size:",results_count)
-	except:
- 		errormessages.append("search/filter error")
+# 	try:
+	kwargs={}
+	for varname in filter_obj:
+		for suffixedvarname in filter_obj[varname]:
+			queryval=filter_obj[varname][suffixedvarname]
+			kwargs[suffixedvarname]=queryval
+	queryset=queryset.filter(**kwargs)
+	results_count=queryset.count()
+	print('--counts--')
+	print("resultset size:",results_count)
+# 	except:
+#  		errormessages.append("search/filter error")
 	 
 	try:
 		aggregation_fields=params.get('aggregate_fields')
@@ -198,9 +186,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 				res=aggqueryset
 			except:
 				errormessages.append("aggregation error")
-		
-
-	
+					
 	return res,selected_fields,results_count,errormessages
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
@@ -282,6 +268,35 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 
 def autocomplete_req(queryset,varname,querystr,offset,max_offset,limit):
 	
+	'''
+		autocomplete search any related text/char field
+		
+		args---->
+		queryset: what we are searching within
+		varname: the fully-qualified (double-underscored) related field
+		querystr: the substring we are searching for on that field
+		offset, max_offset, and limit: pagination
+		<----
+		
+		it works by
+			* creating a values list query on the related field
+			* and then running through these as quickly as possible until
+				* it gets the requested new page length of unique new hits
+				* or hits the end of the values list
+		
+		why is this a pain in the ass?
+			* because mysql does not have distinct on related field functionality
+		
+		when will it hit a wall?
+			* on values with lots of duplicates
+			* like geo vars on voyages
+			* or like rig types on voyageso
+		
+		it times out after 5 seconds just in case
+		going to need caching
+	'''
+	
+	#hard-coded internal pagination for deduping
 	pagesize=500
 
 	if '__' in varname:

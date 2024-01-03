@@ -16,7 +16,7 @@ from drf_spectacular.types import OpenApiTypes
 from common.static.Institution_options import Institution_options
 from common.static.Post_options import Post_options
 from common.static.Author_options import Author_options
-from common.serializers import *
+from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
 
 class PostList(generics.GenericAPIView):
 	'''
@@ -136,6 +136,8 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		
 		read_serializer=autocompleteresponseserializer(resp)
 		serialized=read_serializer.data
+		
+		print(' | '.join(error_messages))
 		
 		return JsonResponse(serialized,safe=False)
 

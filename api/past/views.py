@@ -26,7 +26,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 from drf_spectacular.types import OpenApiTypes
 from common.static.Enslaver_options import Enslaver_options
 from common.static.Enslaved_options import Enslaved_options
-from common.serializers import *
+from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
 
 
 class EnslavedList(generics.GenericAPIView):
@@ -100,69 +100,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 					"offset": 0,
 					"limit": 20,
 					"filter": {},
-					"suggested_values": [
-						{
-							"value": "?, Bob"
-						},
-						{
-							"value": "?, Claborne"
-						},
-						{
-							"value": "?, Claiborne"
-						},
-						{
-							"value": "??bon"
-						},
-						{
-							"value": "?ill, Bob"
-						},
-						{
-							"value": "?way, Bob"
-						},
-						{
-							"value": "A Bossuh"
-						},
-						{
-							"value": "A. Bossou"
-						},
-						{
-							"value": "Abalobo"
-						},
-						{
-							"value": "Abamboh"
-						},
-						{
-							"value": "Abanaboo"
-						},
-						{
-							"value": "Abaraboo"
-						},
-						{
-							"value": "Abbaboo"
-						},
-						{
-							"value": "Abbeeboo"
-						},
-						{
-							"value": "Abbo"
-						},
-						{
-							"value": "Abbobocah"
-						},
-						{
-							"value": "Abboboday"
-						},
-						{
-							"value": "Abbochay"
-						},
-						{
-							"value": "Abbodoo"
-						},
-						{
-							"value": "Abboe"
-						}
-					]
-				},
+					"suggested_values": [{"value": "?, Bob"},{"value": "?, Claborne"},{"value": "?, Claiborne"},{"value": "??bon"},{"value": "?ill, Bob"},{"value": "?way, Bob"},{"value": "A Bossuh"},{"value": "A. Bossou"},{"value": "Abalobo"},{"value": "Abamboh"},{"value": "Abanaboo"},{"value": "Abaraboo"},{"value": "Abbaboo"},{"value": "Abbeeboo"},{"value": "Abbo"},{"value": "Abbobocah"},{"value": "Abboboday"},{"value": "Abbochay"},{"value": "Abbodoo"},{"value": "Abboe"}]},
 				request_only=False,
 				response_only=True
 			)
@@ -205,6 +143,8 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 		read_serializer=autocompleteresponseserializer(resp)
 		serialized=read_serializer.data
 		
+		print(' | '.join(error_messages))
+		
 		return JsonResponse(serialized,safe=False)
 
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
@@ -240,68 +180,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 					"offset": 0,
 					"limit": 20,
 					"filter": {},
-					"suggested_values": [
-						{
-							"value": "? (Sally's), child"
-						},
-						{
-							"value": "?, Sally"
-						},
-						{
-							"value": "?field, Sally"
-						},
-						{
-							"value": "Abissala"
-						},
-						{
-							"value": "Abissalah"
-						},
-						{
-							"value": "Absalon"
-						},
-						{
-							"value": "Achasaloh"
-						},
-						{
-							"value": "Adesalar"
-						},
-						{
-							"value": "Adosalah"
-						},
-						{
-							"value": "Afosalah"
-						},
-						{
-							"value": "Ahdaisaloo"
-						},
-						{
-							"value": "Ahdasalee"
-						},
-						{
-							"value": "Ahlarsalah"
-						},
-						{
-							"value": "Ahmesallah"
-						},
-						{
-							"value": "Ahsalah"
-						},
-						{
-							"value": "Ahsalla"
-						},
-						{
-							"value": "Ahsally"
-						},
-						{
-							"value": "Ahsaloe"
-						},
-						{
-							"value": "Alasalhee"
-						},
-						{
-							"value": "Alasallagee"
-						}
-					]
+					"suggested_values": [{"value": "? (Sally's), child"},{"value": "?, Sally"},{"value": "?field, Sally"},{"value": "Abissala"},{"value": "Abissalah"},{"value": "Absalon"},{"value": "Achasaloh"},{"value": "Adesalar"},{"value": "Adosalah"},{"value": "Afosalah"},{"value": "Ahdaisaloo"},{"value": "Ahdasalee"},{"value": "Ahlarsalah"},{"value": "Ahmesallah"},{"value": "Ahsalah"},{"value": "Ahsalla"},{"value": "Ahsally"},{"value": "Ahsaloe"},{"value": "Alasalhee"},{"value": "Alasallagee"}]
 				},
 				request_only=False,
 				response_only=True
@@ -546,7 +425,7 @@ class EnslavementRelationsDataFrames(generics.GenericAPIView):
 			'enslaved_in_relation__enslaved__gender':{'type':'string'},
 			'relation_enslavers__enslaver_alias__identity__id':{'type':'integer'},
 			'relation_enslavers__enslaver_alias__identity__principal_alias':{'type':'string'},
-			'relation_enslavers__roles__name':{'type':'name'}
+			'relation_enslavers__roles__name':{'type':'string'}
 		}
 		queryset,selected_fields,results_count,error_messages=post_req(
 			queryset,

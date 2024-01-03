@@ -37,8 +37,8 @@ class TagSerializer(serializers.ModelSerializer):
             summary='OR Filter on exact matches of known str values',
             description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for blog posts with the tag Introductory Maps written in English',
             value={
-				"tags__name":["Introductory Maps"],
-				"language":["en"]
+				"tags__name__in":["Introductory Maps"],
+				"language__exact":"en"
 			},
 			request_only=True,
 			response_only=False,
@@ -75,7 +75,7 @@ class AuthorPostSerializer(serializers.ModelSerializer):
             summary='OR Filter on exact matches of known str values',
             description='Here, we are searching for authors who are affiliated with UCSC',
             value={
-				"institution__name":["University of California, Santa Cruz"]
+				"institution__name__exact":"University of California, Santa Cruz"
 			},
 			request_only=True,
 			response_only=False,
@@ -101,7 +101,7 @@ class AuthorSerializer(serializers.ModelSerializer):
             summary='OR Filter on exact matches of known str values',
             description='Here, we are searching for instutions whose authors wrote blog posts that have the tag Introductory Maps',
             value={
-				"institution_authors__posts__tags__name":["Introductory Maps"]
+				"institution_authors__posts__tags__name__exact":"Introductory Maps"
 			},
 			request_only=True,
 			response_only=False,

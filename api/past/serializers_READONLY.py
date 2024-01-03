@@ -180,10 +180,8 @@ class EnslavedInRelationSerializer(serializers.ModelSerializer):
 			summary='Filter on a numeric range',
 			description='Here, we search for named enslaved individualas who were, at the time of the transportation that we have recorded for them, between 5 and 15 years of age.',
 			value={
-				"age":
-				[
-					5,15
-				]
+				"age__gte":5,
+				"age__lte":15
 			},
 			request_only=True,
 			response_only=False
@@ -193,7 +191,7 @@ class EnslavedInRelationSerializer(serializers.ModelSerializer):
 			summary='OR Filter on exact matches of known str values',
 			description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching on a highly nested value: all named enslaved individuals who were on voyages that were principally disembarked in the Bahamas',
 			value={
-				"enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name":
+				"enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name__in":
 				[
 					"Bahamas, port unspecified"
 				]
@@ -290,7 +288,8 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 			summary='Filter on a numeric range',
 			description='Here, we search for enslavers who participated in slave-trading voyages between the years of 1720-1722',
 			value={
-				"aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":[1720,1722]
+				"aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__gte":1720,
+				"aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__lte":1722
 			},
 			request_only=True,
 			response_only=False
@@ -300,7 +299,7 @@ class EnslaverAliasSerializer(serializers.ModelSerializer):
 			summary='OR Filter on exact matches of known str values',
 			description='Here, we search for enslavers who participated in the enslavement of anyone named Bora',
 			value={
-				"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name":["Bora"]
+				"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name__in":["Bora"]
 			},
 			request_only=True,
 			response_only=False

@@ -17,7 +17,7 @@ from .models import *
 import pprint
 from rest_framework import filters
 from common.reqs import *
-from common.serializers import *
+from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
 from geo.common import GeoTreeFilter
 import collections
 import gc
@@ -341,6 +341,8 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 		
 		read_serializer=autocompleteresponseserializer(resp)
 		serialized=read_serializer.data
+		
+		print(' | '.join(error_messages))
 		
 		return JsonResponse(serialized,safe=False)
 

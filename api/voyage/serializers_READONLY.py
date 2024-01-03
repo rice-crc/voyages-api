@@ -270,7 +270,8 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
             summary='Filter on a numeric range for a nested variable',
             description='Here, we search for voyages whose imputed year of arrival at the principal port of disembarkation was between 1820 & 1850. We choose this variable as it is one of the most fully-populated numeric variables in the dataset.',
             value={
-				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year': [1820,1850]
+				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__gte': 1820,
+				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__lte': 1850
 			},
 			request_only=True,
 			response_only=False
@@ -280,7 +281,7 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
             summary='OR Filter on exact matches of known str values',
             description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for voyages that are believed to have disembarked captives principally in Barbados or Cuba',
             value={
-				'voyage_itinerary__imp_principal_region_slave_dis__name': ['Barbados','Cuba']
+				'voyage_itinerary__imp_principal_region_slave_dis__name__in': ['Barbados','Cuba']
 			},
 			request_only=True,
 			response_only=False

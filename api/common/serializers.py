@@ -27,5 +27,3 @@ class autocompleteresponseserializer(serializers.Serializer):
 	limit=serializers.IntegerField()
 	filter=serializers.JSONField()
 	suggested_values=autocompletekvserializer(many=True)
-
-

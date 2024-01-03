@@ -39,7 +39,8 @@ def load_graph():
 	
 	url=DJANGO_BASE_URL+'voyage/dataframes/'
 	payload={
-		"selected_fields":selected_fields
+		"selected_fields":selected_fields,
+		'filter':{}
 	}
 	
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
@@ -66,7 +67,8 @@ def load_graph():
 	
 	url=DJANGO_BASE_URL+'past/enslaver/dataframes/'
 	payload={
-		"selected_fields":selected_fields
+		"selected_fields":selected_fields,
+		'filter':{}
 	}
 	
 	r=requests.post(
@@ -91,7 +93,8 @@ def load_graph():
 	
 	url=DJANGO_BASE_URL+'past/enslaved/dataframes/'
 	payload={
-		"selected_fields":selected_fields
+		"selected_fields":selected_fields,
+		'filter':{}
 	}
 	
 	r=requests.post(
@@ -121,7 +124,8 @@ def load_graph():
 	#517290 relations WITH roles. promising.
 	url=DJANGO_BASE_URL+'past/enslavementrelations/dataframes/'
 	payload={
-		"selected_fields":selected_fields
+		"selected_fields":selected_fields,
+		'filter':{}
 	}
 	
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}

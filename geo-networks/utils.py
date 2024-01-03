@@ -427,7 +427,7 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	else:
 		selected_fields=[pk_var]+itinerary_vars
 	
-	payload={'selected_fields':selected_fields}
+	payload={'selected_fields':selected_fields,'filter':{}}
 	
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
@@ -439,17 +439,10 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 
 	cachedpaths={}
 	
-	nodesdf=pd.DataFrame(columns=[
-		'pk','id','origin','embarkation','disembarkation','post-disembarkation'
-	])
 	nodesdfrows=[]
-	edgesdf=pd.DataFrame(columns=[
-		'pk','weight','source','target','c1x','c1y','c2x','c2y'
-	])
 	edgesdfrows=[]
 	nodesdatadict={}
 	edgesdatadict={}
-
 	
 	amount_of_work=len(results[pk_var])
 	prevpercentdone=0
@@ -676,11 +669,14 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 		if percentdone>prevpercentdone+.02:
 			print("%d percent done" %(percentdone*100))
 			prevpercentdone=percentdone
-			nodesdf=pd.concat([nodesdf,pd.DataFrame.from_records(nodesdfrows)],ignore_index=True)
-			edgesdf=pd.concat([edgesdf,pd.DataFrame.from_records(edgesdfrows)],ignore_index=True)
-			nodesdfrows=[]
-			edgesdfrows=[]
-		
+# 			nodesdf=pd.concat([nodesdf,pd.DataFrame.from_records(nodesdfrows)],ignore_index=True)
+# 			edgesdf=pd.concat([edgesdf,pd.DataFrame.from_records(edgesdfrows)],ignore_index=True)
+# 			nodesdfrows=[]
+# 			edgesdfrows=[]
+	
+	nodesdf=pd.DataFrame.from_records(nodesdfrows)
+	edgesdf=pd.DataFrame.from_records(edgesdfrows)
+	
 	print('NODES',nodesdf)
 	print('EDGES',edgesdf)
 	

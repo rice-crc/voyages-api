@@ -18,7 +18,7 @@ def load_long_df(endpoint,variables):
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
-		data=json.dumps({'selected_fields':variables})
+		data=json.dumps({'selected_fields':variables,'filter':{}})
 	)
 	j=json.loads(r.text)
 	df=pd.DataFrame.from_dict(j)

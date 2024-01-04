@@ -17,7 +17,7 @@ from .models import *
 import pprint
 from rest_framework import filters
 from common.reqs import *
-from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
+from common.serializers import autocompleterequestserializer, autocompleteresponseserializer,crosstabresponseserializer,crosstabrequestserializer
 from geo.common import GeoTreeFilter
 import collections
 import gc
@@ -124,17 +124,40 @@ class VoyageStatsOptions(generics.GenericAPIView):
 		r=requests.get(url=u2,headers={"Content-type":"application/json"})
 		return JsonResponse(json.loads(r.text),safe=False)
 
-@extend_schema(
-		exclude=True
-	)
+
 class VoyageCrossTabs(generics.GenericAPIView):
-	'''
-	I was only able to figure out how to output a true pivot table (multi levels and columns) as a straight html dump from pandas.
-	Moreover, if I styled it at all (tagged the <td>'s with id's for jquery), the size ballooned.
-	Instead, then, we'll go with a custom ag-grid JS dump that can accommodate multi-level cols, but not multi-level rows.	
-	'''
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
+		request=crosstabrequestserializer,
+		responses=crosstabresponseserializer,
+		examples=[	
+			OpenApiExample(
+				'Paginated request for binned years & embarkation geo vars',
+				summary='Multi-level, paginated, 20-year bins',
+				description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum. We are requesting the first 5 rows of these cross-tab results.',
+				value={
+					"columns":[
+						"voyage_itinerary__imp_broad_region_of_slave_purchase__name",
+						"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+						"voyage_itinerary__imp_principal_place_of_slave_purchase__name"
+					],
+					"rows":"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+					"binsize": 20,
+					"rows_label":"YEARAM",
+					"agg_fn":"sum",
+					"value_field":"voyage_slaves_numbers__imp_total_num_slaves_embarked",
+					"offset":0,
+					"limit":5
+				},
+				request_only=True,
+				response_only=False
+			)
+		]
+	
+	)
+
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
@@ -239,8 +262,6 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		resp=JsonResponse(filtered_geotree,safe=False)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
-
-
 
 class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

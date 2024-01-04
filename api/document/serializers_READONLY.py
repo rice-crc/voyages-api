@@ -89,9 +89,9 @@ class SourceShortRefSerializer(serializers.ModelSerializer):
 @extend_schema_serializer(
 	examples = [
 		OpenApiExample(
-            'Ex. 1: array of str vals',
-            summary='OR Filter on exact matches of known str values',
-            description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
+            'Ex. 1: Exact match on a nested field',
+            summary='Exact match on a nested field',
+            description='Here, we search for an exact match on a str value field. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
             value={
 				"short_ref__name__exact":"OMNO"
 			},

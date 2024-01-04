@@ -5,11 +5,6 @@ from .models import *
 import pprint
 import gc
 
-# class SparseDateSerializer(serializers.ModelSerializer):
-# 	class Meta:
-# 		model=SparseDate
-# 		fields='__all__'
-
 class autocompleterequestserializer(serializers.Serializer):
 	varname=serializers.CharField(max_length=500)
 	querystr=serializers.CharField(max_length=255)
@@ -27,3 +22,23 @@ class autocompleteresponseserializer(serializers.Serializer):
 	limit=serializers.IntegerField()
 	filter=serializers.JSONField()
 	suggested_values=autocompletekvserializer(many=True)
+
+class crosstabrequestserializer(serializers.Serializer):
+	columns=serializers.ListField(child=serializers.CharField())
+	rows=serializers.CharField(max_length=500)
+	binsize=serializers.IntegerField()
+	rows_label=serializers.CharField(max_length=500,allow_null=True)
+	agg_fn=serializers.CharField(max_length=500)
+	value_field=serializers.CharField(max_length=500)
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	
+class offsetpaginationserializer(serializers.Serializer):
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	total_results_count=serializers.IntegerField()
+	
+class crosstabresponseserializer(serializers.Serializer):
+	tablestructure=serializers.JSONField()
+	data=serializers.JSONField()
+	medatadata=offsetpaginationserializer(many=False)

@@ -69,6 +69,17 @@ class SourceList(generics.GenericAPIView):
 			print("failed\n+++++++")
 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
+class SourceRETRIEVE(generics.RetrieveAPIView):
+	'''
+	The lookup field for sources is the pk (id)
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceSerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+
 class SourceListGENERIC(generics.ListAPIView):
 	'''
 	TESTING A GENERIC, EASY-TO-SEARCH, PAGINATED LIST OF SOURCES FOR DELLAMONICA & SSC
@@ -239,16 +250,6 @@ class SourceCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 	
-class SourceRETRIEVE(generics.RetrieveAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-
 @extend_schema(
 		exclude=True
 	)

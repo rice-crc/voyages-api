@@ -34,10 +34,10 @@ class TagSerializer(serializers.ModelSerializer):
 	examples = [
 		OpenApiExample(
             'Ex. 1: array of str vals',
-            summary='OR Filter on exact matches of known str values',
-            description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for blog posts with the tag Introductory Maps written in English',
+            summary='Exact OR filter + exact str match',
+            description='Here we combine an OR filter of exact matches with a single exact string match. Specifically, we are searching for blog posts written in English that have the tags "Introductory Maps" or "Lesson Plan"',
             value={
-				"tags__name__in":["Introductory Maps"],
+				"tags__name__in":["Introductory Maps","Lesson Plan"],
 				"language__exact":"en"
 			},
 			request_only=True,

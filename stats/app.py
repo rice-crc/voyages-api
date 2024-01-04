@@ -133,28 +133,28 @@ def crosstabs():
 # 	try:
 	st=time.time()
 	rdata=request.json
-	dfname=rdata['cachename'][0]
-
+# 	dfname=rdata.get('cachename')
+	dfname='voyage_pivot_tables'
 	#it must have a list of ids (even if it's all of the ids)
 	ids=rdata['ids']
 
 	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
-	columns=rdata['columns']
-	rows=rdata['rows']
-	val=rdata['value_field'][0]
-	fn=rdata['agg_fn'][0]
-	
-	print("columns",columns)
-	
+	columns=rdata.get('columns')
+	rows=rdata.get('rows')
+	val=rdata.get('value_field')
+	fn=rdata.get('agg_fn')
+	limit=rdata.get('limit') or 10
+	offset=rdata.get('offset') or 0
+	binsize=rdata.get('binsize')
+		
 	normalize=rdata.get('normalize')
 	if normalize is not None:
 		normalize=normalize[0]
 	if normalize not in ["columns","index"]:
 		normalize=False
-
+	
 	df=eval(dfname)['df']
-	df2=df[df['id'].isin(ids)]
-	rows=rows[0]
+	df=df[df['id'].isin(ids)]
 	
 	yeargroupmode=False
 	
@@ -162,35 +162,39 @@ def crosstabs():
 		s=str(s)
 		return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
 	
+	def makestr(s):
+		if s is None:
+			return "Unknown"
+		else:
+			return str(s)
+	
 	valuetype=options[val]['type']
 	
-	if re.match('.*year__[0-9]+',rows):
+	if rows.endswith('__year') and binsize is not None:
+		binsize=int(binsize)
 		yeargroupmode=True
-		binsize=int(re.search('[0-9]+',rows).group(0))
-		cutvar=re.sub('_+[0-9]+$','',rows)
-		df2=df2.dropna(subset=[cutvar,val])
-		df2=df2.assign(YEARAM=df2[cutvar].astype('int'))
-		yearam_min=df2[cutvar].min()
-		yearam_max=df2[cutvar].max()
-		year_ints=list(range(int(yearam_min),int(yearam_max+1)))
-		if yearam_max-yearam_min <= binsize:
+		df=df.dropna(subset=[rows,val])
+		df[rows]=df[rows].astype('int')
+		year_min=df[rows].min()
+		year_max=df[rows].max()
+		year_ints=list(range(int(year_min),int(year_max+1)))
+		if year_max-year_min <= binsize:
 			nbins=1
 		else:
-			nbins=int((yearam_max-yearam_min)/binsize)
+			nbins=int((year_max-year_min)/binsize)
 		bin_arrays=np.array_split(year_ints,nbins)
 		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
-		print("BINS",bins)
-		df2=df2.assign(YEARAM_BINS=pd.cut(df2['YEARAM'],bins,include_lowest=True))
-		print('DF2',df2)
-		df3=df2[columns+[val]+['YEARAM_BINS']]
-		df3[val]=df3[val].astype('int')
-		print('df3cols',df3,df3.columns)
-		df3['YEARAM_BINS']=df3['YEARAM_BINS'].apply(interval_to_str)
-		print('df3colsB',df3,df3.columns,df3.dtypes)
+		df=df.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
+		df=df[columns+[val]+['row_bins']]
+		df.rename(columns={"row_bins": rows})
+		df['row_bins']=df['row_bins'].astype('str')
+		df[val]=df[val].astype('int')
+		
+		df['row_bins']=df['row_bins'].apply(interval_to_str)
 		ct=pd.crosstab(
-			[df3['YEARAM_BINS']],
-			[df3[col] for col in columns],
-			values=df3[val],
+			[df['row_bins']],
+			[df[col] for col in columns],
+			values=df[val],
 			aggfunc=fn,
 			margins=True
 		)
@@ -198,16 +202,14 @@ def crosstabs():
 # 		print(ct)
 	else:
 		ct=pd.crosstab(
-			[df2[rows]],
-			[df2[col] for col in columns],
-			values=df2[val],
+			[df[rows]],
+			[df[col] for col in columns],
+			values=df[val],
 			aggfunc=fn,
 			normalize=normalize,
 			margins=True
 		)
 		ct.fillna(0)
-	
-# 	print("crosstabs",ct)
 	
 	if len(columns)==1:
 		mlctuples=[[i] for i in list(ct.columns)]
@@ -271,12 +273,10 @@ def crosstabs():
 				colgroups.append(thisfield)
 		return colgroups
 	
-	colgroups=[]
-	indexcol_varname=rows[0]
-	if 'rows_label' in rdata:
-		indexcol_name=rdata['rows_label'][0]
-	else:
-		indexcol_name=''
+	colgroups=[]	
+	indexcol_name=rdata.get('rows_label') or ''
+	
+	
 	indexcolcg=makechild('',isfield=False)
 	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name)
 	indexcolfield['pinned']='left'
@@ -288,7 +288,7 @@ def crosstabs():
 		l.reverse()
 		colgroups=makecolgroups(colgroups,l,mlct)
 	
-	records=[]
+	output_records=[]
 	##N.B. "All" is a reserved column name here, for the margins/totals
 	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
 	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
@@ -302,9 +302,17 @@ def crosstabs():
 			return float(cellval)
 		elif valuetype=="integer":
 			return int(cellval)
-		
 	
-	for r in ct.to_records():	
+	ctshape=ct.shape
+# 	print(ctshape)
+	rowcount=ctshape[0]	
+	start=offset
+	end=min((offset+limit),rowcount-1)
+	
+	ct=ct.iloc[start:end,]
+	ct_records=ct.to_records()
+	
+	for r in ct_records:	
 		for i in range(len(r)):
 			if i==0:
 				thisrecord={
@@ -313,9 +321,17 @@ def crosstabs():
 					)
 					for i in range(len(r))
 				}
-		records.append(thisrecord)
+		output_records.append(thisrecord)
 	
-	output={'tablestructure':colgroups,'data':records}
+	output={
+		'tablestructure': colgroups,
+		'data': output_records,
+		'metadata':{
+			'total_results_count': rowcount,
+			'offset':offset,
+			'limit':limit
+		}
+	}
 	return json.dumps(output)
 
 # 	except:

@@ -167,12 +167,12 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 				thisfield=obj['properties'][fieldname]
 				if 'allOf' in thisfield:
 					thisfield=thisfield['allOf'][0]
-# 					print(fieldname,'allof') ## OK THESE ARE M2M
+					print(fieldname,'allof') ## OK THESE ARE M2M
 					ismany=True
 				if '$ref' in thisfield:
 					next_obj_name=thisfield['$ref'].replace('#/components/schemas/','')
 					output[fieldname]=walker({},schemas,next_obj_name,ismany)
-# 					print(fieldname,'ref')
+					print(fieldname,'ref')
 				elif 'type' in thisfield:
 					if thisfield['type']!='array':
 						thistype=thisfield['type']
@@ -183,17 +183,17 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 							'type':thistype,
 							'many':ismany
 						}
-# 						print(fieldname,'bottomval')
+						print(fieldname,'bottomval')
 					else:
 						thisfield_items=thisfield['items']
 						if 'type' in thisfield_items:
-# 							print('array otherbottomvalue',thisfield)
+							print('array otherbottomvalue',thisfield)
 							output[fieldname]={
 								'type':thisfield_items['type'],
 								'many':ismany
 							}
 						elif '$ref'	in thisfield_items:
-# 							print("array, ref???",thisfield)
+							print("array, ref???",thisfield)
 							next_obj_name=thisfield_items['$ref'].replace('#/components/schemas/','')
 							output[fieldname]=walker({},schemas,next_obj_name,ismany=True)
 			ismany=False

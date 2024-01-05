@@ -35,6 +35,7 @@ from common.static.Voyage_options import Voyage_options
 class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
+	serializer_class=VoyageSerializer
 	@extend_schema(
 		description="\
 		This endpoint returns a list of nested objects, each of which contains all the available information on individual voyages.\n\
@@ -82,13 +83,16 @@ class VoyageList(generics.GenericAPIView):
 		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 		return JsonResponse(resp,safe=False,status=200)
 
-
-
 class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		description="\n\
+		The aggregations endpoints helps us to peek at numerical fields in the same way that autcomplete endpoints help us to get a sense of what the available text values are on a field.\n\
+		So if we want to, for instance, allow a user to search on voyages by year, we might want to give them a rangeslider component. In order to make that rangeslider component, you'd have to know the minimum and maximum years during which voyages sailed -- you would also need to know, of course, whether you were searching for the minimum and maximum of years of departure, embarkation, disembarkation, return, etc.\n\
+		Also, as with the other new endpoints we are rolling out in January 2024, you can run a filter before you query for min/max on variables. So if you've already searched for voyages arriving in Cuba, for instance, you can ask for the min and max years of disembarkation in order to make a rangeslider dynamically tailored to that search.\n\
+		Note to maintainer(s): This endpoint was made with rangesliders in mind, so we are only exposing min & max for now. In the future, it could be very useful to have median, mean, or plug into the stats engine for a line or bar chart to create some highly interactive filtering.\n\
+		",
 		request=VoyageFieldAggregationRequestSerializer,
 		responses=VoyageFieldAggregationResponseSerializer
 	)

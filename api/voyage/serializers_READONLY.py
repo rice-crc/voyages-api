@@ -388,9 +388,9 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
 @extend_schema_serializer(
 	examples = [
          OpenApiExample(
-			'Paginated request for filtered voyages.',
-			summary='Paginated request for filtered voyages.',
-			description='Here, we request page 2 (with 5 items per page) of voyages for which enslaved people were purchased in Cuba or Florida between 1820-1822.',
+			'Paginated autocomplete on enslaver names',
+			summary='Paginated autocomplete on enslaver names',
+			description='Here, we are requesting 5 suggested values, starting with the 10th item, of enslaver aliases (names) associated with voyages between 1820-1840',
 			value={
 				"varname": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
 				"querystr": "george",
@@ -424,10 +424,5 @@ class VoyageAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField(max_length=255)
 
 class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
-	varname=serializers.CharField(max_length=500)
-	querystr=serializers.CharField(max_length=255)
-	offset=serializers.IntegerField()
-	limit=serializers.IntegerField()
-	filter=VoyageFilterItemSerializer(many=True)
 	suggested_values=VoyageAutoCompletekvSerializer(many=True)
 

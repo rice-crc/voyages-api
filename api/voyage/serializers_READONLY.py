@@ -418,7 +418,7 @@ class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
 	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,allow_blank=True)
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
 
 class VoyageAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField(max_length=255)

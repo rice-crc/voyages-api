@@ -17,7 +17,7 @@ from .models import *
 import pprint
 from rest_framework import filters
 from common.reqs import *
-from common.serializers import autocompleterequestserializer, autocompleteresponseserializer,crosstabresponseserializer,crosstabrequestserializer
+# from common.serializers import autocompleterequestserializer, autocompleteresponseserializer,crosstabresponseserializer,crosstabrequestserializer
 from geo.common import GeoTreeFilter
 import collections
 import gc
@@ -47,38 +47,40 @@ class VoyageList(generics.GenericAPIView):
 			6. Data on the vessel\n\
 		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.\n\
 		",
-		request=VoyageListReqSerializer,
-		responses=VoyageListRespSerializer
+		request=VoyageListReqSerializer
 	)
 	
 	def post(self,request):
-		
+		st=time.time()
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageListReqSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
-		params=dict(request.data)
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
 			Voyage_options,
 			auto_prefetch=True
 		)
+		
 		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-		if len(error_messages)==0:
-			st=time.time()
-			resp=VoyageListRespSerializer({
-				'count':total_results_count,
-				'page':page_num,
-				'page_size':page_size,
-				'results':results
-			}).data
-			status=200
-		else:
-			resp={'status':'false','message':' | '.join(error_messages)}
-			status=400
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(resp,safe=False,status=status)
-
+		
+		resp=VoyageListRespSerializer({
+			'count':total_results_count,
+			'page':page_num,
+			'page_size':page_size,
+			'results':results
+		}).data
+		
+		#I'm having the most difficult time in the world validating this nested paginated response
+		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		return JsonResponse(resp,safe=False,status=200)
 
 
 # # Basic statistics
@@ -129,14 +131,16 @@ class VoyageStatsOptions(generics.GenericAPIView):
 		r=requests.get(url=u2,headers={"Content-type":"application/json"})
 		return JsonResponse(json.loads(r.text),safe=False)
 
-
+@extend_schema(
+		exclude=True
+	)
 class VoyageCrossTabs(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
-		request=crosstabrequestserializer,
-		responses=crosstabresponseserializer,
+		request=VoyageCrossTabRequestSerializer,
+		responses=VoyageCrossTabResponseSerializer,
 		examples=[	
 			OpenApiExample(
 				'Paginated request for binned years & embarkation geo vars',
@@ -287,102 +291,40 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 	queryset=Voyage.objects.all()
 	@extend_schema(
 		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
-		request=autocompleterequestserializer,
-		responses=autocompleteresponseserializer,
-		examples = [
-			OpenApiExample(
-				'Autocomplete on any voyages-related field',
-				summary='Filtered autocomplete for enslaver names like George',
-				description='Here, we search for voyages that arrived btw 1820-1850 associated with enslavers whose names are like "George". As you can see from the "offset" and "limit" values, we are requesting five suggestions after 10, meaning we want 11,12,13,14,15. In other words, this is most likely a request for page 3.',
-				value={
-					"varname":"voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
-					"querystr":"george",
-					"offset":10,
-					"limit":5,
-					"filter":{
-						"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":[1820,1840]
-					}
-				},
-				request_only=True,
-				response_only=False
-			),
-			OpenApiExample(
-				'Suggested values are returned',
-				summary='Filtered autocomplete for enslaver names like George',
-				description='Here, we search for voyages that arrived btw 1820-1850 associated with enslavers whose names are like "George". We see five items (# 11,12,13,14,15) returned.',
-				value={
-					"varname":"voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
-					"querystr":"george",
-					"offset":10,
-					"limit":5,
-					"filter":{
-						"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":[1820,1840]
-					},
-					"suggested_values":[
-						{
-							"value": "Brown, George"
-						},
-						{
-							"value": "Bulloch, George L"
-						},
-						{
-							"value": "Burdick, George"
-						},
-						{
-							"value": "Burke, George"
-						},
-						{
-							"value": "Burkley, George W"
-						},
-						{
-							"value": "Callahan, George"
-						}
-					]
-				},
-				request_only=False,
-				response_only=True
-			)
-		]
+		request=VoyageAutoCompleteRequestSerializer,
+		responses=VoyageAutoCompleteResponseSerializer,
 	)
 	def post(self,request):
 		st=time.time()
-		queryset=Voyage.objects.all()
 		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 		
-		options=Voyage_options
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageAutoCompleteRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 		
-		rdata=request.data
-
-		varname=str(rdata.get('varname'))
-		querystr=str(rdata.get('querystr'))
-		offset=int(rdata.get('offset'))
-		limit=int(rdata.get('limit'))
-	
-		max_offset=500
-	
-		if offset>max_offset:
-			final_vals=[]
-		else:
-			queryset,selected_fields,results_count,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				options,
-				auto_prefetch=False
-			)
-			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Voyage.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=False
+		)
 		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		
-		resp=dict(rdata)
+		#RUN THE AUTOCOMPLETE ALGORITHM
+		final_vals=autocomplete_req(queryset,request)
+		resp=dict(request.data)
 		resp['suggested_values']=final_vals
 		
-		read_serializer=autocompleteresponseserializer(resp)
-		serialized=read_serializer.data
-		
-		print(' | '.join(error_messages))
-		
-		return JsonResponse(serialized,safe=False)
+		#VALIDATE THE RESPONSE
+		serialized_resp=VoyageAutoCompleteResponseSerializer(data=resp)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
 
 #This endpoint will build a geographic sankey diagram based on a voyages query
 @extend_schema(
@@ -398,7 +340,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			params=dict(request.data)
 			zoom_level=params.get('zoom_level')
 			queryset=Voyage.objects.all()
-			queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,results_count,error_messages=post_req(
 				queryset,
 				self,
 				request,
@@ -439,6 +381,9 @@ class VoyageCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+@extend_schema(
+		exclude=True
+	)
 class VoyageRETRIEVE(generics.RetrieveAPIView):
 	'''
 	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.

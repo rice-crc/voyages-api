@@ -5,12 +5,13 @@ from .models import *
 import pprint
 import gc
 
+
+
 class autocompleterequestserializer(serializers.Serializer):
 	varname=serializers.CharField(max_length=500)
 	querystr=serializers.CharField(max_length=255)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
-	filter=serializers.JSONField()
 
 class autocompletekvserializer(serializers.Serializer):
 	value=serializers.CharField(max_length=255)
@@ -20,7 +21,6 @@ class autocompleteresponseserializer(serializers.Serializer):
 	querystr=serializers.CharField(max_length=255)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
-	filter=serializers.JSONField()
 	suggested_values=autocompletekvserializer(many=True)
 
 class crosstabrequestserializer(serializers.Serializer):

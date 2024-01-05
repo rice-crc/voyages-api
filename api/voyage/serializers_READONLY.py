@@ -6,6 +6,8 @@ from document.models import Source,Page,SourcePageConnection,SourceVoyageConnect
 from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
+from common.static.Voyage_options import Voyage_options
+
 #### GEO
 
 class VoyageLocationSerializer(serializers.ModelSerializer):
@@ -286,13 +288,28 @@ class VoyageSerializer(serializers.ModelSerializer):
 			summary='Paginated request for filtered voyages.',
 			description='Here, we request page 2 (with 5 items per page) of voyages for which enslaved people were purchased in Cuba or Florida between 1820-1822.',
 			value={
-				"filter":{
-					"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__gte": 1820,
-					"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__lte": 1822,
-					"voyage_itinerary__imp_principal_region_of_slave_purchase__name__in": ["Cuba","Florida"]
-				},
-				"page":2,
-				"page_size":5
+			  "filter": [
+					{
+						"varName":"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"searchTerm":1820,
+						"op":"gte"
+					},
+					{
+						"varName":"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"searchTerm":1822,
+						"op":"lte"
+					},
+					{
+						"varName":"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+						"searchTerm":[
+							"Florida",
+							"Cuba"
+						],
+						"op":"in"
+					}
+				],
+				"page": 2,
+				"page_size": 5
 			},
 			request_only=True
 		)
@@ -308,5 +325,87 @@ class VoyageListRespSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
-	results=VoyageSerializer(many=True)
+	results=VoyageSerializer(many=True,read_only=True)
+
+
+
+
+
+
+
+
+############ REQUEST FILTER OBJECT ITEM SERIALIZERS
+class VoyageFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in"])
+	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	searchTerm=serializers.ReadOnlyField(read_only=True)
+
+############ OFFSET PAGINATION SERIALIZERS
+class VoyageOffsetPaginationSerializer(serializers.Serializer):
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	total_results_count=serializers.IntegerField()
+
+############ CROSSTAB SERIALIZERS
+class VoyageCrossTabRequestSerializer(serializers.Serializer):
+	columns=serializers.ListField(child=serializers.CharField())
+	rows=serializers.CharField(max_length=500)
+	binsize=serializers.IntegerField()
+	rows_label=serializers.CharField(max_length=500,allow_null=True)
+	agg_fn=serializers.CharField(max_length=500)
+	value_field=serializers.CharField(max_length=500)
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	
+class VoyageCrossTabResponseSerializer(serializers.Serializer):
+	tablestructure=serializers.JSONField()
+	data=serializers.JSONField()
+	medatadata=VoyageOffsetPaginationSerializer(many=False)
+
+############ AUTOCOMPLETE SERIALIZERS
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated request for filtered voyages.',
+			summary='Paginated request for filtered voyages.',
+			description='Here, we request page 2 (with 5 items per page) of voyages for which enslaved people were purchased in Cuba or Florida between 1820-1822.',
+			value={
+				"varname": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
+				"querystr": "george",
+				"offset": 10,
+				"limit": 5,
+				"filter": [
+					{
+						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op": "gte",
+						"searchTerm": 1820
+					},
+					{
+						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op": "lte",
+						"searchTerm": 1840
+					}
+				]
+			},
+			request_only=True
+		)
+    ]
+)
+class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
+	varname=serializers.CharField(max_length=500)
+	querystr=serializers.CharField(max_length=255)
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	filter=VoyageFilterItemSerializer(many=True)
+
+class VoyageAutoCompletekvSerializer(serializers.Serializer):
+	value=serializers.CharField(max_length=255)
+
+class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
+	varname=serializers.CharField(max_length=500)
+	querystr=serializers.CharField(max_length=255)
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	filter=VoyageFilterItemSerializer(many=True)
+	suggested_values=VoyageAutoCompletekvSerializer(many=True)
 

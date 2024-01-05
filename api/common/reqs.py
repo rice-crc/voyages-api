@@ -55,29 +55,6 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 			}
 	return res,errormessages
 
-def parse_filter_obj(filter_obj_in,all_fields):
-	'''
-		attempts to format the filter object for application later
-		we are using django notation for nested variables AND filter operations
-		so search functions are encoded as suffixes on the var name
-		e.g., voyage_id__gte=500 looks for voyage ids greater than or equal to 500	
-	'''
-	filter_obj_out={}
-	errors=[]
-	for suffixedvarname in filter_obj_in:
-		if not re.match('[a-z|_]+[__exact|__gte|__lte|__in]$',suffixedvarname):
-			errors.append("BAD FILTER: %s" %suffixedvarname)
-		else:
-			varnamedecomposed=suffixedvarname.split('__')
-			varname='__'.join(varnamedecomposed[:-1])
-			suffix=varnamedecomposed[-1]
-			queryval=filter_obj_in[suffixedvarname]
-			if varname not in filter_obj_out:
-				filter_obj_out[varname]={suffixedvarname:queryval}
-			else:
-				filter_obj_out[varname][suffixedvarname]=queryval
-	return filter_obj_out,errors
-
 def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 	'''
 		This function handles:
@@ -91,31 +68,13 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 	results_count=None
 	
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
-	try:
-		if type(r)==dict:
-			params=r
-		else:
-			params=dict(r.data)
-	except:
-		errormessages.append("error parsing request")
-		return None,None,None,errormessages
+	if type(r)==dict:
+		params=r
+	else:
+		params=dict(r.data)
 	
 	print("----\npost req params:",json.dumps(params,indent=1))
-	
-	#attempts to format the filter object for application later
-	#we are using django notation for nested variables AND filter operations
-	#so search functions are encoded as suffixes on the var name
-	#e.g., voyage_id__gte=500 looks for voyage ids greater than or equal to 500
-	try:
-		filter_obj=params.get('filter')
-	
-		if filter_obj is not None:
-			filter_obj,errors=parse_filter_obj(filter_obj,all_fields)
-			errormessages+=errors
-		else:
-			filter_obj={}
-	except:
-		errormessages.append("error parsing filter obj")
+	filter_obj=params.get('filter')
 	
 	#global search bypasses the normal filtering process
 	#hits solr with a search string (which currently is applied across all text fields on a model)
@@ -148,60 +107,47 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		queryset=queryset.filter(id__in=ids)
 	
 	#used by dataframes calls to prefetch specific columns
-	selected_fields=params.get('selected_fields') or list(all_fields.keys())
-	bad_fields=[f for f in selected_fields if f not in all_fields]
-	if len(bad_fields)>0:
-		errormessages.append("the following fields are not in the models: %s" %', '.join(bad_fields))
 	
-	#build and apply filters (using django's basic filter suffixes like [a-z|_]+[__exact|__gte|__lte|__in]$ )
-# 	try:
-	print(filter_obj)
 	kwargs={}
-	for varname in filter_obj:
-		for suffixedvarname in filter_obj[varname]:
-			queryval=filter_obj[varname][suffixedvarname]
-			kwargs[suffixedvarname]=queryval
-	print(kwargs)
+	for item in filter_obj:
+		op=item['op']
+		searchTerm=item["searchTerm"]
+		varName=item["varName"]
+		if varName in all_fields and op in ['lte','gte','exact','in','icontains']:
+			django_filter_term='__'.join([varName,op])
+			kwargs[django_filter_term]=searchTerm
+		else:
+			if varName not in all_fields:
+				errormessages.append("var %s not in model" %varName)
+			if op not in ['lte','gte','exact','in','icontains']:
+				errormessages.append("%s is not a valid django search operation" %op)
 	queryset=queryset.filter(**kwargs)
 	results_count=queryset.count()
-	print('--counts--')
 	print("resultset size:",results_count)
-# 	except:
-#  		errormessages.append("search/filter error")
- 	
-	try:
-		#PREFETCH REQUISITE FIELDS
-		if auto_prefetch:
-			prefetch_fields=selected_fields
-			#print(prefetch_keys)
-			##ideally, I'd run this list against the model and see
-			##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
-			prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
-			print('--prefetching %d vars--' %len(prefetch_vars))
-			for p in prefetch_vars:
-				queryset=queryset.prefetch_related(p)
-		else:
-			print("not prefetching")
-	except:
-		errormessages.append("prefetch error")
+
+	#PREFETCH REQUISITE FIELDS
+	prefetch_fields=params.get('selected_fields') or []
+	if prefetch_fields==[] and auto_prefetch:
+		prefetch_fields=list(all_fields.keys())
+	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
+	print('--prefetching %d vars--' %len(prefetch_vars))
+	for p in prefetch_vars:
+		queryset=queryset.prefetch_related(p)
 	
 	#ORDER RESULTS
-	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')	
-	try:
-		order_by=params.get('order_by')
-		if order_by is not None:
-			print("---->order by---->",order_by)
-			for ob in order_by:
-				if ob.startswith('-'):
-					queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))
-				else:
-					queryset=queryset.order_by(F(ob).asc(nulls_last=True))
-		else:
-			queryset=queryset.order_by('id')
-	except:
-		errormessages.append("ordering error")
+	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')
+	order_by=params.get('order_by')
+	if order_by is not None:
+		print("---->order by---->",order_by)
+		for ob in order_by:
+			if ob.startswith('-'):
+				queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))
+			else:
+				queryset=queryset.order_by(F(ob).asc(nulls_last=True))
+	else:
+		queryset=queryset.order_by('id')
 						
-	return queryset,selected_fields,results_count,errormessages
+	return queryset,results_count
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	if hierarchical in [True,"true","True",1,"t","T","yes","Yes","y","Y"]:
@@ -278,9 +224,10 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 
 	
 	return output
+		
+		
 
-
-def autocomplete_req(queryset,varname,querystr,offset,max_offset,limit):
+def autocomplete_req(queryset,request):
 	
 	'''
 		autocomplete search any related text/char field
@@ -312,6 +259,14 @@ def autocomplete_req(queryset,varname,querystr,offset,max_offset,limit):
 	
 	#hard-coded internal pagination for deduping
 	pagesize=500
+	rdata=request.data
+	varname=str(rdata.get('varname'))
+	querystr=str(rdata.get('querystr'))
+	offset=int(rdata.get('offset'))
+	limit=int(rdata.get('limit'))
+	max_offset=500
+	if offset>max_offset:
+		return []
 
 	if '__' in varname:
 		kstub='__'.join(varname.split('__')[:-1])

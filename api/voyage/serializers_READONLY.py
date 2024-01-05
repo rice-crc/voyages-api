@@ -262,32 +262,6 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
 		model=VoyageCargoConnection
 		fields='__all__'
 
-
-@extend_schema_serializer(
-	examples = [
-         OpenApiExample(
-            'Ex. 1: numeric range',
-            summary='Filter on a numeric range for a nested variable',
-            description='Here, we search for voyages whose imputed year of arrival at the principal port of disembarkation was between 1820 & 1850. We choose this variable as it is one of the most fully-populated numeric variables in the dataset.',
-            value={
-				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__gte': 1820,
-				'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__lte': 1850
-			},
-			request_only=True,
-			response_only=False
-        ),
-		OpenApiExample(
-            'Ex. 2: array of str vals',
-            summary='OR Filter on exact matches of known str values',
-            description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for voyages that are believed to have disembarked captives principally in Barbados or Cuba',
-            value={
-				'voyage_itinerary__imp_principal_region_slave_dis__name__in': ['Barbados','Cuba']
-			},
-			request_only=True,
-			response_only=False
-		)
-    ]
-)
 class VoyageSerializer(serializers.ModelSerializer):
 	voyage_source_connections=VoyageVoyageSourceConnectionSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False,read_only=True)
@@ -304,3 +278,35 @@ class VoyageSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Voyage
 		fields='__all__'
+
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated request for filtered voyages.',
+			summary='Paginated request for filtered voyages.',
+			description='Here, we request page 2 (with 5 items per page) of voyages for which enslaved people were purchased in Cuba or Florida between 1820-1822.',
+			value={
+				"filter":{
+					"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__gte": 1820,
+					"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__lte": 1822,
+					"voyage_itinerary__imp_principal_region_of_slave_purchase__name__in": ["Cuba","Florida"]
+				},
+				"page":2,
+				"page_size":5
+			},
+			request_only=True
+		)
+    ]
+)
+class VoyageListReqSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	filter=serializers.JSONField()
+
+
+class VoyageListRespSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=VoyageSerializer(many=True)
+

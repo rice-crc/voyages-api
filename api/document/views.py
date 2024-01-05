@@ -55,11 +55,11 @@ class SourceList(generics.GenericAPIView):
 			source_options,
 			retrieve_all=False
 		)
-		
+		paginated_queryset=paginate_queryset(queryset,request)
 		if len(error_messages)==0:
 			st=time.time()
 			headers={"total_results_count":results_count}
-			read_serializer=SourceSerializer(queryset,many=True)
+			read_serializer=SourceSerializer(paginated_queryset,many=True)
 			serialized=read_serializer.data
 			resp=JsonResponse(serialized,safe=False,headers=headers)
 			resp.headers['total_results_count']=headers['total_results_count']

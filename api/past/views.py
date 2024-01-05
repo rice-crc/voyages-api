@@ -46,8 +46,6 @@ class EnslavedList(generics.GenericAPIView):
 		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
 		'''
 		st=time.time()
-		times=[]
-		labels=[]
 		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
 		queryset=Enslaved.objects.all()
 		queryset,selected_fields,results_count,error_messages=post_req(
@@ -57,9 +55,10 @@ class EnslavedList(generics.GenericAPIView):
 			Enslaved_options,
 			auto_prefetch=True
 		)
+		paginated_queryset=paginate_queryset(queryset,request)
 		if len(error_messages)==0:
 			headers={"total_results_count":results_count}
-			read_serializer=EnslavedSerializer(queryset,many=True)
+			read_serializer=EnslavedSerializer(paginated_queryset,many=True)
 			serialized=read_serializer.data
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			return JsonResponse(serialized,safe=False,headers=headers)
@@ -130,8 +129,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 				self,
 				request,
 				options,
-				auto_prefetch=False,
-				retrieve_all=True
+				auto_prefetch=False
 			)
 			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
 		
@@ -211,8 +209,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 				self,
 				request,
 				options,
-				auto_prefetch=False,
-				retrieve_all=True
+				auto_prefetch=False
 			)
 			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
 		
@@ -253,9 +250,10 @@ class EnslaverList(generics.GenericAPIView):
 			Enslaver_options,
 			auto_prefetch=True
 		)
+		paginated_queryset=paginate_queryset(queryset,request)
 		if len(error_messages)==0:
 			headers={"total_results_count":results_count}
-			read_serializer=EnslaverSerializer(queryset,many=True)
+			read_serializer=EnslaverSerializer(paginated_queryset,many=True)
 			serialized=read_serializer.data
 			outputs=[]
 			outputs=serialized
@@ -283,7 +281,12 @@ class EnslavedAggregations(generics.GenericAPIView):
 			aggregations=params.get('aggregate_fields')
 			print(aggregations)
 			queryset=Enslaved.objects.all()
-			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,Enslaved_options,retrieve_all=True)
+			aggregation,selected_fields,results_count,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				Enslaved_options
+			)
 			output_dict={}
 			if len(error_messages)==0:
 				for a in aggregation:
@@ -319,7 +322,12 @@ class EnslaverAggregations(generics.GenericAPIView):
 			params=dict(request.data)
 			aggregations=params.get('aggregate_fields')
 			queryset=EnslaverIdentity.objects.all()
-			aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,Enslaver_options,retrieve_all=True)
+			aggregation,selected_fields,results_count,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				Enslaver_options
+			)
 			output_dict={}
 			if len(error_messages)==0:
 				for a in aggregation:
@@ -354,8 +362,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			self,
 			request,
 			Enslaved_options,
-			auto_prefetch=True,
-			retrieve_all=True
+			auto_prefetch=True
 		)
 		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
@@ -384,8 +391,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			self,
 			request,
 			Enslaver_options,
-			auto_prefetch=True,
-			retrieve_all=True
+			auto_prefetch=True
 		)
 		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
@@ -432,8 +438,7 @@ class EnslavementRelationsDataFrames(generics.GenericAPIView):
 			self,
 			request,
 			enslavementrelationoptions,
-			auto_prefetch=True,
-			retrieve_all=True
+			auto_prefetch=True
 		)
 		queryset=queryset.order_by('id')
 		sf=list(selected_fields)
@@ -460,7 +465,12 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=EnslaverIdentity.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,Enslaver_options,retrieve_all=True)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			reqdict,
+			Enslaver_options
+		)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 			queryset=queryset.select_related(geotree_valuefield_stub)
@@ -484,7 +494,12 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=Enslaved.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,Enslaved_options,retrieve_all=True)
+		queryset,selected_fields,results_count,error_messages=post_req(
+			queryset,
+			self,
+			reqdict,
+			Enslaved_options
+		)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 			queryset=queryset.select_related(geotree_valuefield_stub)
@@ -512,8 +527,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			self,
 			request,
 			Enslaved_options,
-			auto_prefetch=True,
-			retrieve_all=True
+			auto_prefetch=True
 		)
 # 		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
 		print("--->",queryset.count())

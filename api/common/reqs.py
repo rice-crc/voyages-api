@@ -11,13 +11,57 @@ import html
 import re
 import pysolr
 import os
-#GENERIC FUNCTION TO RUN A CALL ON REST SERIALIZERS
-##Default is to auto prefetch, but need to be able to turn it off.
-##For instance, on our PAST graph-like data, the prefetch can overwhelm the system if you try to get everything
-##can also just pass an array of prefetch vars
 
+def paginate_queryset(queryset,request):
+	'''
+		Customized pagination for post requests. Params are:
+		page_size (int)
+		page (int)
+	'''
+	params=request.data
+	page_size=params.get('page_size',10)
+	page=params.get('page',1)
+	paginator=Paginator(queryset, page_size)
+	results_page=paginator.get_page(page)
+	total_results_count=queryset.count()
+	return results_page,total_results_count,page,page_size
+	
+def get_fieldstats(queryset,aggregation_field,options_dict):
+	'''
+		Used to get the min and max of a numeric field
+		Takes a queryset (can be filtered), a field to be filtered on,
+		and the list of valid variables for the queryset's base object class
+		then uses django's aggregation functions to pull the min & max
+		The mean is also available if we choose to extend this later
+	'''
+	res=None
+	errormessages=[]
+	if aggregation_field is None:
+		errormessages.append("you must supply a field to aggregate on")
+	else:
+		valid_aggregation_fields=[f for f in options_dict if options_dict[f]['type'] in ['integer','number']]
+		if aggregation_field not in valid_aggregation_fields:
+			errormessages.append("bad aggregation field: " + aggregation_field)
+		else:
+			if '__' in aggregation_field:
+				prefetch_name='__'.join(aggregation_field.split('__')[:-1])
+				queryset=queryset.prefetch_related(prefetch_name)
+			res={
+				'var_name':aggregation_field,
+				'aggregations':{
+					'min':queryset.aggregate(Min(aggregation_field)),
+					'max':queryset.aggregate(Max(aggregation_field))
+				}
+			}
+	return res,errormessages
 
 def parse_filter_obj(filter_obj_in,all_fields):
+	'''
+		attempts to format the filter object for application later
+		we are using django notation for nested variables AND filter operations
+		so search functions are encoded as suffixes on the var name
+		e.g., voyage_id__gte=500 looks for voyage ids greater than or equal to 500	
+	'''
 	filter_obj_out={}
 	errors=[]
 	for suffixedvarname in filter_obj_in:
@@ -34,8 +78,15 @@ def parse_filter_obj(filter_obj_in,all_fields):
 				filter_obj_out[varname][suffixedvarname]=queryval
 	return filter_obj_out,errors
 
-def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
-	
+def post_req(queryset,s,r,options_dict,auto_prefetch=True):
+	'''
+		This function handles:
+		1. ensuring that all the fields that will be called are valid on the model
+		2. applying filters to the queryset
+		3. bypassing the normal usage and going to solr for pk's if 'global_search' is in the query data
+		4. ordering the queryset
+		5. attempting to intelligently prefetch related fields for performance
+	'''
 	errormessages=[]
 	results_count=None
 	
@@ -51,6 +102,10 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	
 	print("----\npost req params:",json.dumps(params,indent=1))
 	
+	#attempts to format the filter object for application later
+	#we are using django notation for nested variables AND filter operations
+	#so search functions are encoded as suffixes on the var name
+	#e.g., voyage_id__gte=500 looks for voyage ids greater than or equal to 500
 	try:
 		filter_obj=params.get('filter')
 	
@@ -62,9 +117,9 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 	except:
 		errormessages.append("error parsing filter obj")
 	
-	print("----\nfilter obj:",json.dumps(filter_obj,indent=1))
-
-	
+	#global search bypasses the normal filtering process
+	#hits solr with a search string (which currently is applied across all text fields on a model)
+	#and then creates its filtered queryset on the basis of the pk's returned by solr
 	if 'global_search' in params:
 		qsetclassstr=str(queryset[0].__class__)
 		
@@ -91,30 +146,31 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		ids=[doc['id'] for doc in results.docs]
 		queryset=queryset.filter(id__in=ids)
-		
+	
+	#used by dataframes calls to prefetch specific columns
 	selected_fields=params.get('selected_fields') or list(all_fields.keys())
 	bad_fields=[f for f in selected_fields if f not in all_fields]
 	if len(bad_fields)>0:
 		errormessages.append("the following fields are not in the models: %s" %', '.join(bad_fields))
 	
+	#build and apply filters (using django's basic filter suffixes like [a-z|_]+[__exact|__gte|__lte|__in]$ )
 # 	try:
+	print(filter_obj)
 	kwargs={}
 	for varname in filter_obj:
 		for suffixedvarname in filter_obj[varname]:
 			queryval=filter_obj[varname][suffixedvarname]
 			kwargs[suffixedvarname]=queryval
+	print(kwargs)
 	queryset=queryset.filter(**kwargs)
 	results_count=queryset.count()
 	print('--counts--')
 	print("resultset size:",results_count)
 # 	except:
 #  		errormessages.append("search/filter error")
-	 
+ 	
 	try:
-		aggregation_fields=params.get('aggregate_fields')
-		if aggregation_fields is not None:
-			selected_fields=aggregation_fields
-	#PREFETCH REQUISITE FIELDS
+		#PREFETCH REQUISITE FIELDS
 		if auto_prefetch:
 			prefetch_fields=selected_fields
 			#print(prefetch_keys)
@@ -128,15 +184,6 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			print("not prefetching")
 	except:
 		errormessages.append("prefetch error")
-	
-	
-	#AGGREGATIONS
-	##e.g. voyage_slaves_numbers__imp_total_num_slaves_embarked__sum
-	##This *SHOULD* aggregate on the filtered queryset, which means
-	###you could filter the dataset and then update rangeslider min & max
-	###BUT ALSO!!
-	####1. autocomplete suggestions
-	####2. geo tree selects
 	
 	#ORDER RESULTS
 	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')	
@@ -153,41 +200,8 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 			queryset=queryset.order_by('id')
 	except:
 		errormessages.append("ordering error")
-	
-	#PAGINATION/LIMITS
-	if retrieve_all==False:
-		results_per_page=params.get('results_per_page',[10])
-		results_page=params.get('results_page',[1])
-		paginator=Paginator(queryset, results_per_page[0])
-		res=paginator.get_page(results_page[0])
-		print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
-	else:
-		res=queryset
-	
-		#INCLUDE AGGREGATION FIELDS
-	aggregation_fields=params.get('aggregate_fields')
-
-	if aggregation_fields is not None:
-		valid_aggregation_fields=[f for f in options_dict if options_dict[f]['type'] in ['integer','number']]
-		bad_aggregation_fields=[f for f in aggregation_fields if f not in valid_aggregation_fields]
-		if bad_aggregation_fields!=[]:
-			errormessages.append("bad aggregation fields: "+",".join(bad_aggregation_fields))
-			print(errormessages)
-		else:
-			try:
-				aggqueryset=[]
-				selected_fields=[]
-				for aggfield in aggregation_fields:
-					for aggsuffix in ["min","max"]:
-						selected_fields.append(aggfield+"_"+aggsuffix)
-					aggqueryset.append(queryset.aggregate(Min(aggfield)))
-					aggqueryset.append(queryset.aggregate(Max(aggfield)))
-				queryset=aggqueryset
-				res=aggqueryset
-			except:
-				errormessages.append("aggregation error")
-					
-	return res,selected_fields,results_count,errormessages
+						
+	return queryset,selected_fields,results_count,errormessages
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	if hierarchical in [True,"true","True",1,"t","T","yes","Yes","y","Y"]:

@@ -37,19 +37,20 @@ class PostList(generics.GenericAPIView):
 			queryset,self,request,Post_options,retrieve_all=True
 		)
 		print(len(queryset))
+		results_page,total_results_count=paginate_queryset(queryset,request)
 		if len(error_messages)==0:
 			st=time.time()
-			headers={"total_results_count":results_count}
-			read_serializer=PostSerializer(queryset,many=True)
-			serialized=read_serializer.data
-			resp=JsonResponse(serialized,safe=False,headers=headers)
-			resp.headers['total_results_count']=headers['total_results_count']
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return resp
+			serialized_results=PostSerializer(results_page,many=True).data
+			resp={
+				'count':total_results_count,
+				'results':serialized_results
+			}
+			status=200
 		else:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
+			resp={'status':'false','message':' | '.join(error_messages)}
+			status=400
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(resp,safe=False,status=status)
 
 
 

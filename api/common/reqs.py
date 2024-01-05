@@ -46,12 +46,14 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 			if '__' in aggregation_field:
 				prefetch_name='__'.join(aggregation_field.split('__')[:-1])
 				queryset=queryset.prefetch_related(prefetch_name)
+			min=queryset.aggregate(Min(aggregation_field)).popitem()[1]
+			max=queryset.aggregate(Max(aggregation_field)).popitem()[1]
+			
+			
 			res={
-				'var_name':aggregation_field,
-				'aggregations':{
-					'min':queryset.aggregate(Min(aggregation_field)),
-					'max':queryset.aggregate(Max(aggregation_field))
-				}
+				'varName':aggregation_field,
+				'min':min,
+				'max':max
 			}
 	return res,errormessages
 

@@ -83,35 +83,47 @@ class VoyageList(generics.GenericAPIView):
 		return JsonResponse(resp,safe=False,status=200)
 
 
-# # Basic statistics
-# ## takes a numeric variable
-# ## returns its sum, average, max, min, and stdv
-@extend_schema(
-		exclude=True
-	)
+
 class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=VoyageFieldAggregationRequestSerializer,
+		responses=VoyageFieldAggregationResponseSerializer
+	)
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE AGGREGATIONS+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageFieldAggregationRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
 			Voyage_options,
 			auto_prefetch=False
 		)
-		aggregation_field=request.data.get('aggregation_field')
+		
+		#RUN THE AGGREGATIONS
+		aggregation_field=request.data.get('varName')
 		output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Voyage_options)
 		
-		if len(errormessages)==0:
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output_dict,safe=False)
+		print("++++++++",output_dict)
+		
+		#VALIDATE THE RESPONSE
+		serialized_resp=VoyageFieldAggregationResponseSerializer(data=output_dict)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
 		else:
-			print("failed\n",' | '.join(error_messages),"\n+++++++",)
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+			return JsonResponse(serialized_resp.data,safe=False)
 
 @extend_schema(
 		exclude=True

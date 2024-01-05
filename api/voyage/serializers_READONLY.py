@@ -327,12 +327,34 @@ class VoyageListRespSerializer(serializers.Serializer):
 	count=serializers.IntegerField()
 	results=VoyageSerializer(many=True,read_only=True)
 
-
-
-
-
-
-
+############ AGGREGATION FIELD
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Filtered request for min/max',
+			summary='Filtered request for min/max',
+			description='Here, we request the min and max number of people who were embarked on individual voyages before the year 1620.',
+			value={
+				"varName": "voyage_slaves_numbers__imp_total_num_slaves_embarked",
+				"filter": [
+					{
+						"varName":"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op":"lte",
+						"searchTerm":1620
+					}
+				]
+			},
+			request_only=True
+		)
+    ]
+)
+class VoyageFieldAggregationRequestSerializer(serializers.Serializer):
+	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	
+class VoyageFieldAggregationResponseSerializer(serializers.Serializer):
+	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	min=serializers.IntegerField()
+	max=serializers.IntegerField()
 
 ############ REQUEST FILTER OBJECT ITEM SERIALIZERS
 class VoyageFilterItemSerializer(serializers.Serializer):

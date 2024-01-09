@@ -120,7 +120,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 			kwargs[django_filter_term]=searchTerm
 		elif varName in all_fields and op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
 			searchTerm.sort()
-			min,max=SearchTerm
+			min,max=searchTerm
 			kwargs['{0}__{1}'.format(varName, 'lte')]=max
 			kwargs['{0}__{1}'.format(varName, 'gte')]=min		
 		else:

@@ -48,13 +48,13 @@ class VoyageList(generics.GenericAPIView):
 			6. Data on the vessel\n\
 		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.\n\
 		",
-		request=VoyageListReqSerializer
+		request=VoyageListRequestSerializer
 	)
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		#VALIDATE THE REQUEST
-		serialized_req = VoyageListReqSerializer(data=request.data)
+		serialized_req = VoyageListRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
@@ -67,7 +67,7 @@ class VoyageList(generics.GenericAPIView):
 			auto_prefetch=True
 		)
 		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-		resp=VoyageListRespSerializer({
+		resp=VoyageListResponseSerializer({
 			'count':total_results_count,
 			'page':page_num,
 			'page_size':page_size,
@@ -195,7 +195,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 # 
 # 
 # 		
-# 		resp=VoyageListRespSerializer({
+# 		resp=VoyageListResponseSerializer({
 # 			'count':total_results_count,
 # 			'page':page_num,
 # 			'page_size':page_size,
@@ -217,13 +217,6 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			d2=params
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-# 			if r.ok:
-# 				print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 				return JsonResponse(json.loads(r.text),safe=False)
-# 			else:
-# 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
-# 		else:
-# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 @extend_schema(
 		exclude=True
@@ -280,11 +273,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 			output_dicts[sf[i]]=[v[i] for v in vals]
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(output_dicts,safe=False)
-# 		else:
-# 			print("failed\n+++++++")
-# 			print(' | '.join(error_messages))
-# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
 
 class VoyageGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -383,7 +371,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 	@extend_schema(
 		description="This endpoint provides a collection of multi-valued weighted nodes and splined, weighted edges. The intended use-case is the drawing of a geographic sankey map.",
 		request=VoyageAggRoutesRequestSerializer,
-		responses=VoyageAggRoutesResponseReqSerializer,
+		responses=VoyageAggRoutesResponseSerializer,
 	)
 	def post(self,request):
 		st=time.time()
@@ -426,7 +414,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		
 		#VALIDATE THE RESPONSE
 		if r.ok:
-			serialized_resp=VoyageAggRoutesResponseReqSerializer(data=json.loads(r.text))
+			serialized_resp=VoyageAggRoutesResponseSerializer(data=json.loads(r.text))
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		if not serialized_resp.is_valid():
 			return JsonResponse(serialized_resp.errors,status=400)

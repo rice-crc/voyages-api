@@ -281,6 +281,31 @@ class VoyageSerializer(serializers.ModelSerializer):
 		model=Voyage
 		fields='__all__'
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR THE PAGINATED VOYAGE LIST ENDPOINT. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
+
+
+
+############ REQUEST FIILTER OBJECTS
+class VoyageFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	searchTerm=serializers.ReadOnlyField(read_only=True)
+
+########### PAGINATED VOYAGE LISTS 
 @extend_schema_serializer(
 	examples = [
          OpenApiExample(
@@ -315,22 +340,16 @@ class VoyageSerializer(serializers.ModelSerializer):
 		)
     ]
 )
-class VoyageListReqSerializer(serializers.Serializer):
+class VoyageListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
-	filter=serializers.JSONField()
+	filter=VoyageFilterItemSerializer()
 
-class VoyageListRespSerializer(serializers.Serializer):
+class VoyageListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
 	results=VoyageSerializer(many=True,read_only=True)
-
-############ REQUEST FILTER OBJECT ITEM SERIALIZERS
-class VoyageFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
-	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
-	searchTerm=serializers.ReadOnlyField(read_only=True)
 
 
 ############ VOYAGE GEOTREE REQUESTS
@@ -424,7 +443,7 @@ class VoyageAggRoutesNodesSerializer(serializers.Serializer):
 	weights=VoyageAggRoutesNodesWeightsSerializer()
 	data=VoyageAggRoutesNodesDataSerializer()
 	
-class VoyageAggRoutesResponseReqSerializer(serializers.Serializer):
+class VoyageAggRoutesResponseSerializer(serializers.Serializer):
 	edges=serializers.ListField(child=VoyageAggRoutesEdgesSerializer())
 	nodes=serializers.ListField(child=VoyageAggRoutesNodesSerializer())
 

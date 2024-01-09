@@ -27,26 +27,29 @@ from drf_spectacular.types import OpenApiTypes
 from common.static.Enslaver_options import Enslaver_options
 from common.static.Enslaved_options import Enslaved_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
-
-
+		
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=EnslavedSerializer
+	@extend_schema(
+		description="This endpoint returns a list of highly nested objects, each of which contains all the available information on enslaved individuals who we know to have been transported on a voyage.\n\
+		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).\n\
+		For instance, you might search for a person who was bought, sold, or transported on a voyage owned by a known enslaver. Or, you might search for people who, based on the sound of their name as recorded, are believed to have come from a particular region in Africa where an ethnic group known to use that name was located.\n\
+		However, it must be stressed that there is a tension in this dataset: the data that we have on enslaved individuals was almost entirely recorded by the people who enslaved them, or by colonial managers who technically liberated them, but oftentimes pressed these people into military service or labor. We know the names of these people, which is grounbreaking for this project because it allows us to identify named individuals in a dataset that often records only nameless quantities of people, but as you analyze this dataset you will note that most of the data we have on these enslaved people is bio-data, such as gender, age, height, and skin color -- this is qualitatively different than the data we have on the enslavers, about whom we often have a good deal of biographical data.\n\
+		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.",
+		request=EnslavedListRequestSerializer,
+		responses=EnslavedListResponseSerializer
+	)
 	def post(self,request):
-		'''
-		This endpoint returns a list of highly nested objects, each of which contains all the available information on enslaved individuals who we know to have been transported on a voyage.
 		
-		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).
-		
-		For instance, you might search for a person who was bought, sold, or transported on a voyage owned by a known enslaver. Or, you might search for people who, based on the sound of their name as recorded, are believed to have come from a particular region in Africa where an ethnic group known to use that name was located.
-		
-		However, it must be stressed that there is a tension in this dataset: the data that we have on enslaved individuals was almost entirely recorded by the people who enslaved them, or by colonial managers who technically liberated them, but oftentimes pressed these people into military service or labor. We know the names of these people, which is grounbreaking for this project because it allows us to identify named individuals in a dataset that often records only nameless quantities of people, but as you analyze this dataset you will note that most of the data we have on these enslaved people is bio-data, such as gender, age, height, and skin color -- this is qualitatively different than the data we have on the enslavers, about whom we often have a good deal of biographical data.
-		
-		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
-		'''
 		st=time.time()
 		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
+		#VALIDATE THE REQUEST
+		serialized_req = EnslavedListRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Enslaved.objects.all()
 		queryset,results_count=post_req(
 			queryset,
@@ -55,16 +58,18 @@ class EnslavedList(generics.GenericAPIView):
 			Enslaved_options,
 			auto_prefetch=True
 		)
-		paginated_queryset=paginate_queryset(queryset,request)
-		headers={"total_results_count":results_count}
-		read_serializer=EnslavedSerializer(paginated_queryset,many=True)
-		serialized=read_serializer.data
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(serialized,safe=False,headers=headers)
-# 		else:
-# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
 
-
+		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+		resp=EnslavedListResponseSerializer({
+			'count':total_results_count,
+			'page':page_num,
+			'page_size':page_size,
+			'results':results
+		}).data
+		#I'm having the most difficult time in the world validating this nested paginated response
+		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		return JsonResponse(resp,safe=False,status=200)
+		
 class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -227,20 +232,24 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 class EnslaverList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=EnslaverSerializer
+	@extend_schema(
+		description="This endpoint returns a list of highly nested objects, each of which contains all the available information on named individuals we know to have participated in the slave trade.\n\n\
+		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).\n\n\
+		Before 2022, the project had only recorded ship captains and ship owners. We now have a much more robust accounting of individuals, sometimes recorded under different names, participating in multiple voyages, and operating in a range of different roles, from investors to brokers to buyers and sellers of enslaved people. In some cases, we know the names of these enslavers' spouses, and the amounts of money they willed to their descendants upon their death. We are very much looking forward to linking this network of enslavers into other public datasets such as Stanford's Kindred network in order to map the economic legacy of these ill-gotten gains\n\n\
+		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.",
+		request=EnslaverListRequestSerializer,
+		responses=EnslaverListResponseSerializer
+	)
 	def post(self,request):
-		'''
-		This endpoint returns a list of highly nested objects, each of which contains all the available information on named individuals we know to have participated in the slave trade.
-		
-		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).
-		
-		Before 2022, the project had only recorded ship captains and ship owners. We now have a much more robust accounting of individuals, sometimes recorded under different names, participating in multiple voyages, and operating in a range of different roles, from investors to brokers to buyers and sellers of enslaved people. In some cases, we know the names of these enslavers' spouses, and the amounts of money they willed to their descendants upon their death. We are very much looking forward to linking this network of enslavers into other public datasets such as Stanford's Kindred network in order to map the economic legacy of these ill-gotten gains.
-		
-		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
-		'''
-
-		print("ENSLAVER LIST+++++++\nusername:",request.auth.user)
 		st=time.time()
+		print("ENSLAVER LIST+++++++\nusername:",request.auth.user)
+
+		#VALIDATE THE REQUEST
+		serialized_req = EnslaverListRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=EnslaverIdentity.objects.all()
 		queryset,results_count=post_req(
 			queryset,
@@ -249,19 +258,17 @@ class EnslaverList(generics.GenericAPIView):
 			Enslaver_options,
 			auto_prefetch=True
 		)
-		paginated_queryset=paginate_queryset(queryset,request)
-		if len(error_messages)==0:
-			headers={"total_results_count":results_count}
-			read_serializer=EnslaverSerializer(paginated_queryset,many=True)
-			serialized=read_serializer.data
-			outputs=[]
-			outputs=serialized
-			## now let's add some flattened enslavement relations
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(outputs,safe=False,headers=headers)
-		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
 
+		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+		resp=EnslaverListResponseSerializer({
+			'count':total_results_count,
+			'page':page_num,
+			'page_size':page_size,
+			'results':results
+		}).data
+		#I'm having the most difficult time in the world validating this nested paginated response
+		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		return JsonResponse(resp,safe=False,status=200)
 
 
 # Basic statistics

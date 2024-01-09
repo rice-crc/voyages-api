@@ -6,6 +6,8 @@ from geo.models import Location
 from voyage.models import *
 from document.models import Source, SourceEnslavedConnection, SourceEnslaverConnection
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
+from common.static.Enslaver_options import Enslaver_options
+from common.static.Enslaved_options import Enslaved_options
 		
 class PASTSparseDateSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -171,36 +173,6 @@ class EnslavedInRelationSerializer(serializers.ModelSerializer):
 		model=EnslavedInRelation
 		fields='__all__'
 
-
-
-@extend_schema_serializer(
-	examples = [
-		 OpenApiExample(
-			'Ex. 1: numeric range',
-			summary='Filter on a numeric range',
-			description='Here, we search for named enslaved individualas who were, at the time of the transportation that we have recorded for them, between 5 and 15 years of age.',
-			value={
-				"age__gte":5,
-				"age__lte":15
-			},
-			request_only=True,
-			response_only=False
-		),
-		OpenApiExample(
-			'Ex. 2: array of str vals',
-			summary='OR Filter on exact matches of known str values',
-			description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching on a highly nested value: all named enslaved individuals who were on voyages that were principally disembarked in the Bahamas',
-			value={
-				"enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__geo_location__name__in":
-				[
-					"Bahamas, port unspecified"
-				]
-			},
-			request_only=True,
-			response_only=False
-		)
-	]
-)
 class EnslavedSerializer(serializers.ModelSerializer):
 	post_disembark_location=PastLocationSerializer(many=False)
 	captive_fate=CaptiveFateSerializer(many=False)
@@ -344,3 +316,280 @@ class EnslavementRelationPKSerializer(serializers.ModelSerializer):
 		model=EnslavementRelation
 		fields='__all__'
 
+#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR THE PAGINATED VOYAGE LIST ENDPOINT. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
+
+
+
+############ REQUEST FIILTER OBJECTS
+class EnslaverFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Enslaver_options])
+	searchTerm=serializers.ReadOnlyField(read_only=True)
+
+class EnslavedFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Enslaved_options])
+	searchTerm=serializers.ReadOnlyField(read_only=True)
+
+########### PAGINATED ENSLAVED LISTS 
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated, filtered list of enslaved people',
+			summary='Paginated, filtered list of enslaved people',
+			description='Here, we request page 2 (with 5 items per page) of enslaved people who were recorded as between 5-15 years of age when their information was recorded.',
+			value={
+			  "filter": [
+					{
+						"varName":"age",
+						"searchTerm":[5,15],
+						"op":"btw"
+					}
+				],
+				"page": 2,
+				"page_size": 5
+			},
+			request_only=True
+		)
+    ]
+)
+class EnslavedListRequestSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	filter=EnslavedFilterItemSerializer(many=True)
+
+class EnslavedListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=EnslavedSerializer(many=True,read_only=True)
+
+########### PAGINATED ENSLAVER LISTS 
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated, filtered list of enslavers',
+			summary='Paginated request for filtered voyages.',
+			description='Here, we request page 2 (with 5 items per page) of enslavers who are associated with voyages that disembarked captives between 1820-1830 in Cuba.',
+			value={
+			  "filter": [
+					{
+						"varName":"aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"searchTerm":[1820,1830],
+						"op":"btw"
+					},
+					{
+						"varName":"aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__name",
+						"searchTerm":["Cuba"],
+						"op":"in"
+					}
+				],
+				"page": 2,
+				"page_size": 5
+			},
+			request_only=True
+		)
+    ]
+)
+class EnslaverListRequestSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	filter=EnslaverFilterItemSerializer(many=True)
+
+class EnslaverListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=EnslaverSerializer(many=True,read_only=True)
+
+
+# 
+# ############ VOYAGE GEOTREE REQUESTS
+# @extend_schema_serializer(
+# 	examples=[
+# 		OpenApiExample(
+# 			'filtered request for voyages to barbados',
+# 			summary="Filtered region-level voyage map req",
+# 			description="Here, we are looking for a tree of all the values used for the port of departure variable on voyages that disembarked between 1820-40 after embarking enslaved people in Sierra Leone and the Gold Coast",
+# 			value={
+# 				"geotree_valuefields":["voyage_itinerary__port_of_departure__value"],
+# 				"filter":[
+# 					{
+# 						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+# 						"op": "btw",
+# 						"searchTerm": [1820,1840]
+# 					},
+# 					{
+# 						"varName":"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+# 						"searchTerm":["Sierra Leone","Gold Coast"],
+# 						"op":"in"
+# 					}
+# 				]
+# 			}
+# 		)
+# 	]
+# )
+# class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
+# 	geotree_valuefields=serializers.ListField(
+# 		child=serializers.ChoiceField(
+# 			choices=[
+# 				k for k in Voyage_options
+# 				if k.startswith("voyage_itinerary")
+# 				and k.endswith("value")
+# 			]
+# 		)
+# 	)
+# 	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
+# 
+# ############ VOYAGE AGGREGATION ROUTE MAPS
+# @extend_schema_serializer(
+# 	examples=[
+# 		OpenApiExample(
+# 			'filtered request for voyages to barbados',
+# 			summary="Filtered region-level voyage map req",
+# 			description="Here, using geographic region names, we request voyages that embarked people in 'Sierra Leone' and the 'Gold Coast', and disembarked them in 'Barbados'. We accordingly specify the region zoom level.",
+# 			value={
+# 				"zoomlevel":"region",
+# 				"filter":[
+# 					{
+# 						"varName":"voyage_itinerary__imp_principal_region_slave_dis__name",
+# 						"searchTerm":["Barbados"],
+# 						"op":"in"
+# 					},
+# 					{
+# 						"varName":"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+# 						"searchTerm":["Sierra Leone","Gold Coast"],
+# 						"op":"in"
+# 					}
+# 				]
+# 			}
+# 		)
+# 	]
+# 
+# )
+# class VoyageAggRoutesRequestSerializer(serializers.Serializer):
+# 	zoomlevel=serializers.CharField(max_length=50)
+# 	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
+# 
+# class VoyageAggRoutesEdgesSerializer(serializers.Serializer):
+# 	source=serializers.CharField(max_length=50)
+# 	target=serializers.CharField(max_length=50)
+# 	type=serializers.CharField(max_length=50)
+# 	weight=serializers.IntegerField()
+# 	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(allow_null=False)))
+# 
+# class VoyageAggRoutesNodesDataSerializer(serializers.Serializer):
+# 	lat=serializers.FloatField(allow_null=False)
+# 	lon=serializers.FloatField(allow_null=False)
+# 	name=serializers.CharField(max_length=50,allow_null=True)
+# 	tags=serializers.ListField(child=serializers.CharField(max_length=50),allow_null=True)
+# 
+# class VoyageAggRoutesNodesWeightsSerializer(serializers.Serializer):
+# 	disembarkation=serializers.IntegerField()
+# 	embarkation=serializers.IntegerField()
+# 	origin=serializers.IntegerField()
+# 	post_disembarkation=serializers.IntegerField()
+# 
+# class VoyageAggRoutesNodesSerializer(serializers.Serializer):
+# 	id=serializers.CharField(max_length=50)
+# 	weights=VoyageAggRoutesNodesWeightsSerializer()
+# 	data=VoyageAggRoutesNodesDataSerializer()
+# 	
+# class VoyageAggRoutesResponseRequestSerializer(serializers.Serializer):
+# 	edges=serializers.ListField(child=VoyageAggRoutesEdgesSerializer())
+# 	nodes=serializers.ListField(child=VoyageAggRoutesNodesSerializer())
+# 
+# ############ AGGREGATION FIELD
+# @extend_schema_serializer(
+# 	examples = [
+#          OpenApiExample(
+# 			'Filtered request for min/max',
+# 			summary='Filtered request for min/max',
+# 			description='Here, we request the min and max number of people who were embarked on individual voyages before the year 1620.',
+# 			value={
+# 				"varName": "voyage_slaves_numbers__imp_total_num_slaves_embarked",
+# 				"filter": [
+# 					{
+# 						"varName":"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+# 						"op":"lte",
+# 						"searchTerm":1620
+# 					}
+# 				]
+# 			},
+# 			request_only=True
+# 		)
+#     ]
+# )
+# class VoyageFieldAggregationRequestSerializer(serializers.Serializer):
+# 	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+# 	
+# class VoyageFieldAggregationResponseSerializer(serializers.Serializer):
+# 	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+# 	min=serializers.IntegerField()
+# 	max=serializers.IntegerField()
+# 
+# 
+# ############ OFFSET PAGINATION SERIALIZERS
+# class VoyageOffsetPaginationSerializer(serializers.Serializer):
+# 	offset=serializers.IntegerField()
+# 	limit=serializers.IntegerField()
+# 	total_results_count=serializers.IntegerField()
+# 
+# ############ CROSSTAB SERIALIZERS
+# class VoyageCrossTabRequestSerializer(serializers.Serializer):
+# 	columns=serializers.ListField(child=serializers.CharField())
+# 	rows=serializers.CharField(max_length=500)
+# 	binsize=serializers.IntegerField()
+# 	rows_label=serializers.CharField(max_length=500,allow_null=True)
+# 	agg_fn=serializers.CharField(max_length=500)
+# 	value_field=serializers.CharField(max_length=500)
+# 	offset=serializers.IntegerField()
+# 	limit=serializers.IntegerField()
+# 	
+# class VoyageCrossTabResponseSerializer(serializers.Serializer):
+# 	tablestructure=serializers.JSONField()
+# 	data=serializers.JSONField()
+# 	medatadata=VoyageOffsetPaginationSerializer(many=False)
+# 
+# ############ AUTOCOMPLETE SERIALIZERS
+# @extend_schema_serializer(
+# 	examples = [
+#          OpenApiExample(
+# 			'Paginated autocomplete on enslaver names',
+# 			summary='Paginated autocomplete on enslaver names',
+# 			description='Here, we are requesting 5 suggested values, starting with the 10th item, of enslaver aliases (names) associated with voyages between 1820-1840',
+# 			value={
+# 				"varName": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
+# 				"querystr": "george",
+# 				"offset": 10,
+# 				"limit": 5,
+# 				"filter": [
+# 					{
+# 						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+# 						"op": "gte",
+# 						"searchTerm": 1820
+# 					},
+# 					{
+# 						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+# 						"op": "lte",
+# 						"searchTerm": 1840
+# 					}
+# 				]
+# 			},
+# 			request_only=True
+# 		)
+#     ]
+# )
+# class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
+# 	varName=serializers.CharField(max_length=500)
+# 	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
+# 	offset=serializers.IntegerField()
+# 	limit=serializers.IntegerField()
+# 	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
+# 
+# class VoyageAutoCompletekvSerializer(serializers.Serializer):
+# 	value=serializers.CharField(max_length=255)
+# 
+# class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
+# 	suggested_values=VoyageAutoCompletekvSerializer(many=True)
+# 

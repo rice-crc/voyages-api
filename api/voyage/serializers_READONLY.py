@@ -328,9 +328,47 @@ class VoyageListRespSerializer(serializers.Serializer):
 
 ############ REQUEST FILTER OBJECT ITEM SERIALIZERS
 class VoyageFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in"])
+	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
 	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
 	searchTerm=serializers.ReadOnlyField(read_only=True)
+
+
+############ VOYAGE GEOTREE REQUESTS
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'filtered request for voyages to barbados',
+			summary="Filtered region-level voyage map req",
+			description="Here, we are looking for a tree of all the values used for the port of departure variable on voyages that disembarked between 1820-40 after embarking enslaved people in Sierra Leone and the Gold Coast",
+			value={
+				"geotree_valuefields":["voyage_itinerary__port_of_departure__value"],
+				"filter":[
+					{
+						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op": "btw",
+						"searchTerm": [1820,1840]
+					},
+					{
+						"varName":"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+						"searchTerm":["Sierra Leone","Gold Coast"],
+						"op":"in"
+					}
+				]
+			}
+		)
+	]
+)
+class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
+	geotree_valuefields=serializers.ListField(
+		child=serializers.ChoiceField(
+			choices=[
+				k for k in Voyage_options
+				if k.startswith("voyage_itinerary")
+				and k.endswith("value")
+			]
+		)
+	)
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
 
 ############ VOYAGE AGGREGATION ROUTE MAPS
 @extend_schema_serializer(
@@ -358,7 +396,7 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 	]
 
 )
-class VoyageAggRoutesReqSerializer(serializers.Serializer):
+class VoyageAggRoutesRequestSerializer(serializers.Serializer):
 	zoomlevel=serializers.CharField(max_length=50)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
 
@@ -450,7 +488,7 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
 			summary='Paginated autocomplete on enslaver names',
 			description='Here, we are requesting 5 suggested values, starting with the 10th item, of enslaver aliases (names) associated with voyages between 1820-1840',
 			value={
-				"varname": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
+				"varName": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
 				"querystr": "george",
 				"offset": 10,
 				"limit": 5,

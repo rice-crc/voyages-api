@@ -26,9 +26,8 @@ class LocationChildSerializer(serializers.ModelSerializer):
 		model=Location
 		fields='__all__'
 
-
 class LocationSerializerDeep(serializers.ModelSerializer):
-	parents=LocationParentSerializer(many=False)
+	parent=LocationParentSerializer(many=False)
 	children=LocationChildSerializer(many=True)
 	spatial_extent=PolygonSerializer(many=False)
 	location_type=LocationTypeSerializer(many=False)

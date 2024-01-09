@@ -118,6 +118,11 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		if varName in all_fields and op in ['lte','gte','exact','in','icontains']:
 			django_filter_term='__'.join([varName,op])
 			kwargs[django_filter_term]=searchTerm
+		elif varName in all_fields and op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
+			searchTerm.sort()
+			min,max=SearchTerm
+			kwargs['{0}__{1}'.format(varName, 'lte')]=max
+			kwargs['{0}__{1}'.format(varName, 'gte')]=min		
 		else:
 			if varName not in all_fields:
 				errormessages.append("var %s not in model" %varName)
@@ -236,7 +241,7 @@ def autocomplete_req(queryset,request):
 		
 		args---->
 		queryset: what we are searching within
-		varname: the fully-qualified (double-underscored) related field
+		varName: the fully-qualified (double-underscored) related field
 		querystr: the substring we are searching for on that field
 		offset, max_offset, and limit: pagination
 		<----
@@ -262,7 +267,7 @@ def autocomplete_req(queryset,request):
 	#hard-coded internal pagination for deduping
 	pagesize=500
 	rdata=request.data
-	varname=str(rdata.get('varname'))
+	varName=str(rdata.get('varName'))
 	querystr=str(rdata.get('querystr'))
 	offset=int(rdata.get('offset'))
 	limit=int(rdata.get('limit'))
@@ -270,14 +275,14 @@ def autocomplete_req(queryset,request):
 	if offset>max_offset:
 		return []
 
-	if '__' in varname:
-		kstub='__'.join(varname.split('__')[:-1])
+	if '__' in varName:
+		kstub='__'.join(varName.split('__')[:-1])
 		queryset=queryset.prefetch_related(kstub)
 
-	kwargs={'{0}__{1}'.format(varname, 'icontains'):querystr}
+	kwargs={'{0}__{1}'.format(varName, 'icontains'):querystr}
 	queryset=queryset.filter(**kwargs)
-	queryset=queryset.order_by(varname)
-	allcandidates=queryset.values_list(varname)
+	queryset=queryset.order_by(varName)
+	allcandidates=queryset.values_list(varName)
 	allcandidatescount=allcandidates.count()
 	
 	st=time.time()

@@ -19,11 +19,11 @@ from rest_framework import filters
 from common.reqs import *
 # from common.serializers import autocompleterequestserializer, autocompleteresponseserializer,crosstabresponseserializer,crosstabrequestserializer
 from geo.common import GeoTreeFilter
+from geo.serializers_READONLY import LocationSerializerDeep
 import collections
 import gc
 from .serializers import *
 from .serializers_READONLY import *
-from geo.serializers_READONLY import LocationSerializer
 from rest_framework import serializers
 from voyages3.localsettings import *
 from drf_yasg.utils import swagger_auto_schema
@@ -285,25 +285,41 @@ class VoyageDataFrames(generics.GenericAPIView):
 # 			print(' | '.join(error_messages))
 # 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
-@extend_schema(
-		exclude=True
-	)
+
 class VoyageGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint is tricky. In addition to taking a filter object, it also takes a list of geographic value variable names, like 'voyage_itinerary__port_of_departure__value'. \n\
+		What it returns is a hierarchical tree of SlaveVoyages geographic data, filtered down to only the values used in those 'geotree valuefields' after applying the filter object.\n\
+		So if you were to ask for voyage_itinerary__port_of_departure__value, you would mostly get locations in Europe and the Americas; and if you searched 'voyage_itinerary__imp_principal_region_of_slave_purchase__name', you would principally get places in the Americas and Africa.",
+		request=VoyageGeoTreeFilterRequestSerializer,
+		responses=LocationSerializerDeep
+	)
 	def post(self,request):
-		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
+		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageGeoTreeFilterRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#extract and then peel out the geotree_valuefields
 		reqdict=dict(request.data)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			reqdict,
 			Voyage_options
 		)
+		
+		#THEN GET THE CORRESPONDING GEO VALUES
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 			queryset=queryset.select_related(geotree_valuefield_stub)
@@ -311,7 +327,12 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		for geotree_valuefield in geotree_valuefields:		
 			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
 		vls=list(set(vls))
+		
+		#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
 		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+		
+		### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
+		
 		resp=JsonResponse(filtered_geotree,safe=False)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
@@ -319,7 +340,6 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	queryset=Voyage.objects.all()
 	@extend_schema(
 		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
 		request=VoyageAutoCompleteRequestSerializer,
@@ -357,13 +377,12 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
 
-#This endpoint will build a geographic sankey diagram based on a voyages query
 class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="This endpoint provides a collection of multi-valued weighted nodes and splined, weighted edges.",
-		request=VoyageAggRoutesReqSerializer,
+		description="This endpoint provides a collection of multi-valued weighted nodes and splined, weighted edges. The intended use-case is the drawing of a geographic sankey map.",
+		request=VoyageAggRoutesRequestSerializer,
 		responses=VoyageAggRoutesResponseReqSerializer,
 	)
 	def post(self,request):
@@ -371,7 +390,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
 		
 		#VALIDATE THE REQUEST
-		serialized_req = VoyageAggRoutesReqSerializer(data=request.data)
+		serialized_req = VoyageAggRoutesRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		

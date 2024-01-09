@@ -79,7 +79,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 				summary='Autocomplete for names like bo',
 				description='Here, we search for enslaved peoples names that are like "bo". From the offset and limit values, you can see that we are requesting the first 20 entries.',
 				value={
-					"varname":"documented_name",
+					"varName":"documented_name",
 					"querystr":"bo",
 					"offset":0,
 					"limit":20,
@@ -93,7 +93,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 				summary='Autocomplete for names like "bo"',
 				description='Here, we see the first 20 entries like "bo" in our list of enslaved peoples names',
 				value={
-					"varname": "documented_name",
+					"varName": "documented_name",
 					"querystr": "bo",
 					"offset": 0,
 					"limit": 20,
@@ -113,7 +113,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 		
 		rdata=request.data
 
-		varname=str(rdata.get('varname'))
+		varName=str(rdata.get('varName'))
 		querystr=str(rdata.get('querystr'))
 		offset=int(rdata.get('offset'))
 		limit=int(rdata.get('limit'))
@@ -130,7 +130,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 				options,
 				auto_prefetch=False
 			)
-			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
+			final_vals=autocomplete_req(queryset,varName,querystr,offset,max_offset,limit)
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
@@ -158,7 +158,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 				summary='Autocomplete for enslaved names related to enslavers',
 				description='Here, we search for the names of enslaved people that are like "sal" IN RELATION TO the enslavers. From the offset and limit values, you can see that we are requesting the first 20 entries.',
 				value={
-					"varname":"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name",
+					"varName":"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name",
 					"querystr":"sal",
 					"offset":0,
 					"limit":20,
@@ -172,7 +172,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 				summary='Autocomplete for enslaved names related to enslavers',
 				description='Here, we see the first 20 names like "sal" for enslaved people through the enslaver model.',
 				value={
-					"varname": "aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name",
+					"varName": "aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name",
 					"querystr": "sal",
 					"offset": 0,
 					"limit": 20,
@@ -193,7 +193,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 		
 		rdata=request.data
 
-		varname=str(rdata.get('varname'))
+		varName=str(rdata.get('varName'))
 		querystr=str(rdata.get('querystr'))
 		offset=int(rdata.get('offset'))
 		limit=int(rdata.get('limit'))
@@ -210,7 +210,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 				options,
 				auto_prefetch=False
 			)
-			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
+			final_vals=autocomplete_req(queryset,varName,querystr,offset,max_offset,limit)
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
@@ -292,11 +292,11 @@ class EnslavedAggregations(generics.GenericAPIView):
 					for k in a:
 						v=a[k]
 						fn=k.split('__')[-1]
-						varname=k[:-len(fn)-2]
-						if varname in output_dict:
-							output_dict[varname][fn]=a[k]
+						varName=k[:-len(fn)-2]
+						if varName in output_dict:
+							output_dict[varName][fn]=a[k]
 						else:
-							output_dict[varname]={fn:a[k]}
+							output_dict[varName]={fn:a[k]}
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
 				return JsonResponse(output_dict,safe=False)
 			else:
@@ -333,11 +333,11 @@ class EnslaverAggregations(generics.GenericAPIView):
 					for k in a:
 						v=a[k]
 						fn=k.split('__')[-1]
-						varname=k[:-len(fn)-2]
-						if varname in output_dict:
-							output_dict[varname][fn]=a[k]
+						varName=k[:-len(fn)-2]
+						if varName in output_dict:
+							output_dict[varName][fn]=a[k]
 						else:
-							output_dict[varname]={fn:a[k]}
+							output_dict[varName]={fn:a[k]}
 				print("Internal Response Time:",time.time()-st,"\n+++++++")
 				return JsonResponse(output_dict,safe=False)
 			else:

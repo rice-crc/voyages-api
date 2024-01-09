@@ -8,7 +8,7 @@ import gc
 
 
 class autocompleterequestserializer(serializers.Serializer):
-	varname=serializers.CharField(max_length=500)
+	varName=serializers.CharField(max_length=500)
 	querystr=serializers.CharField(max_length=255)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
@@ -17,7 +17,7 @@ class autocompletekvserializer(serializers.Serializer):
 	value=serializers.CharField(max_length=255)
 
 class autocompleteresponseserializer(serializers.Serializer):
-	varname=serializers.CharField(max_length=500)
+	varName=serializers.CharField(max_length=500)
 	querystr=serializers.CharField(max_length=255)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()

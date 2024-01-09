@@ -68,7 +68,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 				summary='Autocomplete for blog tags like "ma"',
 				description='Here, we search blog tags for values like "ma". We request the first 10 of these.',
 				value={
-					"varname":"tags__name",
+					"varName":"tags__name",
 					"querystr":"ma",
 					"limit":10,
 					"offset":0,
@@ -82,7 +82,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 				summary='Autocomplete for blog tags like "ma"',
 				description='Here, we see the first and only 2 blog tags that are like "ma"',
 				value={
-					"varname": "tags__name",
+					"varName": "tags__name",
 					"querystr": "ma",
 					"offset": 0,
 					"limit": 10,
@@ -110,7 +110,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		
 		rdata=request.data
 
-		varname=str(rdata.get('varname'))
+		varName=str(rdata.get('varName'))
 		querystr=str(rdata.get('querystr'))
 		offset=int(rdata.get('offset'))
 		limit=int(rdata.get('limit'))
@@ -128,7 +128,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 				auto_prefetch=False,
 				retrieve_all=True
 			)
-			final_vals=autocomplete_req(queryset,varname,querystr,offset,max_offset,limit)
+			final_vals=autocomplete_req(queryset,varName,querystr,offset,max_offset,limit)
 		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		

@@ -23,14 +23,14 @@ def load_long_df(endpoint,variables):
 	j=json.loads(r.text)
 	df=pd.DataFrame.from_dict(j)
 	#coerce datatypes based on options call
-	for varname in variables:
-		optionsvar=options[varname]
+	for varName in variables:
+		optionsvar=options[varName]
 		vartype=optionsvar['type']	
 		if vartype in [
 			"integer",
 			"number"
 		]:
-			df[varname]=pd.to_numeric(df[varname])
+			df[varName]=pd.to_numeric(df[varName])
 	print(df)
 	return(df)
 

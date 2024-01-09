@@ -510,7 +510,7 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
     ]
 )
 class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
-	varname=serializers.CharField(max_length=500)
+	varName=serializers.CharField(max_length=500)
 	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()

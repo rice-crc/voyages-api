@@ -48,7 +48,7 @@ class SourceList(generics.GenericAPIView):
 		queryset=Source.objects.all()
 		queryset=queryset.order_by('id')
 		source_options=getJSONschema('Source',hierarchical=False)
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,

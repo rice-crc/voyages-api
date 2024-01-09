@@ -48,7 +48,7 @@ class EnslavedList(generics.GenericAPIView):
 		st=time.time()
 		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
 		queryset=Enslaved.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
@@ -56,14 +56,13 @@ class EnslavedList(generics.GenericAPIView):
 			auto_prefetch=True
 		)
 		paginated_queryset=paginate_queryset(queryset,request)
-		if len(error_messages)==0:
-			headers={"total_results_count":results_count}
-			read_serializer=EnslavedSerializer(paginated_queryset,many=True)
-			serialized=read_serializer.data
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(serialized,safe=False,headers=headers)
-		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
+		headers={"total_results_count":results_count}
+		read_serializer=EnslavedSerializer(paginated_queryset,many=True)
+		serialized=read_serializer.data
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(serialized,safe=False,headers=headers)
+# 		else:
+# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=500)
 
 
 class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
@@ -243,7 +242,7 @@ class EnslaverList(generics.GenericAPIView):
 		print("ENSLAVER LIST+++++++\nusername:",request.auth.user)
 		st=time.time()
 		queryset=EnslaverIdentity.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
@@ -357,7 +356,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		params=dict(request.data)
 		queryset=Enslaved.objects.all()
 # 		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
@@ -365,18 +364,18 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			auto_prefetch=True
 		)
 		queryset=queryset.order_by('id')
-		sf=list(selected_fields)
-		if len(error_messages)==0:
-			output_dicts={}
-			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
-			for i in range(len(sf)):
-				output_dicts[sf[i]]=[v[i] for v in vals]
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output_dicts,safe=False)
-		else:
-			print("failed\n+++++++")
-			print(' | '.join(error_messages))
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+		selected_fields=request.data.get('selected_fields')
+		output_dicts={}
+		vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+		for i in range(len(selected_fields)):
+			output_dicts[selected_fields[i]]=[v[i] for v in vals]
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(output_dicts,safe=False)
+# 		else:
+# 			print("failed\n+++++++")
+# 			print(' | '.join(error_messages))
+# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+			
 @extend_schema(exclude=True)
 class EnslaverDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -386,7 +385,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		st=time.time()
 		params=dict(request.data)
 		queryset=EnslaverIdentity.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
@@ -394,18 +393,13 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			auto_prefetch=True
 		)
 		queryset=queryset.order_by('id')
-		sf=list(selected_fields)
-		if len(error_messages)==0:
-			output_dicts={}
-			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
-			for i in range(len(sf)):
-				output_dicts[sf[i]]=[v[i] for v in vals]
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output_dicts,safe=False)
-		else:
-			print("failed\n+++++++")
-			print(' | '.join(error_messages))
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+		selected_fields=request.data.get('selected_fields')
+		output_dicts={}
+		vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+		for i in range(len(selected_fields)):
+			output_dicts[selected_fields[i]]=[v[i] for v in vals]
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(output_dicts,safe=False)
 
 @extend_schema(exclude=True)
 class EnslavementRelationsDataFrames(generics.GenericAPIView):
@@ -433,7 +427,7 @@ class EnslavementRelationsDataFrames(generics.GenericAPIView):
 			'relation_enslavers__enslaver_alias__identity__principal_alias':{'type':'string'},
 			'relation_enslavers__roles__name':{'type':'string'}
 		}
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
@@ -441,19 +435,14 @@ class EnslavementRelationsDataFrames(generics.GenericAPIView):
 			auto_prefetch=True
 		)
 		queryset=queryset.order_by('id')
-		sf=list(selected_fields)
-		if len(error_messages)==0:
-			output_dicts={}
-			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
-			for i in range(len(sf)):
-				output_dicts[sf[i]]=[v[i] for v in vals]
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output_dicts,safe=False)
-		else:
-			print("failed\n+++++++")
-			print(' | '.join(error_messages))
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-
+		selected_fields=request.data.get('selected_fields')
+		output_dicts={}
+		vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
+		for i in range(len(selected_fields)):
+			output_dicts[selected_fields[i]]=[v[i] for v in vals]
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(output_dicts,safe=False)
+		
 @extend_schema(exclude=True)
 class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -465,11 +454,12 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=EnslaverIdentity.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
-			reqdict,
-			Enslaver_options
+			request,
+			Enslaver_options,
+			auto_prefetch=True
 		)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
@@ -494,7 +484,7 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
 		queryset=Enslaved.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			reqdict,
@@ -522,7 +512,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		params=dict(request.data)
 		zoom_level=params.get('zoom_level')
 		queryset=Enslaved.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
@@ -535,7 +525,6 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		zoomlevel=params.get('zoomlevel',['region'])[0]
 		values_list=queryset.values_list('id')
 		pks=[v[0] for v in values_list]
-		
 		django_query_time=time.time()
 		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
 		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
@@ -546,7 +535,6 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		}
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 		j=json.loads(r.text)
-		
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(j,safe=False)
 

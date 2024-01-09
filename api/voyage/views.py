@@ -50,16 +50,13 @@ class VoyageList(generics.GenericAPIView):
 		",
 		request=VoyageListReqSerializer
 	)
-	
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
-		
 		#VALIDATE THE REQUEST
 		serialized_req = VoyageListReqSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
-		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
 		queryset,results_count=post_req(
@@ -69,16 +66,13 @@ class VoyageList(generics.GenericAPIView):
 			Voyage_options,
 			auto_prefetch=True
 		)
-		
 		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-		
 		resp=VoyageListRespSerializer({
 			'count':total_results_count,
 			'page':page_num,
 			'page_size':page_size,
 			'results':results
 		}).data
-		
 		#I'm having the most difficult time in the world validating this nested paginated response
 		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 		return JsonResponse(resp,safe=False,status=200)
@@ -129,27 +123,7 @@ class VoyageAggregations(generics.GenericAPIView):
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
 
-@extend_schema(
-		exclude=True
-	)
-class VoyageStatsOptions(generics.GenericAPIView):
-	'''
-	Need to make the stats engine's indexed variables transparent to the user
-	'''
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		u2=STATS_BASE_URL+'get_indices/'
-		r=requests.get(url=u2,headers={"Content-type":"application/json"})
-		return JsonResponse(json.loads(r.text),safe=False)
-	def options(self,request):
-		u2=STATS_BASE_URL+'get_indices/'
-		r=requests.get(url=u2,headers={"Content-type":"application/json"})
-		return JsonResponse(json.loads(r.text),safe=False)
 
-@extend_schema(
-		exclude=True
-	)
 class VoyageCrossTabs(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -174,40 +148,82 @@ class VoyageCrossTabs(generics.GenericAPIView):
 					"agg_fn":"sum",
 					"value_field":"voyage_slaves_numbers__imp_total_num_slaves_embarked",
 					"offset":0,
-					"limit":5
+					"limit":5,
+					"filter":[]
 				},
 				request_only=True,
 				response_only=False
 			)
 		]
-	
 	)
 
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
-		params=dict(request.data)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageCrossTabRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
-			Voyage_options
+			Voyage_options,
+			auto_prefetch=True
 		)
-		if len(error_messages)==0:
+		
+		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
+		ids=[i[0] for i in queryset.values_list('id')]
+		u2=STATS_BASE_URL+'crosstabs/'
+		params=dict(request.data)
+		stats_req_data=params
+		stats_req_data['ids']=ids
+		r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
+		
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			serialized_resp=VoyageCrossTabResponseSerializer(data=json.loads(r.text))
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
+# 
+# 
+# 		
+# 		resp=VoyageListRespSerializer({
+# 			'count':total_results_count,
+# 			'page':page_num,
+# 			'page_size':page_size,
+# 			'results':results
+# 		}).data
+# 		
+# 		params=dict(request.data)
+# 		queryset=Voyage.objects.all()
+# 		queryset,selected_fields,results_count,error_messages=post_req(
+# 			queryset,
+# 			self,
+# 			request,
+# 			Voyage_options
+# 		)
+# 		if len(error_messages)==0:
 			ids=[i[0] for i in queryset.values_list('id')]
 			u2=STATS_BASE_URL+'crosstabs/'
 			params=dict(request.data)
 			d2=params
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-			if r.ok:
-				print("Internal Response Time:",time.time()-st,"\n+++++++")
-				return JsonResponse(json.loads(r.text),safe=False)
-			else:
-				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
-		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+# 			if r.ok:
+# 				print("Internal Response Time:",time.time()-st,"\n+++++++")
+# 				return JsonResponse(json.loads(r.text),safe=False)
+# 			else:
+# 				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
+# 		else:
+# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 @extend_schema(
 		exclude=True
@@ -249,7 +265,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 		print("VOYAGE DATAFRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
 		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
+		queryset,results_count=post_req(
 			queryset,
 			self,
 			request,
@@ -257,18 +273,17 @@ class VoyageDataFrames(generics.GenericAPIView):
 			auto_prefetch=False
 		)
 		queryset=queryset.order_by('id')
-		sf=list(selected_fields)
-		if len(error_messages)==0:
-			output_dicts={}
-			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
-			for i in range(len(sf)):
-				output_dicts[sf[i]]=[v[i] for v in vals]
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output_dicts,safe=False)
-		else:
-			print("failed\n+++++++")
-			print(' | '.join(error_messages))
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+		sf=request.data.get('selected_fields')
+		output_dicts={}
+		vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+		for i in range(len(sf)):
+			output_dicts[sf[i]]=[v[i] for v in vals]
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(output_dicts,safe=False)
+# 		else:
+# 			print("failed\n+++++++")
+# 			print(' | '.join(error_messages))
+# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
 
 @extend_schema(
 		exclude=True
@@ -343,46 +358,61 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 			return JsonResponse(serialized_resp.data,safe=False)
 
 #This endpoint will build a geographic sankey diagram based on a voyages query
-@extend_schema(
-		exclude=True
-	)
 class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint provides a collection of multi-valued weighted nodes and splined, weighted edges.",
+		request=VoyageAggRoutesReqSerializer,
+		responses=VoyageAggRoutesResponseReqSerializer,
+	)
 	def post(self,request):
-		try:
-			st=time.time()
-			print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
-			params=dict(request.data)
-			zoom_level=params.get('zoom_level')
-			queryset=Voyage.objects.all()
-			queryset,results_count,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=True
-			)
-			queryset=queryset.order_by('id')
-			zoomlevel=params.get('zoomlevel',['region'])[0]
-			values_list=queryset.values_list('id')
-			pks=[v[0] for v in values_list]
-			django_query_time=time.time()
-			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
-			u2=GEO_NETWORKS_BASE_URL+'network_maps/'
-			d2={
-				'graphname':zoomlevel,
-				'cachename':'voyage_maps',
-				'pks':pks
-			}
-			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-			j=json.loads(r.text)
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(j,safe=False)
-		except:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
-
+		st=time.time()
+		print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageAggRoutesReqSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		params=dict(request.data)
+		zoom_level=params.get('zoom_level')
+		queryset=Voyage.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=True
+		)
+		
+		#HAND OFF TO THE FLASK CONTAINER
+		queryset=queryset.order_by('id')
+		zoomlevel=params.get('zoomlevel','region')
+		values_list=queryset.values_list('id')
+		pks=[v[0] for v in values_list]
+		django_query_time=time.time()
+		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
+		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
+		d2={
+			'graphname':zoomlevel,
+			'cachename':'voyage_maps',
+			'pks':pks
+		}
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		
+# 		print("--->",r)
+# 		print(json.loads(r.text))
+		
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			serialized_resp=VoyageAggRoutesResponseReqSerializer(data=json.loads(r.text))
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
 
 @extend_schema(
 		exclude=True
@@ -451,3 +481,20 @@ class VoyageDESTROY(generics.DestroyAPIView):
 	permission_classes=[IsAdminUser]
 
 
+@extend_schema(
+		exclude=True
+	)
+class VoyageStatsOptions(generics.GenericAPIView):
+	'''
+	Need to make the stats engine's indexed variables transparent to the user
+	'''
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	def post(self,request):
+		u2=STATS_BASE_URL+'get_indices/'
+		r=requests.get(url=u2,headers={"Content-type":"application/json"})
+		return JsonResponse(json.loads(r.text),safe=False)
+	def options(self,request):
+		u2=STATS_BASE_URL+'get_indices/'
+		r=requests.get(url=u2,headers={"Content-type":"application/json"})
+		return JsonResponse(json.loads(r.text),safe=False)

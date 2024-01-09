@@ -136,7 +136,7 @@ def network_maps():
 				'origin':row['origin'],
 				'embarkation':row['embarkation'],
 				'disembarkation':row['disembarkation'],
-				'post-disembarkation':row['post-disembarkation']
+				'post_disembarkation':row['post-disembarkation']
 			}
 		}
 		for row_id,row in aggnodes.iterrows()

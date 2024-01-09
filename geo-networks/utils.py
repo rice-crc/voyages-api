@@ -413,7 +413,7 @@ def add_stripped_node_to_dict(graph,n_id,nodesdict):
 		#as an auto-increment
 		n_uuid=str(n_id)
 	if 'tags' in node:
-		del node['tags']
+		node['tags']=None
 	nodesdict[n_uuid]['data']=node
 	return nodesdict
 

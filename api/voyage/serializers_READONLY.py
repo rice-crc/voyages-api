@@ -320,12 +320,75 @@ class VoyageListReqSerializer(serializers.Serializer):
 	page_size=serializers.IntegerField()
 	filter=serializers.JSONField()
 
-
 class VoyageListRespSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
 	results=VoyageSerializer(many=True,read_only=True)
+
+############ REQUEST FILTER OBJECT ITEM SERIALIZERS
+class VoyageFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in"])
+	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	searchTerm=serializers.ReadOnlyField(read_only=True)
+
+############ VOYAGE AGGREGATION ROUTE MAPS
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'filtered request for voyages to barbados',
+			summary="Filtered region-level voyage map req",
+			description="Here, using geographic region names, we request voyages that embarked people in 'Sierra Leone' and the 'Gold Coast', and disembarked them in 'Barbados'. We accordingly specify the region zoom level.",
+			value={
+				"zoomlevel":"region",
+				"filter":[
+					{
+						"varName":"voyage_itinerary__imp_principal_region_slave_dis__name",
+						"searchTerm":["Barbados"],
+						"op":"in"
+					},
+					{
+						"varName":"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+						"searchTerm":["Sierra Leone","Gold Coast"],
+						"op":"in"
+					}
+				]
+			}
+		)
+	]
+
+)
+class VoyageAggRoutesReqSerializer(serializers.Serializer):
+	zoomlevel=serializers.CharField(max_length=50)
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
+
+class VoyageAggRoutesEdgesSerializer(serializers.Serializer):
+	source=serializers.CharField(max_length=50)
+	target=serializers.CharField(max_length=50)
+	type=serializers.CharField(max_length=50)
+	weight=serializers.IntegerField()
+	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(allow_null=False)))
+
+class VoyageAggRoutesNodesDataSerializer(serializers.Serializer):
+	lat=serializers.FloatField(allow_null=False)
+	lon=serializers.FloatField(allow_null=False)
+	name=serializers.CharField(max_length=50,allow_null=True)
+	tags=serializers.ListField(child=serializers.CharField(max_length=50),allow_null=True)
+
+class VoyageAggRoutesNodesWeightsSerializer(serializers.Serializer):
+	disembarkation=serializers.IntegerField()
+	embarkation=serializers.IntegerField()
+	origin=serializers.IntegerField()
+	post_disembarkation=serializers.IntegerField()
+
+class VoyageAggRoutesNodesSerializer(serializers.Serializer):
+	id=serializers.CharField(max_length=50)
+	weights=VoyageAggRoutesNodesWeightsSerializer()
+	data=VoyageAggRoutesNodesDataSerializer()
+	
+class VoyageAggRoutesResponseReqSerializer(serializers.Serializer):
+	edges=serializers.ListField(child=VoyageAggRoutesEdgesSerializer())
+	nodes=serializers.ListField(child=VoyageAggRoutesNodesSerializer())
 
 ############ AGGREGATION FIELD
 @extend_schema_serializer(
@@ -356,11 +419,6 @@ class VoyageFieldAggregationResponseSerializer(serializers.Serializer):
 	min=serializers.IntegerField()
 	max=serializers.IntegerField()
 
-############ REQUEST FILTER OBJECT ITEM SERIALIZERS
-class VoyageFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in"])
-	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
-	searchTerm=serializers.ReadOnlyField(read_only=True)
 
 ############ OFFSET PAGINATION SERIALIZERS
 class VoyageOffsetPaginationSerializer(serializers.Serializer):

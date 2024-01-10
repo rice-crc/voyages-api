@@ -406,72 +406,7 @@ class EnslavementRelationsDataFrames(generics.GenericAPIView):
 			output_dicts[selected_fields[i]]=[v[i] for v in vals]
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(output_dicts,safe=False)
-
-@extend_schema(exclude=True)
-class EnslaverGeoTreeFilter(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		print("ENSLAVER GEO TREE FILTER+++++++\nusername:",request.auth.user)
-		st=time.time()
-		reqdict=dict(request.data)
-		geotree_valuefields=reqdict['geotree_valuefields']
-		del(reqdict['geotree_valuefields'])
-		queryset=EnslaverIdentity.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaver_options,
-			auto_prefetch=True
-		)
-		for geotree_valuefield in geotree_valuefields:
-			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
-			queryset=queryset.select_related(geotree_valuefield_stub)
-		vls=[]
-		for geotree_valuefield in geotree_valuefields:		
-			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
-		vls=list(set(vls))
-		filtered_geotree=GeoTreeFilter(spss_vals=vls)
-		resp=JsonResponse(filtered_geotree,safe=False)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return resp
-
-
-
-@extend_schema(exclude=True)
-class EnslaverGeoTreeFilter(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		print("ENSLAVER GEO TREE FILTER+++++++\nusername:",request.auth.user)
-		st=time.time()
-		reqdict=dict(request.data)
-		geotree_valuefields=reqdict['geotree_valuefields']
-		del(reqdict['geotree_valuefields'])
-		queryset=EnslaverIdentity.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaver_options,
-			auto_prefetch=True
-		)
-		for geotree_valuefield in geotree_valuefields:
-			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
-			queryset=queryset.select_related(geotree_valuefield_stub)
-		vls=[]
-		for geotree_valuefield in geotree_valuefields:		
-			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
-		vls=list(set(vls))
-		filtered_geotree=GeoTreeFilter(spss_vals=vls)
-		resp=JsonResponse(filtered_geotree,safe=False)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return resp
-
-
-
-
+		
 class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -522,8 +457,6 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		resp=JsonResponse(filtered_geotree,safe=False)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
-
-
 
 class EnslavedGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

@@ -595,9 +595,9 @@ class EnslaverDataframesRequestSerializer(serializers.Serializer):
 		OpenApiExample(
 			"Filtered req for enslaved people geo vals",
 			summary="Filtered req for enslaved people geo vals",
-			description="Here, we are looking for a tree of all the values used for the port of departure variable for named enslaved individuals who were embarked in Sierra Leone or the Gold Coast between 1820-40.",
+			description="Here, we are looking for a tree of all the values used for the 'port of departure' variable for named enslaved individuals who were embarked in Sierra Leone or the Gold Coast between 1820-40.",
 			value={
-				"geotree_valuefields":["enslaved_relations__relation__voyage__voyage_itinerary__port_of_departure__value"],
+				"geotree_valuefields":["enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__value"],
 				"filter":[
 					{
 						"varName": "enslaved_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",

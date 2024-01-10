@@ -433,7 +433,7 @@ class VoyageDataframesRequestSerializer(serializers.Serializer):
 	examples=[
 		OpenApiExample(
 			'filtered request for voyages',
-			summary="Filtered region-level voyage map req",
+			summary="Filtered geo tree request",
 			description="Here, we are looking for a tree of all the values used for the port of departure variable on voyages that disembarked between 1820-40 after embarking enslaved people in Sierra Leone and the Gold Coast",
 			value={
 				"geotree_valuefields":["voyage_itinerary__port_of_departure__value"],

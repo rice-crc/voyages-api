@@ -509,13 +509,26 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
 
-@extend_schema(exclude=True)
+
+
 class EnslavedAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint provides a collection of multi-valued weighted nodes and splined, weighted edges. The intended use-case is the drawing of a geographic sankey map.",
+		request=EnslavedAggRoutesRequestSerializer,
+		responses=EnslavedAggRoutesResponseSerializer,
+	)
 	def post(self,request):
 		st=time.time()
 		print("ENSLAVED AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = EnslavedAggRoutesRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 		params=dict(request.data)
 		zoom_level=params.get('zoom_level')
 		queryset=Enslaved.objects.all()
@@ -526,10 +539,10 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			Enslaved_options,
 			auto_prefetch=True
 		)
-# 		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
-		print("--->",queryset.count())
+		
+		#HAND OFF TO THE FLASK CONTAINER
 		queryset=queryset.order_by('id')
-		zoomlevel=params.get('zoomlevel',['region'])[0]
+		zoomlevel=params.get('zoomlevel','region')
 		values_list=queryset.values_list('id')
 		pks=[v[0] for v in values_list]
 		django_query_time=time.time()
@@ -541,9 +554,55 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			'pks':pks
 		}
 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		j=json.loads(r.text)
+		
+# 		print("--->",r)
+# 		print(json.loads(r.text))
+		
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			serialized_resp=EnslavedAggRoutesResponseSerializer(data=json.loads(r.text))
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(j,safe=False)
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(json.loads(r.text),safe=False)
+
+
+# @extend_schema(exclude=True)
+# class EnslavedAggRoutes(generics.GenericAPIView):
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAuthenticated]
+# 	def post(self,request):
+# 		st=time.time()
+# 		print("ENSLAVED AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
+# 		params=dict(request.data)
+# 		zoom_level=params.get('zoom_level')
+# 		queryset=Enslaved.objects.all()
+# 		queryset,results_count=post_req(
+# 			queryset,
+# 			self,
+# 			request,
+# 			Enslaved_options,
+# 			auto_prefetch=True
+# 		)
+# # 		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
+# 		print("--->",queryset.count())
+# 		queryset=queryset.order_by('id')
+# 		zoomlevel=params.get('zoomlevel',['region'])[0]
+# 		values_list=queryset.values_list('id')
+# 		pks=[v[0] for v in values_list]
+# 		django_query_time=time.time()
+# 		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
+# 		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
+# 		d2={
+# 			'graphname':zoomlevel,
+# 			'cachename':'ao_maps',
+# 			'pks':pks
+# 		}
+# 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+# 		j=json.loads(r.text)
+# 		print("Internal Response Time:",time.time()-st,"\n+++++++")
+# 		return JsonResponse(j,safe=False)
 
 
 @extend_schema(exclude=True)

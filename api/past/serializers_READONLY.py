@@ -661,3 +661,57 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 		)
 	)
 	filter=EnslaverFilterItemSerializer(many=True,allow_null=True,required=False)
+	
+	
+############ PAST AGGREGATION ROUTE MAPS
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'filtered request for people disembarked in barbados',
+			summary="Filtered request for people disembarked in Barbados",
+			description="Here we request the routes taken by enslaved individuals whose names we know who disembarked in Barbados (in this case, only one individual, Broteer Furro).",
+			value={
+				"zoomlevel": "region",
+				"filter":[
+					{
+						"varName":"enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__name",
+						"op":"in",
+						"searchTerm":["Barbados, place unspecified"]
+					}
+				]
+			}
+		)
+	]
+
+)
+class EnslavedAggRoutesRequestSerializer(serializers.Serializer):
+	zoomlevel=serializers.CharField(max_length=50)
+	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
+
+class EnslavedAggRoutesEdgesSerializer(serializers.Serializer):
+	source=serializers.CharField(max_length=50)
+	target=serializers.CharField(max_length=50)
+	type=serializers.CharField(max_length=50)
+	weight=serializers.IntegerField()
+	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(allow_null=False)))
+
+class EnslavedAggRoutesNodesDataSerializer(serializers.Serializer):
+	lat=serializers.FloatField(allow_null=False)
+	lon=serializers.FloatField(allow_null=False)
+	name=serializers.CharField(max_length=50,allow_null=True)
+	tags=serializers.ListField(child=serializers.CharField(max_length=50),allow_null=True)
+
+class EnslavedAggRoutesNodesWeightsSerializer(serializers.Serializer):
+	disembarkation=serializers.IntegerField()
+	embarkation=serializers.IntegerField()
+	origin=serializers.IntegerField()
+	post_disembarkation=serializers.IntegerField()
+
+class EnslavedAggRoutesNodesSerializer(serializers.Serializer):
+	id=serializers.CharField(max_length=50)
+	weights=EnslavedAggRoutesNodesWeightsSerializer()
+	data=EnslavedAggRoutesNodesDataSerializer()
+	
+class EnslavedAggRoutesResponseSerializer(serializers.Serializer):
+	edges=serializers.ListField(child=EnslavedAggRoutesEdgesSerializer())
+	nodes=serializers.ListField(child=EnslavedAggRoutesNodesSerializer())	

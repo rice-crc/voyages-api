@@ -343,7 +343,7 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 class VoyageListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
-	filter=VoyageFilterItemSerializer()
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
 
 class VoyageListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
@@ -351,12 +351,88 @@ class VoyageListResponseSerializer(serializers.Serializer):
 	count=serializers.IntegerField()
 	results=VoyageSerializer(many=True,read_only=True)
 
+############ BAR, SCATTER, AND PIE CHARTS
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered Scatter Plot Request',
+			summary="Filtered scatter plot req",
+			description="Here, we are looking for bar charts of how many people embarked, and how many people disembarked, by the region of embarkation, on voyages that landed in Barbados.",
+			value={
+				"groupby_by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+				"groupby_cols":[
+					"voyage_slaves_numbers__imp_total_num_slaves_embarked",
+					"voyage_slaves_numbers__imp_total_num_slaves_disembarked"
+				],
+				"agg_fn":"sum",
+				"cachename":"voyage_bar_and_donut_charts",
+				"filter":[
+					{
+						"varName": "voyage_itinerary__imp_principal_region_slave_dis__name",
+						"op": "in",
+						"searchTerm": ["Barbados"]
+					}
+				]
+			}
+		)
+	]
+)
+class VoyageGroupByRequestSerializer(serializers.Serializer):
+	groupby_by=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	groupby_cols=serializers.ListField(
+		child=serializers.ChoiceField(choices=[
+			k for k in Voyage_options if Voyage_options[k]['type'] in [
+				'integer',
+				'number'
+			]
+		])
+	)
+	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min'])
+	cachename=[
+		'voyage_xyscatter',
+		'voyage_bar_and_donut_charts'
+	]
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
+
+
+############ DATAFRAMES ENDPOINT
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered request for 3 columns',
+			summary="Filtered req for 3 cols",
+			description="Here, we are looking for the ship name, the year of disembarkation, and the name(s) of the associated enslaver(s) for voyages that disembarked captives in the years 1810-15.",
+			value={
+				"selected_fields":[
+					"voyage_id",
+					"voyage_ship__ship_name",
+					"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year"
+				],
+				"filter":[
+					{
+						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op": "btw",
+						"searchTerm": [1810,1815]
+					}
+				]
+			}
+		)
+	]
+)
+class VoyageDataframesRequestSerializer(serializers.Serializer):
+	selected_fields=serializers.ListField(
+		child=serializers.ChoiceField(choices=[
+			k for k in Voyage_options
+		])
+	)
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
+
 
 ############ VOYAGE GEOTREE REQUESTS
 @extend_schema_serializer(
 	examples=[
 		OpenApiExample(
-			'filtered request for voyages to barbados',
+			'filtered request for voyages',
 			summary="Filtered region-level voyage map req",
 			description="Here, we are looking for a tree of all the values used for the port of departure variable on voyages that disembarked between 1820-40 after embarking enslaved people in Sierra Leone and the Gold Coast",
 			value={

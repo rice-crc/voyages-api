@@ -88,14 +88,13 @@ def groupby():
 	'''
 	st=time.time()
 	rdata=request.json
-	dfname=rdata['cachename'][0]
+	dfname=rdata['cachename']
 	ids=rdata['ids']
-	groupby_by=rdata['groupby_by'][0]
+	groupby_by=rdata['groupby_by']
 	groupby_cols=rdata['groupby_cols']
-	agg_fn=rdata['agg_fn'][0]
+	agg_fn=rdata['agg_fn']
 	df=eval(dfname)['df']
 	df2=df[df['id'].isin(ids)]
-# 	print(df2,df2[groupby_cols[0]].unique())
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
 	ct=ct.fillna(0)
 	resp={groupby_by:list(ct.index)}

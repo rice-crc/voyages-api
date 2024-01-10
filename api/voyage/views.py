@@ -54,9 +54,11 @@ class VoyageList(generics.GenericAPIView):
 		st=time.time()
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		#VALIDATE THE REQUEST
+		
 		serialized_req = VoyageListRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
+			
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
 		queryset,results_count=post_req(
@@ -122,7 +124,6 @@ class VoyageAggregations(generics.GenericAPIView):
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
-
 
 class VoyageCrossTabs(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -218,45 +219,31 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			d2['ids']=ids
 			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 
-@extend_schema(
-		exclude=True
-	)
 class VoyageGroupBy(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint is intended for use building line/scatter, bar, and pie charts. It requires a few arguments, which it basically inherits from <a href=\"https://github.com/rice-crc/voyages-api/tree/main/stats\">the back-end flask/pandas service</a> that runs these stats.\n\
+		    1. A variable to group on: 'groupby_by'\n\
+		        1a. For a scatter plot, you would want this would be a numeric variable\n\
+		        1b. For a bar chart, you would want this to be a categorical variable\n\
+		    2. An array of variables to aggregate on: 'groupby_cols'\n\. This is always a numeric variable.\n\
+		    3. An aggregation function: sum, mean, min, max\n\
+		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a small, serialized dataframe taken from the pandas back-end.\n\
+		",
+		request=VoyageGroupByRequestSerializer
+	)
+
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE GROUPBY+++++++\nusername:",request.auth.user)
-		print(request.data)
-		params=dict(request.data)
-		print(params)
-		groupby_by=params.get('groupby_by')
-		groupby_cols=params.get('groupby_cols')
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,
-			self,
-			request,
-			Voyage_options
-		)
-		ids=[i[0] for i in queryset.values_list('id')]
-		u2=STATS_BASE_URL+'groupby/'
-		d2=params
-		d2['ids']=ids
-		d2['selected_fields']=selected_fields
-		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		return JsonResponse(json.loads(r.text),safe=False)# 
-
-@extend_schema(
-		exclude=True
-	)
-#DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
-class VoyageDataFrames(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		print("VOYAGE DATAFRAMES+++++++\nusername:",request.auth.user)
-		st=time.time()
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageGroupByRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
 		queryset,results_count=post_req(
 			queryset,
@@ -265,6 +252,51 @@ class VoyageDataFrames(generics.GenericAPIView):
 			Voyage_options,
 			auto_prefetch=False
 		)
+		
+		#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
+		ids=[i[0] for i in queryset.values_list('id')]
+		u2=STATS_BASE_URL+'groupby/'
+		d2=dict(request.data)
+		d2['ids']=ids
+		
+		#NOT QUITE SURE HOW TO VALIDATE THE RESPONSE OF THIS VIA A SERIALIZER
+		#BECAUSE YOU HAVE A DICTIONARY WITH > 2 KEYS COMING BACK AT YOU
+		#AND ANOTHER GOOD RULE WOULD BE THAT THE ARRAYS ARE ALL EQUAL IN LENGTH
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		return JsonResponse(json.loads(r.text),safe=False)
+
+class VoyageDataFrames(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
+		However, it could be used for csv exports and the like.\n\
+		\n\
+		Be careful!\n\. It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the voyage, you're likely get back extra rows. For instance, requesting captain names will return one row for each captain, not for each voyage.\n\
+		\n\
+		And finally, the example provided below puts a strict year filter on because unrestricted, it will break your swagger viewer :) \n\
+		",
+		request=VoyageDataframesRequestSerializer
+	)
+	def post(self,request):
+		print("VOYAGE AGGREGATIONS+++++++\nusername:",request.auth.user)
+		st=time.time()
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageDataframesRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Voyage.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=True
+		)
+		
 		queryset=queryset.order_by('id')
 		sf=request.data.get('selected_fields')
 		output_dicts={}
@@ -272,6 +304,9 @@ class VoyageDataFrames(generics.GenericAPIView):
 		for i in range(len(sf)):
 			output_dicts[sf[i]]=[v[i] for v in vals]
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
+		
 		return JsonResponse(output_dicts,safe=False)
 
 class VoyageGeoTreeFilter(generics.GenericAPIView):

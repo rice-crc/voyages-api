@@ -238,17 +238,17 @@ class EnslaverInRelationSerializer(serializers.ModelSerializer):
 		model=EnslaverInRelation
 		fields='__all__'
 
-class EnslaverIdentitySerializer(serializers.ModelSerializer):
-	birth_place=PastLocationSerializer(many=False,read_only=True)
-	death_place=PastLocationSerializer(many=False,read_only=True)
-	principal_location=PastLocationSerializer(many=False,read_only=True)
-	class Meta:
-		model=EnslaverIdentity
-		fields='__all__'
+# class EnslaverIdentitySerializer(serializers.ModelSerializer):
+# 	birth_place=PastLocationSerializer(many=False,read_only=True)
+# 	death_place=PastLocationSerializer(many=False,read_only=True)
+# 	principal_location=PastLocationSerializer(many=False,read_only=True)
+# 	class Meta:
+# 		model=EnslaverIdentity
+# 		fields='__all__'
 
 class EnslaverAliasSerializer(serializers.ModelSerializer):
 	enslaver_relations=EnslaverInRelationSerializer(many=True)
-	identity=EnslaverIdentitySerializer(many=False)
+# 	identity=EnslaverIdentitySerializer(many=False)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
@@ -331,7 +331,7 @@ class EnslavedFilterItemSerializer(serializers.Serializer):
 class EnslavedListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
-	filter=EnslavedFilterItemSerializer(many=True)
+	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
 
 class EnslavedListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
@@ -367,13 +367,13 @@ class EnslavedListResponseSerializer(serializers.Serializer):
     ]
 )
 class EnslaverListRequestSerializer(serializers.Serializer):
-	page=serializers.IntegerField()
-	page_size=serializers.IntegerField()
-	filter=EnslaverFilterItemSerializer(many=True)
-
-class EnslaverListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
+	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
+
+class EnslaverListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
 	results=EnslaverSerializer(many=True,read_only=True)
 
@@ -410,14 +410,13 @@ class EnslaverAutoCompleteRequestSerializer(serializers.Serializer):
 	querystr=serializers.CharField(max_length=255,allow_null=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
-	filter=EnslaverFilterItemSerializer(many=True,allow_null=True)
+	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
 
 class EnslaverAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField(max_length=255)
 
 class EnslaverAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=EnslaverAutoCompletekvSerializer(many=True)
-	
 	
 @extend_schema_serializer(
 	examples = [
@@ -451,15 +450,13 @@ class EnslavedAutoCompleteRequestSerializer(serializers.Serializer):
 	querystr=serializers.CharField(max_length=255,allow_null=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
-	filter=EnslavedFilterItemSerializer(many=True,allow_null=True)
+	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
 
 class EnslavedAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField(max_length=255)
 
 class EnslavedAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=EnslavedAutoCompletekvSerializer(many=True)
-
-
 
 ############ AGGREGATION ON FIELDS
 @extend_schema_serializer(
@@ -529,3 +526,138 @@ class EnslaverFieldAggregationResponseSerializer(serializers.Serializer):
 	])
 	min=serializers.IntegerField(allow_null=True)
 	max=serializers.IntegerField(allow_null=True)
+
+############ DATAFRAMES ENDPOINT
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered request for 2 columns',
+			summary="Filtered req for 2 cols",
+			description="Here, we are looking for the enslaved person\'s documented name, and the region in which they disembarked, for individuals whose names we know who were transported between 1810-15.",
+			value={
+				"selected_fields":[
+					"documented_name",
+					"enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__name"
+				],
+				"filter":[
+					{
+						"varName": "enslaved_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op": "btw",
+						"searchTerm": [1810,1815]
+					}
+				]
+			}
+		)
+	]
+)
+class EnslavedDataframesRequestSerializer(serializers.Serializer):
+	selected_fields=serializers.ListField(
+		child=serializers.ChoiceField(choices=[
+			k for k in Enslaved_options
+		])
+	)
+	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
+
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered request for 2 columns',
+			summary="Filtered req for 2 cols",
+			description="Here, we are looking for the name and date of birth for enslavers associated with voyages to Barbados.",
+			value={
+				"selected_fields":[
+					"birth_year",
+					"principal_alias"
+				],
+				"filter":[
+					{
+						"varName": "aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__name",
+						"op": "in",
+						"searchTerm": ["Barbados"]
+					}
+				]
+			}
+		)
+	]
+)
+class EnslaverDataframesRequestSerializer(serializers.Serializer):
+	selected_fields=serializers.ListField(
+		child=serializers.ChoiceField(choices=[
+			k for k in Enslaver_options
+		])
+	)
+	filter=EnslaverFilterItemSerializer(many=True,allow_null=True,required=False)
+
+
+############ GEOTREE REQUESTS
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			"Filtered req for enslaved people geo vals",
+			summary="Filtered req for enslaved people geo vals",
+			description="Here, we are looking for a tree of all the values used for the port of departure variable for named enslaved individuals who were embarked in Sierra Leone or the Gold Coast between 1820-40.",
+			value={
+				"geotree_valuefields":["enslaved_relations__relation__voyage__voyage_itinerary__port_of_departure__value"],
+				"filter":[
+					{
+						"varName": "enslaved_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op": "btw",
+						"searchTerm": [1820,1840]
+					},
+					{
+						"varName":"enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+						"searchTerm":["Sierra Leone","Gold Coast"],
+						"op":"in"
+					}
+				]
+			}
+		)
+	]
+)
+class EnslavedGeoTreeFilterRequestSerializer(serializers.Serializer):
+	geotree_valuefields=serializers.ListField(
+		child=serializers.ChoiceField(
+			choices=[
+				k for k in Enslaved_options
+				if (("post_disembark_location" in k or "voyage_itinerary" in k) and k.endswith("value"))
+			]
+		)
+	)
+	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
+	
+
+############ GEOTREE REQUESTS
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			"Filtered req for enslaver geo vals",
+			summary="Filtered req for enslaver geo vals",
+			description="Here, we are looking for a tree of all the values used for the 'port of departure' variable (used for tracking the triangular trade) for enslavers who are associated with voyages that embarked captives in Sierra Leone or the Gold Coast between 1820-40.",
+			value={
+				"geotree_valuefields":["aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__value"],
+				"filter":[
+					{
+						"varName": "aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op": "btw",
+						"searchTerm": [1820,1840]
+					},
+					{
+						"varName":"aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+						"searchTerm":["Sierra Leone","Gold Coast"],
+						"op":"in"
+					}
+				]
+			}
+		)
+	]
+)
+class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
+	geotree_valuefields=serializers.ListField(
+		child=serializers.ChoiceField(
+			choices=[
+				k for k in Enslaver_options
+				if (("voyage_itinerary" in k or "place" in k) and k.endswith("value"))
+			]
+		)
+	)
+	filter=EnslaverFilterItemSerializer(many=True,allow_null=True,required=False)

@@ -114,7 +114,7 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 			
 			## MAKE SURE YOU APPLY THE FILTER TO THE QUERY
 			### E.G., ARE WE AFTER TRANSATLANTIC OR INTRA-AMERICAN VOYAGES?
-			payload['filter']={}
+			payload['filter']=[]
 			for f in filter_obj:
 				payload['filter'][f]=filter_obj[f]
 			
@@ -427,7 +427,7 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	else:
 		selected_fields=[pk_var]+itinerary_vars
 	
-	payload={'selected_fields':selected_fields,'filter':{}}
+	payload={'selected_fields':selected_fields,'filter':[]}
 	
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,

@@ -20,14 +20,14 @@ import pprint
 from common.reqs import *
 from collections import Counter
 from geo.common import GeoTreeFilter
-from geo.serializers_READONLY import LocationSerializer
+from geo.serializers_READONLY import LocationSerializer,LocationSerializerDeep
 from voyages3.localsettings import *
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from common.static.Enslaver_options import Enslaver_options
 from common.static.Enslaved_options import Enslaved_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
-		
+
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -278,17 +278,30 @@ class EnslaverAggregations(generics.GenericAPIView):
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
-			
-@extend_schema(exclude=True)
+
 class EnslavedDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
+		However, it could be used for csv exports and the like.\n\
+		Be careful! It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the voyage, you're likely get back extra rows.\n\
+		And finally, the example provided below puts a strict year filter on because unrestricted, it will break your swagger viewer :) \n\
+		",
+		request=EnslavedDataframesRequestSerializer
+	)
 	def post(self,request):
 		print("ENSLAVED DATA FRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
-		params=dict(request.data)
+		
+		print(request.data)
+		#VALIDATE THE REQUEST
+		serialized_req = EnslavedDataframesRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Enslaved.objects.all()
-# 		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
 		queryset,results_count=post_req(
 			queryset,
 			self,
@@ -296,27 +309,41 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			Enslaved_options,
 			auto_prefetch=True
 		)
+		
 		queryset=queryset.order_by('id')
-		selected_fields=request.data.get('selected_fields')
+		sf=request.data.get('selected_fields')
 		output_dicts={}
-		vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
-		for i in range(len(selected_fields)):
-			output_dicts[selected_fields[i]]=[v[i] for v in vals]
+		vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+		for i in range(len(sf)):
+			output_dicts[sf[i]]=[v[i] for v in vals]
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
+		
 		return JsonResponse(output_dicts,safe=False)
-# 		else:
-# 			print("failed\n+++++++")
-# 			print(' | '.join(error_messages))
-# 			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-			
-@extend_schema(exclude=True)
+
 class EnslaverDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
+		However, it could be used for csv exports and the like.\n\
+		Be careful! It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the voyage, you're likely get back extra rows.\n\
+		And finally, the example provided below puts a strict year filter on because unrestricted, it will break your swagger viewer :) \n\
+		",
+		request=EnslaverDataframesRequestSerializer
+	)
 	def post(self,request):
-		print("+++++++\nusername:",request.auth.user)
+		print("ENSLAVER DATA FRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
-		params=dict(request.data)
+		
+		print(request.data)
+		#VALIDATE THE REQUEST
+		serialized_req = EnslaverDataframesRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=EnslaverIdentity.objects.all()
 		queryset,results_count=post_req(
 			queryset,
@@ -325,13 +352,17 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			Enslaver_options,
 			auto_prefetch=True
 		)
+		
 		queryset=queryset.order_by('id')
-		selected_fields=request.data.get('selected_fields')
+		sf=request.data.get('selected_fields')
 		output_dicts={}
-		vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
-		for i in range(len(selected_fields)):
-			output_dicts[selected_fields[i]]=[v[i] for v in vals]
+		vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+		for i in range(len(sf)):
+			output_dicts[sf[i]]=[v[i] for v in vals]
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
+		
 		return JsonResponse(output_dicts,safe=False)
 
 @extend_schema(exclude=True)
@@ -375,7 +406,7 @@ class EnslavementRelationsDataFrames(generics.GenericAPIView):
 			output_dicts[selected_fields[i]]=[v[i] for v in vals]
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(output_dicts,safe=False)
-		
+
 @extend_schema(exclude=True)
 class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -406,22 +437,25 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
 
+
+
 @extend_schema(exclude=True)
-class EnslavedGeoTreeFilter(generics.GenericAPIView):
+class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	def post(self,request):
-		print("ENSLAVED GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		print("ENSLAVER GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
 		reqdict=dict(request.data)
 		geotree_valuefields=reqdict['geotree_valuefields']
 		del(reqdict['geotree_valuefields'])
-		queryset=Enslaved.objects.all()
+		queryset=EnslaverIdentity.objects.all()
 		queryset,results_count=post_req(
 			queryset,
 			self,
-			reqdict,
-			Enslaved_options
+			request,
+			Enslaver_options,
+			auto_prefetch=True
 		)
 		for geotree_valuefield in geotree_valuefields:
 			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
@@ -431,6 +465,113 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
 		vls=list(set(vls))
 		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+		resp=JsonResponse(filtered_geotree,safe=False)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return resp
+
+
+
+
+class EnslaverGeoTreeFilter(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint is tricky. In addition to taking a filter object, it also takes a list of geographic value variable names, like 'aliases__enslaver_relations__relation__voyage__voyage_itinerary__port_of_departure__value'. \n\
+		What it returns is a hierarchical tree of SlaveVoyages geographic data, filtered down to only the values used in those 'geotree valuefields' after applying the filter object.\n\
+		So if you were to ask for aliases__enslaver_relations__relation__voyage__voyage_itinerary__port_of_departure__value, you would mostly get locations in Europe and the Americas; and if you searched 'aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__name', you would principally get places in the Americas and Africa.",
+		request=EnslaverGeoTreeFilterRequestSerializer,
+		responses=LocationSerializerDeep
+	)
+	def post(self,request):
+		st=time.time()
+		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = EnslaverGeoTreeFilterRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#extract and then peel out the geotree_valuefields
+		reqdict=dict(request.data)
+		geotree_valuefields=reqdict['geotree_valuefields']
+		del(reqdict['geotree_valuefields'])
+		
+		#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=EnslaverIdentity.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			reqdict,
+			Enslaver_options
+		)
+		
+		#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
+		for geotree_valuefield in geotree_valuefields:
+			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
+			queryset=queryset.select_related(geotree_valuefield_stub)
+		vls=[]
+		for geotree_valuefield in geotree_valuefields:		
+			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+		vls=list(set(vls))
+		
+		#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
+		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+		
+		### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
+		
+		resp=JsonResponse(filtered_geotree,safe=False)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return resp
+
+
+
+class EnslavedGeoTreeFilter(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint is tricky. In addition to taking a filter object, it also takes a list of geographic value variable names, like 'enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__value'. \n\
+		What it returns is a hierarchical tree of SlaveVoyages geographic data, filtered down to only the values used in those 'geotree valuefields' after applying the filter object.\n\
+		So if you were to ask for enslaved_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__value, you would mostly get locations in Europe and the Americas; and if you searched 'enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__name', you would principally get places in the Americas and Africa.",
+		request=EnslavedGeoTreeFilterRequestSerializer,
+		responses=LocationSerializerDeep
+	)
+	def post(self,request):
+		st=time.time()
+		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = EnslavedGeoTreeFilterRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#extract and then peel out the geotree_valuefields
+		reqdict=dict(request.data)
+		geotree_valuefields=reqdict['geotree_valuefields']
+		del(reqdict['geotree_valuefields'])
+		
+		#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Enslaved.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			reqdict,
+			Enslaved_options
+		)
+		
+		#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
+		for geotree_valuefield in geotree_valuefields:
+			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
+			queryset=queryset.select_related(geotree_valuefield_stub)
+		vls=[]
+		for geotree_valuefield in geotree_valuefields:		
+			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+		vls=list(set(vls))
+		
+		#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
+		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+		
+		### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
+		
 		resp=JsonResponse(filtered_geotree,safe=False)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp

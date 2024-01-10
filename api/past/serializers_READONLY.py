@@ -372,8 +372,8 @@ class EnslaverListRequestSerializer(serializers.Serializer):
 	filter=EnslaverFilterItemSerializer(many=True)
 
 class EnslaverListResponseSerializer(serializers.Serializer):
-	page=serializers.IntegerField()
-	page_size=serializers.IntegerField()
+	page=serializers.IntegerField(required=False,allow_null=True)
+	page_size=serializers.IntegerField(required=False,allow_null=True)
 	count=serializers.IntegerField()
 	results=EnslaverSerializer(many=True,read_only=True)
 

@@ -191,7 +191,6 @@ class EnslaverList(generics.GenericAPIView):
 		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 		return JsonResponse(resp,safe=False,status=200)
 
-
 class EnslavedAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -234,7 +233,6 @@ class EnslavedAggregations(generics.GenericAPIView):
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
-
 
 class EnslaverAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

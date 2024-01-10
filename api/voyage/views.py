@@ -465,9 +465,7 @@ class VoyageCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-@extend_schema(
-		exclude=True
-	)
+
 class VoyageRETRIEVE(generics.RetrieveAPIView):
 	'''
 	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.

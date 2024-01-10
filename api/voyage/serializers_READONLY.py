@@ -341,8 +341,8 @@ class VoyageFilterItemSerializer(serializers.Serializer):
     ]
 )
 class VoyageListRequestSerializer(serializers.Serializer):
-	page=serializers.IntegerField()
-	page_size=serializers.IntegerField()
+	page=serializers.IntegerField(required=False,allow_null=True)
+	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True)
 
 class VoyageListResponseSerializer(serializers.Serializer):

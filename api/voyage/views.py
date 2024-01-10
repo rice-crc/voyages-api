@@ -35,20 +35,21 @@ from common.static.Voyage_options import Voyage_options
 class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
-	serializer_class=VoyageSerializer
 	@extend_schema(
-		description="\
-		This endpoint returns a list of nested objects, each of which contains all the available information on individual voyages.\n\
-		Voyages are the legacy natural unit of the project. They are useful because they gather together:\n\
+		description="This endpoint returns a list of nested objects, each of which contains all the available information on individual voyages.\n\
+		\Voyages are the legacy natural unit of the project. They are useful because they gather together:\n\
+		\n\
 			1. Numbers of people and demographic data\n\
 			2. Geographic itinerary data\n\
 			3. Important dates\n\
 			4. Named individuals\n\
 			5. Documentary sources\n\
-			6. Data on the vessel\n\
-		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.\n\
+			6. Data on the vessel\
+		\n\
+		\nYou can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.\
 		",
-		request=VoyageListRequestSerializer
+		request=VoyageListRequestSerializer,
+		responses=VoyageListResponseSerializer
 	)
 	def post(self,request):
 		st=time.time()
@@ -83,11 +84,10 @@ class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="\n\
-		The aggregations endpoints helps us to peek at numerical fields in the same way that autcomplete endpoints help us to get a sense of what the available text values are on a field.\n\
-		So if we want to, for instance, allow a user to search on voyages by year, we might want to give them a rangeslider component. In order to make that rangeslider component, you'd have to know the minimum and maximum years during which voyages sailed -- you would also need to know, of course, whether you were searching for the minimum and maximum of years of departure, embarkation, disembarkation, return, etc.\n\
-		Also, as with the other new endpoints we are rolling out in January 2024, you can run a filter before you query for min/max on variables. So if you've already searched for voyages arriving in Cuba, for instance, you can ask for the min and max years of disembarkation in order to make a rangeslider dynamically tailored to that search.\n\
-		Note to maintainer(s): This endpoint was made with rangesliders in mind, so we are only exposing min & max for now. In the future, it could be very useful to have median, mean, or plug into the stats engine for a line or bar chart to create some highly interactive filtering.\n\
+		description="The aggregations endpoints helps us to peek at numerical fields in the same way that autcomplete endpoints help us to get a sense of what the available text values are on a field.\
+		So if we want to, for instance, allow a user to search on voyages by year, we might want to give them a rangeslider component. In order to make that rangeslider component, you'd have to know the minimum and maximum years during which voyages sailed -- you would also need to know, of course, whether you were searching for the minimum and maximum of years of departure, embarkation, disembarkation, return, etc.\
+		Also, as with the other new endpoints we are rolling out in January 2024, you can run a filter before you query for min/max on variables. So if you've already searched for voyages arriving in Cuba, for instance, you can ask for the min and max years of disembarkation in order to make a rangeslider dynamically tailored to that search.\
+		Note to maintainer(s): This endpoint was made with rangesliders in mind, so we are only exposing min & max for now. In the future, it could be very useful to have median, mean, or plug into the stats engine for a line or bar chart to create some highly interactive filtering.\
 		",
 		request=VoyageFieldAggregationRequestSerializer,
 		responses=VoyageFieldAggregationResponseSerializer
@@ -114,8 +114,6 @@ class VoyageAggregations(generics.GenericAPIView):
 		#RUN THE AGGREGATIONS
 		aggregation_field=request.data.get('varName')
 		output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Voyage_options)
-		
-		print("++++++++",output_dict)
 		
 		#VALIDATE THE RESPONSE
 		serialized_resp=VoyageFieldAggregationResponseSerializer(data=output_dict)
@@ -271,9 +269,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 	@extend_schema(
 		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
 		However, it could be used for csv exports and the like.\n\
-		\n\
-		Be careful!\n\. It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the voyage, you're likely get back extra rows. For instance, requesting captain names will return one row for each captain, not for each voyage.\n\
-		\n\
+		Be careful! It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the voyage, you're likely get back extra rows. For instance, requesting captain names will return one row for each captain, not for each voyage.\n\
 		And finally, the example provided below puts a strict year filter on because unrestricted, it will break your swagger viewer :) \n\
 		",
 		request=VoyageDataframesRequestSerializer
@@ -521,22 +517,3 @@ class VoyageDESTROY(generics.DestroyAPIView):
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
-
-
-@extend_schema(
-		exclude=True
-	)
-class VoyageStatsOptions(generics.GenericAPIView):
-	'''
-	Need to make the stats engine's indexed variables transparent to the user
-	'''
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		u2=STATS_BASE_URL+'get_indices/'
-		r=requests.get(url=u2,headers={"Content-type":"application/json"})
-		return JsonResponse(json.loads(r.text),safe=False)
-	def options(self,request):
-		u2=STATS_BASE_URL+'get_indices/'
-		r=requests.get(url=u2,headers={"Content-type":"application/json"})
-		return JsonResponse(json.loads(r.text),safe=False)

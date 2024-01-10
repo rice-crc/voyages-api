@@ -32,10 +32,10 @@ class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="This endpoint returns a list of highly nested objects, each of which contains all the available information on enslaved individuals who we know to have been transported on a voyage.\n\
-		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).\n\
-		For instance, you might search for a person who was bought, sold, or transported on a voyage owned by a known enslaver. Or, you might search for people who, based on the sound of their name as recorded, are believed to have come from a particular region in Africa where an ethnic group known to use that name was located.\n\
-		However, it must be stressed that there is a tension in this dataset: the data that we have on enslaved individuals was almost entirely recorded by the people who enslaved them, or by colonial managers who technically liberated them, but oftentimes pressed these people into military service or labor. We know the names of these people, which is grounbreaking for this project because it allows us to identify named individuals in a dataset that often records only nameless quantities of people, but as you analyze this dataset you will note that most of the data we have on these enslaved people is bio-data, such as gender, age, height, and skin color -- this is qualitatively different than the data we have on the enslavers, about whom we often have a good deal of biographical data.\n\
+		description="This endpoint returns a list of highly nested objects, each of which contains all the available information on enslaved individuals who we know to have been transported on a voyage.\
+		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).\
+		For instance, you might search for a person who was bought, sold, or transported on a voyage owned by a known enslaver. Or, you might search for people who, based on the sound of their name as recorded, are believed to have come from a particular region in Africa where an ethnic group known to use that name was located.\
+		However, it must be stressed that there is a tension in this dataset: the data that we have on enslaved individuals was almost entirely recorded by the people who enslaved them, or by colonial managers who technically liberated them, but oftentimes pressed these people into military service or labor. We know the names of these people, which is grounbreaking for this project because it allows us to identify named individuals in a dataset that often records only nameless quantities of people, but as you analyze this dataset you will note that most of the data we have on these enslaved people is bio-data, such as gender, age, height, and skin color -- this is qualitatively different than the data we have on the enslavers, about whom we often have a good deal of biographical data.\
 		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.",
 		request=EnslavedListRequestSerializer,
 		responses=EnslavedListResponseSerializer
@@ -73,169 +73,90 @@ class EnslavedList(generics.GenericAPIView):
 class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	queryset=Enslaved.objects.all()
 	@extend_schema(
-		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
-		request=autocompleterequestserializer,
-		responses=autocompleteresponseserializer,
-		examples = [
-			OpenApiExample(
-				'Autocomplete on any enslaved-related field',
-				summary='Autocomplete for names like bo',
-				description='Here, we search for enslaved peoples names that are like "bo". From the offset and limit values, you can see that we are requesting the first 20 entries.',
-				value={
-					"varName":"documented_name",
-					"querystr":"bo",
-					"offset":0,
-					"limit":20,
-					"filter":{}
-				},
-				request_only=True,
-				response_only=False
-			),
-			OpenApiExample(
-				'Suggested values are returned',
-				summary='Autocomplete for names like "bo"',
-				description='Here, we see the first 20 entries like "bo" in our list of enslaved peoples names',
-				value={
-					"varName": "documented_name",
-					"querystr": "bo",
-					"offset": 0,
-					"limit": 20,
-					"filter": {},
-					"suggested_values": [{"value": "?, Bob"},{"value": "?, Claborne"},{"value": "?, Claiborne"},{"value": "??bon"},{"value": "?ill, Bob"},{"value": "?way, Bob"},{"value": "A Bossuh"},{"value": "A. Bossou"},{"value": "Abalobo"},{"value": "Abamboh"},{"value": "Abanaboo"},{"value": "Abaraboo"},{"value": "Abbaboo"},{"value": "Abbeeboo"},{"value": "Abbo"},{"value": "Abbobocah"},{"value": "Abboboday"},{"value": "Abbochay"},{"value": "Abbodoo"},{"value": "Abboe"}]},
-				request_only=False,
-				response_only=True
-			)
-		]
-	)
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, enslaved people). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the enslavers list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=EnslavedAutoCompleteRequestSerializer,
+		responses=EnslavedAutoCompleteResponseSerializer,
+	)	
 	def post(self,request):
 		st=time.time()
-		queryset=Enslaved.objects.all()
 		print("ENSLAVED CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 		
-		options=Enslaved_options
+		#VALIDATE THE REQUEST
+		serialized_req = EnslavedAutoCompleteRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 		
-		rdata=request.data
-
-		varName=str(rdata.get('varName'))
-		querystr=str(rdata.get('querystr'))
-		offset=int(rdata.get('offset'))
-		limit=int(rdata.get('limit'))
-	
-		max_offset=500
-	
-		if offset>max_offset:
-			final_vals=[]
-		else:
-			queryset,selected_fields,results_count,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				options,
-				auto_prefetch=False
-			)
-			final_vals=autocomplete_req(queryset,varName,querystr,offset,max_offset,limit)
+		#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Enslaved.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Enslaver_options,
+			auto_prefetch=False
+		)
 		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		
-		resp=dict(rdata)
+		#RUN THE AUTOCOMPLETE ALGORITHM
+		final_vals=autocomplete_req(queryset,request)
+		resp=dict(request.data)
 		resp['suggested_values']=final_vals
 		
-		read_serializer=autocompleteresponseserializer(resp)
-		serialized=read_serializer.data
-		
-		print(' | '.join(error_messages))
-		
-		return JsonResponse(serialized,safe=False)
+		#VALIDATE THE RESPONSE
+		serialized_resp=EnslavedAutoCompleteResponseSerializer(data=resp)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
 
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	queryset=Enslaved.objects.all()
 	@extend_schema(
-		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the enslavers list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
-		request=autocompleterequestserializer,
-		responses=autocompleteresponseserializer,
-		examples = [
-			OpenApiExample(
-				'Autocomplete on any enslavers-related field',
-				summary='Autocomplete for enslaved names related to enslavers',
-				description='Here, we search for the names of enslaved people that are like "sal" IN RELATION TO the enslavers. From the offset and limit values, you can see that we are requesting the first 20 entries.',
-				value={
-					"varName":"aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name",
-					"querystr":"sal",
-					"offset":0,
-					"limit":20,
-					"filter":{}
-				},
-				request_only=True,
-				response_only=False
-			),
-			OpenApiExample(
-				'Suggested values are returned',
-				summary='Autocomplete for enslaved names related to enslavers',
-				description='Here, we see the first 20 names like "sal" for enslaved people through the enslaver model.',
-				value={
-					"varName": "aliases__enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name",
-					"querystr": "sal",
-					"offset": 0,
-					"limit": 20,
-					"filter": {},
-					"suggested_values": [{"value": "? (Sally's), child"},{"value": "?, Sally"},{"value": "?field, Sally"},{"value": "Abissala"},{"value": "Abissalah"},{"value": "Absalon"},{"value": "Achasaloh"},{"value": "Adesalar"},{"value": "Adosalah"},{"value": "Afosalah"},{"value": "Ahdaisaloo"},{"value": "Ahdasalee"},{"value": "Ahlarsalah"},{"value": "Ahmesallah"},{"value": "Ahsalah"},{"value": "Ahsalla"},{"value": "Ahsally"},{"value": "Ahsaloe"},{"value": "Alasalhee"},{"value": "Alasallagee"}]
-				},
-				request_only=False,
-				response_only=True
-			)
-		]
-	)
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, enslaver identities). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the enslavers list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=EnslaverAutoCompleteRequestSerializer,
+		responses=EnslaverAutoCompleteResponseSerializer,
+	)	
 	def post(self,request):
 		st=time.time()
-		queryset=EnslaverIdentity.objects.all()
 		print("ENSLAVER CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 		
-		options=Enslaver_options
+		#VALIDATE THE REQUEST
+		serialized_req = EnslaverAutoCompleteRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 		
-		rdata=request.data
-
-		varName=str(rdata.get('varName'))
-		querystr=str(rdata.get('querystr'))
-		offset=int(rdata.get('offset'))
-		limit=int(rdata.get('limit'))
-	
-		max_offset=500
-	
-		if offset>max_offset:
-			final_vals=[]
-		else:
-			queryset,selected_fields,results_count,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				options,
-				auto_prefetch=False
-			)
-			final_vals=autocomplete_req(queryset,varName,querystr,offset,max_offset,limit)
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=EnslaverIdentity.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Enslaver_options,
+			auto_prefetch=False
+		)
 		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		
-		resp=dict(rdata)
+		#RUN THE AUTOCOMPLETE ALGORITHM
+		final_vals=autocomplete_req(queryset,request)
+		resp=dict(request.data)
 		resp['suggested_values']=final_vals
 		
-		read_serializer=autocompleteresponseserializer(resp)
-		serialized=read_serializer.data
-		
-		return JsonResponse(serialized,safe=False)
+		#VALIDATE THE RESPONSE
+		serialized_resp=EnslaverAutoCompleteResponseSerializer(data=resp)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
 
-
-#LONG-FORM TABULAR ENDPOINT
 class EnslaverList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="This endpoint returns a list of highly nested objects, each of which contains all the available information on named individuals we know to have participated in the slave trade.\n\n\
-		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).\n\n\
-		Before 2022, the project had only recorded ship captains and ship owners. We now have a much more robust accounting of individuals, sometimes recorded under different names, participating in multiple voyages, and operating in a range of different roles, from investors to brokers to buyers and sellers of enslaved people. In some cases, we know the names of these enslavers' spouses, and the amounts of money they willed to their descendants upon their death. We are very much looking forward to linking this network of enslavers into other public datasets such as Stanford's Kindred network in order to map the economic legacy of these ill-gotten gains\n\n\
+		description="This endpoint returns a list of highly nested objects, each of which contains all the available information on named individuals we know to have participated in the slave trade.\
+		This people-oriented data dramatically changes the nature of our dataset. While Voyages data has always been relational, the complexity of interpersonal connections in this dataset makes it graph-like and pushes the boundaries of the underlying system (Python Django).\
+		Before 2022, the project had only recorded ship captains and ship owners. We now have a much more robust accounting of individuals, sometimes recorded under different names, participating in multiple voyages, and operating in a range of different roles, from investors to brokers to buyers and sellers of enslaved people. In some cases, we know the names of these enslavers' spouses, and the amounts of money they willed to their descendants upon their death. We are very much looking forward to linking this network of enslavers into other public datasets such as Stanford's Kindred network in order to map the economic legacy of these ill-gotten gains\
 		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.",
 		request=EnslaverListRequestSerializer,
 		responses=EnslaverListResponseSerializer
@@ -271,87 +192,94 @@ class EnslaverList(generics.GenericAPIView):
 		return JsonResponse(resp,safe=False,status=200)
 
 
-# Basic statistics
-## takes a numeric variable
-## returns its sum, average, max, min, and stdv@extend_schema(exclude=True)
-@extend_schema(exclude=True)
 class EnslavedAggregations(generics.GenericAPIView):
-# 	serializer_class=EnslavedSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The aggregations endpoints helps us to peek at numerical fields in the same way that autcomplete endpoints help us to get a sense of what the available text values are on a field.\
+		So if we want to, for instance, allow a user to search on voyages by year, we might want to give them a rangeslider component. In order to make that rangeslider component, you'd have to know the minimum and maximum years during which voyages sailed -- you would also need to know, of course, whether you were searching for the minimum and maximum of years of departure, embarkation, disembarkation, return, etc.\
+		Also, as with the other new endpoints we are rolling out in January 2024, you can run a filter before you query for min/max on variables. So if you've already searched for voyages arriving in Cuba, for instance, you can ask for the min and max years of disembarkation in order to make a rangeslider dynamically tailored to that search.\
+		Note to maintainer(s): This endpoint was made with rangesliders in mind, so we are only exposing min & max for now. In the future, it could be very useful to have median, mean, or plug into the stats engine for a line or bar chart to create some highly interactive filtering.\
+		",
+		request=EnslavedFieldAggregationRequestSerializer,
+		responses=EnslavedFieldAggregationResponseSerializer
+	)
 	def post(self,request):
-		try:
-			st=time.time()
-			print("ENSLAVED AGGREGATIONS+++++++\nusername:",request.auth.user)
-			params=dict(request.data)
-			aggregations=params.get('aggregate_fields')
-			print(aggregations)
-			queryset=Enslaved.objects.all()
-			aggregation,selected_fields,results_count,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Enslaved_options
-			)
-			output_dict={}
-			if len(error_messages)==0:
-				for a in aggregation:
-					for k in a:
-						v=a[k]
-						fn=k.split('__')[-1]
-						varName=k[:-len(fn)-2]
-						if varName in output_dict:
-							output_dict[varName][fn]=a[k]
-						else:
-							output_dict[varName]={fn:a[k]}
-				print("Internal Response Time:",time.time()-st,"\n+++++++")
-				return JsonResponse(output_dict,safe=False)
-			else:
-				print("failed\n+++++++")
-				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-		except:
-			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+		st=time.time()
+		print("ENSLAVED AGGREGATIONS+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = EnslavedFieldAggregationRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Enslaved.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Enslaved_options,
+			auto_prefetch=False
+		)
+		
+		#RUN THE AGGREGATIONS
+		aggregation_field=request.data.get('varName')
+		output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaved_options)
+		print(output_dict)
+		#VALIDATE THE RESPONSE
+		serialized_resp=EnslavedFieldAggregationResponseSerializer(data=output_dict)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
 
 
-# # Basic statistics
-# ## takes a numeric variable
-# ## returns its sum, average, max, min, and stdv@extend_schema(exclude=True)
-@extend_schema(exclude=True)
 class EnslaverAggregations(generics.GenericAPIView):
-# 	serializer_class=EnslaverSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The aggregations endpoints helps us to peek at numerical fields in the same way that autcomplete endpoints help us to get a sense of what the available text values are on a field.\
+		So if we want to, for instance, allow a user to search enslavers by the year that the voyages they were associated with operated, then we might want to give them a rangeslider component. In order to make that rangeslider component, you'd have to know the minimum and maximum years during which voyages sailed -- you would also need to know, of course, whether you were searching for the minimum and maximum of years of departure, embarkation, disembarkation, return, etc.\
+		Also, as with the other new endpoints we are rolling out in January 2024, you can run a filter before you query for min/max on variables. So if you've already searched for enslavers associated with voyages arriving in Cuba, for instance, you can ask for the min and max years of disembarkation in order to make a rangeslider dynamically tailored to that search.\
+		Note to maintainer(s): This endpoint was made with rangesliders in mind, so we are only exposing min & max for now. In the future, it could be very useful to have median, mean, or plug into the stats engine for a line or bar chart to create some highly interactive filtering.\
+		",
+		request=EnslaverFieldAggregationRequestSerializer,
+		responses=EnslaverFieldAggregationResponseSerializer
+	)
 	def post(self,request):
 		st=time.time()
 		print("ENSLAVER AGGREGATIONS+++++++\nusername:",request.auth.user)
-		try:
-			params=dict(request.data)
-			aggregations=params.get('aggregate_fields')
-			queryset=EnslaverIdentity.objects.all()
-			aggregation,selected_fields,results_count,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Enslaver_options
-			)
-			output_dict={}
-			if len(error_messages)==0:
-				for a in aggregation:
-					for k in a:
-						v=a[k]
-						fn=k.split('__')[-1]
-						varName=k[:-len(fn)-2]
-						if varName in output_dict:
-							output_dict[varName][fn]=a[k]
-						else:
-							output_dict[varName]={fn:a[k]}
-				print("Internal Response Time:",time.time()-st,"\n+++++++")
-				return JsonResponse(output_dict,safe=False)
-			else:
-				print("failed\n+++++++")
-				return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
-		except:
-			return JsonResponse({'status':'false','message':'bad request'}, status=400)
+		
+		#VALIDATE THE REQUEST
+		print(request.data)
+# 		serialized_req = EnslaverFieldAggregationRequestSerializer(data=request.data)
+# 		if not serialized_req.is_valid():
+# 			return JsonResponse(serialized_req.errors,status=400)
+
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=EnslaverIdentity.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Enslaver_options,
+			auto_prefetch=False
+		)
+		
+		#RUN THE AGGREGATIONS
+		aggregation_field=request.data.get('varName')
+		output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaver_options)
+		
+		print(output_dict)
+		#VALIDATE THE RESPONSE
+		serialized_resp=EnslaverFieldAggregationResponseSerializer(data=output_dict)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
 			
 @extend_schema(exclude=True)
 class EnslavedDataFrames(generics.GenericAPIView):

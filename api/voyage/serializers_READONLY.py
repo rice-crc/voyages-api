@@ -545,12 +545,22 @@ class VoyageAggRoutesResponseSerializer(serializers.Serializer):
     ]
 )
 class VoyageFieldAggregationRequestSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	varName=serializers.ChoiceField(choices=[
+		k for k in Voyage_options if Voyage_options[k]['type'] in [
+			'integer',
+			'number'
+		]
+	])
 	
 class VoyageFieldAggregationResponseSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
-	min=serializers.IntegerField()
-	max=serializers.IntegerField()
+	varName=serializers.ChoiceField(choices=[
+		k for k in Voyage_options if Voyage_options[k]['type'] in [
+			'integer',
+			'number'
+		]
+	])
+	min=serializers.IntegerField(allow_null=True)
+	max=serializers.IntegerField(allow_null=True)
 
 
 ############ OFFSET PAGINATION SERIALIZERS
@@ -605,7 +615,11 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
     ]
 )
 class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.CharField(max_length=500)
+	varName=serializers.ChoiceField(choices=[
+		k for k in Voyage_options if Voyage_options[k]['type'] in [
+			'string'
+		]
+	])
 	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()

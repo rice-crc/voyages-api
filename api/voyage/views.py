@@ -278,7 +278,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 		print("VOYAGE AGGREGATIONS+++++++\nusername:",request.auth.user)
 		st=time.time()
 		
-		print(request.data)
 		#VALIDATE THE REQUEST
 		serialized_req = VoyageDataframesRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():

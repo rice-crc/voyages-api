@@ -39,10 +39,15 @@ class Schemas(generics.GenericAPIView):
 
 		
 
-@extend_schema(exclude=True)
 class GlobalSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint takes a string and passes it on to Solr, which searches across all indexed text fields (currently all text fields) in our core models (Voyages, Enslaved People, Enslavers, and Blog Posts [documents next...]). It returns counts and the first 10 primary keys for each",
+		request=GlobalSearchRequestSerializer,
+		responses=GlobalSearchResponseItemSerializer
+	)
 	def post(self,request):
 		st=time.time()
 		print("Global Search+++++++\nusername:",request.auth.user)
@@ -51,8 +56,12 @@ class GlobalSearch(generics.GenericAPIView):
 		search_string=params.get('search_string')
 		# Oh, yes. Little Bobby Tables, we call him.
 		
-		output_dict=[]
+		#VALIDATE THE REQUEST
+		serialized_req = GlobalSearchRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 		
+		output_dict=[]
 		coretuples=[
 			['voyages',Voyage.objects.all()],
 			['enslaved',Enslaved.objects.all()],
@@ -96,5 +105,10 @@ class GlobalSearch(generics.GenericAPIView):
 					'ids':ids
 				})
 
+		#VALIDATE THE RESPONSE
+		serialized_resp=GlobalSearchResponseItemSerializer(data=output_dict,many=True)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(output_dict,safe=False)
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)

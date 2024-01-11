@@ -69,8 +69,20 @@ def network_maps():
 				nodes_dict,edges_list=add_neighbors(G,nodes_dict,n,edges_list,levels=levels)
 # 				nodes_dict,edges=add_predecessors(G,nodes_dict,n,edges)
 # 				nodes_dict,edges=add_successors(G,nodes_dict,n,edges)
-
-	nodes=[nodes_dict[k] for k in nodes_dict]
+	
+	nodes=[]
+	
+	for n_id in nodes_dict:
+		node_dict={
+			'data':{}
+		}
+		node=nodes_dict[n_id]
+		for k in node:
+			if k in ['id','node_class','uuid']:
+				node_dict[k]=node[k]
+			else:
+				node_dict['data'][k]=node[k]
+		nodes.append(node_dict)
 	
 	print("elapsed time:",time.time()-st)
 	output={

@@ -509,8 +509,6 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return resp
 
-
-
 class EnslavedAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -568,55 +566,36 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			return JsonResponse(json.loads(r.text),safe=False)
 
 
-# @extend_schema(exclude=True)
-# class EnslavedAggRoutes(generics.GenericAPIView):
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 	def post(self,request):
-# 		st=time.time()
-# 		print("ENSLAVED AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
-# 		params=dict(request.data)
-# 		zoom_level=params.get('zoom_level')
-# 		queryset=Enslaved.objects.all()
-# 		queryset,results_count=post_req(
-# 			queryset,
-# 			self,
-# 			request,
-# 			Enslaved_options,
-# 			auto_prefetch=True
-# 		)
-# # 		queryset=queryset.filter(enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name='Mozambique')
-# 		print("--->",queryset.count())
-# 		queryset=queryset.order_by('id')
-# 		zoomlevel=params.get('zoomlevel',['region'])[0]
-# 		values_list=queryset.values_list('id')
-# 		pks=[v[0] for v in values_list]
-# 		django_query_time=time.time()
-# 		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
-# 		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
-# 		d2={
-# 			'graphname':zoomlevel,
-# 			'cachename':'ao_maps',
-# 			'pks':pks
-# 		}
-# 		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-# 		j=json.loads(r.text)
-# 		print("Internal Response Time:",time.time()-st,"\n+++++++")
-# 		return JsonResponse(j,safe=False)
-
-
-@extend_schema(exclude=True)
 class PASTNetworks(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint presents a graph database view of the highly interconnected data in PAST. We request the primary key of an enslaved person, an enslaver, a voyage, or an enslavement relation, and we receive back a pinhole view of the network in the form of the requested node and its neighbors (out to two hops for enslaved, one hop for all others) as well as the edges connecting these. You can request multiple nodes from multiple classes but the typical use case is to just request one and then iteratively grow the network. I shoudld probably put a cap on the total number of entities that can be requested.... The back-end is powered by <a herf='https://networkx.org/'>NetworkX</a>",
+		request=PASTNetworksRequestSerializer,
+		responses=PASTNetworksResponseSerializer
+	)
 	def post(self,request):
 		st=time.time()
 		print("PAST NETWORKS+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = PASTNetworksRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#HAND OFF TO THE FLASK CONTAINER
 		params=json.dumps(dict(request.data))
 		print(PEOPLE_NETWORKS_BASE_URL)
 		r=requests.post(PEOPLE_NETWORKS_BASE_URL,data=params,headers={"Content-type":"application/json"})
-		j=json.loads(r.text)
-		return JsonResponse(j,safe=False)
+		
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			serialized_resp=PASTNetworksResponseSerializer(data=json.loads(r.text))
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
 
 
 #CONTRIBUTIONS

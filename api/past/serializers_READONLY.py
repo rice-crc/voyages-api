@@ -714,4 +714,48 @@ class EnslavedAggRoutesNodesSerializer(serializers.Serializer):
 	
 class EnslavedAggRoutesResponseSerializer(serializers.Serializer):
 	edges=serializers.ListField(child=EnslavedAggRoutesEdgesSerializer())
-	nodes=serializers.ListField(child=EnslavedAggRoutesNodesSerializer())	
+	nodes=serializers.ListField(child=EnslavedAggRoutesNodesSerializer())
+
+############### NETWORK GRAPHS
+
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			"Connections to Robert N. Henderson",
+			summary="Connections to Robert N. Henderson",
+			description="Here we request the connections to enslaver #55232, Robert N. Henderson.",
+			value={
+				"enslavers": [55232]
+			}
+		)
+	]
+)
+class PASTNetworksRequestSerializer(serializers.Serializer):
+	enslaved=serializers.ListField(
+		child=serializers.IntegerField(), required=False
+	)
+	enslavers=serializers.ListField(
+		child=serializers.IntegerField(), required=False
+	)
+	voyages=serializers.ListField(
+		child=serializers.IntegerField(), required=False
+	)
+	enslavement_relations=serializers.ListField(
+		child=serializers.IntegerField(), required=False
+	)
+
+class PASTNetworksResponseNodeSerializer(serializers.Serializer):
+	id=serializers.IntegerField()
+	node_class=serializers.CharField(max_length=50)
+	uuid=serializers.CharField(max_length=36)
+	data=serializers.JSONField()
+	
+	
+class PASTNetworksResponseEdgeSerializer(serializers.Serializer):
+	source=serializers.CharField(max_length=36)
+	target=serializers.CharField(max_length=36)
+	data=serializers.JSONField()
+	
+class PASTNetworksResponseSerializer(serializers.Serializer):
+	nodes=PASTNetworksResponseNodeSerializer(many=True)
+	edges=PASTNetworksResponseEdgeSerializer(many=True)

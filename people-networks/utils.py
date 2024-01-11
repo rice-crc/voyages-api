@@ -170,7 +170,6 @@ def load_graph():
 # 			print(enslaved_dict[814219])
 # 			print(relation_type)
 # 			printit=True
-# 		
 		##NOT YET HANDLING ENSLAVER ROLES
 		if relation_type=="Marriage":
 			#enslaver-to-enslaver marriages

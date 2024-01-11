@@ -87,20 +87,6 @@ class SourceShortRefSerializer(serializers.ModelSerializer):
 		model=ShortRef
 		fields=['id','name']
 
-@extend_schema_serializer(
-	examples = [
-		OpenApiExample(
-            'Ex. 1: Exact match on a nested field',
-            summary='Exact match on a nested field',
-            description='Here, we search for an exact match on a str value field. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
-            value={
-				"short_ref__name__exact":"OMNO"
-			},
-			request_only=True,
-			response_only=False
-        )
-    ]
-)
 class SourceSerializer(serializers.ModelSerializer):
 	page_connections=SourcePageConnectionSerializer(many=True)
 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True)
@@ -114,11 +100,38 @@ class SourceSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 
-############ REQUEST FIILTER OBJECTS
+
 class SourceFilterItemSerializer(serializers.Serializer):
 	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
 	varName=serializers.ChoiceField(choices=[k for k in Source_options])
 	searchTerm=serializers.ReadOnlyField(read_only=True)
 
+############ REQUEST FIILTER OBJECTS
+@extend_schema_serializer(
+	examples = [
+		OpenApiExample(
+            'Ex. 1: Exact match on a nested field',
+            summary='Exact match on a nested field',
+            description='Here, we search for an exact match on a str value field. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
+            value={
+            	"filter":[
+					{
+						"varName":"short_ref__name",
+						"op":"in",
+						"searchTerm":["OMNO"]
+					}
+            	]
+			},
+			request_only=True,
+			response_only=False
+        )
+    ]
+)
 class SourceRequestSerializer(serializers.Serializer):
 	filter=SourceFilterItemSerializer(many=True,allow_null=True,required=False)
+
+class SourceListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=SourceSerializer(many=True,read_only=True)

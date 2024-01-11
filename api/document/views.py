@@ -35,7 +35,6 @@ from rest_framework import filters
 class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=SourceSerializer
 	@extend_schema(
 		request=SourceRequestSerializer,
 		responses=SourceSerializer
@@ -50,29 +49,32 @@ class SourceList(generics.GenericAPIView):
 		These changes necessitated that we create Docs as its own django app and endpoint. Now, each "Source" points at one or more Voyages, Enslaved People, or Enslavers. In turn, some of these Sources also have page-level metadata and links to IIIF images. For more information on the IIIF specification, visit https://iiif.io/api/index.html
 		'''
 		print("SOURCE LIST+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = SourceRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Source.objects.all()
 		queryset=queryset.order_by('id')
-		source_options=getJSONschema('Source',hierarchical=False)
 		queryset,results_count=post_req(	
 			queryset,
 			self,
 			request,
-			source_options,
-			retrieve_all=False
+			Source_options
 		)
-		paginated_queryset=paginate_queryset(queryset,request)
-		if len(error_messages)==0:
-			st=time.time()
-			headers={"total_results_count":results_count}
-			read_serializer=SourceSerializer(paginated_queryset,many=True)
-			serialized=read_serializer.data
-			resp=JsonResponse(serialized,safe=False,headers=headers)
-			resp.headers['total_results_count']=headers['total_results_count']
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return resp
-		else:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+
+		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+		resp=SourceListResponseSerializer({
+			'count':total_results_count,
+			'page':page_num,
+			'page_size':page_size,
+			'results':results
+		}).data
+		#I'm having the most difficult time in the world validating this nested paginated response
+		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		return JsonResponse(resp,safe=False,status=200)
 
 class SourceRETRIEVE(generics.RetrieveAPIView):
 	'''

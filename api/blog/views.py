@@ -26,121 +26,81 @@ class PostList(generics.GenericAPIView):
 	
 	Blog posts also contain hyperlinks to images hosted by SlaveVoyages for making the posts visually appealing.
 	'''
-	serializer_class=PostSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		request=PostListRequestSerializer,
+		responses=PostListResponseSerializer
+	)
 	def post(self,request):
 		print("BLOG POST LIST+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = PostListRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Post.objects.all()
-		params=dict(request.data)
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,self,request,Post_options,retrieve_all=True
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Post_options,
+			auto_prefetch=True
 		)
-		print(len(queryset))
-		results_page,total_results_count=paginate_queryset(queryset,request)
-		if len(error_messages)==0:
-			st=time.time()
-			serialized_results=PostSerializer(results_page,many=True).data
-			resp={
-				'count':total_results_count,
-				'results':serialized_results
-			}
-			status=200
-		else:
-			resp={'status':'false','message':' | '.join(error_messages)}
-			status=400
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(resp,safe=False,status=status)
-
-
+		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+		resp=PostListResponseSerializer({
+			'count':total_results_count,
+			'page':page_num,
+			'page_size':page_size,
+			'results':results
+		}).data
+		#I'm having the most difficult time in the world validating this nested paginated response
+		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		return JsonResponse(resp,safe=False,status=200)
 
 class PostTextFieldAutoComplete(generics.GenericAPIView):
+	'''
+	The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the blog post). It also accepts filters.
+	'''
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	queryset=Enslaved.objects.all()
 	@extend_schema(
-		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the blog post). It also accepts filters.",
-		request=autocompleterequestserializer,
-		responses=autocompleteresponseserializer,
-		examples = [
-			OpenApiExample(
-				'Autocomplete on any blog-related field',
-				summary='Autocomplete for blog tags like "ma"',
-				description='Here, we search blog tags for values like "ma". We request the first 10 of these.',
-				value={
-					"varName":"tags__name",
-					"querystr":"ma",
-					"limit":10,
-					"offset":0,
-					"filter":{}
-				},
-				request_only=True,
-				response_only=False
-			),
-			OpenApiExample(
-				'Suggested values are returned',
-				summary='Autocomplete for blog tags like "ma"',
-				description='Here, we see the first and only 2 blog tags that are like "ma"',
-				value={
-					"varName": "tags__name",
-					"querystr": "ma",
-					"offset": 0,
-					"limit": 10,
-					"filter": {},
-					"suggested_values": [
-						{
-							"value": "Diaspora Maps"
-						},
-						{
-							"value": "Introductory Maps"
-						}
-					]
-				},
-				request_only=False,
-				response_only=True
-			)
-		]
+		request=PostAutoCompleteRequestSerializer,
+		responses=PostAutoCompleteResponseSerializer
 	)
 	def post(self,request):
 		st=time.time()
-		queryset=Post.objects.all()
 		print("BLOG POST CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
 		
-		options=Post_options
+		#VALIDATE THE REQUEST
+		serialized_req = PostAutoCompleteRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 		
-		rdata=request.data
-
-		varName=str(rdata.get('varName'))
-		querystr=str(rdata.get('querystr'))
-		offset=int(rdata.get('offset'))
-		limit=int(rdata.get('limit'))
-	
-		max_offset=500
-	
-		if offset>max_offset:
-			final_vals=[]
-		else:
-			queryset,selected_fields,results_count,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				options,
-				auto_prefetch=False,
-				retrieve_all=True
-			)
-			final_vals=autocomplete_req(queryset,varName,querystr,offset,max_offset,limit)
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Post.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Post_options,
+			auto_prefetch=False
+		)
 		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		
-		resp=dict(rdata)
+		#RUN THE AUTOCOMPLETE ALGORITHM
+		final_vals=autocomplete_req(queryset,request)
+		resp=dict(request.data)
 		resp['suggested_values']=final_vals
 		
-		read_serializer=autocompleteresponseserializer(resp)
-		serialized=read_serializer.data
-		
-		print(' | '.join(error_messages))
-		
-		return JsonResponse(serialized,safe=False)
+		#VALIDATE THE RESPONSE
+		serialized_resp=PostAutoCompleteResponseSerializer(data=resp)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
 
 
 
@@ -150,25 +110,39 @@ class AuthorList(generics.GenericAPIView):
 		
 		The posts authored by the author are included in the response as an array of nested objects.
 	'''
-	serializer_class=AuthorSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		request=AuthorListRequestSerializer,
+		responses=AuthorListResponseSerializer
+	)
 	def post(self,request):
 		print("AUTHOR LIST+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = AuthorListRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Author.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Author_options,retrieve_all=False)
-		if len(error_messages)==0:
-			st=time.time()
-			headers={"total_results_count":results_count}
-			read_serializer=AuthorSerializer(queryset,many=True)
-			serialized=read_serializer.data
-			resp=JsonResponse(serialized,safe=False,headers=headers)
-			resp.headers['total_results_count']=headers['total_results_count']
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return resp
-		else:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Author_options,
+			auto_prefetch=True
+		)
+		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+		resp=AuthorListResponseSerializer({
+			'count':total_results_count,
+			'page':page_num,
+			'page_size':page_size,
+			'results':results
+		}).data
+		#I'm having the most difficult time in the world validating this nested paginated response
+		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		return JsonResponse(resp,safe=False,status=200)
 
 class InstitutionList(generics.GenericAPIView):
 	'''
@@ -176,24 +150,37 @@ class InstitutionList(generics.GenericAPIView):
 		
 		The authors associated with these institutions are included as nested objects, and the posts by those authors are nested within these author objects.
 	'''
-	serializer_class=InstitutionSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		request=InstitutionListRequestSerializer,
+		responses=InstitutionListResponseSerializer
+	)
 	def post(self,request):
 		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = InstitutionListRequestSerializer(data=request.data)
+		
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Institution.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,self,request,Institution_options,retrieve_all=False
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Institution_options,
+			auto_prefetch=True
 		)
-		if len(error_messages)==0:
-			st=time.time()
-			headers={"total_results_count":results_count}
-			read_serializer=InstitutionSerializer(queryset,many=True)
-			serialized=read_serializer.data
-			resp=JsonResponse(serialized,safe=False,headers=headers)
-			resp.headers['total_results_count']=headers['total_results_count']
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return resp
-		else:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+		resp=InstitutionListResponseSerializer({
+			'count':total_results_count,
+			'page':page_num,
+			'page_size':page_size,
+			'results':results
+		},read_only=True).data
+		#I'm having the most difficult time in the world validating this nested paginated response
+		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		return JsonResponse(resp,safe=False,status=200)

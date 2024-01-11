@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField,CharField
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
 import re
 from .models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
@@ -100,13 +100,19 @@ class SourceSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 
+############ REQUEST FIILTER OBJECTS
+class AnyField(Field):
+	def to_representation(self, value):
+		return value
+	def to_internal_value(self, data):
+		return data
 
 class SourceFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
 	varName=serializers.ChoiceField(choices=[k for k in Source_options])
-	searchTerm=serializers.ReadOnlyField(read_only=True)
+	searchTerm=AnyField()
 
-############ REQUEST FIILTER OBJECTS
+
 @extend_schema_serializer(
 	examples = [
 		OpenApiExample(

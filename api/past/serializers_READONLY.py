@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField,CharField
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
 import re
 from .models import *
 from geo.models import Location
@@ -294,17 +294,25 @@ class EnslavementRelationPKSerializer(serializers.ModelSerializer):
 #################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR THE PAGINATED VOYAGE LIST ENDPOINT. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
 
 
+class AnyField(Field):
+	def to_representation(self, value):
+		return value
+
+	def to_internal_value(self, data):
+		return data
+
+
 
 ############ REQUEST FIILTER OBJECTS
 class EnslaverFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
 	varName=serializers.ChoiceField(choices=[k for k in Enslaver_options])
-	searchTerm=serializers.ReadOnlyField(read_only=True)
+	searchTerm=AnyField()
 
 class EnslavedFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
 	varName=serializers.ChoiceField(choices=[k for k in Enslaved_options])
-	searchTerm=serializers.ReadOnlyField(read_only=True)
+	searchTerm=AnyField()
 
 ########### PAGINATED ENSLAVED LISTS 
 @extend_schema_serializer(

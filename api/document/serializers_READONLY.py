@@ -4,6 +4,7 @@ import re
 from .models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from django.core.exceptions import ObjectDoesNotExist
+from common.static.Source_options import Source_options
 
 class DocSparseDateSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -111,3 +112,13 @@ class SourceSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Source
 		fields='__all__'
+
+
+############ REQUEST FIILTER OBJECTS
+class SourceFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["gte","lte","exact","icontains","in","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Source_options])
+	searchTerm=serializers.ReadOnlyField(read_only=True)
+
+class SourceRequestSerializer(serializers.Serializer):
+	filter=SourceFilterItemSerializer(many=True,allow_null=True,required=False)

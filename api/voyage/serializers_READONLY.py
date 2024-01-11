@@ -505,8 +505,8 @@ class VoyageAggRoutesEdgesSerializer(serializers.Serializer):
 class VoyageAggRoutesNodesDataSerializer(serializers.Serializer):
 	lat=serializers.FloatField(allow_null=False)
 	lon=serializers.FloatField(allow_null=False)
-	name=serializers.CharField(max_length=50,allow_null=True)
-	tags=serializers.ListField(child=serializers.CharField(max_length=50),allow_null=True)
+	name=serializers.CharField(max_length=500,allow_null=True)
+	tags=serializers.ListField(child=serializers.CharField(max_length=500),allow_null=True)
 
 class VoyageAggRoutesNodesWeightsSerializer(serializers.Serializer):
 	disembarkation=serializers.IntegerField()

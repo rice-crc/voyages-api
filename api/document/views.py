@@ -36,6 +36,11 @@ class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	serializer_class=SourceSerializer
+	@extend_schema(
+		request=SourceRequestSerializer,
+		responses=SourceSerializer
+	)
+	
 	def post(self,request):
 		'''
 		Voyages has always been built on scholarship, with references to many different archival sources. In the legacy version of the site, the sources were organized with a unique short reference ("short_ref") and a full reference ("full_ref"), like OMNO & Outward Manifests for New Orleans. When these sources were connected to Voyages, they would oftentimes be connected along with a field called "text_ref" that pointed at a specific location in the archive, or page number in the book.
@@ -48,7 +53,7 @@ class SourceList(generics.GenericAPIView):
 		queryset=Source.objects.all()
 		queryset=queryset.order_by('id')
 		source_options=getJSONschema('Source',hierarchical=False)
-		queryset,results_count=post_req(
+		queryset,results_count=post_req(	
 			queryset,
 			self,
 			request,
@@ -78,7 +83,6 @@ class SourceRETRIEVE(generics.RetrieveAPIView):
 	lookup_field='id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-
 
 class SourceListGENERIC(generics.ListAPIView):
 	'''

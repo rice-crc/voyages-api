@@ -7,6 +7,30 @@ from common.models import NamedModelAbstractBase,SparseDateAbstractBase
 class DocSparseDate(SparseDateAbstractBase):
 	pass
 
+class Transcription(models.Model):
+    """
+    The text transcription of a page in a document.
+    ADAPTED FROM DELLAMONICA'S MODEL
+    """
+    page = models.ForeignKey(
+    	'Page',
+    	null=False,
+        on_delete=models.CASCADE,
+        related_name='transcriptions'
+    )
+    #page number will come from the sourcepageconnection.order field
+	#page_number = models.IntegerField(null=False)
+    # A BCP47 language code for the transcription text.
+    # https://www.rfc-editor.org/bcp/bcp47.txt
+    language_code = models.CharField(max_length=20, null=False)
+    text = models.TextField(null=False)
+    # Indicates whether the transcription is in the original language or a
+    # translation.
+    is_translation = models.BooleanField(null=False)
+
+    def __str__(self):
+        return f"Transcription p. {self.page.source_connection.order}: {self.text}"
+
 class Page(models.Model):
 	"""
 	INDIVIDUAL PAGES
@@ -58,13 +82,19 @@ class Page(models.Model):
 			return None
 			
 class SourcePageConnection(models.Model):
+	"""
+	CONNECTIONS BTW SOURCES AND PAGES.
+	A PAGE CAN APPEAR IN MULTIPLE SOURCES.
+	WE REALIZED THIS WITH THE HUNTINGTON'S POOR INDEXING OF THEIR ITEMS.
+	A TRANSCRIBED LETTER MAY START ON ONE PAGE AND END ON ANOTHER, AND THEN BE FOLLOWED, ON THAT LAST PAGE BY THE BEGINNING OF ANOTHER TRANSCRIBED LETTER.
+	"""
 	source=models.ForeignKey(
 		'Source',
 		related_name='page_connections',
 		on_delete=models.CASCADE
 	)
 	
-	page=models.ForeignKey(
+	page=models.OneToOneField(
 		'Page',
 		related_name='source_connections',
 		on_delete=models.CASCADE
@@ -198,6 +228,10 @@ class Source(models.Model):
 		null=True
 	)
 	
+	#from dellamonica's models
+	thumbnail = models.TextField(null=True, help_text='URL for a thumbnail of the Document')
+	bib = models.TextField(null=True, help_text='Formatted bibliography for the Document')
+	
 	zotero_group_id=models.IntegerField(
 		"Zotero Integer Group ID",
 		null=True,
@@ -267,7 +301,10 @@ class Source(models.Model):
 		null=False
 	)
 	
-	notes=models.TextField(null=True,blank=True)
+	notes=models.TextField(
+		null=True,
+		blank=True
+	)
 	
 	order_in_shortref=models.IntegerField(
 		"Now that we're splitting shortrefs, sources should be ordered under them",

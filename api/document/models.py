@@ -29,7 +29,7 @@ class Transcription(models.Model):
     is_translation = models.BooleanField(null=False)
 
     def __str__(self):
-        return f"Transcription p. {self.page.source_connection.order}: {self.text}"
+        return f"Transcription of page {self.page}: {self.text}"
 
 class Page(models.Model):
 	"""
@@ -94,7 +94,7 @@ class SourcePageConnection(models.Model):
 		on_delete=models.CASCADE
 	)
 	
-	page=models.OneToOneField(
+	page=models.ForeignKey(
 		'Page',
 		related_name='source_connections',
 		on_delete=models.CASCADE
@@ -215,6 +215,12 @@ class ShortRef(models.Model):
 	def __str__(self):
 		return self.name
 
+class SourceType(models.Model):
+	'''
+		We'll rely on Zotero's controlled vocabulary from now on.
+	'''
+	name = models.CharField(max_length=255,unique=True)
+
 class Source(models.Model):
 	"""
 	Represents the relationship between Voyage and VoyageSources
@@ -231,6 +237,7 @@ class Source(models.Model):
 	#from dellamonica's models
 	thumbnail = models.TextField(null=True, help_text='URL for a thumbnail of the Document')
 	bib = models.TextField(null=True, help_text='Formatted bibliography for the Document')
+	manifest_content = models.JSONField(help_text='DCTerms imported from Zotero -- NOT the full manifest',null=True)
 	
 	zotero_group_id=models.IntegerField(
 		"Zotero Integer Group ID",
@@ -253,6 +260,19 @@ class Source(models.Model):
 		default="sv-docs"
 	)
 	
+	zotero_url=models.URLField(
+		max_length=400,
+		null=True
+	)
+	
+	source_type=models.ForeignKey(
+		SourceType,
+		null=True,
+		blank=True,
+		on_delete=models.CASCADE,
+		related_name='+'
+	)
+	
 	short_ref=models.ForeignKey(
 		ShortRef,
 		null=False,
@@ -263,7 +283,7 @@ class Source(models.Model):
 	
 	title=models.CharField(
 		"Title",
-		max_length=255,
+		max_length=1000,
 		null=False,
 		blank=False
 	)
@@ -295,7 +315,7 @@ class Source(models.Model):
 	)
 	
 	has_published_manifest=models.BooleanField(
-		"Is there a published manifest on dellamonica's server?",
+		"Is there a published manifest?",
 		default=False,
 		blank=False,
 		null=False

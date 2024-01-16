@@ -161,7 +161,7 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 		hierarchical=True
 	else:
 		hierarchical=False
-	r=requests.get(url=OPEN_API_BASE_API)
+	r=requests.get(url=OPEN_API_BASE_API+"schema/?format=json")
 	j=json.loads(r.text)
 	schemas=j['components']['schemas']
 	base_obj_name=base_obj_name

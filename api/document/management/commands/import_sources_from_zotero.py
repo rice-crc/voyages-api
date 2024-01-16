@@ -1,11 +1,14 @@
 from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from api.models import Document, DocumentRevision, EntityDocument, EntityType, Transcription
+from document.models import Source, Transcription, SourceType,DocSparseDate
 from xml.etree import ElementTree
 import json
 import re
 import requests
+#adding in authorization and urls from localsettings
+from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,zotero_credentials
+from voyages3.settings import STATIC_ROOT
 
 _dublin_core_labels = {
 	"abstract": "Abstract",
@@ -125,23 +128,25 @@ _dublin_core_labels = {
 }
 
 _max_errors = 5 # Maximum number of *consecutive* errors for the APIs we call.
-_voyages_cache_filename = '.cached_voyages_data'
-_zotero_cache_filename = '.cached_zotero_data'
+# _voyages_cache_filename = '.cached_voyages_data'
+_zotero_cache_filename = f'{STATIC_ROOT}/.cached_zotero_data'
 
 def _makeLabelValue(label, value, lang):
 	return { 'label': { lang: [label] }, 'value': { lang: value } }
 
 class Command(BaseCommand):
-	help = """This command fetches data from multiple APIs and consolidates
-	the information into a local Document entity"""
+	help = """This command fetches data from the Zotero API and imports it to the Voyages Document models"""
 	
 	def add_arguments(self, parser):
-		parser.add_argument("--voyages-key")
-		parser.add_argument("--voyages-url")
-		parser.add_argument("--zotero-key")
+		# We shouldn't need these any more
+# 		parser.add_argument("--voyages-key")
+# 		parser.add_argument("--voyages-url")
+		# But we will need this
+		parser.add_argument("--voyages-frontend", default=VOYAGES_FRONTEND_BASE_URL)
+		parser.add_argument("--zotero-key", default=zotero_credentials['api_key'])
 		parser.add_argument("--zotero-url", default="https://api.zotero.org")
-		parser.add_argument("--zotero-userid")
-		parser.add_argument("--ignore-cache")
+		parser.add_argument("--zotero-userid", default=zotero_credentials['userid'])
+		parser.add_argument("--ignore-cache", default=True)
 
 	@staticmethod
 	def _get_zotero_data(options, group_ids: list[int]):
@@ -150,7 +155,10 @@ class Command(BaseCommand):
 			try:
 				with open(_zotero_cache_filename, encoding='utf-8') as f:
 					cached = json.load(f)
-					print(f"Imported {len(cached.keys())} Zotero entries from cached file")
+					print(f"Importing Zotero entries from cached file. {len(cached.keys())} group libraries are present...")
+					for group_id in cached:
+						print(f"+Library ID {group_id} has {len(cached[group_id].keys())} items.")
+					
 					return cached
 			except:
 				print("No cached Zotero data")
@@ -184,16 +192,21 @@ class Command(BaseCommand):
 					e in page.findall('.//{http://www.w3.org/2005/Atom}entry')
 			}
 			count = len(entries)
+			
 			# Replace the XML element in the dict values by a dictionary of RDF
 			# attributes with their respective values.
 			page = {
 				key: extract_from_rdf(rdf)
 				for key, rdf in entries.items() if rdf is not None
 			}
+			
 			return (page, count)
 
 		zotero_data = {}
 		for group_id in group_ids:
+			#I think we need a nested dictionary
+			## in case item id's turn out not to be unique between group libraries...
+			zotero_data[group_id]={}
 			zotero_start = 0
 			error_count = 0
 			last_error = None
@@ -206,7 +219,7 @@ class Command(BaseCommand):
 					if count == 0:
 						break
 					zotero_start += count
-					zotero_data.update(page)
+					zotero_data[group_id].update(page)
 					error_count = 0
 				except Exception as ex:
 					last_error = ex
@@ -229,8 +242,8 @@ class Command(BaseCommand):
 					print(f"Fetched bibliography from Zotero's API [{len(page)}].")
 					for item in page:
 						key = item['key']
-						if key in zotero_data:
-							zd = zotero_data[key]
+						if key in zotero_data[group_id]:
+							zd = zotero_data[group_id][key]
 							zd['bib'] = item['bib']
 							zd['zotero_doc_url'] = item['links']['alternate']['href']
 					zotero_start += len(page)
@@ -245,60 +258,18 @@ class Command(BaseCommand):
 			print("Failed to write Zotero data to the cache")
 		return zotero_data
 	
-	@staticmethod
-	def _get_voyages_data(options):
-		# Check if we already have cached data from the Zotero API.
-		if not options.get('--ignore-cache', False):
-			try:
-				with open(_voyages_cache_filename, encoding='utf-8') as f:
-					cached = json.load(f)
-					print(f"Imported {len(cached.keys())} Voyage entries from cached file")
-					return cached
-			except:
-				print("No cached Voyage data")
-		voyages_data = {}
-		sv_headers = { "Authorization": f"Token {options['voyages_key']}" }
-		offset = 0
-		error_count = 0
-		last_error = None
-		while True:
-			if error_count >= _max_errors:
-				raise Exception(f"Too many failures fetching data from the Voyages API: {last_error}")
-			try:
-				res = requests.get(
-					f"{options['voyages_url']}/docs/GENERIC/?limit=10&offset={offset}",
-					headers=sv_headers,
-					timeout=60)
-				page = res.json()['results']
-				if not page:
-					break
-				voyages_data.update({ item['zotero_item_id']: item for item in page })
-				print(f"Fetched {len(page)} rows [first id={page[0]['id']}]")
-				error_count = 0
-				offset += len(page)
-			except Exception as ex:
-				last_error = ex
-				error_count += 1
-				continue
-		# Save to a local cache
-		try:
-			with open(_voyages_cache_filename, 'w', encoding='utf-8') as f:
-				json.dump(voyages_data, f)
-		except:
-			print("Failed to write Voyages data to the cache")
-		return voyages_data
 	
-	@staticmethod
-	def _map_connections(doc, etype, connections, field_name):
-		conn = set()
-		for item in connections:
-			if item.get(field_name):
-				entity_key = item[field_name].get('id')
-				if entity_key:
-					conn.add(entity_key)
-		for ekey in conn:
-			edoc = EntityDocument(document=doc, entity_type=etype, entity_key=ekey)
-			edoc.save()
+# 	@staticmethod
+# 	def _map_connections(doc, etype, connections, field_name):
+# 		conn = set()
+# 		for item in connections:
+# 			if item.get(field_name):
+# 				entity_key = item[field_name].get('id')
+# 				if entity_key:
+# 					conn.add(entity_key)
+# 		for ekey in conn:
+# 			edoc = EntityDocument(document=doc, entity_type=etype, entity_key=ekey)
+# 			edoc.save()
 
 	@staticmethod
 	def _extract_iiif_url(url):
@@ -310,70 +281,145 @@ class Command(BaseCommand):
 		return [m.group(i) for i in [2, 3]]
 	
 	def handle(self, *args, **options):
+		# Log into Zotero with specified username
 		zotero_groups_url = f"{options['zotero_url']}/users/{options['zotero_userid']}/groups"
-		res = requests.get(zotero_groups_url, timeout=30)
+		zotero_headers = { 'Authorization': f"Bearer {options['zotero_key']}" }
+		res = requests.get(
+			zotero_groups_url,
+			timeout=30,
+			headers=zotero_headers
+		)
 		# Retrieve the group ids from the Zotero API.
-		group_ids = [item['id'] for item in res.json() if item['data']['name']]
+		# Specifically, those that the logged-in user has access to
+		##
+# 		group_ids = [item['id'] for item in res.json() if item['data']['name']]
+		
+		#INSTEAD, WE'RE GOING TO MANUALLY SET ZOTERO GROUP LIBRARIES AS PULLABLE
+		#BECAUSE WE'RE TREATING IT AS OUR SOURCE OF TRUTH ON THE BIBLIOGRAPHIC DATASET
+		group_ids=zotero_credentials['import_from_library_ids']
 		print(f"Zotero group ids are: {group_ids}")
 		zotero_data = Command._get_zotero_data(options, group_ids)
-		voyages_data = Command._get_voyages_data(options)
-		docs = {d.key: d for d in Document.objects.prefetch_related('revisions').all()}
-		entity_types = {t.name: t for t in EntityType.objects.all()}
+				
 		timestamp_format = "%Y-%m-%dT%H:%M:%S.%fZ"
 		imported_count = 0
+		
+		#So I've turned this around -- now we treat Zotero as our bibliographic source of truth
+		##Rather than pulling source data then looking for the corresponding zotero entry
+		##We pull zotero data and look for the corresponding source entry
+		###Down the line, we'll need a way to identify if a source has been
+		####Added to SV without being added to Zotero?
+		####Or god forbid somehow deleted from Zotero
+		##But my thinking here is that the contribute form should have a zotero widget
+		##So that people can create sources to go with their contributions
+		
+		imported_count=0
 		with transaction.atomic():
-			for key, voyage_data in voyages_data.items():
-				pages = [p['page'] for p in voyage_data['page_connections']]
-				rdf = zotero_data.get(key)
-				if not rdf:
-					continue
-				page_images = [pimg for pimg in
-					[Command._extract_iiif_url(p.get('iiif_baseimage_url')) for p in pages]
-					if pimg is not None]
-				# At this point we have enough data to import to our db.
-				doc = docs.get(key)
-				if doc is None:
-					doc = Document()
-					doc.key = key
-				# TODO: check whether there is already an identical revision and
-				# prevent the creation of a duplicate.
-				try:
-					timestamp = datetime.strptime(voyage_data['last_updated'], timestamp_format)
-				except:
-					timestamp = datetime.now()
-				doc.bib = rdf.pop('bib', None)
-				doc.save()
-				rev = DocumentRevision(
-					document=doc, label=rdf.get('Title', 'No title'),
-					status=DocumentRevision.Status.IMPORTED,
-					timestamp=timestamp)
-				rev.revision_number = 1
-				# Generate metadata for the document.
-				zotero_doc_url = rdf.pop('zotero_doc_url', None)
-				metadata = [_makeLabelValue(k, val, 'en') for k, val in rdf.items()]
-				if zotero_doc_url:
-					metadata.append(_makeLabelValue('Citation', [f"<span><a href='{zotero_doc_url}'>Zotero Entry</a></span>"], 'en'))
-				rev.content = {
-					'metadata': metadata,
-					'page_images': page_images
-				}
-				rev.save()
-				# Create entity links to the document.
-				Command._map_connections(doc, entity_types['Voyages'], voyage_data.get('source_voyage_connections'), 'voyage')
-				Command._map_connections(doc, entity_types['Enslaved'], voyage_data.get('source_enslaved_connections'), 'enslaved')
-				Command._map_connections(doc, entity_types['Enslavers'], voyage_data.get('source_enslaver_connections'), 'enslaver')
-				Command._map_connections(doc, entity_types['Voyage sources'], [{ 'src': voyage_data }], 'src')
-				# Import transcript data.
-				for i, page in enumerate(pages, 1):
-					page_transc = page.get('transcription')
-					if page_transc:
-						# TODO: for now there is no language code in the source API
-						transcription = Transcription(
-							document_rev=rev, page_number=i,
-							language_code='en', text=page_transc,
-							is_translation=False)
-						transcription.save()
-				imported_count += 1
-				if imported_count % 100 == 0:
-					print(f"Imported {imported_count} documents")
+			for zotero_group_id in zotero_data:
+				for zotero_item_id in zotero_data[zotero_group_id]:
+				
+					#get the core archival metadata (jcm)
+					rdf = zotero_data[zotero_group_id][zotero_item_id]				
+					zotero_url = rdf.pop('zotero_doc_url',None)
+					bib = rdf.pop('bib', None)
+					source_title = rdf.pop('Title','No title')
+					source_type_name = rdf.pop('Type',None)
+					source_date = rdf.pop("Date",None)
+				
+					## We really should be enforcing a standard date format but... (jcm)
+					if source_date is not None:
+						source_date=source_date[0]
+						slashes=re.fullmatch("[0-9]*/[0-9]*/[0-9]*",source_date)
+						dashes=re.fullmatch("[0-9]*-[0-9]*-[0-9]*",source_date)
+						at_least_a_year=re.search('[0-9]{4}',source_date)
+						if slashes:
+							yyyy,mm,dd=[int(i) if i!='' else None for i in source_date.split("/")]
+						elif dashes:
+							yyyy,mm,dd=[int(i) if i!='' else None for i in source_date.split("-")]
+						elif at_least_a_year:
+							yyyy=int(at_least_a_year.group(0))
+							mm=dd=None
+							print("BAD DATE FORMAT, RECORDING YEAR:",yyyy,zotero_url)
+						elif source_date=="No Date":
+							yyyy=mm=dd=None
+						else:
+							yyyy=mm=dd=None
+							print("UNABLE TO PARSE DATE:",zotero_url,source_date)
+				
+					# Check to see if the source is in the database (jcm)
+					try:
+						source=Source.objects.get(zotero_item_id=zotero_item_id)
+					except:
+						print("SOURCE DOES NOT EXIST IN VOYAGES:",zotero_url)
+						source=None
+				
+					#proceed if we have a match in the database for that source (jcm)
+					if source is not None:
+				
+						#AS FAR AS I CAN TELL, TYPE IS EITHER NONE OR 1 ENTRY LONG
+						#But for some reason Zotero encodes them as arrays? (jcm)
+						if source_type_name is not None:
+							source_type_name=source_type_name[0]
+							#zotero's types are all lowercase. we're going to capitalize them
+							#and use them as a controlled vocabulary
+							source_type,source_type_isnes=SourceType.objects.get_or_create(
+								name=source_type_name.capitalize()
+							)
+							source.source_type=source_type
+						else:
+							source.source_type=None
+					
+						source.title=source_title
+				
+						source.zotero_url = zotero_url
+				
+						source.bib=bib
+				
+						if source.zotero_group_id is None:
+							source.zotero_group_id=zotero_group_id
+					
+						#SIMILARLY, TITLE IS EITHER NONE OR A 1-ENTRY ARRAY
+						if source_title is not None:
+							source_title=source_title[0]
+					
+						#get any existing attached date object
+						#and overwrite it or delete it as necessary
+						#or create a new one if it does not (as necessary)
+						if not (yyyy is None and mm is None and dd is None):
+							if source.date is not None:
+								source_date_obj=source.date
+							else:
+								source_date_obj=DocSparseDate.objects.create(
+									year=yyyy,
+									month=mm,
+									day=dd
+								)
+							source.date=source_date_obj
+						else:
+							if source.date is not None:
+								source_date_obj=source.date
+								source_date_obj.delete()
+							source.sparse_date=None
+					
+						#if there are pages (which in my schema always have images) ...
+						#then we'll pull in the dcterms data for use by the manifest generator
+						#but all the other data (citation, transcriptions, etc) are all included
+						#in the schema already
+						if source.page_connections.all().count() > 0:
+							metadata = [_makeLabelValue(k, val, 'en') for k, val in rdf.items()]
+							print(metadata)
+							source.manifest_content = {
+								'metadata': metadata
+							}
+						else:
+							source.manifest_content=None
+					
+						source.save()
+					else:
+						#I think we should actually go ahead and create the source if it doesn't exist
+						#But until we make that call, I'm leaving this alone! (jcm)
+						pass
+					
+					imported_count += 1
+					if imported_count % 100 == 0:
+						print(f"Imported {imported_count} documents")
 		print("Import finished")

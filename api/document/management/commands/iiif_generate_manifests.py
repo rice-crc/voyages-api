@@ -6,11 +6,13 @@ import json
 import pathlib
 import re
 import requests
-
+from django.db.models import Q
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models import Prefetch
-from api.models import DocumentRevision, EntityDocument
+from document.models import Source
+from voyages3.settings import STATIC_ROOT,STATIC_URL
+from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_API
 
 # We special case these sources as they have issues with their IIIF Image
 # Service preventing us from creating manifests that point directly to the image
@@ -18,7 +20,7 @@ from api.models import DocumentRevision, EntityDocument
 # files.
 _special_case_no_img_service = ['catalog.archives.gov']
 
-def _get_api_and_profile(img_info):
+def get_api_and_profile(img_info):
 	profile_source = img_info['profile'][0]
 	level_match = re.match('.*(level[0-9]).*', profile_source)
 	img_profile = re.match(".*/api/image/([0-9]+)/(level[0-9]).json$", profile_source)
@@ -37,52 +39,78 @@ class Command(BaseCommand):
 	"""
 
 	help = """This command generate manifest files based on the documents
-		marked for publication in the database"""
+		in the database that have page images attached to them."""
 
 	def add_arguments(self, parser):
-		parser.add_argument("--base-url")
+		parser.add_argument("--base-url",default=f"{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/")
 		parser.add_argument("--out-dir", type=pathlib.Path,
-							help="The output directory where the manifests should be placed")
-		parser.add_argument("--status", nargs="*", type=int,
-							default=DocumentRevision.Status.APPROVED,
-							help="Only generate manifests with these status codes. " +
-							"Default = PUBLISHED")
+							help="The output directory where the manifests should be placed",
+							default=f"{STATIC_ROOT}/iiif_manifests/")
+		parser.add_argument("--skip-existing",default=True,
+							help="We are having timeout issues fetching remote manifests for repurposing. This serves as a basic checkpoint.")
+
+	@staticmethod
+	def _extract_iiif_url(url):
+		if url is None or url == '':
+			return None
+		m = re.match('^(https?://)([^/]+)(.*)/full/(full|max)/0/default.jpg$', url)
+		if not m:
+			raise Exception(f"Bad format for IIIF url: '{url}'")
+		return [m.group(i) for i in [2, 3]]
 
 	def handle(self, *args, **options):
-		revisions = DocumentRevision.objects \
-			.select_related('document') \
-			.prefetch_related('transcriptions') \
-			.prefetch_related( \
-				Prefetch('document__entities', EntityDocument.objects.prefetch_related('entity_type'))) \
-			.filter(status__in=[int(s) for s in options['status']])
-		revisions = list(revisions)
-		print(f"Found {len(revisions)} revisions to publish")
-		generated_count = 0
-		for rev in revisions:
+		manifest_sources=Source.objects.all().filter(~Q(page_connections__page=None))
+		
+		#screen out sources that lack either pages  
+		sources = Source.objects \
+			.prefetch_related('page_connections') \
+			.prefetch_related('page_connections__page') \
+			.prefetch_related('page_connections__page__transcriptions') \
+			.prefetch_related('source_voyage_connections__voyage') \
+			.prefetch_related('source_enslaver_connections__enslaver') \
+			.prefetch_related('source_enslaved_connections__enslaved') \
+			.filter(
+				~Q(page_connections__page=None) and ~Q(manifest_content=None)
+			)
+		print(f"Found {sources.count()} sources with page images.")
+		
+		if options['skip_existing'] in [True,'true','True']:
+			precount=sources.count()
+			sources=sources.filter(has_published_manifest=False)
+			if sources.count()<precount:
+				print(f"however, you have elected to skip those that already have manifests. we will only be publishing new manifests for the {sources.count()} items that lack them.")
+			else:
+				print("We will publish manifests for all of them.")
+		else:
+			print("We will publish manifests for all of them.")
+		
+		generated_count=0
+		for source in sources:
 			with transaction.atomic():
-				content = rev.content
-				page_images = content['page_images']
-				if not page_images:
+				content = source.manifest_content
+				
+				#then do a final pass to ensure that we don't have "pages" without images
+				#some of those did sneak in during the process of indexing transkribus against the library collections
+				pages_with_images = [spc.page for spc in source.page_connections.all() if spc.page.iiif_baseimage_url not in [None,'']]
+				
+				if len(pages_with_images)==0:
 					# Do not generate manifest without images.
-					rev.status = DocumentRevision.Status.NO_IMAGES
-					rev.save()
 					continue
+				
 				# Generate manifest for this revision.
-				base_id = f"{options['base_url']}/{rev.document.key}"
+				## THIS SHOULD BE UPDATED TO A COMPOSITE KEY: zotero_group_id + zotero_item_id
+				base_id = f"{options['base_url']}{source.zotero_group_id}__{source.zotero_item_id}.json"
 				first_thumb = None
 				canvas = []
 				abort = False
-				transcriptions = list(rev.transcriptions.all())
-				# We support multiple languages in the transcription so the same
-				# page may appear multiple times.
-				transcriptions = {page_num: [t for t in transcriptions if t.page_number == page_num]
-								for page_num in {t.page_number for t in transcriptions}}
-				for i, page in enumerate(page_images, 1):
+				for i, page in enumerate(pages_with_images, 1):
+# 					print(page.__dict__)
+					iiif_baseimage_url=page.iiif_baseimage_url
 					# A canvas page.
-					host_addr = page[0]
-					img_url_base = f"https://{host_addr}{page[1]}"
+					host_addr,iiif_suffix = Command._extract_iiif_url(iiif_baseimage_url)
+					img_url_base = f"https://{host_addr}{iiif_suffix}"
 					img_info = requests.get(f"{img_url_base}/info.json", timeout=30).json()
-					(api_version, profile_level) = _get_api_and_profile(img_info)
+					(api_version, profile_level) = get_api_and_profile(img_info)
 					use_img_service = not any(s in host_addr for s in _special_case_no_img_service)
 					if use_img_service and not (api_version and profile_level):
 						print("Failed to find API version and level for image service: " +
@@ -138,13 +166,13 @@ class Command(BaseCommand):
 							}]
 						}]
 					}
-					transc = transcriptions.get(i)
-					if transc:
+					transcriptions = page.transcriptions.all()
+					if len(transcriptions)>0:
 						canvas_data["annotations"] = [{
-							"id": f"{canvas_id}/annopage{idx_t}",
+							"id": f"{canvas_id}/annopage{i}",
 							"type": "AnnotationPage",
 							"items": [{
-								"id": f"{canvas_id}/annopage{idx_t}/anno1",
+								"id": f"{canvas_id}/annopage{i}/anno1",
 								"type": "Annotation",
 								"motivation": "commenting",
 								"body": {
@@ -155,49 +183,74 @@ class Command(BaseCommand):
 								},
 								"target": canvas_id
 							}]
-						} for idx_t, t in enumerate(transc, 1)]
+						} for t in transcriptions]
 					canvas.append(canvas_data)
 				if abort:
 					break
 				# Append entity connections to metadata.
 				doc_links = {}
-				for entity in rev.document.entities.all():
-					et = entity.entity_type
-					entity_links = doc_links.setdefault(et.name, [])
-					link_url = et.url_format.format(key=entity.entity_key)
-					link_label = et.url_label.format(key=entity.entity_key)
-					entity_links.append(f"<span><a href='{link_url}'>{link_label}</a></span>")
-				# Make a copy of the metadata so as not to overwrite the
-				# revision's version.
+				
 				metadata = list(content['metadata'])
-				for typename, entries in doc_links.items():
-					link_item = {
-						"label": { 'en': [f"Linked {typename}"] },
-						"value": { 'en': entries }
+				
+				#voyage ids
+				source_voyages=source.source_voyage_connections.all()
+				if source_voyages.count()>0:
+					voyage_links={
+						"label": { 'en': "Linked Voyages" },
+						"value": { 'en': [] }
 					}
-					metadata.append(link_item)
+					for source_voyage in source_voyages:
+						voyage_id=source_voyage.voyage.voyage_id
+						link=f"<span><a href='{VOYAGES_FRONTEND_BASE_URL}voyage/{voyage_id}'>Voyage #{voyage_id}</a></span>"
+						voyage_links['value']['en'].append(link)
+					metadata.append(voyage_links)
+					
+				source_enslavers=source.source_enslaver_connections.all()
+				if source_enslavers.count()>0:
+					enslaver_links={
+						"label": { 'en': "Linked Enslavers" },
+						"value": { 'en': [] }
+					}
+					for enslaver in source_enslavers:
+						enslaver_id=source_enslaver.enslaver.id
+						enslaver_principal_alias=source_enslaver.enslaver.principal_alias
+						link=f"<span><a href='{VOYAGES_FRONTEND_BASE_URL}enslaver/{enslaver_id}'>{enslaver_principal_alias} #{enslaver_id}</a></span>"
+						enslaver_links['value']['en'].append(link)
+					metadata.append(enslaver_links)
+				
+				source_enslaved_people=source.source_enslaved_connections.all()
+				if source_enslaved_people.count()>0:
+					enslaved_links={
+						"label": { 'en': "Linked Enslaved People" },
+						"value": { 'en': [] }
+					}
+					for source_enslaved_person in source_enslaved_people:
+						enslaved_id=source_enslaved_person.enslaved.enslaved_id
+						enslaved_documented_name=source_enslaved_person.enslaved.documented_name
+						link=f"<span><a href='{VOYAGES_FRONTEND_BASE_URL}enslaved/{enslaved_id}'>{enslaved_documented_name} #{enslaved_id}</a></span>"
+						enslaved_links['value']['en'].append(link)
+					metadata.append(enslaved_links)
+				
 				manifest = {
 					"@context": "http://iiif.io/api/presentation/3/context.json",
 					"id": base_id,
 					"type": "Manifest",
-					"label": { 'en': [rev.label] },
+					"label": { 'en': source.title },
 					"metadata": metadata,
 					"viewingDirection": "left-to-right",
 					"behavior": ["paged"],
-					"navDate": str(rev.timestamp),
 					"thumbnail": first_thumb,
 					"items": canvas
 				}
-				filename = f"{rev.document.key}_rev{str(rev.revision_number).zfill(3)}.json"
+				
+				
+				filename = f"{source.zotero_group_id}__{source.zotero_item_id}.json"
 				out_dir: pathlib.Path = options['out_dir']
 				with open(out_dir.joinpath(filename), 'w', encoding='utf-8') as f:
 					json.dump(manifest, f)
-				rev.status = DocumentRevision.Status.PUBLISHED
-				rev.save()
-				doc = rev.document
-				doc.current_rev = rev.revision_number
-				doc.thumbnail = first_thumb[0]['id']
-				doc.save()
+				source.thumbnail = first_thumb[0]['id']
+				source.has_published_manifest=True
+				source.save()
 				generated_count += 1
 				if generated_count % 50 == 0:
 					print(f"Generated {generated_count} manifests")

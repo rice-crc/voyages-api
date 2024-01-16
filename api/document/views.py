@@ -81,44 +81,44 @@ class SourceRETRIEVE(generics.RetrieveAPIView):
 	The lookup field for sources is the pk (id)
 	'''
 	queryset=Source.objects.all()
-	serializer_class=SourceSerializer
+	serializer_class=SourceCRUDSerializer
 	lookup_field='id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
-class SourceListGENERIC(generics.ListAPIView):
-	'''
-	TESTING A GENERIC, EASY-TO-SEARCH, PAGINATED LIST OF SOURCES FOR DELLAMONICA & SSC
-	
-	GET queries to this endpoint with the param "search" will search the following:
-	
-		A. EXACT on 
-			1. "short_ref__name", e.g. 1713Poll
-			2. "date__year", e.g. 1982
-			3. "zotero_item_id", e.g. FPGTSQXM
-		B. ICOMPLETE on "title"
-	
-	Because sources have massively nested data in some cases, I have had to restrict us to a maximum of 5 results per page.
-	
-	DON'T search OMNO in Swagger. My server can take Daniel Domingues Texas data, but your browser cannot :)
-	'''
-	queryset=Source.objects.all()
-	queryset.prefetch_related(
-		'page_connections',
-		'source_enslaver_connections',
-		'source_voyage_connections',
-		'source_enslaved_connections',
-		'source_enslavement_relation_connections'
-	)
-	queryset.select_related(
-		'short_ref',
-		'date'
-	)
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	serializer_class=SourceSerializer
-	filter_backends = [filters.SearchFilter]
-	search_fields = ['title','=date__year','short_ref__name','=zotero_item_id']
+# class SourceListGENERIC(generics.ListAPIView):
+# 	'''
+# 	TESTING A GENERIC, EASY-TO-SEARCH, PAGINATED LIST OF SOURCES FOR DELLAMONICA & SSC
+# 	
+# 	GET queries to this endpoint with the param "search" will search the following:
+# 	
+# 		A. EXACT on 
+# 			1. "short_ref__name", e.g. 1713Poll
+# 			2. "date__year", e.g. 1982
+# 			3. "zotero_item_id", e.g. FPGTSQXM
+# 		B. ICOMPLETE on "title"
+# 	
+# 	Because sources have massively nested data in some cases, I have had to restrict us to a maximum of 5 results per page.
+# 	
+# 	DON'T search OMNO in Swagger. My server can take Daniel Domingues Texas data, but your browser cannot :)
+# 	'''
+# 	queryset=Source.objects.all()
+# 	queryset.prefetch_related(
+# 		'page_connections',
+# 		'source_enslaver_connections',
+# 		'source_voyage_connections',
+# 		'source_enslaved_connections',
+# 		'source_enslavement_relation_connections'
+# 	)
+# 	queryset.select_related(
+# 		'short_ref',
+# 		'date'
+# 	)
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAuthenticated]
+# 	serializer_class=SourceSerializer
+# 	filter_backends = [filters.SearchFilter]
+# 	search_fields = ['title','=date__year','short_ref__name','=zotero_item_id']
 
 #######################
 # default view will be a paginated gallery
@@ -181,64 +181,6 @@ def source_page(request,source_id=1):
 		return render(request, "single_doc.html", {'source':source})
 	else:
 		return HttpResponseForbidden("Forbidden")
-
-@extend_schema(
-		exclude=True
-	)
-class ShortRefCREATE(generics.CreateAPIView):
-	'''
-	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
-	'''
-	queryset=ShortRef.objects.all()
-	serializer_class=CRUDShortRefSerializer
-	lookup_field='name'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class ShortRefRETRIEVE(generics.RetrieveAPIView):
-	'''
-	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
-	
-	These used to be unique values on the sources table in Voyages. In that legacy model, we had a short_ref and a full_ref for each source, and then, in our union table with voyages, we had a text_ref field where we would put page numbers, or box and folder numbers, etc. However, this led to a good deal of schema abuse (duplication, inconsistent use of fields, etc.)
-	
-	In the new model, we maintain the uniqueness of Short Ref's but we allow many Source objects to connect to these short ref's. The new source objects have much more, and much more structured data, being managed remotely in Zotero. Each source therefore now has an additional unique identifier: its Zotero Item ID.
-	
-	It could make sense to give these short refs their own Zotero listings.
-	'''
-	queryset=ShortRef.objects.all()
-	serializer_class=ShortRefSerializer
-	lookup_field='name'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-
-@extend_schema(
-		exclude=True
-	)
-class ShortRefUPDATE(generics.UpdateAPIView):
-	'''
-	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
-	'''
-	queryset=ShortRef.objects.all()
-	serializer_class=CRUDShortRefSerializer
-	lookup_field='name'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class ShortRefDESTROY(generics.DestroyAPIView):
-	'''
-	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
-	'''
-	queryset=ShortRef.objects.all()
-	serializer_class=CRUDShortRefSerializer
-	lookup_field='name'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
 
 @extend_schema(
 		exclude=True

@@ -3,11 +3,11 @@ from . import views
 
 urlpatterns = [
 	path('',views.SourceList.as_view()),
-	path('GENERIC/',views.SourceListGENERIC.as_view()),
-	path('shortref/CREATE/',views.ShortRefCREATE.as_view()),
-	path('shortref/<str:name>',views.ShortRefRETRIEVE.as_view()),
-	path('shortref/UPDATE/<str:name>',views.ShortRefUPDATE.as_view()),
-	path('shortref/DESTROY/<str:name>',views.ShortRefDESTROY.as_view()),
+# 	path('GENERIC/',views.SourceListGENERIC.as_view()),
+# 	path('shortref/CREATE/',views.ShortRefCREATE.as_view()),
+# 	path('shortref/<str:name>',views.ShortRefRETRIEVE.as_view()),
+# 	path('shortref/UPDATE/<str:name>',views.ShortRefUPDATE.as_view()),
+# 	path('shortref/DESTROY/<str:name>',views.ShortRefDESTROY.as_view()),
 	path('CREATE/',views.SourceCREATE.as_view()),
 	path('<int:id>',views.SourceRETRIEVE.as_view()),
 	path('UPDATE/<int:id>',views.SourceUPDATE.as_view()),

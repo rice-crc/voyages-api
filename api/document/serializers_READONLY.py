@@ -6,6 +6,16 @@ from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from django.core.exceptions import ObjectDoesNotExist
 from common.static.Source_options import Source_options
 
+class SourceTypeSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=SourceType
+		fields='__all__'
+
+# class TranscriptionSerializer(Serializers.ModelSerializer):
+# 	class Meta:
+# 		model=Transcription
+# 		fields='__all__'
+
 class DocSparseDateSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=DocSparseDate
@@ -88,6 +98,7 @@ class SourceShortRefSerializer(serializers.ModelSerializer):
 		fields=['id','name']
 
 class SourceSerializer(serializers.ModelSerializer):
+	source_type=SourceTypeSerializer(many=False)
 	page_connections=SourcePageConnectionSerializer(many=True)
 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True)
 	source_voyage_connections=SourceVoyageConnectionSerializer(many=True)
@@ -118,13 +129,13 @@ class SourceFilterItemSerializer(serializers.Serializer):
 		OpenApiExample(
             'Ex. 1: Exact match on a nested field',
             summary='Exact match on a nested field',
-            description='Here, we search for an exact match on a str value field. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
+            description='Here, we search for an exact match on the short valuefield.',
             value={
             	"filter":[
 					{
 						"varName":"short_ref__name",
 						"op":"in",
-						"searchTerm":["OMNO"]
+						"searchTerm":["1713Poll"]
 					}
             	]
 			},

@@ -7,10 +7,50 @@ from django.core.exceptions import ObjectDoesNotExist
 from drf_writable_nested.serializers import WritableNestedModelSerializer
 from drf_writable_nested.mixins import UniqueFieldsMixin,NestedUpdateMixin
 
-class CRUDDocSparseDateSerializer(serializers.ModelSerializer):
+class CRUDSourceTypeSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=SourceType
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return SourceType.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceTypeSerializer, self).create(validated_data)
+	def update(self, instance, validated_data):
+		try:
+			return SourceType.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceTypeSerializer, self).create(validated_data)
+
+class CRUDTranscriptionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	class Meta:
+		model=Transcription
+		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return CRUDTranscriptionSerializer.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDTranscriptionSerializer, self).create(validated_data)
+	def update(self, instance, validated_data):
+		try:
+			return Transcription.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDTranscriptionSerializer, self).create(validated_data)
+
+class CRUDDocSparseDateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
 		model=DocSparseDate
 		fields='__all__'
+	def create(self, validated_data):
+		try:
+			return SourceVoyageConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceVoyageConnectionSerializer, self).create(validated_data)
+	def update(self, instance, validated_data):
+		try:
+			return SourceVoyageConnection.objects.get(id=validated_data['id'])
+		except:
+			return super(CRUDSourceVoyageConnectionSerializer, self).create(validated_data)
 
 class CRUDSourceVoyageConnectionSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 	class Meta:
@@ -73,6 +113,7 @@ class CRUDSourceEnslaverConnectionSerializer(UniqueFieldsMixin, serializers.Mode
 			return super(CRUDSourceEnslaverConnectionSerializer, self).create(validated_data)		
 
 class CRUDPageSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+	transcriptions=CRUDSourceTypeSerializer(many=True)
 	class Meta:
 		model=Page
 		fields='__all__'
@@ -128,7 +169,7 @@ class CRUDShortRefSerializer(UniqueFieldsMixin, WritableNestedModelSerializer):
 			  "item_url": None,
 			  "zotero_group_id": None,
 			  "zotero_item_id": None,
-			  "short_ref": {"name":"OMNO"},
+			  "short_ref": {"name":"1713Poll"},
 			  "title": None,
 			  "date": None,
 			  "last_updated": None,

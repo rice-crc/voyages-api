@@ -415,7 +415,7 @@ class EnslaverAutoCompleteRequestSerializer(serializers.Serializer):
 			'string'
 		]
 	])
-	querystr=serializers.CharField(max_length=255,allow_null=True)
+	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
@@ -455,7 +455,7 @@ class EnslavedAutoCompleteRequestSerializer(serializers.Serializer):
 			'string'
 		]
 	])
-	querystr=serializers.CharField(max_length=255,allow_null=True)
+	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)

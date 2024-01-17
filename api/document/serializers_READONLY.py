@@ -127,7 +127,28 @@ class SourceFilterItemSerializer(serializers.Serializer):
 @extend_schema_serializer(
 	examples = [
 		OpenApiExample(
-            'Ex. 1: Exact match on a nested field',
+            'Filtered search for docs with manifests',
+            summary='Filtered search for docs with manifests',
+            description='Here, we search for documents a) whose titles containing a substring like "creole" and b) have manifests (there is only one result, from the Texas/OMNO data).',
+            value={
+			  "filter": [
+				{
+				  "varName": "has_published_manifest",
+				  "op": "exact",
+				  "searchTerm": True
+				},
+				{
+				  "varName": "title",
+				  "op": "icontains",
+				  "searchTerm": "creole"
+				}
+			  ]
+			},
+			request_only=True,
+			response_only=False
+        ),
+		OpenApiExample(
+            'Exact match on a nested field',
             summary='Exact match on a nested field',
             description='Here, we search for an exact match on the short valuefield.',
             value={

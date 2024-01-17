@@ -5,6 +5,7 @@ Management command for generating IIIF manifests
 import json
 import pathlib
 import re
+import time
 import requests
 from django.db.models import Q
 from django.core.management.base import BaseCommand
@@ -95,6 +96,7 @@ class Command(BaseCommand):
 				
 				if len(pages_with_images)==0:
 					# Do not generate manifest without images.
+					print(f"source {source.id} {source} has no images?")
 					continue
 				
 				# Generate manifest for this revision.
@@ -104,12 +106,30 @@ class Command(BaseCommand):
 				canvas = []
 				abort = False
 				for i, page in enumerate(pages_with_images, 1):
+					print(page)
 # 					print(page.__dict__)
 					iiif_baseimage_url=page.iiif_baseimage_url
 					# A canvas page.
 					host_addr,iiif_suffix = Command._extract_iiif_url(iiif_baseimage_url)
 					img_url_base = f"https://{host_addr}{iiif_suffix}"
-					img_info = requests.get(f"{img_url_base}/info.json", timeout=30).json()
+					
+					error_count=0
+					max_errors=10
+					standoff=1
+					while True:
+						req=requests.get(f"{img_url_base}/info.json", timeout=30)
+						print(req)
+						if req.status_code!=200:
+							print(req.status_code,"error fetching",img_url_base)
+							error_count+=1
+							if error_count>10:
+								exit()
+							standoff=standoff*4
+							time.sleep(standoff)
+						else:
+							img_info=req.json()
+							break
+					
 					(api_version, profile_level) = get_api_and_profile(img_info)
 					use_img_service = not any(s in host_addr for s in _special_case_no_img_service)
 					if use_img_service and not (api_version and profile_level):

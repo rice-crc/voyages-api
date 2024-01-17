@@ -15,7 +15,8 @@ class Command(BaseCommand):
 			"Institution",
 			"Post",
 			"Voyage",
-			"Source"
+			"Source",
+			"Estimate"
 		]
 		
 		for base_obj_name in base_obj_names:

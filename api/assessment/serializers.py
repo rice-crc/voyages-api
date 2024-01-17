@@ -1,9 +1,8 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField,CharField
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
 import re
 from .models import *
-from voyage.serializers import *
-
+from common.static.Estimate_options import Estimate_options
 
 class ImportAreaSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -39,3 +38,51 @@ class EstimateSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Estimate
 		fields='__all__'
+
+#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR THE PAGINATED VOYAGE LIST ENDPOINT. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
+
+
+class AnyField(Field):
+	def to_representation(self, value):
+		return value
+	def to_internal_value(self, data):
+		return data
+
+############ REQUEST FIILTER OBJECTS
+class EstimateFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Estimate_options])
+	searchTerm=AnyField()
+
+
+############ DATAFRAMES ENDPOINT
+# @extend_schema_serializer(
+# 	examples=[
+# 		OpenApiExample(
+# 			'Filtered request for 3 columns',
+# 			summary="Filtered req for 3 cols",
+# 			description="Here, we are looking for the ship name, the year of disembarkation, and the name(s) of the associated enslaver(s) for voyages that disembarked captives in the years 1810-15.",
+# 			value={
+# 				"selected_fields":[
+# 					"voyage_id",
+# 					"voyage_ship__ship_name",
+# 					"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year"
+# 				],
+# 				"filter":[
+# 					{
+# 						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+# 						"op": "btw",
+# 						"searchTerm": [1810,1815]
+# 					}
+# 				]
+# 			}
+# 		)
+# 	]
+# )
+class EstimateDataframesRequestSerializer(serializers.Serializer):
+	selected_fields=serializers.ListField(
+		child=serializers.ChoiceField(choices=[
+			k for k in Estimate_options
+		])
+	)
+	filter=EstimateFilterItemSerializer(many=True,allow_null=True,required=False)

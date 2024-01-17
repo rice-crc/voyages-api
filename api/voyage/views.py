@@ -275,7 +275,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 		request=VoyageDataframesRequestSerializer
 	)
 	def post(self,request):
-		print("VOYAGE AGGREGATIONS+++++++\nusername:",request.auth.user)
+		print("VOYAGE DATAFRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
 		
 		#VALIDATE THE REQUEST

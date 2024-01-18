@@ -181,41 +181,18 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		params=dict(request.data)
 		stats_req_data=params
 		stats_req_data['ids']=ids
+		stats_req_data['cachename']='voyage_pivot_tables'
 		r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
-		
+			
 		#VALIDATE THE RESPONSE
 		if r.ok:
-			serialized_resp=VoyageCrossTabResponseSerializer(data=json.loads(r.text))
+			j=json.loads(r.text)
+			serialized_resp=VoyageCrossTabResponseSerializer(data=j)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		if not serialized_resp.is_valid():
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
-# 
-# 
-# 		
-# 		resp=VoyageListResponseSerializer({
-# 			'count':total_results_count,
-# 			'page':page_num,
-# 			'page_size':page_size,
-# 			'results':results
-# 		}).data
-# 		
-# 		params=dict(request.data)
-# 		queryset=Voyage.objects.all()
-# 		queryset,selected_fields,results_count,error_messages=post_req(
-# 			queryset,
-# 			self,
-# 			request,
-# 			Voyage_options
-# 		)
-# 		if len(error_messages)==0:
-			ids=[i[0] for i in queryset.values_list('id')]
-			u2=STATS_BASE_URL+'crosstabs/'
-			params=dict(request.data)
-			d2=params
-			d2['ids']=ids
-			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 
 class VoyageGroupBy(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

@@ -586,7 +586,7 @@ class VoyageCrossTabRequestSerializer(serializers.Serializer):
 class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()
 	data=serializers.JSONField()
-	medatadata=VoyageOffsetPaginationSerializer(many=False)
+	metadata=VoyageOffsetPaginationSerializer()
 
 ############ AUTOCOMPLETE SERIALIZERS
 @extend_schema_serializer(

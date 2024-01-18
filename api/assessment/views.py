@@ -20,6 +20,8 @@ import collections
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from common.static.Estimate_options import Estimate_options
+from voyages3.localsettings import *
+
 
 #LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
 ##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
@@ -57,25 +59,24 @@ class AssessmentList(generics.GenericAPIView):
 class EstimateDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-# 	@extend_schema(
-# 		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
-# 		However, it could be used for csv exports and the like.\n\
-# 		Be careful! It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the voyage, you're likely get back extra rows. For instance, requesting captain names will return one row for each captain, not for each voyage.\n\
-# 		And finally, the example provided below puts a strict year filter on because unrestricted, it will break your swagger viewer :) \n\
-# 		",
-# 		request=VoyageDataframesRequestSerializer
-# 	)
+	@extend_schema(
+		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
+		However, it could be used for csv exports and the like.\n\
+		Be careful! It's a resource hog.",
+		request=EstimateDataframesRequestSerializer
+	)
 	def post(self,request):
 		print("ESTIMATE DATAFRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
 		
 		#VALIDATE THE REQUEST
-		serialized_req = EstimatesDataframesRequestSerializer(data=request.data,read_only=True)
+		serialized_req = EstimateDataframesRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Estimate.objects.all()
+# 		print(queryset)
 		queryset,results_count=post_req(
 			queryset,
 			self,
@@ -88,6 +89,7 @@ class EstimateDataFrames(generics.GenericAPIView):
 		sf=request.data.get('selected_fields')
 		output_dicts={}
 		vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+		
 		for i in range(len(sf)):
 			output_dicts[sf[i]]=[v[i] for v in vals]
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -95,3 +97,72 @@ class EstimateDataFrames(generics.GenericAPIView):
 		## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 		
 		return JsonResponse(output_dicts,safe=False)
+
+class EstimateCrossTabs(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
+		request=EstimateCrossTabRequestSerializer,
+		responses=EstimateCrossTabResponseSerializer,
+		examples=[	
+			OpenApiExample(
+				'Paginated request for binned years & embarkation geo vars',
+				summary='Multi-level, paginated, 20-year bins',
+				description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum. We are requesting the first 5 rows of these cross-tab results.',
+				value={
+					"columns":[
+						"embarkation_region__export_area__name",
+						"embarkation_region__name",
+					],
+					"rows":"year",
+					"binsize": 20,
+					"rows_label":"YEAR",
+					"agg_fn":"sum",
+					"value_field":"embarked_slaves",
+					"offset":0,
+					"limit":5,
+					"filter":[
+						
+					]
+				},
+				request_only=True
+			)
+		]
+	)
+	def post(self,request):
+		st=time.time()
+		print("ESTIMATE CROSSTABS+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = EstimateCrossTabRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Estimate.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Estimate_options,
+			auto_prefetch=True
+		)
+		
+		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
+		ids=[i[0] for i in queryset.values_list('id')]
+		u2=STATS_BASE_URL+'crosstabs/'
+		params=dict(request.data)
+		stats_req_data=params
+		stats_req_data['ids']=ids
+		stats_req_data['cachename']='estimate_pivot_tables'
+		r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			j=json.loads(r.text)
+			serialized_resp=EstimateCrossTabResponseSerializer(data=j)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)

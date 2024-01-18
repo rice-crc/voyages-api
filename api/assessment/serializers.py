@@ -3,6 +3,7 @@ from rest_framework.fields import SerializerMethodField,IntegerField,CharField,F
 import re
 from .models import *
 from common.static.Estimate_options import Estimate_options
+from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 
 class ImportAreaSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -56,29 +57,29 @@ class EstimateFilterItemSerializer(serializers.Serializer):
 
 
 ############ DATAFRAMES ENDPOINT
-# @extend_schema_serializer(
-# 	examples=[
-# 		OpenApiExample(
-# 			'Filtered request for 3 columns',
-# 			summary="Filtered req for 3 cols",
-# 			description="Here, we are looking for the ship name, the year of disembarkation, and the name(s) of the associated enslaver(s) for voyages that disembarked captives in the years 1810-15.",
-# 			value={
-# 				"selected_fields":[
-# 					"voyage_id",
-# 					"voyage_ship__ship_name",
-# 					"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year"
-# 				],
-# 				"filter":[
-# 					{
-# 						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
-# 						"op": "btw",
-# 						"searchTerm": [1810,1815]
-# 					}
-# 				]
-# 			}
-# 		)
-# 	]
-# )
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered request for 3 columns',
+			summary="Filtered req for 3 cols",
+			description="Here, we are looking the continent on which voyages embarked people, in which year, and how many people were disembarked from those voyages.",
+			value={
+				"selected_fields":[
+					'embarkation_region__export_area__name',
+					'embarked_slaves',
+					'disembarked_slaves'
+				],
+				"filter":[
+					{
+						"varName":"year",
+						"op":"btw",
+						"searchTerm":[1750,1775]
+					}
+				]
+			}
+		)
+	]
+)
 class EstimateDataframesRequestSerializer(serializers.Serializer):
 	selected_fields=serializers.ListField(
 		child=serializers.ChoiceField(choices=[
@@ -86,3 +87,25 @@ class EstimateDataframesRequestSerializer(serializers.Serializer):
 		])
 	)
 	filter=EstimateFilterItemSerializer(many=True,allow_null=True,required=False)
+
+############ OFFSET PAGINATION SERIALIZERS
+class EstimateOffsetPaginationSerializer(serializers.Serializer):
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	total_results_count=serializers.IntegerField()
+
+############ CROSSTAB SERIALIZERS
+class EstimateCrossTabRequestSerializer(serializers.Serializer):
+	columns=serializers.ListField(child=serializers.CharField())
+	rows=serializers.CharField(max_length=500)
+	binsize=serializers.IntegerField()
+	rows_label=serializers.CharField(max_length=500,allow_null=True)
+	agg_fn=serializers.CharField(max_length=500)
+	value_field=serializers.CharField(max_length=500)
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	
+class EstimateCrossTabResponseSerializer(serializers.Serializer):
+	tablestructure=serializers.JSONField()
+	data=serializers.JSONField()
+	metadata=EstimateOffsetPaginationSerializer()

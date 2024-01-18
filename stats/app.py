@@ -11,9 +11,8 @@ import re
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
-options={}
 
-def load_long_df(endpoint,variables):
+def load_long_df(endpoint,variables,options):
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
@@ -31,14 +30,14 @@ def load_long_df(endpoint,variables):
 			"number"
 		]:
 			df[varName]=pd.to_numeric(df[varName])
-	print(df)
 	return(df)
 
 registered_caches=[
 	voyage_bar_and_donut_charts,
 	voyage_summary_statistics,
 	voyage_pivot_tables,
-	voyage_xyscatter
+	voyage_xyscatter,
+	estimate_pivot_tables
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
@@ -48,14 +47,24 @@ standoff_base=4
 standoff_count=0
 while True:
 	failures_count=0
-	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
-	r=requests.get(url=DJANGO_BASE_URL+'common/schemas/?schema_name=Voyage&hierarchical=False',headers=headers)
-	options=json.loads(r.text)
 	for rc in registered_caches:
+		time.sleep(1)
+		#pull the index keys from the index_vars.py file
+		#and load each cache based on the parameters it sets out
 		endpoint=rc['endpoint']
 		variables=rc['variables']
+		schema_name=rc['schema_name']
+		headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
+		#before we make the dataframes call, we need to get the schema data
+		#via an options call to the django server
+		#because this will allow us to coerce the propert data types (numeric or categorical)
+		#in order to make the math work out properly later!
 		try:
-			rc['df']=load_long_df(endpoint,variables)
+			r=requests.get(url=DJANGO_BASE_URL+'common/schemas/?schema_name=%s&hierarchical=False' %schema_name,headers=headers)
+			options=json.loads(r.text)
+			rc['options']=options
+			rc['df']=load_long_df(endpoint,variables,options)
+			print(rc['df'])
 		except:
 			failures_count+=1
 			print("failed on cache:",rc['name'])
@@ -132,8 +141,8 @@ def crosstabs():
 # 	try:
 	st=time.time()
 	rdata=request.json
-# 	dfname=rdata.get('cachename')
-	dfname='voyage_pivot_tables'
+	dfname=rdata.get('cachename')
+# 	dfname='voyage_pivot_tables'
 	#it must have a list of ids (even if it's all of the ids)
 	ids=rdata['ids']
 
@@ -153,6 +162,7 @@ def crosstabs():
 		normalize=False
 	
 	df=eval(dfname)['df']
+	options=eval(dfname)['options']
 	df=df[df['id'].isin(ids)]
 	
 	yeargroupmode=False
@@ -169,7 +179,10 @@ def crosstabs():
 	
 	valuetype=options[val]['type']
 	
-	if rows.endswith('__year') and binsize is not None:
+	##TBD --> NEED TO VALIDATE THAT THE ROWS VARIABLE IS
+	####1) NUMERIC TO WORK IN THE FIRST PLACE
+	####2) A YEAR VAR IN ORDER TO MAKE SENSE TO A HUMAN END-USER
+	if binsize is not None:
 		binsize=int(binsize)
 		yeargroupmode=True
 		df=df.dropna(subset=[rows,val])
@@ -274,8 +287,6 @@ def crosstabs():
 	
 	colgroups=[]	
 	indexcol_name=rdata.get('rows_label') or ''
-	
-	
 	indexcolcg=makechild('',isfield=False)
 	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name)
 	indexcolfield['pinned']='left'
@@ -322,6 +333,8 @@ def crosstabs():
 				}
 		output_records.append(thisrecord)
 	
+	
+	
 	output={
 		'tablestructure': colgroups,
 		'data': output_records,
@@ -331,6 +344,7 @@ def crosstabs():
 			'limit':limit
 		}
 	}
+	
 	return json.dumps(output)
 
 # 	except:

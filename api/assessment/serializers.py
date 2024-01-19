@@ -98,7 +98,7 @@ class EstimateOffsetPaginationSerializer(serializers.Serializer):
 class EstimateCrossTabRequestSerializer(serializers.Serializer):
 	columns=serializers.ListField(child=serializers.CharField())
 	rows=serializers.CharField()
-	binsize=serializers.IntegerField(required=False)
+	binsize=serializers.IntegerField(allow_null=True,required=False)
 	rows_label=serializers.CharField(allow_null=True)
 	agg_fn=serializers.CharField()
 	value_field=serializers.CharField()

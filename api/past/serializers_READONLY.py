@@ -415,13 +415,13 @@ class EnslaverAutoCompleteRequestSerializer(serializers.Serializer):
 			'string'
 		]
 	])
-	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
+	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
 
 class EnslaverAutoCompletekvSerializer(serializers.Serializer):
-	value=serializers.CharField(max_length=255)
+	value=serializers.CharField()
 
 class EnslaverAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=EnslaverAutoCompletekvSerializer(many=True)
@@ -455,13 +455,13 @@ class EnslavedAutoCompleteRequestSerializer(serializers.Serializer):
 			'string'
 		]
 	])
-	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
+	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
 
 class EnslavedAutoCompletekvSerializer(serializers.Serializer):
-	value=serializers.CharField(max_length=255)
+	value=serializers.CharField()
 
 class EnslavedAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=EnslavedAutoCompletekvSerializer(many=True)
@@ -693,21 +693,21 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 
 )
 class EnslavedAggRoutesRequestSerializer(serializers.Serializer):
-	zoomlevel=serializers.CharField(max_length=50)
+	zoomlevel=serializers.CharField()
 	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
 
 class EnslavedAggRoutesEdgesSerializer(serializers.Serializer):
-	source=serializers.CharField(max_length=50)
-	target=serializers.CharField(max_length=50)
-	type=serializers.CharField(max_length=50)
+	source=serializers.CharField()
+	target=serializers.CharField()
+	type=serializers.CharField()
 	weight=serializers.IntegerField()
 	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(allow_null=False)))
 
 class EnslavedAggRoutesNodesDataSerializer(serializers.Serializer):
 	lat=serializers.FloatField(allow_null=False)
 	lon=serializers.FloatField(allow_null=False)
-	name=serializers.CharField(max_length=500,allow_null=True)
-	tags=serializers.ListField(child=serializers.CharField(max_length=500),allow_null=True)
+	name=serializers.CharField(allow_null=True)
+	tags=serializers.ListField(child=serializers.CharField(),allow_null=True)
 
 class EnslavedAggRoutesNodesWeightsSerializer(serializers.Serializer):
 	disembarkation=serializers.IntegerField()
@@ -716,7 +716,7 @@ class EnslavedAggRoutesNodesWeightsSerializer(serializers.Serializer):
 	post_disembarkation=serializers.IntegerField()
 
 class EnslavedAggRoutesNodesSerializer(serializers.Serializer):
-	id=serializers.CharField(max_length=50)
+	id=serializers.CharField()
 	weights=EnslavedAggRoutesNodesWeightsSerializer()
 	data=EnslavedAggRoutesNodesDataSerializer()
 	
@@ -754,14 +754,14 @@ class PASTNetworksRequestSerializer(serializers.Serializer):
 
 class PASTNetworksResponseNodeSerializer(serializers.Serializer):
 	id=serializers.IntegerField()
-	node_class=serializers.CharField(max_length=50)
-	uuid=serializers.CharField(max_length=36)
+	node_class=serializers.CharField()
+	uuid=serializers.CharField()
 	data=serializers.JSONField()
 	
 	
 class PASTNetworksResponseEdgeSerializer(serializers.Serializer):
-	source=serializers.CharField(max_length=36)
-	target=serializers.CharField(max_length=36)
+	source=serializers.CharField()
+	target=serializers.CharField()
 	data=serializers.JSONField()
 	
 class PASTNetworksResponseSerializer(serializers.Serializer):

@@ -495,21 +495,21 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 
 )
 class VoyageAggRoutesRequestSerializer(serializers.Serializer):
-	zoomlevel=serializers.CharField(max_length=50)
+	zoomlevel=serializers.CharField()
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 
 class VoyageAggRoutesEdgesSerializer(serializers.Serializer):
-	source=serializers.CharField(max_length=50)
-	target=serializers.CharField(max_length=50)
-	type=serializers.CharField(max_length=50)
+	source=serializers.CharField()
+	target=serializers.CharField()
+	type=serializers.CharField()
 	weight=serializers.IntegerField()
 	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(allow_null=False)))
 
 class VoyageAggRoutesNodesDataSerializer(serializers.Serializer):
 	lat=serializers.FloatField(allow_null=False)
 	lon=serializers.FloatField(allow_null=False)
-	name=serializers.CharField(max_length=500,allow_null=True)
-	tags=serializers.ListField(child=serializers.CharField(max_length=500),allow_null=True)
+	name=serializers.CharField(allow_null=True)
+	tags=serializers.ListField(child=serializers.CharField(),allow_null=True)
 
 class VoyageAggRoutesNodesWeightsSerializer(serializers.Serializer):
 	disembarkation=serializers.IntegerField()
@@ -518,7 +518,7 @@ class VoyageAggRoutesNodesWeightsSerializer(serializers.Serializer):
 	post_disembarkation=serializers.IntegerField()
 
 class VoyageAggRoutesNodesSerializer(serializers.Serializer):
-	id=serializers.CharField(max_length=50)
+	id=serializers.CharField()
 	weights=VoyageAggRoutesNodesWeightsSerializer()
 	data=VoyageAggRoutesNodesDataSerializer()
 	
@@ -575,11 +575,11 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 ############ CROSSTAB SERIALIZERS
 class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	columns=serializers.ListField(child=serializers.CharField())
-	rows=serializers.CharField(max_length=500)
+	rows=serializers.CharField()
 	binsize=serializers.IntegerField()
-	rows_label=serializers.CharField(max_length=500,allow_null=True)
-	agg_fn=serializers.CharField(max_length=500)
-	value_field=serializers.CharField(max_length=500)
+	rows_label=serializers.CharField(allow_null=True)
+	agg_fn=serializers.CharField()
+	value_field=serializers.CharField()
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	
@@ -623,13 +623,13 @@ class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
 			'string'
 		]
 	])
-	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
+	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 
 class VoyageAutoCompletekvSerializer(serializers.Serializer):
-	value=serializers.CharField(max_length=255)
+	value=serializers.CharField()
 
 class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=VoyageAutoCompletekvSerializer(many=True)

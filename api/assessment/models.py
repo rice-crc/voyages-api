@@ -113,8 +113,8 @@ class Estimate(models.Model):
 		ExportRegion, null=True, blank=True, on_delete=models.CASCADE)
 	disembarkation_region = models.ForeignKey(
 		ImportRegion, null=True, blank=True, on_delete=models.CASCADE)
-	embarked_slaves = models.FloatField(null=True, blank=True)
-	disembarked_slaves = models.FloatField(null=True, blank=True)
+	embarked_slaves = models.IntegerField(null=True, blank=True)
+	disembarked_slaves = models.IntegerField(null=True, blank=True)
 
 	def __str__(self):
 		return self.__unicode__()

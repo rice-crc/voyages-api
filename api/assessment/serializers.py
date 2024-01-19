@@ -97,11 +97,11 @@ class EstimateOffsetPaginationSerializer(serializers.Serializer):
 ############ CROSSTAB SERIALIZERS
 class EstimateCrossTabRequestSerializer(serializers.Serializer):
 	columns=serializers.ListField(child=serializers.CharField())
-	rows=serializers.CharField(max_length=500)
+	rows=serializers.CharField()
 	binsize=serializers.IntegerField()
-	rows_label=serializers.CharField(max_length=500,allow_null=True)
-	agg_fn=serializers.CharField(max_length=500)
-	value_field=serializers.CharField(max_length=500)
+	rows_label=serializers.CharField(allow_null=True)
+	agg_fn=serializers.CharField()
+	value_field=serializers.CharField()
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	

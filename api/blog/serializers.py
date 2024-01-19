@@ -224,13 +224,13 @@ class PostAutoCompleteRequestSerializer(serializers.Serializer):
 			'string'
 		]
 	])
-	querystr=serializers.CharField(max_length=255,allow_null=True,allow_blank=True)
+	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=PostFilterItemSerializer(many=True,allow_null=True,required=False)
 
 class PostAutoCompletekvSerializer(serializers.Serializer):
-	value=serializers.CharField(max_length=255)
+	value=serializers.CharField()
 
 class PostAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=PostAutoCompletekvSerializer(many=True)

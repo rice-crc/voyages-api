@@ -576,7 +576,7 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	columns=serializers.ListField(child=serializers.CharField())
 	rows=serializers.CharField()
-	binsize=serializers.IntegerField()
+	binsize=serializers.IntegerField(required=False)
 	rows_label=serializers.CharField(allow_null=True)
 	agg_fn=serializers.CharField()
 	value_field=serializers.CharField()

@@ -601,6 +601,29 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 			},
 			request_only=True,
 			response_only=False
+		),
+		OpenApiExample(
+			'Paginated request for binned years & embarkation geo vars',
+			summary='Multi-level, paginated, 20-year bins',
+			description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum. We are requesting the first 5 rows of these cross-tab results.',
+			value={
+				"columns":[
+					"voyage_itinerary__imp_broad_region_of_slave_purchase__name",
+					"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+					"voyage_itinerary__imp_principal_place_of_slave_purchase__name"
+				],
+				"rows":"voyage_itinerary__imp_principal_region_slave_dis__name",
+				"binsize": None,
+				"rows_label":"Imputed Principle Port of Disembarkation (MJSLPTIMP)",
+				"agg_fn":"sum",
+				"value_field":"voyage_slaves_numbers__imp_total_num_slaves_embarked",
+				"offset":20,
+				"limit":10,
+				"filter":[],
+				"order_by": ["-Africa__Senegambia and offshore Atlantic__Saint-Louis"]
+			},
+			request_only=True,
+			response_only=False
 		)
 	]
 )

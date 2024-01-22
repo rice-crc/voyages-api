@@ -124,13 +124,9 @@ class LanguageGroup(NamedModelAbstractBase):
 	
 	uuid=models.UUIDField(default=uuid.uuid4, editable=False,null=True)
 	
-	longitude = models.DecimalField("Longitude of point",
-									max_digits=10,
-									decimal_places=7,
+	longitude = models.FloatField("Longitude of point",
 									null=True)
-	latitude = models.DecimalField("Latitude of point",
-								   max_digits=10,
-								   decimal_places=7,
+	latitude = models.FloatField("Latitude of point",
 								   null=True)
 	shape=models.JSONField(
 		"Geojson Polygon",
@@ -142,13 +138,9 @@ class ModernCountry(NamedModelAbstractBase):
 	
 	uuid=models.UUIDField(default=uuid.uuid4, editable=False,null=True)
 	
-	longitude = models.DecimalField("Longitude of Country",
-									max_digits=10,
-									decimal_places=7,
+	longitude = models.FloatField("Longitude of Country",
 									null=False)
-	latitude = models.DecimalField("Latitude of Country",
-								   max_digits=10,
-								   decimal_places=7,
+	latitude = models.FloatField("Latitude of Country",
 								   null=False)
 	languages = models.ManyToManyField(LanguageGroup)
 	
@@ -210,7 +202,7 @@ class Enslaved(models.Model):
 	# Personal data
 	age = models.IntegerField(null=True, db_index=True,blank=True)
 	gender = models.IntegerField(null=True, db_index=True,blank=True)
-	height = models.DecimalField(null=True, decimal_places=2, max_digits=6, verbose_name="Height in inches", db_index=True,blank=True)
+	height = models.FloatField(null=True, verbose_name="Height in inches", db_index=True,blank=True)
 	skin_color = models.CharField(max_length=100, null=True, db_index=True,blank=True)
 	language_group = models.ForeignKey(
 		LanguageGroup,
@@ -273,7 +265,7 @@ class EnslavementRelation(models.Model):
 	place = models.ForeignKey(Location, null=True,blank=True, on_delete=models.SET_NULL, related_name='+')
 	date = models.CharField(max_length=12, null=True,blank=True,
 		help_text="Date in MM,DD,YYYY format with optional fields.")
-	amount = models.DecimalField(null=True,blank=True, decimal_places=2, max_digits=6)
+	amount = models.FloatField(null=True,blank=True)
 	voyage = models.ForeignKey(
 		Voyage,
 		related_name="voyage_enslavement_relations",

@@ -38,8 +38,8 @@ class LocationSerializerDeep(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
 	spatial_extent=PolygonSerializer(many=False,allow_null=True)
 	location_type=LocationTypeSerializer(many=False)
-	latitude=serializers.DecimalField(allow_null=True,max_digits=10,decimal_places=7)
-	longitude=serializers.DecimalField(allow_null=True,max_digits=10,decimal_places=7)
+	latitude=serializers.FloatField(allow_null=True)
+	longitude=serializers.FloatField(allow_null=True)
 	class Meta:
 		model=Location
 		fields='__all__'

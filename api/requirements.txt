@@ -1,4 +1,5 @@
 asgiref==3.7.2
+async-timeout==4.0.3
 attrs==23.1.0
 bibtexparser==1.4.0
 blinker==1.6.2
@@ -41,6 +42,7 @@ python-monkey-business==1.0.0
 pytz==2023.3
 PyYAML==6.0.1
 pyzotero==1.5.9
+redis==5.0.1
 referencing==0.30.2
 requests==2.31.0
 rpds-py==0.10.4

@@ -259,7 +259,7 @@ class CargoUnitSerializer(serializers.ModelSerializer):
 class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
 	cargo=CargoTypeSerializer(many=False,read_only=True)
 	unit=CargoUnitSerializer(many=False,read_only=True)
-	amount=serializers.DecimalField(max_digits=7,decimal_places=2,read_only=True)
+	amount=serializers.FloatField(read_only=True)
 	class Meta:
 		model=VoyageCargoConnection
 		fields='__all__'
@@ -397,6 +397,8 @@ class VoyageGroupByRequestSerializer(serializers.Serializer):
 	]
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 
+# class VoyageGroupByResponseSerializer(serializers.Serializer):
+# 	data=serializers.JSONField()
 
 ############ DATAFRAMES ENDPOINT
 @extend_schema_serializer(
@@ -430,6 +432,8 @@ class VoyageDataframesRequestSerializer(serializers.Serializer):
 	)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 
+# class VoyageDataframesResponseSerializer(serializers.Serializer):
+# 	data=serializers.JSONField()
 
 ############ VOYAGE GEOTREE REQUESTS
 @extend_schema_serializer(
@@ -573,6 +577,32 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 	total_results_count=serializers.IntegerField()
 
 ############ CROSSTAB SERIALIZERS
+@extend_schema_serializer(
+	examples=[	
+		OpenApiExample(
+			'Paginated request for binned years & embarkation geo vars',
+			summary='Multi-level, paginated, 20-year bins',
+			description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum. We are requesting the first 5 rows of these cross-tab results.',
+			value={
+				"columns":[
+					"voyage_itinerary__imp_broad_region_of_slave_purchase__name",
+					"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+					"voyage_itinerary__imp_principal_place_of_slave_purchase__name"
+				],
+				"rows":"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+				"binsize": 20,
+				"rows_label":"YEARAM",
+				"agg_fn":"sum",
+				"value_field":"voyage_slaves_numbers__imp_total_num_slaves_embarked",
+				"offset":0,
+				"limit":5,
+				"filter":[]
+			},
+			request_only=True,
+			response_only=False
+		)
+	]
+)
 class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	columns=serializers.ListField(child=serializers.CharField())
 	rows=serializers.CharField()

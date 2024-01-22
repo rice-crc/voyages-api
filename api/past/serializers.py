@@ -191,8 +191,8 @@ class CRUDCaptiveStatusSerializer(UniqueFieldsMixin, serializers.ModelSerializer
 			return super(CRUDCaptiveStatusSerializer, self).create(validated_data)
 
 class CRUDLanguageGroupSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-	longitude=serializers.DecimalField(max_digits=10,decimal_places=7,allow_null=True)
-	latitude=serializers.DecimalField(max_digits=10,decimal_places=7,allow_null=True)
+	longitude=serializers.FloatField(allow_null=True)
+	latitude=serializers.FloatField(allow_null=True)
 	class Meta:
 		model=LanguageGroup
 		fields='__all__'
@@ -310,7 +310,7 @@ class EnslavementRelationCRUDSerializer(UniqueFieldsMixin,WritableNestedModelSer
 	relation_type=CRUDEnslavementRelationTypeSerializer(many=False,allow_null=True)
 	place=CRUDPastLocationSerializer(many=False,allow_null=True)
 	date=CRUDEnslavementRelationSparseDateSerializer(many=False,allow_null=True)
-	amount=serializers.DecimalField(decimal_places=2, max_digits=6,allow_null=True)
+	amount=serializers.FloatField(allow_null=True)
 	relation_enslavers=EnslaverInRelationCRUDSerializer(many=True)
 	enslaved_in_relation=EnslavedInRelationCRUDSerializer(many=True)
 	class Meta:
@@ -366,7 +366,7 @@ class EnslavedCRUDSerializer(WritableNestedModelSerializer):
 	editor_modern_names_certainty = serializers.CharField(allow_null=True)
 	age = serializers.IntegerField(allow_null=True)
 	gender = serializers.IntegerField(allow_null=True)
-	height = serializers.DecimalField(decimal_places=2, max_digits=6,allow_null=True)
+	height = serializers.FloatField(allow_null=True)
 	skin_color = serializers.CharField(allow_null=True)
 	dataset = serializers.IntegerField(allow_null=True)
 	notes = serializers.CharField(allow_null=True)

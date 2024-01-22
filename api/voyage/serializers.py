@@ -337,7 +337,7 @@ class CRUDCargoUnitSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
 class VoyageCRUDCargoConnectionSerializer(UniqueFieldsMixin,WritableNestedModelSerializer):
 	cargo=CRUDCargoTypeSerializer(many=False,allow_null=True)
 	unit=CRUDCargoUnitSerializer(many=False,allow_null=True)
-	amount=serializers.DecimalField(allow_null=True,max_digits=7,decimal_places=2)
+	amount=serializers.FloatField(allow_null=True)
 	class Meta:
 		model=VoyageCargoConnection
 		fields='__all__'

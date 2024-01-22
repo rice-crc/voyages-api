@@ -225,7 +225,6 @@ class EnslavedAggregations(generics.GenericAPIView):
 		#RUN THE AGGREGATIONS
 		aggregation_field=request.data.get('varName')
 		output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaved_options)
-		print(output_dict)
 		#VALIDATE THE RESPONSE
 		serialized_resp=EnslavedFieldAggregationResponseSerializer(data=output_dict)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -270,7 +269,6 @@ class EnslaverAggregations(generics.GenericAPIView):
 		aggregation_field=request.data.get('varName')
 		output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaver_options)
 		
-		print(output_dict)
 		#VALIDATE THE RESPONSE
 		serialized_resp=EnslaverFieldAggregationResponseSerializer(data=output_dict)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")

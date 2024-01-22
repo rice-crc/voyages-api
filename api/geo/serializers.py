@@ -31,8 +31,8 @@ class CRUDPolygonSerializer(serializers.ModelSerializer):
 class CRUDLocationSerializer(WritableNestedModelSerializer):
 	spatial_extent=CRUDPolygonSerializer(many=False,allow_null=True)
 	location_type=CRUDLocationTypeSerializer(many=False)
-	latitude=serializers.DecimalField(allow_null=True,max_digits=10,decimal_places=7)
-	longitude=serializers.DecimalField(allow_null=True,max_digits=10,decimal_places=7)
+	latitude=serializers.FloatField(allow_null=True)
+	longitude=serializers.FloatField(allow_null=True)
 	class Meta:
 		model=Location
 		fields='__all__'

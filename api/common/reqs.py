@@ -4,7 +4,7 @@ import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
-from voyages3.localsettings import *
+from voyages3.localsettings import OPEN_API_BASE_API,DEBUG
 import requests
 from django.core.paginator import Paginator
 import html
@@ -46,10 +46,10 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 			if '__' in aggregation_field:
 				prefetch_name='__'.join(aggregation_field.split('__')[:-1])
 				queryset=queryset.prefetch_related(prefetch_name)
+				if DEBUG:
+					print("prefetching:",prefetch_name)
 			min=queryset.aggregate(Min(aggregation_field)).popitem()[1]
 			max=queryset.aggregate(Max(aggregation_field)).popitem()[1]
-			
-			
 			res={
 				'varName':aggregation_field,
 				'min':min,
@@ -75,7 +75,8 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 	else:
 		params=dict(r.data)
 	
-	print("----\npost req params:",json.dumps(params,indent=1))
+	if DEBUG:
+		print("----\npost req params:",json.dumps(params,indent=1))
 	filter_obj=params.get('filter')
 	
 	#global search bypasses the normal filtering process
@@ -92,7 +93,9 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		}
 		
 		solrcorename=solrcorenamedict[qsetclassstr]
-		print("CLASS",qsetclassstr,solrcorename)
+		
+		if DEBUG:
+			print("CLASS",qsetclassstr,solrcorename)
 		
 		solr = pysolr.Solr(
 			'http://voyages-solr:8983/solr/%s/' %solrcorename,
@@ -130,14 +133,17 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 				errormessages.append("%s is not a valid django search operation" %op)
 	queryset=queryset.filter(**kwargs)
 	results_count=queryset.count()
-	print("resultset size:",results_count)
+	if DEBUG:
+		print("resultset size:",results_count)
 
 	#PREFETCH REQUISITE FIELDS
 	prefetch_fields=params.get('selected_fields') or []
 	if prefetch_fields==[] and auto_prefetch:
 		prefetch_fields=list(all_fields.keys())
 	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
-	print('--prefetching %d vars--' %len(prefetch_vars))
+	
+	if DEBUG:
+		print('--prefetching %d vars--' %len(prefetch_vars))
 	for p in prefetch_vars:
 		queryset=queryset.prefetch_related(p)
 	
@@ -145,7 +151,8 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')
 	order_by=params.get('order_by')
 	if order_by is not None:
-		print("---->order by---->",order_by)
+		if DEBUG:
+			print("---->order by---->",order_by)
 		for ob in order_by:
 			if ob.startswith('-'):
 				queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))

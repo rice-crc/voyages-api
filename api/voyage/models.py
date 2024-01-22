@@ -177,11 +177,9 @@ class VoyageShip(models.Model):
 		blank=True,
 		on_delete=models.SET_NULL
 	)
-	tonnage_mod = models.DecimalField(
+	tonnage_mod = models.FloatField(
 		"Tonnage standardized on British "
 		"measured tons, 1773-1870",
-		max_digits=8,
-		decimal_places=1,
 		null=True,
 		blank=True
 	)
@@ -249,11 +247,9 @@ class VoyageCargoConnection(models.Model):
 		null=True,
 		on_delete=models.SET_NULL
 	)
-	amount = models.DecimalField(
+	amount = models.FloatField(
 		"The amount of cargo according to the unit",
-		null=True,
-		max_digits=7,
-		decimal_places=2
+		null=True
 	)
 	is_purchasing_commmodity=models.BooleanField(
 		"Was this a commodity used to purchase enslaved people",
@@ -1073,12 +1069,11 @@ class VoyageSlavesNumbers(models.Model):
 		null=True,
 		blank=True)
 
-	imp_jamaican_cash_price = models.DecimalField(
+	imp_jamaican_cash_price = models.FloatField(
 		"Sterling cash price in Jamaica* (imputed)",
 		null=True,
-		blank=True,
-		max_digits=10,
-		decimal_places=4)
+		blank=True
+	)
 
 	imp_mortality_during_voyage = models.IntegerField(
 		"Imputed number of slave deaths during Middle Passage "

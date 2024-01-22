@@ -347,7 +347,7 @@ class VoyageListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
-	order_by=serializers.ListField(child=serializers.CharField(allow_null=True))
+	order_by=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
 
 class VoyageListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()

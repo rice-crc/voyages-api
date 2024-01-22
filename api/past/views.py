@@ -23,7 +23,7 @@ from common.reqs import *
 from collections import Counter
 from geo.common import GeoTreeFilter
 from geo.serializers_READONLY import LocationSerializer,LocationSerializerDeep
-from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,GEO_NETWORKS_BASE_URL,PEOPLE_NETWORKS_BASE_URL
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,GEO_NETWORKS_BASE_URL,PEOPLE_NETWORKS_BASE_URL,USE_REDIS_CACHE
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from common.static.Enslaver_options import Enslaver_options
@@ -54,9 +54,16 @@ class EnslavedList(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		srd=serialized_req.data
-		hashed=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-		cached_response = redis_cache.get(hashed)
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
@@ -108,10 +115,16 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 		
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		srd=serialized_req.data
-		hashed=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-		cached_response = redis_cache.get(hashed)
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
 		if cached_response is None:
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
@@ -159,10 +172,16 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 		
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		srd=serialized_req.data
-		hashed=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-		cached_response = redis_cache.get(hashed)
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
@@ -213,25 +232,49 @@ class EnslaverList(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
-		#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=EnslaverIdentity.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaver_options,
-			auto_prefetch=True
-		)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 
-		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-		resp=EnslaverListResponseSerializer({
-			'count':total_results_count,
-			'page':page_num,
-			'page_size':page_size,
-			'results':results
-		}).data
-		#I'm having the most difficult time in the world validating this nested paginated response
-		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=EnslaverIdentity.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaver_options,
+				auto_prefetch=True
+			)
+
+			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+			resp=EnslaverListResponseSerializer({
+				'count':total_results_count,
+				'page':page_num,
+				'page_size':page_size,
+				'results':results
+			}).data
+			#I'm having the most difficult time in the world validating this nested paginated response
+			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			
 		return JsonResponse(resp,safe=False,status=200)
 
 class EnslavedAggregations(generics.GenericAPIView):
@@ -255,26 +298,50 @@ class EnslavedAggregations(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
-		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Enslaved.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaved_options,
-			auto_prefetch=False
-		)
-		
-		#RUN THE AGGREGATIONS
-		aggregation_field=request.data.get('varName')
-		output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaved_options)
-		#VALIDATE THE RESPONSE
-		serialized_resp=EnslavedFieldAggregationResponseSerializer(data=output_dict)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		if not serialized_resp.is_valid():
-			return JsonResponse(serialized_resp.errors,status=400)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
 		else:
-			return JsonResponse(serialized_resp.data,safe=False)
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Enslaved.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaved_options,
+				auto_prefetch=False
+			)
+		
+			#RUN THE AGGREGATIONS
+			aggregation_field=request.data.get('varName')
+			output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaved_options)
+			#VALIDATE THE RESPONSE
+			serialized_resp=EnslavedFieldAggregationResponseSerializer(data=output_dict)
+			if not serialized_resp.is_valid():
+				return JsonResponse(serialized_resp.errors,status=400)
+			else:
+				resp=serialized_resp.data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
 class EnslaverAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -294,31 +361,55 @@ class EnslaverAggregations(generics.GenericAPIView):
 		
 		#VALIDATE THE REQUEST
 		print(request.data)
-# 		serialized_req = EnslaverFieldAggregationRequestSerializer(data=request.data)
-# 		if not serialized_req.is_valid():
-# 			return JsonResponse(serialized_req.errors,status=400)
-
-		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=EnslaverIdentity.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaver_options,
-			auto_prefetch=False
-		)
-		
-		#RUN THE AGGREGATIONS
-		aggregation_field=request.data.get('varName')
-		output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaver_options)
-		
-		#VALIDATE THE RESPONSE
-		serialized_resp=EnslaverFieldAggregationResponseSerializer(data=output_dict)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		if not serialized_resp.is_valid():
-			return JsonResponse(serialized_resp.errors,status=400)
+		serialized_req = EnslaverFieldAggregationRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+			
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
 		else:
-			return JsonResponse(serialized_resp.data,safe=False)
+			cached_response=None
+
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=EnslaverIdentity.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaver_options,
+				auto_prefetch=False
+			)
+		
+			#RUN THE AGGREGATIONS
+			aggregation_field=request.data.get('varName')
+			output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaver_options)
+		
+			#VALIDATE THE RESPONSE
+			serialized_resp=EnslaverFieldAggregationResponseSerializer(data=output_dict)
+			if not serialized_resp.is_valid():
+				return JsonResponse(serialized_resp.errors,status=400)
+			else:
+				resp=serialized_resp.data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
 class EnslavedDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -340,28 +431,49 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		serialized_req = EnslavedDataframesRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Enslaved.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaved_options,
+				auto_prefetch=True
+			)
 		
-		#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Enslaved.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaved_options,
-			auto_prefetch=True
-		)
+			queryset=queryset.order_by('id')
+			sf=request.data.get('selected_fields')
+			resp={}
+			vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+			for i in range(len(sf)):
+				resp[sf[i]]=[v[i] for v in vals]		
+			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
 		
-		queryset=queryset.order_by('id')
-		sf=request.data.get('selected_fields')
-		output_dicts={}
-		vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
-		for i in range(len(sf)):
-			output_dicts[sf[i]]=[v[i] for v in vals]
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
-		## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
-		
-		return JsonResponse(output_dicts,safe=False)
+		return JsonResponse(resp,safe=False,status=200)
 
 class EnslaverDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -384,27 +496,48 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		
-		#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=EnslaverIdentity.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaver_options,
-			auto_prefetch=True
-		)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
-		queryset=queryset.order_by('id')
-		sf=request.data.get('selected_fields')
-		output_dicts={}
-		vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
-		for i in range(len(sf)):
-			output_dicts[sf[i]]=[v[i] for v in vals]
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=EnslaverIdentity.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaver_options,
+				auto_prefetch=True
+			)
 		
-		## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
+			queryset=queryset.order_by('id')
+			sf=request.data.get('selected_fields')
+			resp={}
+			vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+			for i in range(len(sf)):
+				resp[sf[i]]=[v[i] for v in vals]
+			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
 		
-		return JsonResponse(output_dicts,safe=False)
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
 @extend_schema(exclude=True)
 class EnslavementRelationsDataFrames(generics.GenericAPIView):
@@ -466,38 +599,59 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		serialized_req = EnslaverGeoTreeFilterRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
-		#extract and then peel out the geotree_valuefields
-		reqdict=dict(request.data)
-		geotree_valuefields=reqdict['geotree_valuefields']
-		del(reqdict['geotree_valuefields'])
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#extract and then peel out the geotree_valuefields
+			reqdict=dict(request.data)
+			geotree_valuefields=reqdict['geotree_valuefields']
+			del(reqdict['geotree_valuefields'])
 		
-		#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=EnslaverIdentity.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			reqdict,
-			Enslaver_options
-		)
+			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=EnslaverIdentity.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				reqdict,
+				Enslaver_options
+			)
 		
-		#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
-		for geotree_valuefield in geotree_valuefields:
-			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
-			queryset=queryset.select_related(geotree_valuefield_stub)
-		vls=[]
-		for geotree_valuefield in geotree_valuefields:		
-			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
-		vls=list(set(vls))
+			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
+			for geotree_valuefield in geotree_valuefields:
+				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
+				queryset=queryset.select_related(geotree_valuefield_stub)
+			vls=[]
+			for geotree_valuefield in geotree_valuefields:		
+				vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+			vls=list(set(vls))
 		
-		#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
-		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+			#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
+			resp=GeoTreeFilter(spss_vals=vls)
 		
-		### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
+			### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
 		
-		resp=JsonResponse(filtered_geotree,safe=False)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return resp
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
 class EnslavedGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -518,37 +672,56 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		
-		#extract and then peel out the geotree_valuefields
-		reqdict=dict(request.data)
-		geotree_valuefields=reqdict['geotree_valuefields']
-		del(reqdict['geotree_valuefields'])
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
-		#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Enslaved.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			reqdict,
-			Enslaved_options
-		)
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:		
+			#extract and then peel out the geotree_valuefields
+			reqdict=dict(request.data)
+			geotree_valuefields=reqdict['geotree_valuefields']
+			del(reqdict['geotree_valuefields'])
 		
-		#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
-		for geotree_valuefield in geotree_valuefields:
-			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
-			queryset=queryset.select_related(geotree_valuefield_stub)
-		vls=[]
-		for geotree_valuefield in geotree_valuefields:		
-			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
-		vls=list(set(vls))
+			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Enslaved.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				reqdict,
+				Enslaved_options
+			)
 		
-		#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
-		filtered_geotree=GeoTreeFilter(spss_vals=vls)
+			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
+			for geotree_valuefield in geotree_valuefields:
+				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
+				queryset=queryset.select_related(geotree_valuefield_stub)
+			vls=[]
+			for geotree_valuefield in geotree_valuefields:		
+				vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+			vls=list(set(vls))
 		
-		### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
+			#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
+			resp=GeoTreeFilter(spss_vals=vls)
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
 		
-		resp=JsonResponse(filtered_geotree,safe=False)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return resp
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
 class EnslavedAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -566,46 +739,68 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 		serialized_req = EnslavedAggRoutesRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
-		
-		#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
-		params=dict(request.data)
-		zoom_level=params.get('zoom_level')
-		queryset=Enslaved.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaved_options,
-			auto_prefetch=True
-		)
-		
-		#HAND OFF TO THE FLASK CONTAINER
-		queryset=queryset.order_by('id')
-		zoomlevel=params.get('zoomlevel','region')
-		values_list=queryset.values_list('id')
-		pks=[v[0] for v in values_list]
-		django_query_time=time.time()
-		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
-		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
-		d2={
-			'graphname':zoomlevel,
-			'cachename':'ao_maps',
-			'pks':pks
-		}
-		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		
-# 		print("--->",r)
-# 		print(json.loads(r.text))
-		
-		#VALIDATE THE RESPONSE
-		if r.ok:
-			serialized_resp=EnslavedAggRoutesResponseSerializer(data=json.loads(r.text))
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		if not serialized_resp.is_valid():
-			return JsonResponse(serialized_resp.errors,status=400)
-		else:
-			return JsonResponse(json.loads(r.text),safe=False)
 
+		
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+
+			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
+			params=dict(request.data)
+			zoom_level=params.get('zoom_level')
+			queryset=Enslaved.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaved_options,
+				auto_prefetch=True
+			)
+		
+			#HAND OFF TO THE FLASK CONTAINER
+			queryset=queryset.order_by('id')
+			zoomlevel=params.get('zoomlevel','region')
+			values_list=queryset.values_list('id')
+			pks=[v[0] for v in values_list]
+			django_query_time=time.time()
+			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
+			u2=GEO_NETWORKS_BASE_URL+'network_maps/'
+			d2={
+				'graphname':zoomlevel,
+				'cachename':'ao_maps',
+				'pks':pks
+			}
+			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		
+			#VALIDATE THE RESPONSE
+			if r.ok:
+				j=json.loads(r.text)
+				serialized_resp=EnslavedAggRoutesResponseSerializer(data=j)
+			if not serialized_resp.is_valid():
+				return JsonResponse(serialized_resp.errors,status=400)
+			else:
+				resp=serialized_resp.data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
 class PASTNetworks(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -624,19 +819,44 @@ class PASTNetworks(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		
-		#HAND OFF TO THE FLASK CONTAINER
-		params=json.dumps(dict(request.data))
-		print(PEOPLE_NETWORKS_BASE_URL)
-		r=requests.post(PEOPLE_NETWORKS_BASE_URL,data=params,headers={"Content-type":"application/json"})
-		
-		#VALIDATE THE RESPONSE
-		if r.ok:
-			serialized_resp=PASTNetworksResponseSerializer(data=json.loads(r.text))
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		if not serialized_resp.is_valid():
-			return JsonResponse(serialized_resp.errors,status=400)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
 		else:
-			return JsonResponse(serialized_resp.data,safe=False)
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+
+			#HAND OFF TO THE FLASK CONTAINER
+			params=json.dumps(dict(request.data))
+			print(PEOPLE_NETWORKS_BASE_URL)
+			r=requests.post(PEOPLE_NETWORKS_BASE_URL,data=params,headers={"Content-type":"application/json"})
+		
+			#VALIDATE THE RESPONSE
+			if r.ok:
+				j=json.loads(r.text)
+				serialized_resp=PASTNetworksResponseSerializer(data=j)
+			if not serialized_resp.is_valid():
+				return JsonResponse(serialized_resp.errors,status=400)
+			else:
+				resp=serialized_resp.data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
 
 #CONTRIBUTIONS

@@ -65,9 +65,16 @@ class VoyageList(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 		
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		srd=serialized_req.data
-		hashed=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-		cached_response = redis_cache.get(hashed)
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
@@ -465,10 +472,19 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 		serialized_req = VoyageAutoCompleteRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
+
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		srd=serialized_req.data
-		hashed=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-		cached_response = redis_cache.get(hashed)
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT

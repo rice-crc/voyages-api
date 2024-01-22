@@ -347,6 +347,7 @@ class VoyageListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True))
 
 class VoyageListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
@@ -612,6 +613,7 @@ class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	value_field=serializers.CharField()
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
+	order_by=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
 	
 class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()

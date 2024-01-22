@@ -104,6 +104,7 @@ class EstimateCrossTabRequestSerializer(serializers.Serializer):
 	value_field=serializers.CharField()
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 	
 class EstimateCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()

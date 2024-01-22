@@ -340,6 +340,7 @@ class EnslavedListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 class EnslavedListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
@@ -378,7 +379,8 @@ class EnslaverListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
-
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
+	
 class EnslaverListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()

@@ -14,7 +14,7 @@ import requests
 import time
 import collections
 import gc
-from voyages3.localsettings import *
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG
 import re
 import pysolr
 from .serializers import *
@@ -25,6 +25,10 @@ from common.reqs import getJSONschema
 import uuid
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+import redis
+
+redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
 
 @extend_schema(exclude=True)
 class Schemas(generics.GenericAPIView):

@@ -154,6 +154,15 @@ def crosstabs():
 	limit=rdata.get('limit') or 10
 	offset=rdata.get('offset') or 0
 	binsize=rdata.get('binsize')
+	order_by=rdata.get('order_by')
+	if order_by is not None:
+		ascending=True
+		order_by=order_by[0]
+		if order_by.startswith("-"):
+			ascending=False
+			order_by=order_by[1:]
+		order_by_list=order_by.split('__')
+		order_by_list=tuple(order_by_list)
 		
 	normalize=rdata.get('normalize')
 	if normalize is not None:
@@ -170,13 +179,13 @@ def crosstabs():
 	def interval_to_str(s):
 		s=str(s)
 		return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
-	
+
 	def makestr(s):
 		if s is None:
 			return "Unknown"
 		else:
 			return str(s)
-	
+
 	valuetype=options[val]['type']
 	
 	##TBD --> NEED TO VALIDATE THAT THE ROWS VARIABLE IS
@@ -201,7 +210,6 @@ def crosstabs():
 		df.rename(columns={"row_bins": rows})
 		df['row_bins']=df['row_bins'].astype('str')
 		df[val]=df[val].astype('int')
-		
 		df['row_bins']=df['row_bins'].apply(interval_to_str)
 		ct=pd.crosstab(
 			[df['row_bins']],
@@ -211,7 +219,6 @@ def crosstabs():
 			margins=True
 		)
 		ct.fillna(0)
-# 		print(ct)
 	else:
 		ct=pd.crosstab(
 			[df[rows]],
@@ -222,6 +229,9 @@ def crosstabs():
 			margins=True
 		)
 		ct.fillna(0)
+	
+	if order_by is not None:
+		ct=ct.sort_values(by=order_by_list,ascending=ascending)
 	
 	if len(columns)==1:
 		mlctuples=[[i] for i in list(ct.columns)]
@@ -242,7 +252,8 @@ def crosstabs():
 				if key[0]=='All':
 					key='All'
 				else:
-					key=re.sub('\.','','__'.join(key))
+# 					key=re.sub('\.','','__'.join(key))
+					key='__'.join(key)
 			
 			child={
 				"columnGroupShow":cgsval,
@@ -301,7 +312,8 @@ def crosstabs():
 	output_records=[]
 	##N.B. "All" is a reserved column name here, for the margins/totals
 	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
-	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
+# 	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
+	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
 	ct=ct.fillna(0)
 	

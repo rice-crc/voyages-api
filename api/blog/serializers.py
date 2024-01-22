@@ -125,6 +125,7 @@ class PostListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=PostFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 class PostListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
@@ -159,6 +160,7 @@ class AuthorListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=AuthorFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 class AuthorListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
@@ -193,6 +195,7 @@ class InstitutionListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=InstitutionFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 class InstitutionListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()

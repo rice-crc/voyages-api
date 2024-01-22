@@ -16,6 +16,7 @@ OPEN_API_BASE_API="http://127.0.0.1:8000/"
 
 REDIS_HOST="voyages-redis"
 REDIS_PORT=6379
+USE_REDIS_CACHE=True
 
 zotero_credentials={
 	"api_key":"abcdefg",

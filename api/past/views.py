@@ -16,17 +16,21 @@ import time
 from .models import *
 from .serializers import *
 from .serializers_READONLY import *
+import redis
+import hashlib
 import pprint
 from common.reqs import *
 from collections import Counter
 from geo.common import GeoTreeFilter
 from geo.serializers_READONLY import LocationSerializer,LocationSerializerDeep
-from voyages3.localsettings import *
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,GEO_NETWORKS_BASE_URL,PEOPLE_NETWORKS_BASE_URL
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from common.static.Enslaver_options import Enslaver_options
 from common.static.Enslaved_options import Enslaved_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
+
+redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -49,25 +53,41 @@ class EnslavedList(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
-		#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Enslaved.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaved_options,
-			auto_prefetch=True
-		)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		srd=serialized_req.data
+		hashed=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+		cached_response = redis_cache.get(hashed)
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
 
-		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-		resp=EnslavedListResponseSerializer({
-			'count':total_results_count,
-			'page':page_num,
-			'page_size':page_size,
-			'results':results
-		}).data
-		#I'm having the most difficult time in the world validating this nested paginated response
-		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Enslaved.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaved_options,
+				auto_prefetch=True
+			)
+
+			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+			resp=EnslavedListResponseSerializer({
+				'count':total_results_count,
+				'page':page_num,
+				'page_size':page_size,
+				'results':results
+			}).data
+			#I'm having the most difficult time in the world validating this nested paginated response
+			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			
 		return JsonResponse(resp,safe=False,status=200)
 		
 class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
@@ -81,34 +101,44 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("ENSLAVED CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-		
 		#VALIDATE THE REQUEST
 		serialized_req = EnslavedAutoCompleteRequestSerializer(data=request.data)
+		
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		
-		#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Enslaved.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaver_options,
-			auto_prefetch=False
-		)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		srd=serialized_req.data
+		hashed=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+		cached_response = redis_cache.get(hashed)
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		
-		#RUN THE AUTOCOMPLETE ALGORITHM
-		final_vals=autocomplete_req(queryset,request)
-		resp=dict(request.data)
-		resp['suggested_values']=final_vals
-		
-		#VALIDATE THE RESPONSE
-		serialized_resp=EnslavedAutoCompleteResponseSerializer(data=resp)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		if not serialized_resp.is_valid():
-			return JsonResponse(serialized_resp.errors,status=400)
+		if cached_response is None:
+			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Enslaved.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaver_options,
+				auto_prefetch=False
+			)
+			#RUN THE AUTOCOMPLETE ALGORITHM
+			final_vals=autocomplete_req(queryset,request)
+			resp=dict(request.data)
+			resp['suggested_values']=final_vals
+			#VALIDATE THE RESPONSE
+			serialized_resp=EnslavedAutoCompleteResponseSerializer(data=resp)
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
 		else:
-			return JsonResponse(serialized_resp.data,safe=False)
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(resp,safe=False,status=200)
 
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -124,31 +154,44 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 		
 		#VALIDATE THE REQUEST
 		serialized_req = EnslaverAutoCompleteRequestSerializer(data=request.data)
+			
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		
-		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=EnslaverIdentity.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Enslaver_options,
-			auto_prefetch=False
-		)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		srd=serialized_req.data
+		hashed=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+		cached_response = redis_cache.get(hashed)
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		
-		#RUN THE AUTOCOMPLETE ALGORITHM
-		final_vals=autocomplete_req(queryset,request)
-		resp=dict(request.data)
-		resp['suggested_values']=final_vals
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=EnslaverIdentity.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Enslaver_options,
+				auto_prefetch=False
+			)
 		
-		#VALIDATE THE RESPONSE
-		serialized_resp=EnslaverAutoCompleteResponseSerializer(data=resp)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		if not serialized_resp.is_valid():
-			return JsonResponse(serialized_resp.errors,status=400)
+			#RUN THE AUTOCOMPLETE ALGORITHM
+			final_vals=autocomplete_req(queryset,request)
+			resp=dict(request.data)
+			resp['suggested_values']=final_vals
+		
+			#VALIDATE THE RESPONSE
+			serialized_resp=EnslaverAutoCompleteResponseSerializer(data=resp)
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
 		else:
-			return JsonResponse(serialized_resp.data,safe=False)
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(resp,safe=False,status=200)
 
 class EnslaverList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -744,5 +787,3 @@ class EnslavedDESTROY(generics.DestroyAPIView):
 	lookup_field='enslaved_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
-
-

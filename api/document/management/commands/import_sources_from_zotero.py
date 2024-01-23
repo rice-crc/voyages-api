@@ -367,12 +367,6 @@ class Command(BaseCommand):
 							source.source_type=source_type
 						else:
 							source.source_type=None
-					
-						source.title=source_title
-				
-						source.zotero_url = zotero_url
-				
-						source.bib=bib
 				
 						if source.zotero_group_id is None:
 							source.zotero_group_id=zotero_group_id
@@ -380,6 +374,12 @@ class Command(BaseCommand):
 						#SIMILARLY, TITLE IS EITHER NONE OR A 1-ENTRY ARRAY
 						if source_title is not None:
 							source_title=source_title[0]
+						
+						source.title=source_title
+				
+						source.zotero_url = zotero_url
+				
+						source.bib=bib
 					
 						#get any existing attached date object
 						#and overwrite it or delete it as necessary
@@ -406,7 +406,7 @@ class Command(BaseCommand):
 						#in the schema already
 						if source.page_connections.all().count() > 0:
 							metadata = [_makeLabelValue(k, val, 'en') for k, val in rdf.items()]
-							print(metadata)
+# 							print(metadata)
 							source.manifest_content = {
 								'metadata': metadata
 							}

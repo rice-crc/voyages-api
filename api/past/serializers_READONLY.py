@@ -8,7 +8,10 @@ from document.models import Source, SourceEnslavedConnection, SourceEnslaverConn
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Enslaver_options import Enslaver_options
 from common.static.Enslaved_options import Enslaved_options
-		
+from common.static.EnslavementRelation_options import EnslavementRelation_options
+
+############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
+
 class PASTSparseDateSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=PASTSparseDate
@@ -18,9 +21,6 @@ class RegisterCountrySerializer(serializers.ModelSerializer):
 	class Meta:
 		model=RegisterCountry
 		fields='__all__'
-
-
-############ SERIALIZERS COMMON TO BOTH ENSLAVERS AND ENSLAVED
 
 class EnslaverRoleSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -200,16 +200,16 @@ class EnslavedPKSerializer(serializers.ModelSerializer):
 
 #### FROM ENSLAVERS TO ENSLAVED
 
+
+####################### ENSLAVERS M2M CONNECTIONS
+
+#### FROM ENSLAVERS OUTWARDS
+
 class PastSourceEnslaverConnectionSerializer(serializers.ModelSerializer):
 	source=PastSourceSerializer(many=False)
 	class Meta:
 		model=SourceEnslaverConnection
 		fields='__all__'
-
-
-####################### ENSLAVED M2M CONNECTIONS
-
-#### FROM ENSLAVERS TO ENSLAVED
 
 class EnslaverEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -231,68 +231,79 @@ class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
 		model=EnslavementRelation
 		fields='__all__'
 
-class EnslaverInRelationSerializer(serializers.ModelSerializer):
+class EnslaverEnslaverInRelationSerializer(serializers.ModelSerializer):
 	relation = EnslaverEnslavementRelationSerializer(many=False)
 	roles=EnslaverRoleSerializer(many=False)
 	class Meta:
 		model=EnslaverInRelation
 		fields='__all__'
 
-# class EnslaverIdentitySerializer(serializers.ModelSerializer):
-# 	birth_place=PastLocationSerializer(many=False,read_only=True)
-# 	death_place=PastLocationSerializer(many=False,read_only=True)
-# 	principal_location=PastLocationSerializer(many=False,read_only=True)
-# 	class Meta:
-# 		model=EnslaverIdentity
-# 		fields='__all__'
-
 class EnslaverAliasSerializer(serializers.ModelSerializer):
-	enslaver_relations=EnslaverInRelationSerializer(many=True)
-# 	identity=EnslaverIdentitySerializer(many=False)
+	enslaver_relations=EnslaverEnslaverInRelationSerializer(many=True)
 	class Meta:
 		model=EnslaverAlias
 		fields='__all__'
 
-class EnslaverSerializer(serializers.ModelSerializer):
-	principal_location=PastLocationSerializer(many=False)
-	enslaver_source_connections=PastSourceEnslaverConnectionSerializer(many=True)
-	aliases=EnslaverAliasSerializer(many=True)
+class EnslaverIdentitySerializer(serializers.ModelSerializer):
 	birth_place=PastLocationSerializer(many=False)
 	death_place=PastLocationSerializer(many=False)
+	aliases=EnslaverAliasSerializer(many=True)
+	principal_location=PastLocationSerializer(many=False)
+	enslaver_source_connections=PastSourceEnslaverConnectionSerializer(many=True)
 	class Meta:
 		model=EnslaverIdentity
+		fields='__all__'
+
+############### ENSLAVEMENT RELATIONS -- OUT TO ENSLAVERS, ENSLAVED, AND VOYAGES
+
+class RelationEnslavedSerializer(serializers.ModelSerializer):
+	post_disembark_location=PastLocationSerializer(many=False)
+	captive_fate=CaptiveFateSerializer(many=False)
+	captive_status=CaptiveStatusSerializer(many=False)
+	language_group=LanguageGroupSerializer(many=False)
+	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
+	class Meta:
+		model=Enslaved
+		fields='__all__'
+
+class RelationEnslavedInRelationSerializer(serializers.ModelSerializer):
+	enslaved=RelationEnslavedSerializer(many=False)
+	class Meta:
+		model=EnslavedInRelation
+		fields='__all__'
+
+class RelationEnslaverIdentitySerializer(serializers.ModelSerializer):
+	birth_place=PastLocationSerializer(many=False,read_only=True)
+	death_place=PastLocationSerializer(many=False,read_only=True)
+	principal_location=PastLocationSerializer(many=False,read_only=True)
+	class Meta:
+		model=EnslaverIdentity
+		fields='__all__'
+
+class RelationEnslaverAliasSerializer(serializers.ModelSerializer):
+	identity=RelationEnslaverIdentitySerializer(many=False)
+	class Meta:
+		model=EnslaverAlias
+		fields='__all__'
+
+class RelationEnslaverInRelationSerializer(serializers.ModelSerializer):
+	enslaver_alias = RelationEnslaverAliasSerializer(many=False)
+	roles=EnslaverRoleSerializer(many=False)
+	class Meta:
+		model=EnslaverInRelation
 		fields='__all__'
 		
-
-class EnslaverPKSerializer(serializers.ModelSerializer):
-	principal_location=PastLocationSerializer(many=False)
-	enslaver_source_connections=PastSourceEnslaverConnectionSerializer(many=True)
-	aliases=EnslaverAliasSerializer(many=True)
-	birth_place=PastLocationSerializer(many=False)
-	death_place=PastLocationSerializer(many=False)
-	class Meta:
-		model=EnslaverIdentity
-		fields='__all__'
-
-
-
-class EnslavementRelationSparseDateSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=VoyageSparseDate
-		fields='__all__'
-
-class EnslavementRelationPKSerializer(serializers.ModelSerializer):
+class EnslavementRelationSerializer(serializers.ModelSerializer):
 	relation_type=EnslavementRelationTypeSerializer(many=False,allow_null=True)
 	place=PastLocationSerializer(many=False,allow_null=True)
-	date=EnslavementRelationSparseDateSerializer(many=False,allow_null=True)
-	relation_enslavers=EnslaverInRelationSerializer(many=True)
-	enslaved_in_relation=EnslavedInRelationSerializer(many=True)
+	relation_enslavers=RelationEnslaverInRelationSerializer(many=True,allow_null=True)
+	enslaved_in_relation=RelationEnslavedInRelationSerializer(many=True,allow_null=True)
+	voyage=PastVoyageSerializer(many=False,allow_null=True)
 	class Meta:
 		model=EnslavementRelation
 		fields='__all__'
 
-#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR THE PAGINATED VOYAGE LIST ENDPOINT. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
-
+#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR PAGINATED LISTS. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
 
 class AnyField(Field):
 	def to_representation(self, value):
@@ -300,8 +311,6 @@ class AnyField(Field):
 
 	def to_internal_value(self, data):
 		return data
-
-
 
 ############ REQUEST FIILTER OBJECTS
 class EnslaverFilterItemSerializer(serializers.Serializer):
@@ -313,6 +322,46 @@ class EnslavedFilterItemSerializer(serializers.Serializer):
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
 	varName=serializers.ChoiceField(choices=[k for k in Enslaved_options])
 	searchTerm=AnyField()
+
+class EnslavementRelationFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in EnslavementRelation_options])
+	searchTerm=AnyField()
+
+########### PAGINATED ENSLAVEMENT RELATION LISTS 
+
+class EnslavementRelationListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=EnslavementRelationSerializer(many=True,read_only=True)
+
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated, filtered list of enslavement relations',
+			summary='Paginated, filtered list of enslavement relations',
+			description='Here, we look for all enslavement relations connected to voyage 135096, the ',
+			value={
+			  "filter": [
+					{
+						"varName":"voyage__voyage_id",
+						"searchTerm":135096,
+						"op":"exact"
+					}
+				],
+				"page": 1,
+				"page_size": 10
+			},
+			request_only=True
+		)
+    ]
+)
+class EnslavementRelationListRequestSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	filter=EnslavementRelationFilterItemSerializer(many=True,required=False,allow_null=True)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 ########### PAGINATED ENSLAVED LISTS 
 @extend_schema_serializer(
@@ -385,7 +434,7 @@ class EnslaverListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
-	results=EnslaverSerializer(many=True,read_only=True)
+	results=EnslaverIdentitySerializer(many=True,read_only=True)
 
 ############ AUTOCOMPLETE SERIALIZERS
 @extend_schema_serializer(
@@ -502,7 +551,7 @@ class EnslavedFieldAggregationResponseSerializer(serializers.Serializer):
 	])
 	min=serializers.IntegerField(allow_null=True)
 	max=serializers.IntegerField(allow_null=True)
-	
+
 @extend_schema_serializer(
 	examples = [
          OpenApiExample(
@@ -537,7 +586,7 @@ class EnslaverFieldAggregationResponseSerializer(serializers.Serializer):
 	min=serializers.IntegerField(allow_null=True)
 	max=serializers.IntegerField(allow_null=True)
 
-############ DATAFRAMES ENDPOINT
+############ DATAFRAMES ENDPOINTS
 @extend_schema_serializer(
 	examples=[
 		OpenApiExample(
@@ -598,6 +647,37 @@ class EnslaverDataframesRequestSerializer(serializers.Serializer):
 	)
 	filter=EnslaverFilterItemSerializer(many=True,allow_null=True,required=False)
 
+
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered request for 3 columns',
+			summary="Filtered req for 3 cols",
+			description="Here, we are looking for the enslaved person\'s documented name, the ship's name, and the pk of the relation for people who were transported between 1810-15.",
+			value={
+				"selected_fields":[
+					"id",
+					"voyage__voyage_ship__ship_name",
+					"enslaved_in_relation__enslaved__documented_name"
+				],
+				"filter":[
+					{
+						"varName": "voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"op": "btw",
+						"searchTerm": [1810,1815]
+					}
+				]
+			}
+		)
+	]
+)
+class EnslavementRelationDataframesRequestSerializer(serializers.Serializer):
+	selected_fields=serializers.ListField(
+		child=serializers.ChoiceField(choices=[
+			k for k in EnslavementRelation_options
+		])
+	)
+	filter=EnslavementRelationFilterItemSerializer(many=True,allow_null=True,required=False)
 
 ############ GEOTREE REQUESTS
 @extend_schema_serializer(
@@ -759,8 +839,7 @@ class PASTNetworksResponseNodeSerializer(serializers.Serializer):
 	node_class=serializers.CharField()
 	uuid=serializers.CharField()
 	data=serializers.JSONField()
-	
-	
+
 class PASTNetworksResponseEdgeSerializer(serializers.Serializer):
 	source=serializers.CharField()
 	target=serializers.CharField()

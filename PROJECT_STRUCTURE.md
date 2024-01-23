@@ -6,15 +6,15 @@ The project is built around a microservices model. It intends to farm out work t
 
 The app is supported with some infrastructural containers built by Docker. Refer to the main Readme file for instructions on these.
 
-### MySQL
+### Voyages-MySQL
 
 The Django app is configured to use a MySQL db backend, running on port 3306.
 
-### Adminer
+### Voyages-Adminer
 
 In order to directly inspect the database (when this is necessary), we have installed an Adminer container running on port 8080.
 
-### Solr
+### Voyages-Solr
 
 This service is used to index entities in the database (Voyages, Enslaved People, Enslavers, and Blog Posts). Currently, it is only being used for the global search feature. However, it would make sense to use this to index documents at well (though full-text search always requires some tuning).
 
@@ -22,7 +22,7 @@ This service is used to index entities in the database (Voyages, Enslaved People
 
 These containers run python services in Flask or Django. The "main" API container runs a barebones Django web app, which the other processes essentially index the data from, in order to provide efficient use of these data (for instance, when aggregating to make data visualizations).
 
-### API
+### Voyages-API (Django)
 
 This is the Python Django project that manages the database, provides an admin interface for directly editing the data, and presents the data out via API views.
 
@@ -30,13 +30,13 @@ A core principle of the rearchitecture was that the ORM should be exposed so tha
 
 For notes on API usage and maintainer notes, refer to the [API's readme](api/README.md)
 
-### Voyages-Stats
+### Voyages-Stats (Flask)
 
 This container uses Pandas to build in-memory databases that can quickly produce json summary statistics that fit well into the plotly.js graphing library. Typically, these requests are about providing summary statistics using pandas functions like groupby.
 
 Right now, we've only applied these statistical operations to the voyages endpoint. We need to have discussions about how we want to visualize numerical data related to people.
 
-### Voyages-People-Networks
+### Voyages-People-Networks (Flask)
 
 This container uses NetworkX to map the numerous connections between people and voyages.
 
@@ -44,6 +44,6 @@ Its development grew out of the fact that the database had to be restructured in
 
 Its default behavior is to receive an ID for one of its core object classes (an enslaved person, an enslaver, or a voyage), and to return the node with that ID, its neighbors out two hops, and the associated edges.
 
-### Voyages-Geo-Networks
+### Voyages-Geo-Networks (Flask)
 
 This container uses NetworkX to create essentially a routing system, and then runs every entity for each object class through that routing system, in order to cache, in Pandas, a large dataframe of the various edges and weights for each entity, so that these can be aggregated on, and splined appropriately based on the weights.

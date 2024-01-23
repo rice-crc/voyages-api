@@ -11,7 +11,28 @@ import html
 import re
 import pysolr
 import os
+import uuid
 
+def clean_long_df(rows,selected_fields):
+	'''
+	JSON Serialization doesn't fly when you fetch the raw value of certain data types
+	e.g., uuid.UUID, decimal.Decimal.....
+	'''
+	
+	resp={sf:[] for sf in selected_fields}
+	
+	for i in range(len(selected_fields)):
+		sf=selected_fields[i]
+		column=[r[i] for r in rows]
+		
+		for r in rows:
+			val=r[i]
+			if type(val) == uuid.UUID:
+				val=str(val)
+			
+			resp[sf].append(val)
+	return resp
+	
 def paginate_queryset(queryset,request):
 	'''
 		Customized pagination for post requests. Params are:
@@ -169,6 +190,11 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 	return queryset,results_count
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
+	'''
+	Recursively walks the OpenAPI schemas to build flat json files that we can later use for indexing, serializer population and validation, etc.
+	Its best friend is the rebuild_options management command.
+	Why do this? It turns out that the OpenAPI endpoint is a little touchy, so we can't route live requests through it.
+	'''
 	if hierarchical in [True,"true","True",1,"t","T","yes","Yes","y","Y"]:
 		hierarchical=True
 	else:
@@ -243,8 +269,6 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 
 	
 	return output
-		
-		
 
 def autocomplete_req(queryset,request):
 	

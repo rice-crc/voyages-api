@@ -6,7 +6,6 @@ import pprint
 import gc
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 
-
 class autocompleterequestserializer(serializers.Serializer):
 	varName=serializers.CharField(max_length=500)
 	querystr=serializers.CharField(max_length=255)

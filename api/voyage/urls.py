@@ -11,10 +11,8 @@ urlpatterns = [
 	path('crosstabs/',views.VoyageCrossTabs.as_view()),
 	path('aggroutes/',views.VoyageAggRoutes.as_view()),
 	path('geotree/',views.VoyageGeoTreeFilter.as_view()),
-	path('CREATE/',views.VoyageCREATE.as_view()),
-	path('<int:voyage_id>',views.VoyageRETRIEVE.as_view()),
-	path('UPDATE/<int:voyage_id>',views.VoyageUPDATE.as_view()),
-	path('DESTROY/<int:voyage_id>',views.VoyageDESTROY.as_view())
+	path('CREATE/<int:voyage_id>',views.VoyageCreate.as_view()),
+	path('RUD/<int:voyage_id>',views.VoyageRetrieveUpdateDestroy.as_view())
     ]
     
     

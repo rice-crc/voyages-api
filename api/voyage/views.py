@@ -18,7 +18,7 @@ import pprint
 import redis
 import hashlib
 from rest_framework import filters
-from common.reqs import *
+from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df
 # from common.serializers import autocompleterequestserializer, autocompleteresponseserializer,crosstabresponseserializer,crosstabrequestserializer
 from geo.common import GeoTreeFilter
 from geo.serializers_READONLY import LocationSerializerDeep
@@ -365,11 +365,8 @@ class VoyageDataFrames(generics.GenericAPIView):
 		
 			queryset=queryset.order_by('id')
 			sf=request.data.get('selected_fields')
-			resp={}
 			vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
-			for i in range(len(sf)):
-				resp[sf[i]]=[v[i] for v in vals]
-		
+			resp=clean_long_df(vals,sf)		
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			redis_cache.set(hashed,json.dumps(resp))
@@ -590,65 +587,22 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
-@extend_schema(
-		exclude=True
-	)
-class VoyageCREATE(generics.CreateAPIView):
+class VoyageCreate(generics.CreateAPIView):
 	'''
-	Create Voyage without a pk
+	Create a Voyage
 	'''
 	queryset=Voyage.objects.all()
-	serializer_class=VoyageCRUDSerializer
+	serializer_class=VoyageSerializerCRUD
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-class VoyageRETRIEVE(generics.RetrieveAPIView):
+class VoyageRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 	'''
-	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
-	'''
-	queryset=Voyage.objects.all()
-	serializer_class=VoyageSerializer
-	lookup_field='voyage_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class VoyageUPDATE(generics.UpdateAPIView):
-	'''
-	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
-	
-	Previously, the SQL pk ("id") always corresponded to the "voyage_id" field. We will not be enforcing this going forward.
-	
-	M2M relations will not be writable here EXCEPT in the case of union/"through" tables.
-	
-	Examples:
-	
-		1. You CANNOT create an Enslaved (person) record as you traverse voyage_enslavement_relations >> relation_enslaved, but only the EnslavementRelation record that joins them
-		2. You CAN create an EnslaverInRelation record as you traverse voyage_enslavement_relations >> relation_enslaver >> enslaver_alias >> enslaver_identity ...
-		3. ... but you CANNOT create an EnslaverRole record during that traversal, like voyage_enslavement_relations >> relation_enslaver >> enslaver_role
-	
-	I have also, for the time, set all itinerary Location foreign keys as read_only.
-	
-	Godspeed.
+	Retrieve, Update, or Delete a Voyage
 	'''
 	queryset=Voyage.objects.all()
-	serializer_class=VoyageCRUDSerializer
-	lookup_field='voyage_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class VoyageDESTROY(generics.DestroyAPIView):
-	'''
-	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
-	'''
-	queryset=Voyage.objects.all()
-	serializer_class=VoyageCRUDSerializer
+	serializer_class=VoyageSerializerCRUD
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]

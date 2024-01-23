@@ -19,7 +19,7 @@ from .serializers_READONLY import *
 import redis
 import hashlib
 import pprint
-from common.reqs import *
+from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df
 from collections import Counter
 from geo.common import GeoTreeFilter
 from geo.serializers_READONLY import LocationSerializer,LocationSerializerDeep
@@ -28,6 +28,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 from drf_spectacular.types import OpenApiTypes
 from common.static.Enslaver_options import Enslaver_options
 from common.static.Enslaved_options import Enslaved_options
+from common.static.EnslavementRelation_options import EnslavementRelation_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
@@ -458,12 +459,14 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		
 			queryset=queryset.order_by('id')
 			sf=request.data.get('selected_fields')
-			resp={}
+			
 			vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
-			for i in range(len(sf)):
-				resp[sf[i]]=[v[i] for v in vals]		
+			
+			resp=clean_long_df(vals,sf)
+			
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			print()
 			redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
@@ -481,7 +484,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 	@extend_schema(
 		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
 		However, it could be used for csv exports and the like.\n\
-		Be careful! It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the voyage, you're likely get back extra rows.\n\
+		Be careful! It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the enslaver, you're likely to get back extra rows.\n\
 		And finally, the example provided below puts a strict year filter on because unrestricted, it will break your swagger viewer :) \n\
 		",
 		request=EnslaverDataframesRequestSerializer
@@ -490,7 +493,6 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		print("ENSLAVER DATA FRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
 		
-		print(request.data)
 		#VALIDATE THE REQUEST
 		serialized_req = EnslaverDataframesRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
@@ -522,10 +524,8 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		
 			queryset=queryset.order_by('id')
 			sf=request.data.get('selected_fields')
-			resp={}
 			vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
-			for i in range(len(sf)):
-				resp[sf[i]]=[v[i] for v in vals]
+			resp=clean_long_df(vals,sf)
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			redis_cache.set(hashed,json.dumps(resp))
@@ -539,47 +539,127 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
-@extend_schema(exclude=True)
-class EnslavementRelationsDataFrames(generics.GenericAPIView):
+class EnslavementRelationList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="We are going to try to serialize as a paginated list the model that makes this into a graph database, against all better judgement.",
+		request=EnslavementRelationListRequestSerializer,
+		responses=EnslavementRelationListResponseSerializer
+	)
+	def post(self,request):
+		
+		st=time.time()
+		print("ENSLAVEMENT RELATION LIST (GODSPEED)+++++++\nusername:",request.auth.user)
+		#VALIDATE THE REQUEST
+		serialized_req = EnslavementRelationListRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+
+			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=EnslavementRelation.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				EnslavementRelation_options,
+				auto_prefetch=True
+			)
+
+			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+			resp=EnslavementRelationListResponseSerializer({
+				'count':total_results_count,
+				'page':page_num,
+				'page_size':page_size,
+				'results':results
+			}).data
+			#I'm having the most difficult time in the world validating this nested paginated response
+			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			
+		return JsonResponse(resp,safe=False,status=200)
+
+
+class EnslavementRelationDataFrames(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
+		However, it could be used for csv exports and the like.\n\
+		Be careful! It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships, you're likely to get back extra rows.\n\
+		And finally, the example provided below puts a strict year filter on because unrestricted, it will break your swagger viewer :) \n\
+		",
+		request=EnslavementRelationDataframesRequestSerializer
+	)
 	def post(self,request):
 		print("+++++++\nusername:",request.auth.user)
 		st=time.time()
-		params=dict(request.data)
-		queryset=EnslavementRelation.objects.all()
-		enslavementrelationoptions={
-			'id':{'type':'integer'},
-			'voyage__voyage_id':{'type':'integer'},
-			'voyage__id':{'type':'integer'},
-			'relation_type__name':{'type':'string'},
-			'voyage__voyage_ship__ship_name':{'type':'string'},
-			'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name':{'type':'string'},
-			'voyage__voyage_itinerary__imp_principal_port_slave_dis__name':{'type':'string'},
-			'voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year':{'type':'integer'},
-			'enslaved_in_relation__enslaved__id':{'type':'integer'},
-			'enslaved_in_relation__enslaved__documented_name':{'type':'string'},
-			'enslaved_in_relation__enslaved__age':{'type':'integer'},
-			'enslaved_in_relation__enslaved__gender':{'type':'string'},
-			'relation_enslavers__enslaver_alias__identity__id':{'type':'integer'},
-			'relation_enslavers__enslaver_alias__identity__principal_alias':{'type':'string'},
-			'relation_enslavers__roles__name':{'type':'string'}
-		}
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			enslavementrelationoptions,
-			auto_prefetch=True
-		)
-		queryset=queryset.order_by('id')
-		selected_fields=request.data.get('selected_fields')
-		output_dicts={}
-		vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
-		for i in range(len(selected_fields)):
-			output_dicts[selected_fields[i]]=[v[i] for v in vals]
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(output_dicts,safe=False)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = EnslavementRelationDataframesRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=EnslavementRelation.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				EnslavementRelation_options,
+				auto_prefetch=True
+			)
+			queryset=queryset.order_by('id')
+			sf=request.data.get('selected_fields')
+			vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+			resp=clean_long_df(vals,sf)
+			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 		
 class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -861,149 +941,149 @@ class PASTNetworks(generics.GenericAPIView):
 
 #CONTRIBUTIONS
 
-@extend_schema(
-		exclude=True
-	)
-class EnslavementRelationCREATE(generics.CreateAPIView):
-	'''
-	Create an enslavement relation without a pk
-	'''
-	queryset=EnslavementRelation.objects.all()
-	serializer_class=EnslavementRelationCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class EnslavementRelationRETRIEVE(generics.RetrieveAPIView):
-	'''
-	Retrieve an enslavement relation record with their pk
-	'''
-	queryset=EnslavementRelation.objects.all()
-	serializer_class=EnslavementRelationPKSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-
-@extend_schema(
-		exclude=True
-	)
-class EnslavementRelationUPDATE(generics.UpdateAPIView):
-	'''
-	Update an enslavement relation record with their pk
-	'''
-	queryset=EnslavementRelation.objects.all()
-	serializer_class=EnslavementRelationCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class EnslavementRelationDESTROY(generics.DestroyAPIView):
-	'''
-	Delete an enslavement relation record with their pk
-	'''
-	queryset=EnslavementRelation.objects.all()
-	serializer_class=EnslavementRelationCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class EnslaverCREATE(generics.CreateAPIView):
-	'''
-	Create enslaver without a pk
-	'''
-	queryset=EnslaverIdentity.objects.all()
-	serializer_class=EnslaverCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class EnslaverRETRIEVE(generics.RetrieveAPIView):
-	'''
-	Retrieve an enslaver record with their pk
-	'''
-	queryset=EnslaverIdentity.objects.all()
-	serializer_class=EnslaverPKSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-
-@extend_schema(
-		exclude=True
-	)
-class EnslaverUPDATE(generics.UpdateAPIView):
-	'''
-	Update an enslaver record with their pk
-	'''
-	queryset=EnslaverIdentity.objects.all()
-	serializer_class=EnslaverCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class EnslaverDESTROY(generics.DestroyAPIView):
-	'''
-	Delete an enslaver record with their pk
-	'''
-	queryset=EnslaverIdentity.objects.all()
-	serializer_class=EnslaverCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class EnslavedCREATE(generics.CreateAPIView):
-	'''
-	Create enslaver without a pk
-	'''
-	queryset=Enslaved.objects.all()
-	serializer_class=EnslavedCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class EnslavedRETRIEVE(generics.RetrieveAPIView):
-	'''
-	Retrieve an enslaver record with their pk
-	'''
-	queryset=Enslaved.objects.all()
-	serializer_class=EnslavedPKSerializer
-	lookup_field='enslaved_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-
-@extend_schema(
-		exclude=True
-	)
-class EnslavedUPDATE(generics.UpdateAPIView):
-	'''
-	Update an enslaver record with their pk
-	'''
-	queryset=Enslaved.objects.all()
-	serializer_class=EnslavedCRUDSerializer
-	lookup_field='enslaved_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class EnslavedDESTROY(generics.DestroyAPIView):
-	'''
-	Delete an enslaver record with their pk
-	'''
-	queryset=Enslaved.objects.all()
-	serializer_class=EnslavedCRUDSerializer
-	lookup_field='enslaved_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslavementRelationCREATE(generics.CreateAPIView):
+# 	'''
+# 	Create an enslavement relation without a pk
+# 	'''
+# 	queryset=EnslavementRelation.objects.all()
+# 	serializer_class=EnslavementRelationCRUDSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# class EnslavementRelationRETRIEVE(generics.RetrieveAPIView):
+# 	'''
+# 	Retrieve an enslavement relation record with their pk
+# 	'''
+# 	queryset=EnslavementRelation.objects.all()
+# 	serializer_class=EnslavementRelationSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAuthenticated]
+# 
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslavementRelationUPDATE(generics.UpdateAPIView):
+# 	'''
+# 	Update an enslavement relation record with their pk
+# 	'''
+# 	queryset=EnslavementRelation.objects.all()
+# 	serializer_class=EnslavementRelationCRUDSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslavementRelationDESTROY(generics.DestroyAPIView):
+# 	'''
+# 	Delete an enslavement relation record with their pk
+# 	'''
+# 	queryset=EnslavementRelation.objects.all()
+# 	serializer_class=EnslavementRelationCRUDSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslaverCREATE(generics.CreateAPIView):
+# 	'''
+# 	Create enslaver without a pk
+# 	'''
+# 	queryset=EnslaverIdentity.objects.all()
+# 	serializer_class=EnslaverCRUDSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# class EnslaverRETRIEVE(generics.RetrieveAPIView):
+# 	'''
+# 	Retrieve an enslaver record with their pk
+# 	'''
+# 	queryset=EnslaverIdentity.objects.all()
+# 	serializer_class=EnslaverPKSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAuthenticated]
+# 
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslaverUPDATE(generics.UpdateAPIView):
+# 	'''
+# 	Update an enslaver record with their pk
+# 	'''
+# 	queryset=EnslaverIdentity.objects.all()
+# 	serializer_class=EnslaverCRUDSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslaverDESTROY(generics.DestroyAPIView):
+# 	'''
+# 	Delete an enslaver record with their pk
+# 	'''
+# 	queryset=EnslaverIdentity.objects.all()
+# 	serializer_class=EnslaverCRUDSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslavedCREATE(generics.CreateAPIView):
+# 	'''
+# 	Create enslaver without a pk
+# 	'''
+# 	queryset=Enslaved.objects.all()
+# 	serializer_class=EnslavedCRUDSerializer
+# 	lookup_field='id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# class EnslavedRETRIEVE(generics.RetrieveAPIView):
+# 	'''
+# 	Retrieve an enslaver record with their pk
+# 	'''
+# 	queryset=Enslaved.objects.all()
+# 	serializer_class=EnslavedPKSerializer
+# 	lookup_field='enslaved_id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAuthenticated]
+# 
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslavedUPDATE(generics.UpdateAPIView):
+# 	'''
+# 	Update an enslaver record with their pk
+# 	'''
+# 	queryset=Enslaved.objects.all()
+# 	serializer_class=EnslavedCRUDSerializer
+# 	lookup_field='enslaved_id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# @extend_schema(
+# 		exclude=True
+# 	)
+# class EnslavedDESTROY(generics.DestroyAPIView):
+# 	'''
+# 	Delete an enslaver record with their pk
+# 	'''
+# 	queryset=Enslaved.objects.all()
+# 	serializer_class=EnslavedCRUDSerializer
+# 	lookup_field='enslaved_id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]

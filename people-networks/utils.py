@@ -122,7 +122,7 @@ def load_graph():
 	
 	#482149 relations without roles.
 	#517290 relations WITH roles. promising.
-	url=DJANGO_BASE_URL+'past/enslavementrelations/dataframes/'
+	url=DJANGO_BASE_URL+'past/enslavementrelation/dataframes/'
 	payload={
 		"selected_fields":selected_fields,
 		'filter':[]

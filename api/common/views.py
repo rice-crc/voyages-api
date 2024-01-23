@@ -29,7 +29,6 @@ import redis
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
-
 @extend_schema(exclude=True)
 class Schemas(generics.GenericAPIView):
 	def get(self,request):
@@ -39,9 +38,7 @@ class Schemas(generics.GenericAPIView):
 			schema_json=getJSONschema(schema_name,hierarchical)
 			return JsonResponse(schema_json,safe=False)
 		else:
-			return JsonResponse({'status':'false','message':'you must specify schema_name (string) and hierarchical (boolean)'}, status=502)
-
-		
+			return JsonResponse({'status':'false','message':'you must specify schema_name (string) and hierarchical (boolean)'}, status=502)		
 
 class GlobalSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

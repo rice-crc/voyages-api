@@ -10,14 +10,18 @@ from rest_framework.permissions import IsAuthenticated
 from django.views.generic.list import ListView
 from common.reqs import *
 from .models import *
+import hashlib
+import redis
 from .serializers import *
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,USE_REDIS_CACHE
 from common.static.Institution_options import Institution_options
 from common.static.Post_options import Post_options
 from common.static.Author_options import Author_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
 
+redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 class PostList(generics.GenericAPIView):
 	'''
 	The Voyages team launched its new blog interface in 2022, in order to allow for richer humanities content to be integrated into the site, and to allow for more rapid publication of project-related news.
@@ -33,31 +37,61 @@ class PostList(generics.GenericAPIView):
 		responses=PostListResponseSerializer
 	)
 	def post(self,request):
+
+		st=time.time()
 		print("BLOG POST LIST+++++++\nusername:",request.auth.user)
 		
 		#VALIDATE THE REQUEST
 		serialized_req = PostListRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(
+				json.dumps(
+					hashdict,
+					sort_keys=True,
+					indent=1
+				).encode('utf-8')
+			).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Post.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Post_options,
+				auto_prefetch=True
+			)
+			results,total_results_count,page_num,page_size=\
+			paginate_queryset(queryset,request)
+			
+			resp=PostListResponseSerializer({
+				'count':total_results_count,
+				'page':page_num,
+				'page_size':page_size,
+				'results':results
+			}).data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			resp=json.loads(cached_response)
 		
-		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Post.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Post_options,
-			auto_prefetch=True
-		)
-		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-		resp=PostListResponseSerializer({
-			'count':total_results_count,
-			'page':page_num,
-			'page_size':page_size,
-			'results':results
-		}).data
-		#I'm having the most difficult time in the world validating this nested paginated response
-		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			
 		return JsonResponse(resp,safe=False,status=200)
 
 class PostTextFieldAutoComplete(generics.GenericAPIView):
@@ -78,31 +112,53 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		serialized_req = PostAutoCompleteRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
-		
-		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Post.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Post_options,
-			auto_prefetch=False
-		)
-		
-		#RUN THE AUTOCOMPLETE ALGORITHM
-		final_vals=autocomplete_req(queryset,request)
-		resp=dict(request.data)
-		resp['suggested_values']=final_vals
-		
-		#VALIDATE THE RESPONSE
-		serialized_resp=PostAutoCompleteResponseSerializer(data=resp)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		if not serialized_resp.is_valid():
-			return JsonResponse(serialized_resp.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(
+				json.dumps(
+					hashdict,
+					sort_keys=True,
+					indent=1
+				).encode('utf-8')
+			).hexdigest()
+			cached_response = redis_cache.get(hashed)
 		else:
-			return JsonResponse(serialized_resp.data,safe=False)
-
-
+			cached_response=None
+		
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Post.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Post_options,
+				auto_prefetch=False
+			)
+		
+			#RUN THE AUTOCOMPLETE ALGORITHM
+			final_vals=autocomplete_req(queryset,request)
+			resp=dict(request.data)
+			resp['suggested_values']=final_vals
+		
+			#VALIDATE THE RESPONSE
+			serialized_resp=PostAutoCompleteResponseSerializer(data=resp)
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(resp,safe=False,status=200)
 
 class AuthorList(generics.GenericAPIView):
 	'''
@@ -117,31 +173,62 @@ class AuthorList(generics.GenericAPIView):
 		responses=AuthorListResponseSerializer
 	)
 	def post(self,request):
+		st=time.time()
 		print("AUTHOR LIST+++++++\nusername:",request.auth.user)
 		
 		#VALIDATE THE REQUEST
 		serialized_req = AuthorListRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(
+				json.dumps(
+					hashdict,
+					sort_keys=True,
+					indent=1
+				).encode('utf-8')
+			).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
-		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Author.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Author_options,
-			auto_prefetch=True
-		)
-		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-		resp=AuthorListResponseSerializer({
-			'count':total_results_count,
-			'page':page_num,
-			'page_size':page_size,
-			'results':results
-		}).data
-		#I'm having the most difficult time in the world validating this nested paginated response
-		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Author.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Author_options,
+				auto_prefetch=True
+			)
+			results,total_results_count,page_num,page_size=\
+			paginate_queryset(queryset,request)
+			
+			resp=AuthorListResponseSerializer({
+				'count':total_results_count,
+				'page':page_num,
+				'page_size':page_size,
+				'results':results
+			}).data
+			#I'm having the most difficult time in the world validating this nested paginated response
+			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			
 		return JsonResponse(resp,safe=False,status=200)
 
 class InstitutionList(generics.GenericAPIView):
@@ -157,6 +244,7 @@ class InstitutionList(generics.GenericAPIView):
 		responses=InstitutionListResponseSerializer
 	)
 	def post(self,request):
+		st=time.time()
 		print("INSTITUTION LIST+++++++\nusername:",request.auth.user)
 		
 		#VALIDATE THE REQUEST
@@ -164,23 +252,44 @@ class InstitutionList(generics.GenericAPIView):
 		
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
 		
-		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Institution.objects.all()
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Institution_options,
-			auto_prefetch=True
-		)
-		results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-		resp=InstitutionListResponseSerializer({
-			'count':total_results_count,
-			'page':page_num,
-			'page_size':page_size,
-			'results':results
-		},read_only=True).data
-		#I'm having the most difficult time in the world validating this nested paginated response
-		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Institution.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Institution_options,
+				auto_prefetch=True
+			)
+			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+			resp=InstitutionListResponseSerializer({
+				'count':total_results_count,
+				'page':page_num,
+				'page_size':page_size,
+				'results':results
+			},read_only=True).data
+			#I'm having the most difficult time in the world validating this nested paginated response
+			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			redis_cache.set(hashed,json.dumps(resp))
+		else:
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			
 		return JsonResponse(resp,safe=False,status=200)

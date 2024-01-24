@@ -34,8 +34,8 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 from drf_spectacular.types import OpenApiTypes
 from common.static.Voyage_options import Voyage_options
 
-if USE_REDIS_CACHE:
-	redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
+redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
@@ -97,7 +97,8 @@ class VoyageList(generics.GenericAPIView):
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -163,7 +164,8 @@ class VoyageAggregations(generics.GenericAPIView):
 			else:
 				resp=serialized_resp.data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -234,7 +236,8 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			else:
 				resp=serialized_resp.data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -307,7 +310,8 @@ class VoyageGroupBy(generics.GenericAPIView):
 			json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			resp=json.loads(json_resp.text)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -369,7 +373,8 @@ class VoyageDataFrames(generics.GenericAPIView):
 			resp=clean_long_df(vals,sf)		
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -443,7 +448,8 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		
 			### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -500,7 +506,8 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 			#VALIDATE THE RESPONSE
 			serialized_resp=VoyageAutoCompleteResponseSerializer(data=resp)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -577,7 +584,8 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			else:
 				resp=serialized_resp.data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)

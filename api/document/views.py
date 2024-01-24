@@ -94,7 +94,8 @@ class SourceList(generics.GenericAPIView):
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			resp=json.loads(cached_response)
 		

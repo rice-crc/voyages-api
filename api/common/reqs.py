@@ -177,11 +177,16 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		for ob in order_by:
 			if ob.startswith('-'):
 				k=ob[1:]
+				asc=False
 			else:
+				asc=True
 				k=ob
 			
 			if k in all_fields:
-				queryset=queryset.order_by(F(k).desc(nulls_last=True))
+				if asc:
+					queryset=queryset.order_by(F(k).asc(nulls_last=True))
+				else:
+					queryset=queryset.order_by(F(k).desc(nulls_last=True))
 			else:
 				queryset=queryset.order_by('id')
 	else:

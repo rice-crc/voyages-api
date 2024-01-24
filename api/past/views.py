@@ -89,7 +89,8 @@ class EnslavedList(generics.GenericAPIView):
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			resp=json.loads(cached_response)
 		
@@ -144,7 +145,8 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 			#VALIDATE THE RESPONSE
 			serialized_resp=EnslavedAutoCompleteResponseSerializer(data=resp)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -203,7 +205,8 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 			#VALIDATE THE RESPONSE
 			serialized_resp=EnslaverAutoCompleteResponseSerializer(data=resp)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -267,7 +270,8 @@ class EnslaverList(generics.GenericAPIView):
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -333,7 +337,8 @@ class EnslavedAggregations(generics.GenericAPIView):
 			else:
 				resp=serialized_resp.data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -401,7 +406,8 @@ class EnslaverAggregations(generics.GenericAPIView):
 			else:
 				resp=serialized_resp.data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -467,7 +473,8 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			print()
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -528,7 +535,8 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			resp=clean_long_df(vals,sf)
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -591,7 +599,8 @@ class EnslavementRelationList(generics.GenericAPIView):
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			resp=json.loads(cached_response)
 		
@@ -599,7 +608,6 @@ class EnslavementRelationList(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			
 		return JsonResponse(resp,safe=False,status=200)
-
 
 class EnslavementRelationDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -650,7 +658,8 @@ class EnslavementRelationDataFrames(generics.GenericAPIView):
 			resp=clean_long_df(vals,sf)
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -722,7 +731,8 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		
 			### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -792,7 +802,8 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 			#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
 			resp=GeoTreeFilter(spss_vals=vls)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -872,7 +883,8 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			else:
 				resp=serialized_resp.data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
@@ -928,7 +940,8 @@ class PASTNetworks(generics.GenericAPIView):
 			else:
 				resp=serialized_resp.data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			redis_cache.set(hashed,json.dumps(resp))			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)

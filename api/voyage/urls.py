@@ -12,7 +12,13 @@ urlpatterns = [
 	path('aggroutes/',views.VoyageAggRoutes.as_view()),
 	path('geotree/',views.VoyageGeoTreeFilter.as_view()),
 	path('CREATE/<int:voyage_id>',views.VoyageCreate.as_view()),
-	path('RUD/<int:voyage_id>',views.VoyageRetrieveUpdateDestroy.as_view())
-    ]
-    
-    
+	path('RUD/<int:voyage_id>',views.VoyageRetrieveUpdateDestroy.as_view()),
+	path('NationalityList/',views.NationalityList.as_view()),
+	path('RigOfVesselList/',views.RigOfVesselList.as_view()),
+	path('TonTypeList/',views.TonTypeList.as_view()),
+	path('ParticularOutcomeList/',views.ParticularOutcomeList.as_view()),
+	path('SlavesOutcomeList/',views.SlavesOutcomeList.as_view()),
+	path('ResistanceList/',views.ResistanceList.as_view()),
+	path('OwnerOutcomeList/',views.OwnerOutcomeList.as_view()),
+	path('VesselCapturedOutcomeList/',views.VesselCapturedOutcomeList.as_view())
+]

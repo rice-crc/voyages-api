@@ -614,3 +614,117 @@ class VoyageRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
+
+class RigOfVesselList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=RigOfVessel
+	queryset=RigOfVessel.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=RigOfVesselSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class NationalityList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=NationalitySerializer
+	queryset=Nationality.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=NationalitySerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class TonTypeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=TonTypeSerializer
+	queryset=TonType.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=TonTypeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	
+class ParticularOutcomeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=ParticularOutcomeSerializer
+	queryset=ParticularOutcome.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=ParticularOutcomeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+
+class SlavesOutcomeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=SlavesOutcomeSerializer
+	queryset=SlavesOutcome.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=SlavesOutcomeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+
+class ResistanceList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=ResistanceSerializer
+	queryset=Resistance.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=ResistanceSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	
+class OwnerOutcomeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=OwnerOutcomeSerializer
+	queryset=OwnerOutcome.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=OwnerOutcomeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+
+class VesselCapturedOutcomeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=VesselCapturedOutcomeSerializer
+	queryset=VesselCapturedOutcome.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=VesselCapturedOutcomeSerializerCRUD
+	authentication_classes=[TokenAuthentication]

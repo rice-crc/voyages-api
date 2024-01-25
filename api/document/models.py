@@ -3,6 +3,7 @@ import re
 from voyage.models import Voyage
 from past.models import Enslaved,EnslaverIdentity,EnslavementRelation
 from common.models import NamedModelAbstractBase,SparseDateAbstractBase
+from voyages3.settings import STATIC_URL
 
 class DocSparseDate(SparseDateAbstractBase):
 	pass
@@ -38,9 +39,6 @@ class Page(models.Model):
 	page_url=models.URLField(
 		max_length=400,null=True,blank=True
 	)
-	iiif_manifest_url=models.URLField(
-		null=True,blank=True,max_length=400
-	)
 	iiif_baseimage_url=models.URLField(
 		null=True,blank=True,max_length=400)
 	image_filename=models.CharField(
@@ -48,7 +46,6 @@ class Page(models.Model):
 		null=True,
 		blank=True
 	)
-	transcription=models.TextField(null=True,blank=True)
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 	
@@ -331,7 +328,7 @@ class Source(models.Model):
 		null=True,
 		blank=True
 	)
-		
+	
 	class Meta:
 		unique_together=[
 			['title','url','legacy_source']
@@ -342,3 +339,10 @@ class Source(models.Model):
 			
 	class Meta:
 		ordering=['id']
+	
+	@property
+	def iiif_manifest_url(self):
+		if self.has_published_manifest and self.zotero_group_id and self.zotero_item_id is not None:
+			return(f'/{STATIC_URL}iiif_manifests/{self.zotero_group_id}__{self.zotero_item_id}.json')
+		else:
+			return None

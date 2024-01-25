@@ -599,6 +599,18 @@ class VoyageAggRoutes(generics.GenericAPIView):
 
 ######## CRUD ENDPOINTS
 
+class VoyageGET(generics.RetrieveAPIView):
+	'''
+	GET one voyage by its ID (for card view)
+	'''
+	queryset=Voyage.objects.all()
+	serializer_class=VoyageSerializer
+	lookup_field='voyage_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+
+
 class VoyageCreate(generics.CreateAPIView):
 	'''
 	Create a Voyage. You MUST supply a voyage_id
@@ -664,6 +676,7 @@ class TonTypeList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=TonTypeSerializerCRUD
 	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	
 class ParticularOutcomeList(generics.ListAPIView):
 	'''
@@ -678,6 +691,7 @@ class ParticularOutcomeList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=ParticularOutcomeSerializerCRUD
 	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 
 class SlavesOutcomeList(generics.ListAPIView):
 	'''
@@ -692,6 +706,7 @@ class SlavesOutcomeList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=SlavesOutcomeSerializerCRUD
 	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 
 class ResistanceList(generics.ListAPIView):
 	'''
@@ -706,6 +721,7 @@ class ResistanceList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=ResistanceSerializerCRUD
 	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	
 class OwnerOutcomeList(generics.ListAPIView):
 	'''
@@ -720,6 +736,7 @@ class OwnerOutcomeList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=OwnerOutcomeSerializerCRUD
 	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 
 class VesselCapturedOutcomeList(generics.ListAPIView):
 	'''
@@ -734,3 +751,4 @@ class VesselCapturedOutcomeList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=VesselCapturedOutcomeSerializerCRUD
 	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]

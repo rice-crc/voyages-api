@@ -22,11 +22,11 @@ urlpatterns = [
 # 	path('enslavementrelation/UPDATE/<int:id>',views.EnslavementRelationUPDATE.as_view()),
 # 	path('enslavementrelation/DESTROY/<int:id>',views.EnslavementRelationDESTROY.as_view()),
 # 	path('enslaver/CREATE/',views.EnslaverCREATE.as_view()),
-# 	path('enslaver/<int:id>',views.EnslaverRETRIEVE.as_view()),
+	path('enslaver/<int:id>',views.EnslaverRETRIEVE.as_view()),
 # 	path('enslaver/UPDATE/<int:id>',views.EnslaverUPDATE.as_view()),
 # 	path('enslaver/DESTROY/<int:id>',views.EnslaverDESTROY.as_view()),
 # 	path('enslaved/CREATE/',views.EnslavedCREATE.as_view()),
-# 	path('enslaved/<int:enslaved_id>',views.EnslavedRETRIEVE.as_view()),
+	path('enslaved/<int:enslaved_id>',views.EnslavedRETRIEVE.as_view()),
 # 	path('enslaved/UPDATE/<int:enslaved_id>',views.EnslavedUPDATE.as_view()),
 # 	path('enslaved/DESTROY/<int:enslaved_id>',views.EnslavedDESTROY.as_view())
 ]

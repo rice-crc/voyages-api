@@ -11,8 +11,10 @@ urlpatterns = [
 	path('gallery/single/',views.source_page,name="source_page"),
 	path('gallery/single/<int:source_id>',views.source_page,name="source_page"),
 	#CRUD ENDPOINTS (FOR CONTRIBUTE CLIENTS)
-	path('CREATE/',views.SourceCREATE.as_view()),
-	path('RUD/<str:uid>',views.SourceRetrieveUpdateDestroy.as_view()),
+	path('CREATE/',views.SourceCreate.as_view()),
+	path('DESTROY/<int:id>',views.SourceDestroy.as_view()),
+	path('UPDATE/<int:id>',views.SourceUpdate.as_view()),
+	path('RETRIEVE/<int:id>',views.SourceRetrieve.as_view()),
 	#READ-ONLY CONTROLLED VOCAB ENDPOINTS (FOR CONTRIBUTE CLIENTS)
 	path('SourceTypeList/',views.SourceTypeList.as_view())
 ]

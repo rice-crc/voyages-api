@@ -31,6 +31,7 @@ def clean_long_df(rows,selected_fields):
 				val=str(val)
 			
 			resp[sf].append(val)
+	
 	return resp
 	
 def paginate_queryset(queryset,request):

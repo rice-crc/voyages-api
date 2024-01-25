@@ -1016,15 +1016,15 @@ class PASTNetworks(generics.GenericAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-# class EnslaverRETRIEVE(generics.RetrieveAPIView):
-# 	'''
-# 	Retrieve an enslaver record with their pk
-# 	'''
-# 	queryset=EnslaverIdentity.objects.all()
-# 	serializer_class=EnslaverPKSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
+class EnslaverRETRIEVE(generics.RetrieveAPIView):
+	'''
+	Retrieve an enslaver record with their pk
+	'''
+	queryset=EnslaverIdentity.objects.all()
+	serializer_class=EnslaverIdentitySerializer
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 # 
 # @extend_schema(
 # 		exclude=True
@@ -1065,15 +1065,15 @@ class PASTNetworks(generics.GenericAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-# class EnslavedRETRIEVE(generics.RetrieveAPIView):
-# 	'''
-# 	Retrieve an enslaver record with their pk
-# 	'''
-# 	queryset=Enslaved.objects.all()
-# 	serializer_class=EnslavedPKSerializer
-# 	lookup_field='enslaved_id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
+class EnslavedRETRIEVE(generics.RetrieveAPIView):
+	'''
+	Retrieve an enslaver record with their pk
+	'''
+	queryset=Enslaved.objects.all()
+	serializer_class=EnslavedSerializer
+	lookup_field='enslaved_id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 # 
 # @extend_schema(
 # 		exclude=True

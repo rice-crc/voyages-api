@@ -166,7 +166,7 @@ def source_page(request,source_id=1):
 
 ######## CRUD ENDPOINTS
 
-class SourceCREATE(generics.CreateAPIView):
+class SourceCreate(generics.CreateAPIView):
 	'''
 	CREATE Source without a pk
 	
@@ -176,7 +176,7 @@ class SourceCREATE(generics.CreateAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-class SourceRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+class SourceDestroy(generics.DestroyAPIView):
 	'''
 	The lookup field for sources is the pk (id)
 	'''
@@ -185,6 +185,26 @@ class SourceRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 	lookup_field='id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
+
+class SourceUpdate(generics.UpdateAPIView):
+	'''
+	The lookup field for sources is the pk (id)
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceSerializerCRUD
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class SourceRetrieve(generics.RetrieveAPIView):
+	'''
+	The lookup field for sources is the pk (id)
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceSerializerCRUD
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
 	
 class SourceTypeList(generics.ListAPIView):
 	'''
@@ -199,3 +219,4 @@ class SourceTypeList(generics.ListAPIView):
 	sort_by='id'
 	serializer_class=SourceTypeSerializerCRUD
 	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]

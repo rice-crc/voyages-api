@@ -13,6 +13,7 @@ urlpatterns = [
 	path('aggroutes/',views.VoyageAggRoutes.as_view()),
 	path('geotree/',views.VoyageGeoTreeFilter.as_view()),
 	#CRUD ENDPOINTS (FOR CONTRIBUTE CLIENTS)
+	path('<int:voyage_id>',views.VoyageGET.as_view()),
 	path('CREATE/<int:voyage_id>',views.VoyageCreate.as_view()),
 	path('RUD/<int:voyage_id>',views.VoyageRetrieveUpdateDestroy.as_view()),
 	#READ-ONLY CONTROLLED VOCAB ENDPOINTS (FOR CONTRIBUTE CLIENTS)

@@ -13,7 +13,7 @@ import os
 import time
 
 class Command(BaseCommand):
-	help = 'imports BL volumes from dd41 student segmentations -- purpose-built'
+	help = 'IMNO sources -- purpose-built'
 	def handle(self, *args, **options):
 		
 		library_id='5290782'
@@ -374,12 +374,3 @@ class Command(BaseCommand):
 							enslaved=enslavedperson,
 							source=SourceB_obj
 						)
-					
-					
-					
-				
-				
-				
-				
-				
-				

@@ -36,7 +36,7 @@ class SparseDateAbstractBase(models.Model):
 	year = models.IntegerField(
 		null=True,
 		blank=True,
-		validators=[MinValueValidator(0),MaxValueValidator(2000)]
+		validators=[MinValueValidator(0),MaxValueValidator(2050)]
 	)
 
 	def __str__(self):

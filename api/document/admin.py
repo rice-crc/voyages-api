@@ -4,7 +4,7 @@ from past.models import *
 from voyage.models import *
 
 class PageAdmin(admin.ModelAdmin):
-	readonly_fields=['page_url','image_filename','iiif_manifest_url','iiif_baseimage_url']
+	readonly_fields=['page_url','image_filename','iiif_baseimage_url']
 	search_fields=['page_url','image_filename']
 	list_display=['page_url','image_filename']
 	model=Page

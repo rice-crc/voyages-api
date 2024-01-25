@@ -1,9 +1,21 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField,CharField
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
 import re
 from .models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from django.core.exceptions import ObjectDoesNotExist
+from voyages3.localsettings import STATIC_URL
+from common.static.Source_options import Source_options
+
+class SourceTypeSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=SourceType
+		fields='__all__'
+
+# class TranscriptionSerializer(Serializers.ModelSerializer):
+# 	class Meta:
+# 		model=Transcription
+# 		fields='__all__'
 
 class DocSparseDateSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -86,21 +98,8 @@ class SourceShortRefSerializer(serializers.ModelSerializer):
 		model=ShortRef
 		fields=['id','name']
 
-@extend_schema_serializer(
-	examples = [
-		OpenApiExample(
-            'Ex. 1: array of str vals',
-            summary='OR Filter on exact matches of known str values',
-            description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for sources in the Outward Manifests for New Orleans collection',
-            value={
-				"short_ref__name":["OMNO"]
-			},
-			request_only=True,
-			response_only=False
-        )
-    ]
-)
 class SourceSerializer(serializers.ModelSerializer):
+	source_type=SourceTypeSerializer(many=False)
 	page_connections=SourcePageConnectionSerializer(many=True)
 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True)
 	source_voyage_connections=SourceVoyageConnectionSerializer(many=True)
@@ -108,6 +107,79 @@ class SourceSerializer(serializers.ModelSerializer):
 	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True)
 	short_ref=SourceShortRefSerializer(many=False,allow_null=False)
 	date=DocSparseDateSerializer(many=False,allow_null=True)
+	iiif_manifest_url=SerializerMethodField()
 	class Meta:
 		model=Source
 		fields='__all__'
+	def get_iiif_manifest_url(self,obj):
+		if obj.has_published_manifest and obj.zotero_group_id and obj.zotero_item_id is not None:
+			return(f'{STATIC_URL}iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
+		else:
+			return None
+
+
+############ REQUEST FIILTER OBJECTS
+class AnyField(Field):
+	def to_representation(self, value):
+		return value
+	def to_internal_value(self, data):
+		return data
+
+class SourceFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Source_options])
+	searchTerm=AnyField()
+
+
+@extend_schema_serializer(
+	examples = [
+		OpenApiExample(
+            'Filtered search for docs with manifests',
+            summary='Filtered search for docs with manifests',
+            description='Here, we search for documents a) whose titles containing a substring like "creole" and b) have manifests (there is only one result, from the Texas/OMNO data).',
+            value={
+			  "filter": [
+				{
+				  "varName": "has_published_manifest",
+				  "op": "exact",
+				  "searchTerm": True
+				},
+				{
+				  "varName": "title",
+				  "op": "icontains",
+				  "searchTerm": "creole"
+				}
+			  ]
+			},
+			request_only=True,
+			response_only=False
+        ),
+		OpenApiExample(
+            'Exact match on a nested field',
+            summary='Exact match on a nested field',
+            description='Here, we search for an exact match on the short valuefield.',
+            value={
+            	"filter":[
+					{
+						"varName":"short_ref__name",
+						"op":"in",
+						"searchTerm":["1713Poll"]
+					}
+            	]
+			},
+			request_only=True,
+			response_only=False
+        )
+    ]
+)
+class SourceRequestSerializer(serializers.Serializer):
+	filter=SourceFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
+	page=serializers.IntegerField(required=False,allow_null=True)
+	page_size=serializers.IntegerField(required=False,allow_null=True)
+	
+class SourceListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=SourceSerializer(many=True,read_only=True)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField,CharField
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
 import re
 from .models import *
 from document.models import *
@@ -7,7 +7,9 @@ from geo.models import *
 from .models import *
 from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
-
+from common.static.Post_options import Post_options
+from common.static.Author_options import Author_options
+from common.static.Institution_options import Institution_options
 
 class AuthorInstitutionSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -30,21 +32,6 @@ class TagSerializer(serializers.ModelSerializer):
 		model=Tag
 		fields='__all__'
 
-@extend_schema_serializer(
-	examples = [
-		OpenApiExample(
-            'Ex. 1: array of str vals',
-            summary='OR Filter on exact matches of known str values',
-            description='Here, we search on str value fields for known exact matches to ANY of those values. Specifically, we are searching for blog posts with the tag Introductory Maps written in English',
-            value={
-				"tags__name":["Introductory Maps"],
-				"language":["en"]
-			},
-			request_only=True,
-			response_only=False,
-        )
-    ]
-)
 class PostSerializer(serializers.ModelSerializer):
 	authors = PostAuthorSerializer(many=True,read_only=True)
 	tags = TagSerializer(many=True,read_only=True)
@@ -68,20 +55,6 @@ class AuthorPostSerializer(serializers.ModelSerializer):
 		model=Post
 		exclude=['authors',]
 
-@extend_schema_serializer(
-	examples = [
-		OpenApiExample(
-            'Ex. 1: array of str vals',
-            summary='OR Filter on exact matches of known str values',
-            description='Here, we are searching for authors who are affiliated with UCSC',
-            value={
-				"institution__name":["University of California, Santa Cruz"]
-			},
-			request_only=True,
-			response_only=False,
-        )
-    ]
-)
 class AuthorSerializer(serializers.ModelSerializer):
 	posts = AuthorPostSerializer(many=True,read_only=True)
 	photo = serializers.SerializerMethodField('get_photo_url')
@@ -94,23 +67,173 @@ class AuthorSerializer(serializers.ModelSerializer):
 		model=Author
 		fields='__all__'
 
-@extend_schema_serializer(
-	examples = [
-		OpenApiExample(
-            'Ex. 1: array of str vals',
-            summary='OR Filter on exact matches of known str values',
-            description='Here, we are searching for instutions whose authors wrote blog posts that have the tag Introductory Maps',
-            value={
-				"institution_authors__posts__tags__name":["Introductory Maps"]
-			},
-			request_only=True,
-			response_only=False,
-        )
-    ]
-)
 class InstitutionSerializer(serializers.ModelSerializer):
 	institution_authors=AuthorSerializer(many=True)
 	class Meta:
 		model=Institution
 		fields='__all__'
 
+############ REQUEST FIILTER OBJECTS
+class AnyField(Field):
+	def to_representation(self, value):
+		return value
+
+	def to_internal_value(self, data):
+		return data
+
+class PostFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Post_options])
+	searchTerm=AnyField()
+
+class AuthorFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Author_options])
+	searchTerm=AnyField()
+
+class InstitutionFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	varName=serializers.ChoiceField(choices=[k for k in Institution_options])
+	searchTerm=AnyField()
+
+########### PAGINATED VOYAGE LISTS 
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated filtered blog req.',
+			summary='Paginated filtered blog req.',
+			description='Here, we request blog posts tagged as "Texas Bound" or "Lesson Plan"',
+			value={
+			  "filter": [
+					{
+						"varName":"tags__name",
+						"searchTerm":[
+							"Texas Bound",
+							"Lesson Plan"
+						],
+						"op":"in"
+					}
+				],
+				"page": 0,
+				"page_size": 12
+			},
+			request_only=True
+		)
+    ]
+)
+class PostListRequestSerializer(serializers.Serializer):
+	page=serializers.IntegerField(required=False,allow_null=True)
+	page_size=serializers.IntegerField(required=False,allow_null=True)
+	filter=PostFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
+
+class PostListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=PostSerializer(many=True,read_only=True)
+
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated filtered blog authors list req.',
+			summary='Paginated filtered blog authors list req.',
+			description='Here, we are searching for authors who have written posts with the tag Introductory Maps',
+			value={
+			  "filter": [
+					{
+						"varName":"posts__tags__name",
+						"searchTerm":[
+							"Introductory Maps"
+						],
+						"op":"in"
+					}
+				],
+				"page": 0,
+				"page_size": 12
+			},
+			request_only=True
+		)
+    ]
+)
+class AuthorListRequestSerializer(serializers.Serializer):
+	page=serializers.IntegerField(required=False,allow_null=True)
+	page_size=serializers.IntegerField(required=False,allow_null=True)
+	filter=AuthorFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
+
+class AuthorListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=AuthorSerializer(many=True,read_only=True)
+
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated filtered blog institution req.',
+			summary='Paginated filtered blog institution req.',
+			description='Here, we are searching for instutions whose authors wrote blog posts that have the tag Introductory Maps',
+			value={
+			  "filter": [
+					{
+						"varName":"institution_authors__posts__tags__name",
+						"searchTerm":[
+							"Introductory Maps"
+						],
+						"op":"in"
+					}
+				],
+				"page": 0,
+				"page_size": 12
+			},
+			request_only=True
+		)
+    ]
+)
+class InstitutionListRequestSerializer(serializers.Serializer):
+	page=serializers.IntegerField(required=False,allow_null=True)
+	page_size=serializers.IntegerField(required=False,allow_null=True)
+	filter=InstitutionFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
+
+class InstitutionListResponseSerializer(serializers.Serializer):
+	page=serializers.IntegerField()
+	page_size=serializers.IntegerField()
+	count=serializers.IntegerField()
+	results=InstitutionSerializer(many=True,read_only=True)
+
+
+############ AUTOCOMPLETE SERIALIZERS
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Paginated autocomplete on blog post tags',
+			summary='Paginated autocomplete on blog post tags',
+			description='Here, we are requesting the first 10 suggested values of blog tags like "ma"',
+			value={
+				"varName": "tags__name",
+				"querystr": "ma",
+				"offset": 0,
+				"limit": 10,
+				"filter": []
+			}
+		)
+    ]
+)
+class PostAutoCompleteRequestSerializer(serializers.Serializer):
+	varName=serializers.ChoiceField(choices=[
+		k for k in Post_options if Post_options[k]['type'] in [
+			'string'
+		]
+	])
+	querystr=serializers.CharField(allow_null=True,allow_blank=True)
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	filter=PostFilterItemSerializer(many=True,allow_null=True,required=False)
+
+class PostAutoCompletekvSerializer(serializers.Serializer):
+	value=serializers.CharField()
+
+class PostAutoCompleteResponseSerializer(serializers.Serializer):
+	suggested_values=PostAutoCompletekvSerializer(many=True)

@@ -133,10 +133,10 @@ def network_maps():
 			'id':row_id,
 			'data':nodesdata[row_id],
 			'weights':{
-				'origin':row['origin'],
-				'embarkation':row['embarkation'],
-				'disembarkation':row['disembarkation'],
-				'post-disembarkation':row['post-disembarkation']
+				'origin':int(row['origin']),
+				'embarkation':int(row['embarkation']),
+				'disembarkation':int(row['disembarkation']),
+				'post_disembarkation':int(row['post-disembarkation'])
 			}
 		}
 		for row_id,row in aggnodes.iterrows()
@@ -148,7 +148,7 @@ def network_maps():
 	aggedges=aggedges[aggedges['weight']>0]
 	aggedges=aggedges[aggedges['pk'].isin(pks)]
 	
-	print("unique pks",len(aggedges['pk'].unique()))
+# 	print("unique pks",len(aggedges['pk'].unique()))
 	
 	aggedges['c1x']=aggedges['c1x']*aggedges['weight']
 	aggedges['c2x']=aggedges['c2x']*aggedges['weight']
@@ -171,6 +171,10 @@ def network_maps():
 			'type':edgesdata['__'.join([str(row['source']),str(row['target'])])]['type']
 		} for row_id,row in aggedges.iterrows()
 	]
+	
+# 	for node in finalnodes:
+# 		print(node)
+	
 	return(jsonify({'nodes':finalnodes,'edges':finaledges}))
 
 @app.route('/rebuild_indices/<indexname>', methods=['GET'])

@@ -3,9 +3,34 @@ import re
 from voyage.models import Voyage
 from past.models import Enslaved,EnslaverIdentity,EnslavementRelation
 from common.models import NamedModelAbstractBase,SparseDateAbstractBase
+from voyages3.localsettings import STATIC_URL
 
 class DocSparseDate(SparseDateAbstractBase):
 	pass
+
+class Transcription(models.Model):
+    """
+    The text transcription of a page in a document.
+    ADAPTED FROM DELLAMONICA'S MODEL
+    """
+    page = models.ForeignKey(
+    	'Page',
+    	null=False,
+        on_delete=models.CASCADE,
+        related_name='transcriptions'
+    )
+    #page number will come from the sourcepageconnection.order field
+	#page_number = models.IntegerField(null=False)
+    # A BCP47 language code for the transcription text.
+    # https://www.rfc-editor.org/bcp/bcp47.txt
+    language_code = models.CharField(max_length=20, null=False)
+    text = models.TextField(null=False)
+    # Indicates whether the transcription is in the original language or a
+    # translation.
+    is_translation = models.BooleanField(null=False)
+
+    def __str__(self):
+        return f"Transcription of page {self.page}: {self.text}"
 
 class Page(models.Model):
 	"""
@@ -14,9 +39,6 @@ class Page(models.Model):
 	page_url=models.URLField(
 		max_length=400,null=True,blank=True
 	)
-	iiif_manifest_url=models.URLField(
-		null=True,blank=True,max_length=400
-	)
 	iiif_baseimage_url=models.URLField(
 		null=True,blank=True,max_length=400)
 	image_filename=models.CharField(
@@ -24,7 +46,6 @@ class Page(models.Model):
 		null=True,
 		blank=True
 	)
-	transcription=models.TextField(null=True,blank=True)
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 	
@@ -58,6 +79,12 @@ class Page(models.Model):
 			return None
 			
 class SourcePageConnection(models.Model):
+	"""
+	CONNECTIONS BTW SOURCES AND PAGES.
+	A PAGE CAN APPEAR IN MULTIPLE SOURCES.
+	WE REALIZED THIS WITH THE HUNTINGTON'S POOR INDEXING OF THEIR ITEMS.
+	A TRANSCRIBED LETTER MAY START ON ONE PAGE AND END ON ANOTHER, AND THEN BE FOLLOWED, ON THAT LAST PAGE BY THE BEGINNING OF ANOTHER TRANSCRIBED LETTER.
+	"""
 	source=models.ForeignKey(
 		'Source',
 		related_name='page_connections',
@@ -185,6 +212,12 @@ class ShortRef(models.Model):
 	def __str__(self):
 		return self.name
 
+class SourceType(models.Model):
+	'''
+		We'll rely on Zotero's controlled vocabulary from now on.
+	'''
+	name = models.CharField(max_length=255,unique=True)
+
 class Source(models.Model):
 	"""
 	Represents the relationship between Voyage and VoyageSources
@@ -197,6 +230,11 @@ class Source(models.Model):
 		max_length=400,
 		null=True
 	)
+	
+	#from dellamonica's models
+	thumbnail = models.TextField(null=True, help_text='URL for a thumbnail of the Document')
+	bib = models.TextField(null=True, help_text='Formatted bibliography for the Document')
+	manifest_content = models.JSONField(help_text='DCTerms imported from Zotero -- NOT the full manifest',null=True)
 	
 	zotero_group_id=models.IntegerField(
 		"Zotero Integer Group ID",
@@ -219,6 +257,19 @@ class Source(models.Model):
 		default="sv-docs"
 	)
 	
+	zotero_url=models.URLField(
+		max_length=400,
+		null=True
+	)
+	
+	source_type=models.ForeignKey(
+		SourceType,
+		null=True,
+		blank=True,
+		on_delete=models.CASCADE,
+		related_name='+'
+	)
+	
 	short_ref=models.ForeignKey(
 		ShortRef,
 		null=False,
@@ -229,7 +280,7 @@ class Source(models.Model):
 	
 	title=models.CharField(
 		"Title",
-		max_length=255,
+		max_length=1000,
 		null=False,
 		blank=False
 	)
@@ -261,20 +312,23 @@ class Source(models.Model):
 	)
 	
 	has_published_manifest=models.BooleanField(
-		"Is there a published manifest on dellamonica's server?",
+		"Is there a published manifest?",
 		default=False,
 		blank=False,
 		null=False
 	)
 	
-	notes=models.TextField(null=True,blank=True)
+	notes=models.TextField(
+		null=True,
+		blank=True
+	)
 	
 	order_in_shortref=models.IntegerField(
 		"Now that we're splitting shortrefs, sources should be ordered under them",
 		null=True,
 		blank=True
 	)
-		
+	
 	class Meta:
 		unique_together=[
 			['title','url','legacy_source']
@@ -282,11 +336,13 @@ class Source(models.Model):
 	
 	def __str__(self):
 		return self.title + " " + self.short_ref.name
-
-	@property
-	def zotero_web_page_url(self):
-		if self.zotero_url not in (None,""):
-			url="https://www.zotero.org/groups/%s/sv-docs/items/%s/library" %(self.zotero_group_id,self.zotero_item_id)
-	
+			
 	class Meta:
 		ordering=['id']
+	
+	@property
+	def iiif_manifest_url(self):
+		if self.has_published_manifest and self.zotero_group_id and self.zotero_item_id is not None:
+			return(f'{STATIC_URL}iiif_manifests/{self.zotero_group_id}__{self.zotero_item_id}.json')
+		else:
+			return None

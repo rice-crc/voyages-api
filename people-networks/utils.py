@@ -39,7 +39,8 @@ def load_graph():
 	
 	url=DJANGO_BASE_URL+'voyage/dataframes/'
 	payload={
-		"selected_fields":selected_fields
+		"selected_fields":selected_fields,
+		'filter':[]
 	}
 	
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
@@ -66,7 +67,8 @@ def load_graph():
 	
 	url=DJANGO_BASE_URL+'past/enslaver/dataframes/'
 	payload={
-		"selected_fields":selected_fields
+		"selected_fields":selected_fields,
+		'filter':[]
 	}
 	
 	r=requests.post(
@@ -91,7 +93,8 @@ def load_graph():
 	
 	url=DJANGO_BASE_URL+'past/enslaved/dataframes/'
 	payload={
-		"selected_fields":selected_fields
+		"selected_fields":selected_fields,
+		'filter':[]
 	}
 	
 	r=requests.post(
@@ -119,9 +122,10 @@ def load_graph():
 	
 	#482149 relations without roles.
 	#517290 relations WITH roles. promising.
-	url=DJANGO_BASE_URL+'past/enslavementrelations/dataframes/'
+	url=DJANGO_BASE_URL+'past/enslavementrelation/dataframes/'
 	payload={
-		"selected_fields":selected_fields
+		"selected_fields":selected_fields,
+		'filter':[]
 	}
 	
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
@@ -166,7 +170,6 @@ def load_graph():
 # 			print(enslaved_dict[814219])
 # 			print(relation_type)
 # 			printit=True
-# 		
 		##NOT YET HANDLING ENSLAVER ROLES
 		if relation_type=="Marriage":
 			#enslaver-to-enslaver marriages

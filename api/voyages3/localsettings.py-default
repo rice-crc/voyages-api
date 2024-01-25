@@ -8,11 +8,15 @@ ALLOWED_HOSTS = ['*']
 
 # STATIC_URL="http://voyages-django:8000/static/"
 FLASK_BASE_URL="http://voyages-stats:5000/"
-
-# STATIC_URL="http://voyages-django:8000/static/"
 STATS_BASE_URL="http://voyages-stats:5000/"
 GEO_NETWORKS_BASE_URL="http://voyages-geo-networks:5005/"
 PEOPLE_NETWORKS_BASE_URL="http://voyages-people-networks:5006/"
+VOYAGES_FRONTEND_BASE_URL="http://127.0.0.1:3000/"
+OPEN_API_BASE_API="http://127.0.0.1:8000/"
+
+REDIS_HOST="voyages-redis"
+REDIS_PORT=6379
+USE_REDIS_CACHE=True
 
 zotero_credentials={
 	"api_key":"abcdefg",
@@ -24,6 +28,8 @@ michigan_collection_manifests=[
 	'ghi',
 	'jkl'
 ]
+
+transkribus_collection_ids=['1234567']
 
 DATABASES = {
     'default': {
@@ -40,4 +46,3 @@ transkribus_credentials={
 	"user":"dcba",
 	"pw":"zyxw"
 }
-

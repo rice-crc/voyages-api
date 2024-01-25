@@ -24,18 +24,26 @@ import collections
 import gc
 from .serializers import *
 from .serializers_READONLY import *
-from voyages3.localsettings import *
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,GEO_NETWORKS_BASE_URL,PEOPLE_NETWORKS_BASE_URL,USE_REDIS_CACHE
 import re
+import redis
+import hashlib
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from common.static.Source_options import Source_options
 from rest_framework import filters
 
+redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
 class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	serializer_class=SourceSerializer
+	@extend_schema(
+		request=SourceRequestSerializer,
+		responses=SourceSerializer
+	)
+	
 	def post(self,request):
 		'''
 		Voyages has always been built on scholarship, with references to many different archival sources. In the legacy version of the site, the sources were organized with a unique short reference ("short_ref") and a full reference ("full_ref"), like OMNO & Outward Manifests for New Orleans. When these sources were connected to Voyages, they would oftentimes be connected along with a field called "text_ref" that pointed at a specific location in the archive, or page number in the book.
@@ -44,66 +52,59 @@ class SourceList(generics.GenericAPIView):
 		
 		These changes necessitated that we create Docs as its own django app and endpoint. Now, each "Source" points at one or more Voyages, Enslaved People, or Enslavers. In turn, some of these Sources also have page-level metadata and links to IIIF images. For more information on the IIIF specification, visit https://iiif.io/api/index.html
 		'''
+		st=time.time()
 		print("SOURCE LIST+++++++\nusername:",request.auth.user)
-		queryset=Source.objects.all()
-		queryset=queryset.order_by('id')
-		source_options=getJSONschema('Source',hierarchical=False)
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,
-			self,
-			request,
-			source_options,
-			retrieve_all=False
-		)
 		
-		if len(error_messages)==0:
-			st=time.time()
-			headers={"total_results_count":results_count}
-			read_serializer=SourceSerializer(queryset,many=True)
-			serialized=read_serializer.data
-			resp=JsonResponse(serialized,safe=False,headers=headers)
-			resp.headers['total_results_count']=headers['total_results_count']
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return resp
+		#VALIDATE THE REQUEST
+		serialized_req = SourceRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
 		else:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+			cached_response=None
+			
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Source.objects.all()
+			queryset=queryset.order_by('id')
+			queryset,results_count=post_req(	
+				queryset,
+				self,
+				request,
+				Source_options
+			)
 
-class SourceListGENERIC(generics.ListAPIView):
-	'''
-	TESTING A GENERIC, EASY-TO-SEARCH, PAGINATED LIST OF SOURCES FOR DELLAMONICA & SSC
-	
-	GET queries to this endpoint with the param "search" will search the following:
-	
-		A. EXACT on 
-			1. "short_ref__name", e.g. 1713Poll
-			2. "date__year", e.g. 1982
-			3. "zotero_item_id", e.g. FPGTSQXM
-		B. ICOMPLETE on "title"
-	
-	Because sources have massively nested data in some cases, I have had to restrict us to a maximum of 5 results per page.
-	
-	DON'T search OMNO in Swagger. My server can take Daniel Domingues Texas data, but your browser cannot :)
-	'''
-	queryset=Source.objects.all()
-	queryset.prefetch_related(
-		'page_connections',
-		'source_enslaver_connections',
-		'source_voyage_connections',
-		'source_enslaved_connections',
-		'source_enslavement_relation_connections'
-	)
-	queryset.select_related(
-		'short_ref',
-		'date'
-	)
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	serializer_class=SourceSerializer
-	filter_backends = [filters.SearchFilter]
-	search_fields = ['title','=date__year','short_ref__name','=zotero_item_id']
+			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+			resp=SourceListResponseSerializer({
+				'count':total_results_count,
+				'page':page_num,
+				'page_size':page_size,
+				'results':results
+			}).data
+			#I'm having the most difficult time in the world validating this nested paginated response
+			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
+		else:
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			
+		return JsonResponse(resp,safe=False,status=200)
 
-#######################
+####################### CLASSIC DJANGO TEMPLATED VIEWS -- KILL THESE AS SOON AS THE CONTRIBUTE FORM IS WORKING
 # default view will be a paginated gallery
 @extend_schema(
 		exclude=True
@@ -151,9 +152,7 @@ def Gallery(request,collection_id=None,pagenumber=1):
 		)
 	else:
 		return HttpResponseForbidden("Forbidden")
-		
 
-#######################
 # then the individual page view
 @extend_schema(
 		exclude=True
@@ -165,116 +164,59 @@ def source_page(request,source_id=1):
 	else:
 		return HttpResponseForbidden("Forbidden")
 
-@extend_schema(
-		exclude=True
-	)
-class ShortRefCREATE(generics.CreateAPIView):
-	'''
-	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
-	'''
-	queryset=ShortRef.objects.all()
-	serializer_class=CRUDShortRefSerializer
-	lookup_field='name'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
+######## CRUD ENDPOINTS
 
-@extend_schema(
-		exclude=True
-	)
-class ShortRefRETRIEVE(generics.RetrieveAPIView):
-	'''
-	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
-	
-	These used to be unique values on the sources table in Voyages. In that legacy model, we had a short_ref and a full_ref for each source, and then, in our union table with voyages, we had a text_ref field where we would put page numbers, or box and folder numbers, etc. However, this led to a good deal of schema abuse (duplication, inconsistent use of fields, etc.)
-	
-	In the new model, we maintain the uniqueness of Short Ref's but we allow many Source objects to connect to these short ref's. The new source objects have much more, and much more structured data, being managed remotely in Zotero. Each source therefore now has an additional unique identifier: its Zotero Item ID.
-	
-	It could make sense to give these short refs their own Zotero listings.
-	'''
-	queryset=ShortRef.objects.all()
-	serializer_class=ShortRefSerializer
-	lookup_field='name'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-
-@extend_schema(
-		exclude=True
-	)
-class ShortRefUPDATE(generics.UpdateAPIView):
-	'''
-	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
-	'''
-	queryset=ShortRef.objects.all()
-	serializer_class=CRUDShortRefSerializer
-	lookup_field='name'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class ShortRefDESTROY(generics.DestroyAPIView):
-	'''
-	Shortrefs by canonical name, like "OMNO", "IMNO", or "DOCP Huntington 57 21"
-	'''
-	queryset=ShortRef.objects.all()
-	serializer_class=CRUDShortRefSerializer
-	lookup_field='name'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class SourceCREATE(generics.CreateAPIView):
+class SourceCreate(generics.CreateAPIView):
 	'''
 	CREATE Source without a pk
 	
-	You must provide a ShortRef, which are our legacy short-text unique identifiers for documentary sources. A valid (< 100 chars) value in a nested short_ref field will create a new short ref if it does not already exist.
-	
-	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
 	'''
 	queryset=Source.objects.all()
-	serializer_class=SourceCRUDSerializer
+	serializer_class=SourceSerializerCRUD
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
-	
-class SourceRETRIEVE(generics.RetrieveAPIView):
+
+class SourceDestroy(generics.DestroyAPIView):
 	'''
 	The lookup field for sources is the pk (id)
 	'''
 	queryset=Source.objects.all()
-	serializer_class=SourceSerializer
+	serializer_class=SourceSerializerCRUD
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class SourceUpdate(generics.UpdateAPIView):
+	'''
+	The lookup field for sources is the pk (id)
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceSerializerCRUD
+	lookup_field='id'
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class SourceRetrieve(generics.RetrieveAPIView):
+	'''
+	The lookup field for sources is the pk (id)
+	'''
+	queryset=Source.objects.all()
+	serializer_class=SourceSerializerCRUD
 	lookup_field='id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-
-@extend_schema(
-		exclude=True
-	)
-class SourceUPDATE(generics.UpdateAPIView):
-	'''
-	The lookup field for sources is the pk (id)
 	
-	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
+class SourceTypeList(generics.ListAPIView):
 	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-@extend_schema(
-		exclude=True
-	)
-class SourceDESTROY(generics.DestroyAPIView):
-	'''
-	The lookup field for sources is the pk (id)
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
 	
-	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
+	These terms come from the Zotero document types; legacy values from SlaveVoyages were mapped over when the SSC project moved all the sources to Zotero.
 	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceCRUDSerializer
-	lookup_field='id'
+	model=SourceTypeSerializer
+	queryset=SourceType.objects.all()
+	pagination_class=None
+	sort_by='id'
+	serializer_class=SourceTypeSerializerCRUD
 	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
+	permission_classes=[IsAuthenticated]

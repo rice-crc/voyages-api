@@ -595,9 +595,13 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+
+
+######## CRUD ENDPOINTS
+
 class VoyageCreate(generics.CreateAPIView):
 	'''
-	Create a Voyage
+	Create a Voyage. You MUST supply a voyage_id
 	'''
 	queryset=Voyage.objects.all()
 	serializer_class=VoyageSerializerCRUD
@@ -614,6 +618,8 @@ class VoyageRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
+
+######## READ-ONLY CONTROLLED VOCAB ENDPOINTS
 
 class RigOfVesselList(generics.ListAPIView):
 	'''
@@ -694,7 +700,7 @@ class ResistanceList(generics.ListAPIView):
 	
 	+++ Need a write-up from the team on the meaning of this variable.
 	'''
-	model=ResistanceSerializer
+	model=Resistance
 	queryset=Resistance.objects.all()
 	pagination_class=None
 	sort_by='value'

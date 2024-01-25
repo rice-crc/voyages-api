@@ -339,11 +339,6 @@ class Source(models.Model):
 	
 	def __str__(self):
 		return self.title + " " + self.short_ref.name
-
-	@property
-	def zotero_web_page_url(self):
-		if self.zotero_url not in (None,""):
-			url="https://www.zotero.org/groups/%s/sv-docs/items/%s/library" %(self.zotero_group_id,self.zotero_item_id)
-	
+			
 	class Meta:
 		ordering=['id']

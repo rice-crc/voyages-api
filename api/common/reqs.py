@@ -98,7 +98,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 	
 	if DEBUG:
 		print("----\npost req params:",json.dumps(params,indent=1))
-	filter_obj=params.get('filter')
+	filter_obj=params.get('filter') or {}
 	
 	#global search bypasses the normal filtering process
 	#hits solr with a search string (which currently is applied across all text fields on a model)

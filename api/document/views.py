@@ -104,17 +104,7 @@ class SourceList(generics.GenericAPIView):
 			
 		return JsonResponse(resp,safe=False,status=200)
 
-class SourceRETRIEVE(generics.RetrieveAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceCRUDSerializer
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-
-#######################
+####################### CLASSIC DJANGO TEMPLATED VIEWS -- KILL THESE AS SOON AS THE CONTRIBUTE FORM IS WORKING
 # default view will be a paginated gallery
 @extend_schema(
 		exclude=True
@@ -162,9 +152,7 @@ def Gallery(request,collection_id=None,pagenumber=1):
 		)
 	else:
 		return HttpResponseForbidden("Forbidden")
-		
 
-#######################
 # then the individual page view
 @extend_schema(
 		exclude=True
@@ -176,48 +164,38 @@ def source_page(request,source_id=1):
 	else:
 		return HttpResponseForbidden("Forbidden")
 
-@extend_schema(
-		exclude=True
-	)
+######## CRUD ENDPOINTS
+
 class SourceCREATE(generics.CreateAPIView):
 	'''
 	CREATE Source without a pk
 	
-	You must provide a ShortRef, which are our legacy short-text unique identifiers for documentary sources. A valid (< 100 chars) value in a nested short_ref field will create a new short ref if it does not already exist.
-	
-	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
 	'''
 	queryset=Source.objects.all()
-	serializer_class=SourceCRUDSerializer
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-	
-@extend_schema(
-		exclude=True
-	)
-class SourceUPDATE(generics.UpdateAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	
-	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceCRUDSerializer
-	lookup_field='id'
+	serializer_class=SourceSerializerCRUD
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-@extend_schema(
-		exclude=True
-	)
-class SourceDESTROY(generics.DestroyAPIView):
+class SourceRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 	'''
 	The lookup field for sources is the pk (id)
-	
-	Voyages, Enslaved, and Enslavers are presented in this model, but are set to read-only.
 	'''
 	queryset=Source.objects.all()
-	serializer_class=SourceCRUDSerializer
+	serializer_class=SourceSerializerCRUD
 	lookup_field='id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
+	
+class SourceTypeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	These terms come from the Zotero document types; legacy values from SlaveVoyages were mapped over when the SSC project moved all the sources to Zotero.
+	'''
+	model=SourceTypeSerializer
+	queryset=SourceType.objects.all()
+	pagination_class=None
+	sort_by='id'
+	serializer_class=SourceTypeSerializerCRUD
+	authentication_classes=[TokenAuthentication]

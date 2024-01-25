@@ -58,7 +58,6 @@ class Page(models.Model):
 	def __str__(self):
 		nonnulls=[i for i in [
 				self.page_url,
-				self.iiif_manifest_url,
 				self.iiif_baseimage_url
 			]
 			if i is not None and i != ''

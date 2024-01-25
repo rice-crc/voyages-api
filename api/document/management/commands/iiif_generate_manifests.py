@@ -12,8 +12,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models import Prefetch
 from document.models import Source
-from voyages3.settings import STATIC_ROOT,STATIC_URL
-from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_API
+from voyages3.settings import STATIC_ROOT
+from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_API,STATIC_URL
 
 # We special case these sources as they have issues with their IIIF Image
 # Service preventing us from creating manifests that point directly to the image

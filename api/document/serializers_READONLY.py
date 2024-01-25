@@ -4,7 +4,7 @@ import re
 from .models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from django.core.exceptions import ObjectDoesNotExist
-from voyages3.settings import STATIC_URL
+from voyages3.localsettings import STATIC_URL
 from common.static.Source_options import Source_options
 
 class SourceTypeSerializer(serializers.ModelSerializer):
@@ -113,7 +113,7 @@ class SourceSerializer(serializers.ModelSerializer):
 		fields='__all__'
 	def get_iiif_manifest_url(self,obj):
 		if obj.has_published_manifest and obj.zotero_group_id and obj.zotero_item_id is not None:
-			return(f'/{STATIC_URL}iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
+			return(f'{STATIC_URL}iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
 		else:
 			return None
 

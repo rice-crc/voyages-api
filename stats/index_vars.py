@@ -1,5 +1,6 @@
 voyage_xyscatter={
 	'endpoint':'voyage/dataframes/',
+	'schema_name':'Voyage',
 	'name':'voyage_xyscatter',
 	'variables': [
 		'id',
@@ -7,12 +8,8 @@ voyage_xyscatter={
 		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
 		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
 		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
-		'voyage_crew__crew_first_landing',
-		'voyage_crew__crew_voyage_outset',
 		'voyage_dates__length_middle_passage_days',
 		'voyage_dates__imp_length_home_to_disembark',
-		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
-		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
 		'voyage_crew__crew_first_landing',
 		'voyage_crew__crew_voyage_outset',
 		'voyage_ship__tonnage_mod',
@@ -24,6 +21,7 @@ voyage_xyscatter={
 
 voyage_bar_and_donut_charts={
 	'endpoint':'voyage/dataframes/',
+	'schema_name':'Voyage',
 	'name':'voyage_bar_and_donut_charts',
 	'variables': [
 		'id',
@@ -68,6 +66,7 @@ voyage_bar_and_donut_charts={
 
 voyage_pivot_tables={
 	'endpoint':'voyage/dataframes/',
+	'schema_name':'Voyage',
 	'name':'voyage_pivot_tables',
 	'variables': [
 		'id',
@@ -96,6 +95,7 @@ voyage_pivot_tables={
 
 voyage_summary_statistics={
 	'endpoint':'voyage/dataframes/',
+	'schema_name':'Voyage',
 	'name':'voyage_summary_statistics',
 	'variables': [
 		'id',
@@ -113,6 +113,7 @@ voyage_summary_statistics={
 
 voyage_maps={
 	'endpoint':'voyage/dataframes/',
+	'schema_name':'Voyage',
 	'name':'voyage_maps',
 	'variables':[
 		'id',
@@ -134,6 +135,7 @@ voyage_maps={
 
 enslaved_maps={
 	'endpoint':'past/enslaved/dataframes/',
+	'schema_name':'Voyage',
 	'name':'enslaved_maps',
 	'variables':[
 		'id',
@@ -145,5 +147,49 @@ enslaved_maps={
 		'voyage__voyage_itinerary__imp_principal_region_slave_dis__name',
 		'voyage__voyage_itinerary__imp_principal_port_slave_dis__name',
 		'voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
+	]
+}
+
+
+estimate_pivot_tables={
+	'endpoint':'assessment/dataframes/',
+	'schema_name':'Estimate',
+	'name':'estimate_pivot_tables',
+	'variables':[
+		'id',
+		'nation__id',
+		'nation__name',
+		'nation__order_num',
+		'embarkation_region__id',
+		'embarkation_region__export_area__id',
+		'embarkation_region__export_area__name',
+		'embarkation_region__export_area__order_num',
+		'embarkation_region__export_area__latitude',
+		'embarkation_region__export_area__longitude',
+		'embarkation_region__export_area__show_at_zoom',
+		'embarkation_region__export_area__show_on_map',
+		'embarkation_region__name',
+		'embarkation_region__order_num',
+		'embarkation_region__latitude',
+		'embarkation_region__longitude',
+		'embarkation_region__show_at_zoom',
+		'embarkation_region__show_on_map',
+		'disembarkation_region__id',
+		'disembarkation_region__import_area__id',
+		'disembarkation_region__import_area__name',
+		'disembarkation_region__import_area__order_num',
+		'disembarkation_region__import_area__latitude',
+		'disembarkation_region__import_area__longitude',
+		'disembarkation_region__import_area__show_at_zoom',
+		'disembarkation_region__import_area__show_on_map',
+		'disembarkation_region__name',
+		'disembarkation_region__order_num',
+		'disembarkation_region__latitude',
+		'disembarkation_region__longitude',
+		'disembarkation_region__show_at_zoom',
+		'disembarkation_region__show_on_map',
+		'year',
+		'embarked_slaves',
+		'disembarked_slaves'
 	]
 }

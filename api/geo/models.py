@@ -44,17 +44,13 @@ class Location(models.Model):
 		"Location name",
 		max_length=255
 	)
-	longitude = models.DecimalField(
+	longitude = models.FloatField(
 		"Longitude of Centroid",
-		max_digits=10,
-		decimal_places=7,
 		null=True,
 		blank=True
 	)
-	latitude = models.DecimalField(
+	latitude = models.FloatField(
 		"Latitude of Centroid",
-		max_digits=10,
-		decimal_places=7,
 		null=True,
 		blank=True
 	)

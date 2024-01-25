@@ -38,7 +38,9 @@ def GeoTreeFilter(spss_vals=[],select_all=False):
 			'name':l.name,
 			'longitude':l.longitude,
 			'latitude':l.latitude,
-			'value':l.value
+			'value':l.value,
+			'location_type':{'name':l.location_type.name},
+			'spatial_extent':l.spatial_extent
 		}
 		return ld
 	
@@ -52,4 +54,5 @@ def GeoTreeFilter(spss_vals=[],select_all=False):
 			crdict['children']=[locationdict(p) for p in childplaces]
 			brdict['children'].append(crdict)
 		locationtree.append(brdict)
+	
 	return locationtree

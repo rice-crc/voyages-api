@@ -43,14 +43,24 @@
 {% for s in page_obj %}
 
 	<div>
-	<p><a href="/docs/gallery/single/{{s.id}}">{{ s.title }}<br/>{{ s.date }}<br/>
+	<p><a href="/docs/gallery/single/{{s.id}}">{{ s.title }}<br/>{{ s.date }}</a><br/></p>
+	<table>
+	<tr>
+	<td>
 	{% for spc in s.page_connections.all %}
-		{% if spc.page.iiif_baseimage_url %}
-			<img src="{{spc.page.square_thumbnail}}"></a>
-		{% endif %}
+		<img src="{{spc.page.square_thumbnail}}"></a>
 	{% endfor %}
-	</a>
+	</td>
+	<td>
+	<p>Filenames:<br/>
+		{% for spc in s.page_connections.all %}
+			<b>-->{{spc.id}} {{spc.page.image_filename}}</b><br/>
+			
+		{% endfor %}
 	</p>
+	</td>
+	</tr>
+	</table>
 	</div>
 	<hr/>
 

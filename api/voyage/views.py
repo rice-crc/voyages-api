@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.views.generic.list import ListView
+from rest_framework.pagination import PageNumberPagination
 from collections import Counter
 import urllib
 import json
@@ -14,354 +15,593 @@ import requests
 import time
 from .models import *
 import pprint
-from common.reqs import *
+import redis
+import hashlib
+from rest_framework import filters
+from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df
+# from common.serializers import autocompleterequestserializer, autocompleteresponseserializer,crosstabresponseserializer,crosstabrequestserializer
 from geo.common import GeoTreeFilter
+from geo.serializers_READONLY import LocationSerializerDeep
 import collections
 import gc
 from .serializers import *
 from .serializers_READONLY import *
-from geo.serializers_READONLY import LocationSerializer
-from voyages3.localsettings import *
+from rest_framework import serializers
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,GEO_NETWORKS_BASE_URL,STATS_BASE_URL,DEBUG,USE_REDIS_CACHE
 from drf_yasg.utils import swagger_auto_schema
 import re
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
 from drf_spectacular.types import OpenApiTypes
 from common.static.Voyage_options import Voyage_options
+
+
+redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
-	serializer_class=VoyageSerializer
-	def post(self,request):
-		'''
-		This endpoint returns a list of nested objects, each of which contains all the available information on individual voyages.
+	@extend_schema(
+		description="This endpoint returns a list of nested objects, each of which contains all the available information on individual voyages.\n\
+		\Voyages are the legacy natural unit of the project. They are useful because they gather together:\n\
+		\n\
+			1. Numbers of people and demographic data\n\
+			2. Geographic itinerary data\n\
+			3. Important dates\n\
+			4. Named individuals\n\
+			5. Documentary sources\n\
+			6. Data on the vessel\
+		\n\
+		\nYou can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.\
+		",
+		request=VoyageListRequestSerializer,
+		responses=VoyageListResponseSerializer
+	)
+	def post(self,request):	
+		st=time.time()
+		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageListRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 		
-		Voyages are the legacy natural unit of the project. They are useful because they gather together:
-		
-			1. Numbers of people and demographic data
-			2. Geographic itinerary data
-			3. Important dates
-			4. Named individuals
-			5. Documentary sources
-			6. Data on the vessel
-		
-		You can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.
-		'''
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,
-			self,
-			request,
-			Voyage_options,
-			retrieve_all=False
-		)
-		if len(error_messages)==0:
-			st=time.time()
-			headers={"total_results_count":results_count}
-			read_serializer=VoyageSerializer(queryset,many=True)
-			serialized=read_serializer.data
-			resp=JsonResponse(serialized,safe=False,headers=headers)
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return resp
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
 		else:
-			print("failed\n+++++++")
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=True
+			)
+			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+			resp=VoyageListResponseSerializer({
+				'count':total_results_count,
+				'page':page_num,
+				'page_size':page_size,
+				'results':results
+			}).data
+			#I'm having the most difficult time in the world validating this nested paginated response
+			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+			
+		return JsonResponse(resp,safe=False,status=200)
 
-# # Basic statistics
-# ## takes a numeric variable
-# ## returns its sum, average, max, min, and stdv
-@extend_schema(
-        exclude=True
-    )
 class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The aggregations endpoints helps us to peek at numerical fields in the same way that autcomplete endpoints help us to get a sense of what the available text values are on a field.\
+		So if we want to, for instance, allow a user to search on voyages by year, we might want to give them a rangeslider component. In order to make that rangeslider component, you'd have to know the minimum and maximum years during which voyages sailed -- you would also need to know, of course, whether you were searching for the minimum and maximum of years of departure, embarkation, disembarkation, return, etc.\
+		Also, as with the other new endpoints we are rolling out in January 2024, you can run a filter before you query for min/max on variables. So if you've already searched for voyages arriving in Cuba, for instance, you can ask for the min and max years of disembarkation in order to make a rangeslider dynamically tailored to that search.\
+		Note to maintainer(s): This endpoint was made with rangesliders in mind, so we are only exposing min & max for now. In the future, it could be very useful to have median, mean, or plug into the stats engine for a line or bar chart to create some highly interactive filtering.\
+		",
+		request=VoyageFieldAggregationRequestSerializer,
+		responses=VoyageFieldAggregationResponseSerializer
+	)
 	def post(self,request):
 		st=time.time()
-		print("VOYAGE AGGREGATIONS+++++++\nusername:",request.auth.user)
-		params=dict(request.data)
-		aggregations=params.get('aggregate_fields')
-		print("aggregations:",aggregations)
-		queryset=Voyage.objects.all()
-		aggregation,selected_fields,results_count,error_messages=post_req(queryset,self,request,Voyage_options,retrieve_all=True)
-		output_dict={}
-		if len(error_messages)==0:
-			for a in aggregation:
-				print(a)
-				for k in a:
-					v=a[k]
-					fn=k.split('__')[-1]
-					varname=k[:-len(fn)-2]
-					if varname in output_dict:
-						output_dict[varname][fn]=a[k]
-					else:
-						output_dict[varname]={fn:a[k]}
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output_dict,safe=False)
+		if DEBUG:
+			print("VOYAGE AGGREGATIONS+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageFieldAggregationRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
 		else:
-			print("failed\n",' | '.join(error_messages),"\n+++++++",)
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=False
+			)
+			#RUN THE AGGREGATIONS
+			aggregation_field=request.data.get('varName')
+			output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Voyage_options)
+			#VALIDATE THE RESPONSE
+			serialized_resp=VoyageFieldAggregationResponseSerializer(data=output_dict)
+			if not serialized_resp.is_valid():
+				return JsonResponse(serialized_resp.errors,status=400)
+			else:
+				resp=serialized_resp.data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
-@extend_schema(
-        exclude=True
-    )
-class VoyageStatsOptions(generics.GenericAPIView):
-	'''
-	Need to make the stats engine's indexed variables transparent to the user
-	'''
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		u2=STATS_BASE_URL+'get_indices/'
-		r=requests.get(url=u2,headers={"Content-type":"application/json"})
-		return JsonResponse(json.loads(r.text),safe=False)
-	def options(self,request):
-		u2=STATS_BASE_URL+'get_indices/'
-		r=requests.get(url=u2,headers={"Content-type":"application/json"})
-		return JsonResponse(json.loads(r.text),safe=False)
-
-@extend_schema(
-        exclude=True
-    )
 class VoyageCrossTabs(generics.GenericAPIView):
-	'''
-	I was only able to figure out how to output a true pivot table (multi levels and columns) as a straight html dump from pandas.
-	Moreover, if I styled it at all (tagged the <td>'s with id's for jquery), the size ballooned.
-	Instead, then, we'll go with a custom ag-grid JS dump that can accommodate multi-level cols, but not multi-level rows.	
-	'''
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
+		request=VoyageCrossTabRequestSerializer,
+		responses=VoyageCrossTabResponseSerializer
+	)
 	def post(self,request):
 		st=time.time()
-		print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
-		params=dict(request.data)
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Voyage_options,retrieve_all=True)
-		if len(error_messages)==0:
+		if DEBUG:
+			print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageCrossTabRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=True
+			)
+		
+			#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
 			ids=[i[0] for i in queryset.values_list('id')]
 			u2=STATS_BASE_URL+'crosstabs/'
 			params=dict(request.data)
-			d2=params
-			d2['ids']=ids
-			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+			stats_req_data=params
+			stats_req_data['ids']=ids
+			stats_req_data['cachename']='voyage_pivot_tables'
+			r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
+			
+			#VALIDATE THE RESPONSE
 			if r.ok:
-				print("Internal Response Time:",time.time()-st,"\n+++++++")
-				return JsonResponse(json.loads(r.text),safe=False)
+				j=json.loads(r.text)
+				serialized_resp=VoyageCrossTabResponseSerializer(data=j)
+			if not serialized_resp.is_valid():
+				return JsonResponse(serialized_resp.errors,status=400)
 			else:
-				return JsonResponse({'status':'false','message':'bad groupby request'}, status=400)
+				resp=serialized_resp.data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
 		else:
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
-@extend_schema(
-        exclude=True
-    )
 class VoyageGroupBy(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint is intended for use building line/scatter, bar, and pie charts. It requires a few arguments, which it basically inherits from <a href=\"https://github.com/rice-crc/voyages-api/tree/main/stats\">the back-end flask/pandas service</a> that runs these stats.\n\
+		    1. A variable to group on: 'groupby_by'\n\
+		        1a. For a scatter plot, you would want this would be a numeric variable\n\
+		        1b. For a bar chart, you would want this to be a categorical variable\n\
+		    2. An array of variables to aggregate on: 'groupby_cols'\n\. This is always a numeric variable.\n\
+		    3. An aggregation function: sum, mean, min, max\n\
+		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a small, serialized dataframe taken from the pandas back-end.\n\
+		",
+		request=VoyageGroupByRequestSerializer,
+# 		responses=VoyageGroupByResponseSerializer
+	)
+
 	def post(self,request):
 		st=time.time()
-		print("VOYAGE GROUPBY+++++++\nusername:",request.auth.user)
-		print(request.data)
-		params=dict(request.data)
-		print(params)
-		groupby_by=params.get('groupby_by')
-		groupby_cols=params.get('groupby_cols')
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,request,Voyage_options,retrieve_all=True)
-		ids=[i[0] for i in queryset.values_list('id')]
-		u2=STATS_BASE_URL+'groupby/'
-		d2=params
-		d2['ids']=ids
-		d2['selected_fields']=selected_fields
-		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		return JsonResponse(json.loads(r.text),safe=False)# 
+		if DEBUG:
+			print("VOYAGE GROUPBY+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageGroupByRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 
-@extend_schema(
-        exclude=True
-    )
-#DATAFRAME ENDPOINT (A resource hog -- internal use only!!)
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=False
+			)
+		
+			#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
+			ids=[i[0] for i in queryset.values_list('id')]
+			u2=STATS_BASE_URL+'groupby/'
+			d2=dict(request.data)
+			d2['ids']=ids
+		
+			#NOT QUITE SURE HOW TO VALIDATE THE RESPONSE OF THIS VIA A SERIALIZER
+			#BECAUSE YOU HAVE A DICTIONARY WITH > 2 KEYS COMING BACK AT YOU
+			#AND ANOTHER GOOD RULE WOULD BE THAT THE ARRAYS ARE ALL EQUAL IN LENGTH
+			json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+			resp=json.loads(json_resp.text)
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
+
 class VoyageDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The dataframes endpoint is mostly for internal use -- building up caches of data in the flask services.\n\
+		However, it could be used for csv exports and the like.\n\
+		Be careful! It's a resource hog. But more importantly, if you request fields that are not one-to-one relationships with the voyage, you're likely get back extra rows. For instance, requesting captain names will return one row for each captain, not for each voyage.\n\
+		And finally, the example provided below puts a strict year filter on because unrestricted, it will break your swagger viewer :) \n\
+		",
+		request=VoyageDataframesRequestSerializer,
+# 		responses=VoyageDataframesResponseSerializer
+	)
 	def post(self,request):
 		print("VOYAGE DATAFRAMES+++++++\nusername:",request.auth.user)
 		st=time.time()
-		retrieve_all=True
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,
-			self,
-			request,
-			Voyage_options,
-			auto_prefetch=False,
-			retrieve_all=True
-		)
-# 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
-# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
-# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of # Benin')
-				
-		queryset=queryset.order_by('id')
-		sf=list(selected_fields)
-		if len(error_messages)==0:
-			output_dicts={}
-			vals=list(eval('queryset.values_list("'+'","'.join(selected_fields)+'")'))
-			for i in range(len(sf)):
-				output_dicts[sf[i]]=[v[i] for v in vals]
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			return JsonResponse(output_dicts,safe=False)
-		else:
-			print("failed\n+++++++")
-			print(' | '.join(error_messages))
-			return JsonResponse({'status':'false','message':' | '.join(error_messages)}, status=400)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageDataframesRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 
-@extend_schema(
-        exclude=True
-    )
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=True
+			)
+		
+			queryset=queryset.order_by('id')
+			sf=request.data.get('selected_fields')
+			vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+			resp=clean_long_df(vals,sf)		
+			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
+
 class VoyageGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint is tricky. In addition to taking a filter object, it also takes a list of geographic value variable names, like 'voyage_itinerary__port_of_departure__value'. \n\
+		What it returns is a hierarchical tree of SlaveVoyages geographic data, filtered down to only the values used in those 'geotree valuefields' after applying the filter object.\n\
+		So if you were to ask for voyage_itinerary__port_of_departure__value, you would mostly get locations in Europe and the Americas; and if you searched 'voyage_itinerary__imp_principal_region_of_slave_purchase__name', you would principally get places in the Americas and Africa.",
+		request=VoyageGeoTreeFilterRequestSerializer,
+		responses=LocationSerializerDeep
+	)
 	def post(self,request):
-		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
 		st=time.time()
-		reqdict=dict(request.data)
-		geotree_valuefields=reqdict['geotree_valuefields']
-		del(reqdict['geotree_valuefields'])
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(queryset,self,reqdict,Voyage_options,retrieve_all=True)
-		for geotree_valuefield in geotree_valuefields:
-			geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
-			queryset=queryset.select_related(geotree_valuefield_stub)
-		vls=[]
-		for geotree_valuefield in geotree_valuefields:		
-			vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
-		vls=list(set(vls))
-		filtered_geotree=GeoTreeFilter(spss_vals=vls)
-		resp=JsonResponse(filtered_geotree,safe=False)
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return resp
+		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageGeoTreeFilterRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:		
+			#extract and then peel out the geotree_valuefields
+			reqdict=dict(request.data)
+			geotree_valuefields=reqdict['geotree_valuefields']
+			del(reqdict['geotree_valuefields'])
+		
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				reqdict,
+				Voyage_options
+			)
+		
+			#THEN GET THE CORRESPONDING GEO VALUES
+			for geotree_valuefield in geotree_valuefields:
+				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
+				queryset=queryset.select_related(geotree_valuefield_stub)
+			
+			vls=[]
+			
+			for geotree_valuefield in geotree_valuefields:		
+				vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+			vls=list(set(vls))
+		
+			#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
+			resp=GeoTreeFilter(spss_vals=vls)
+		
+			### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
-
-#This will only accept one field at a time
-#Should only be a text field
-#And it will only return max 10 results
-#It will therefore serve as an autocomplete endpoint
-#I should make all text queries into 'or' queries
-@extend_schema(
-        exclude=True
-    )
 class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=VoyageAutoCompleteRequestSerializer,
+		responses=VoyageAutoCompleteResponseSerializer,
+	)
 	def post(self,request):
-		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-# 		try:
 		st=time.time()
-		params=dict(request.data)
-		print(params)
-		k=list(params.keys())[0]
-		v=params[k][0]
-		
-		print("voyage/autocomplete",k,v)
-		queryset=Voyage.objects.all()
-		if '__' in k:
-			kstub='__'.join(k.split('__')[:-1])
-			k_id_field=kstub+"__id"
-			queryset=queryset.prefetch_related(kstub)
+		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageAutoCompleteRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
 		else:
-			k_id_field="id"
-		kwargs={'{0}__{1}'.format(k, 'icontains'):v}
-		queryset=queryset.filter(**kwargs)
-		queryset=queryset.order_by(k)
-		total_results_count=queryset.count()
-		candidates=[]
-		candidate_vals=[]
-		fetchcount=30
-		## Have to use this ugliness b/c we're not in postgres
-		## https://docs.djangoproject.com/en/4.2/ref/models/querysets/#django.db.models.query.QuerySet.distinct
-		for v in queryset.values_list(k_id_field,k).iterator():
-			if v[1] not in candidate_vals:
-				candidates.append(v)
-				candidate_vals.append(v[1])
-			if len(candidates)>=fetchcount:
-				break
+			cached_response=None
 
-		res={
-			"total_results_count":total_results_count,
-			"results":[
-				{
-					"id":c[0],
-					"label":c[1]
-				} for c in candidates
-			]
-		}
-		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(res,safe=False)
-# 		except:
-# 			print("failed\n+++++++")
-# 			return JsonResponse({'status':'false','message':'bad autocomplete request'}, status=400)
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=False
+			)
+			#RUN THE AUTOCOMPLETE ALGORITHM
+			final_vals=autocomplete_req(queryset,request)
+			resp=dict(request.data)
+			resp['suggested_values']=final_vals
+			#VALIDATE THE RESPONSE
+			serialized_resp=VoyageAutoCompleteResponseSerializer(data=resp)
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(resp,safe=False,status=200)
 
-#This endpoint will build a geographic sankey diagram based on a voyages query
-@extend_schema(
-        exclude=True
-    )
 class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def post(self,request):
-# 		try:
-		st=time.time()
-		print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
-		params=dict(request.data)
-		zoom_level=params.get('zoom_level')
-		queryset=Voyage.objects.all()
-		queryset,selected_fields,results_count,error_messages=post_req(
-			queryset,
-			self,
-			request,
-			Voyage_options,
-			auto_prefetch=True,
-			retrieve_all=True
-		)
-# 		queryset=queryset.filter(voyage_itinerary__principal_place_of_slave_purchase__name='Mozambique')
-# 		queryset=queryset.filter(voyage_itinerary__imp_principal_region_slave_dis__name='Sierra Leone')
-# 		queryset=queryset.filter(voyage_itinerary__first_region_slave_emb__name='Bight of Benin')
-		queryset=queryset.order_by('id')
-		zoomlevel=params.get('zoomlevel',['region'])[0]
-		values_list=queryset.values_list('id')
-		pks=[v[0] for v in values_list]
-		
-		django_query_time=time.time()
-		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
-		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
-		d2={
-			'graphname':zoomlevel,
-			'cachename':'voyage_maps',
-			'pks':pks
-		}
-		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-		j=json.loads(r.text)
-		
-		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(j,safe=False)
-
-@extend_schema(
-		exclude=True
+	@extend_schema(
+		description="This endpoint provides a collection of multi-valued weighted nodes and splined, weighted edges. The intended use-case is the drawing of a geographic sankey map.",
+		request=VoyageAggRoutesRequestSerializer,
+		responses=VoyageAggRoutesResponseSerializer,
 	)
-class VoyageCREATE(generics.CreateAPIView):
-	'''
-	Create Voyage without a pk
-	'''
-	queryset=Voyage.objects.all()
-	serializer_class=VoyageCRUDSerializer
-	lookup_field='voyage_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
+	def post(self,request):
+		st=time.time()
+		if DEBUG:
+			print("VOYAGE AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageAggRoutesRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			params=dict(request.data)
+			zoom_level=params.get('zoom_level')
+			queryset=Voyage.objects.all()
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=True
+			)
+		
+			#HAND OFF TO THE FLASK CONTAINER
+			queryset=queryset.order_by('id')
+			zoomlevel=params.get('zoomlevel','region')
+			values_list=queryset.values_list('id')
+			pks=[v[0] for v in values_list]
+			django_query_time=time.time()
+			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
+			u2=GEO_NETWORKS_BASE_URL+'network_maps/'
+			d2={
+				'graphname':zoomlevel,
+				'cachename':'voyage_maps',
+				'pks':pks
+			}
+			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+
+			#VALIDATE THE RESPONSE
+			if r.ok:
+				j=json.loads(r.text)
+				serialized_resp=VoyageAggRoutesResponseSerializer(data=j)
+			if not serialized_resp.is_valid():
+				return JsonResponse(serialized_resp.errors,status=400)
+			else:
+				resp=serialized_resp.data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
 
 
-class VoyageRETRIEVE(generics.RetrieveAPIView):
+
+######## CRUD ENDPOINTS
+
+class VoyageGET(generics.RetrieveAPIView):
 	'''
-	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
+	GET one voyage by its ID (for card view)
 	'''
 	queryset=Voyage.objects.all()
 	serializer_class=VoyageSerializer
@@ -369,44 +609,146 @@ class VoyageRETRIEVE(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-@extend_schema(
-		exclude=True
-	)
-class VoyageUPDATE(generics.UpdateAPIView):
+
+
+class VoyageCreate(generics.CreateAPIView):
 	'''
-	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
-	
-	Previously, the SQL pk ("id") always corresponded to the "voyage_id" field. We will not be enforcing this going forward.
-	
-	M2M relations will not be writable here EXCEPT in the case of union/"through" tables.
-	
-	Examples:
-	
-		1. You CANNOT create an Enslaved (person) record as you traverse voyage_enslavement_relations >> relation_enslaved, but only the EnslavementRelation record that joins them
-		2. You CAN create an EnslaverInRelation record as you traverse voyage_enslavement_relations >> relation_enslaver >> enslaver_alias >> enslaver_identity ...
-		3. ... but you CANNOT create an EnslaverRole record during that traversal, like voyage_enslavement_relations >> relation_enslaver >> enslaver_role
-	
-	I have also, for the time, set all itinerary Location foreign keys as read_only.
-	
-	Godspeed.
+	Create a Voyage. You MUST supply a voyage_id
 	'''
 	queryset=Voyage.objects.all()
-	serializer_class=VoyageCRUDSerializer
+	serializer_class=VoyageSerializerCRUD
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
-@extend_schema(
-		exclude=True
-	)
-class VoyageDESTROY(generics.DestroyAPIView):
+class VoyageRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 	'''
-	The lookup field for contributions is "voyage_id". This corresponds to the legacy voyage_id unique identifiers. For create operations they should be chosen with care as they have semantic significance.
+	Retrieve, Update, or Delete a Voyage
 	'''
 	queryset=Voyage.objects.all()
-	serializer_class=VoyageCRUDSerializer
+	serializer_class=VoyageSerializerCRUD
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAdminUser]
 
+######## READ-ONLY CONTROLLED VOCAB ENDPOINTS
 
+class RigOfVesselList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=RigOfVessel
+	queryset=RigOfVessel.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=RigOfVesselSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class NationalityList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=NationalitySerializer
+	queryset=Nationality.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=NationalitySerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAdminUser]
+
+class TonTypeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=TonTypeSerializer
+	queryset=TonType.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=TonTypeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	
+class ParticularOutcomeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=ParticularOutcomeSerializer
+	queryset=ParticularOutcome.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=ParticularOutcomeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+class SlavesOutcomeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=SlavesOutcomeSerializer
+	queryset=SlavesOutcome.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=SlavesOutcomeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+class ResistanceList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=Resistance
+	queryset=Resistance.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=ResistanceSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	
+class OwnerOutcomeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=OwnerOutcomeSerializer
+	queryset=OwnerOutcome.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=OwnerOutcomeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+
+class VesselCapturedOutcomeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=VesselCapturedOutcomeSerializer
+	queryset=VesselCapturedOutcome.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=VesselCapturedOutcomeSerializerCRUD
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]

@@ -1,38 +1,109 @@
+import time
 import json
 import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
-from voyages3.localsettings import *
+from voyages3.localsettings import OPEN_API_BASE_API,DEBUG
 import requests
 from django.core.paginator import Paginator
 import html
 import re
 import pysolr
 import os
-#GENERIC FUNCTION TO RUN A CALL ON REST SERIALIZERS
-##Default is to auto prefetch, but need to be able to turn it off.
-##For instance, on our PAST graph-like data, the prefetch can overwhelm the system if you try to get everything
-##can also just pass an array of prefetch vars
+import uuid
 
-def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
+def clean_long_df(rows,selected_fields):
+	'''
+	JSON Serialization doesn't fly when you fetch the raw value of certain data types
+	e.g., uuid.UUID, decimal.Decimal.....
+	'''
 	
+	resp={sf:[] for sf in selected_fields}
+	
+	for i in range(len(selected_fields)):
+		sf=selected_fields[i]
+		column=[r[i] for r in rows]
+		
+		for r in rows:
+			val=r[i]
+			if type(val) == uuid.UUID:
+				val=str(val)
+			
+			resp[sf].append(val)
+	
+	return resp
+	
+def paginate_queryset(queryset,request):
+	'''
+		Customized pagination for post requests. Params are:
+		page_size (int)
+		page (int)
+	'''
+	params=request.data
+	page_size=params.get('page_size',10)
+	page=params.get('page',1)
+	paginator=Paginator(queryset, page_size)
+	results_page=paginator.get_page(page)
+	total_results_count=queryset.count()
+	return results_page,total_results_count,page,page_size
+	
+def get_fieldstats(queryset,aggregation_field,options_dict):
+	'''
+		Used to get the min and max of a numeric field
+		Takes a queryset (can be filtered), a field to be filtered on,
+		and the list of valid variables for the queryset's base object class
+		then uses django's aggregation functions to pull the min & max
+		The mean is also available if we choose to extend this later
+	'''
+	res=None
+	errormessages=[]
+	if aggregation_field is None:
+		errormessages.append("you must supply a field to aggregate on")
+	else:
+		valid_aggregation_fields=[f for f in options_dict if options_dict[f]['type'] in ['integer','number']]
+		if aggregation_field not in valid_aggregation_fields:
+			errormessages.append("bad aggregation field: " + aggregation_field)
+		else:
+			if '__' in aggregation_field:
+				prefetch_name='__'.join(aggregation_field.split('__')[:-1])
+				queryset=queryset.prefetch_related(prefetch_name)
+				if DEBUG:
+					print("prefetching:",prefetch_name)
+			min=queryset.aggregate(Min(aggregation_field)).popitem()[1]
+			max=queryset.aggregate(Max(aggregation_field)).popitem()[1]
+			res={
+				'varName':aggregation_field,
+				'min':min,
+				'max':max
+			}
+	return res,errormessages
+
+def post_req(queryset,s,r,options_dict,auto_prefetch=True):
+	'''
+		This function handles:
+		1. ensuring that all the fields that will be called are valid on the model
+		2. applying filters to the queryset
+		3. bypassing the normal usage and going to solr for pk's if 'global_search' is in the query data
+		4. ordering the queryset
+		5. attempting to intelligently prefetch related fields for performance
+	'''
 	errormessages=[]
 	results_count=None
 	
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
-	try:
-		if type(r)==dict:
-			params=r
-		else:
-			params=dict(r.data)
-		params={k:params[k] for k in params if params[k]!=['']}
-		pp = pprint.PrettyPrinter(indent=4)
-		print("--post req params--")
-		pp.pprint(params)
-	except:
-		errormessages.append("error parsing parameters")
+	if type(r)==dict:
+		params=r
+	else:
+		params=dict(r.data)
 	
+	if DEBUG:
+		print("----\npost req params:",json.dumps(params,indent=1))
+	filter_obj=params.get('filter') or {}
+	
+	#global search bypasses the normal filtering process
+	#hits solr with a search string (which currently is applied across all text fields on a model)
+	#and then creates its filtered queryset on the basis of the pk's returned by solr
 	if 'global_search' in params:
 		qsetclassstr=str(queryset[0].__class__)
 		
@@ -44,7 +115,9 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		}
 		
 		solrcorename=solrcorenamedict[qsetclassstr]
-		print("CLASS",qsetclassstr,solrcorename)
+		
+		if DEBUG:
+			print("CLASS",qsetclassstr,solrcorename)
 		
 		solr = pysolr.Solr(
 			'http://voyages-solr:8983/solr/%s/' %solrcorename,
@@ -59,151 +132,80 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True,retrieve_all=False):
 		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		ids=[doc['id'] for doc in results.docs]
 		queryset=queryset.filter(id__in=ids)
-		
-	selected_fields=params.get('selected_fields') or list(all_fields.keys())
-	bad_fields=[f for f in selected_fields if f not in all_fields]
-	if len(bad_fields)>0:
-		errormessages.append("the following fields are not in the models: %s" %', '.join(bad_fields))
 	
-	try:
-		###FILTER RESULTS
-		##select text and numeric fields, ignoring those without a type
-		text_fields=[i for i in all_fields if all_fields[i]['type'] =='string']
-		numeric_fields=[i for i in all_fields if all_fields[i]['type'] in ['integer','number']]
-		boolean_fields=[i for i in all_fields if all_fields[i]['type']=='boolean']
-		#print("FILTER FIELDS",text_fields,numeric_fields,boolean_fields)
-		##build filters
-		kwargs={}
-		###numeric filters -- only accepting one range per field right now
-		active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
-		if len(active_numeric_search_fields)>0:
-			for field in active_numeric_search_fields:
-				fieldvals=params.get(field)
-				if len(fieldvals)==2 and '*' not in fieldvals:
-					range=fieldvals
-					vals=[float(i) for i in range]
-					vals.sort()
-					min,max=vals
-					kwargs['{0}__{1}'.format(field, 'lte')]=max
-					kwargs['{0}__{1}'.format(field, 'gte')]=min
-				else:
-					kwargs[field+'__in']=[int(i) for i in fieldvals if i!='*']
-				
-		###text filters (exact match, and allow for multiple entries joined by an or)
-		###this hard eval is not ideal but I can't quite see how else to do it just now?
-		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
-		if len(active_text_search_fields)>0:
-			for field in active_text_search_fields:
-				vals=params.get(field)
-				qobjstrs=["Q({0}={1})".format(field,json.dumps(re.sub("\\\\+","",val))) for val in vals]
-				#print(vals,qobjstrs)
-				queryset=queryset.filter(eval('|'.join(qobjstrs)))
-				#print(queryset)
-		##boolean filters -- only accepting one range per field right now
-		active_boolean_search_fields=[i for i in set(params).intersection(set(boolean_fields))]
-		if len(active_boolean_search_fields)>0:
-			for field in active_boolean_search_fields:
-				searchstring=params.get(field)[0]
-				if searchstring.lower() in ["true","t","1","yes"]:
-					searchstring=True
-				elif searchstring.lower() in ["false","f","0","no"]:
-					searchstring=False
-
-				if searchstring in [True,False]:
-					kwargs[field]=searchstring
-		#print(kwargs)
-		###apply filters
-		queryset=queryset.filter(**kwargs)
-		results_count=queryset.count()
-		print('--counts--')
+	#used by dataframes calls to prefetch specific columns
+	
+	kwargs={}
+	for item in filter_obj:
+		op=item['op']
+		searchTerm=item["searchTerm"]
+		varName=item["varName"]
+		if varName in all_fields and op in ['lte','gte','exact','in','icontains']:
+			django_filter_term='__'.join([varName,op])
+			kwargs[django_filter_term]=searchTerm
+		elif varName in all_fields and op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
+			searchTerm.sort()
+			min,max=searchTerm
+			kwargs['{0}__{1}'.format(varName, 'lte')]=max
+			kwargs['{0}__{1}'.format(varName, 'gte')]=min		
+		else:
+			if varName not in all_fields:
+				errormessages.append("var %s not in model" %varName)
+			if op not in ['lte','gte','exact','in','icontains']:
+				errormessages.append("%s is not a valid django search operation" %op)
+	queryset=queryset.filter(**kwargs)
+	results_count=queryset.count()
+	if DEBUG:
 		print("resultset size:",results_count)
-	except:
- 		errormessages.append("search/filter error")
-	 
-	try:
-		aggregation_fields=params.get('aggregate_fields')
-		if aggregation_fields is not None:
-			selected_fields=aggregation_fields
+
 	#PREFETCH REQUISITE FIELDS
-		prefetch_fields=selected_fields
-		#print(prefetch_keys)
-		##ideally, I'd run this list against the model and see
-		##which were m2m relationships (prefetch_related) and which were 1to1 (select_related)
-		prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
+	prefetch_fields=params.get('selected_fields') or []
+	if prefetch_fields==[] and auto_prefetch:
+		prefetch_fields=list(all_fields.keys())
+	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
+	
+	if DEBUG:
 		print('--prefetching %d vars--' %len(prefetch_vars))
-		for p in prefetch_vars:
-			queryset=queryset.prefetch_related(p)
-	except:
-		errormessages.append("prefetch error")
-	
-	
-	#AGGREGATIONS
-	##e.g. voyage_slaves_numbers__imp_total_num_slaves_embarked__sum
-	##This *SHOULD* aggregate on the filtered queryset, which means
-	###you could filter the dataset and then update rangeslider min & max
-	###BUT ALSO!!
-	####1. autocomplete suggestions
-	####2. geo tree selects
+	for p in prefetch_vars:
+		queryset=queryset.prefetch_related(p)
 	
 	#ORDER RESULTS
-	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')	
-	try:
-		order_by=params.get('order_by')
-		if order_by is not None:
+	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')
+	order_by=params.get('order_by')
+	if order_by is not None:
+		if DEBUG:
 			print("---->order by---->",order_by)
-			for ob in order_by:
-				if ob.startswith('-'):
-					queryset=queryset.order_by(F(ob[1:]).desc(nulls_last=True))
+		for ob in order_by:
+			if ob.startswith('-'):
+				k=ob[1:]
+				asc=False
+			else:
+				asc=True
+				k=ob
+			
+			if k in all_fields:
+				if asc:
+					queryset=queryset.order_by(F(k).asc(nulls_last=True))
 				else:
-					queryset=queryset.order_by(F(ob).asc(nulls_last=True))
-		else:
-			queryset=queryset.order_by('id')
-	except:
-		errormessages.append("ordering error")
-	
-	#PAGINATION/LIMITS
-	if retrieve_all==False:
-		results_per_page=params.get('results_per_page',[10])
-		results_page=params.get('results_page',[1])
-		paginator=Paginator(queryset, results_per_page[0])
-		res=paginator.get_page(results_page[0])
-		print("-->page",results_page[0],"-->@",results_per_page[0],"per page")
+					queryset=queryset.order_by(F(k).desc(nulls_last=True))
+			else:
+				queryset=queryset.order_by('id')
 	else:
-		res=queryset
-	
-		#INCLUDE AGGREGATION FIELDS
-	aggregation_fields=params.get('aggregate_fields')
-
-	if aggregation_fields is not None:
-		valid_aggregation_fields=[f for f in options_dict if options_dict[f]['type'] in ['integer','number']]
-		bad_aggregation_fields=[f for f in aggregation_fields if f not in valid_aggregation_fields]
-		if bad_aggregation_fields!=[]:
-			errormessages.append("bad aggregation fields: "+",".join(bad_aggregation_fields))
-			print(errormessages)
-		else:
-			try:
-				aggqueryset=[]
-				selected_fields=[]
-				for aggfield in aggregation_fields:
-					for aggsuffix in ["min","max"]:
-						selected_fields.append(aggfield+"_"+aggsuffix)
-					aggqueryset.append(queryset.aggregate(Min(aggfield)))
-					aggqueryset.append(queryset.aggregate(Max(aggfield)))
-				queryset=aggqueryset
-				res=aggqueryset
-			except:
-				errormessages.append("aggregation error")
-		
-
-	
-	return res,selected_fields,results_count,errormessages
+		queryset=queryset.order_by('id')
+						
+	return queryset,results_count
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
+	'''
+	Recursively walks the OpenAPI schemas to build flat json files that we can later use for indexing, serializer population and validation, etc.
+	Its best friend is the rebuild_options management command.
+	Why do this? It turns out that the OpenAPI endpoint is a little touchy, so we can't route live requests through it.
+	'''
 	if hierarchical in [True,"true","True",1,"t","T","yes","Yes","y","Y"]:
 		hierarchical=True
 	else:
 		hierarchical=False
-	r=requests.get(url=OPEN_API_BASE_API)
+	r=requests.get(url=OPEN_API_BASE_API+"schema/?format=json")
 	j=json.loads(r.text)
 	schemas=j['components']['schemas']
 	base_obj_name=base_obj_name
@@ -273,3 +275,86 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 
 	
 	return output
+
+def autocomplete_req(queryset,request):
+	
+	'''
+		autocomplete search any related text/char field
+		
+		args---->
+		queryset: what we are searching within
+		varName: the fully-qualified (double-underscored) related field
+		querystr: the substring we are searching for on that field
+		offset, max_offset, and limit: pagination
+		<----
+		
+		it works by
+			* creating a values list query on the related field
+			* and then running through these as quickly as possible until
+				* it gets the requested new page length of unique new hits
+				* or hits the end of the values list
+		
+		why is this a pain in the ass?
+			* because mysql does not have distinct on related field functionality
+		
+		when will it hit a wall?
+			* on values with lots of duplicates
+			* like geo vars on voyages
+			* or like rig types on voyageso
+		
+		it times out after 5 seconds just in case
+		going to need caching
+	'''
+	
+	#hard-coded internal pagination for deduping
+	pagesize=500
+	rdata=request.data
+	varName=str(rdata.get('varName'))
+	querystr=str(rdata.get('querystr'))
+	offset=int(rdata.get('offset'))
+	limit=int(rdata.get('limit'))
+	max_offset=500
+	if offset>max_offset:
+		return []
+
+	if '__' in varName:
+		kstub='__'.join(varName.split('__')[:-1])
+		queryset=queryset.prefetch_related(kstub)
+
+	kwargs={'{0}__{1}'.format(varName, 'icontains'):querystr}
+	queryset=queryset.filter(**kwargs)
+	queryset=queryset.order_by(varName)
+	allcandidates=queryset.values_list(varName)
+	allcandidatescount=allcandidates.count()
+	
+	st=time.time()
+	
+	if allcandidatescount < limit:
+		final_vals=list(set([i[0] for i in allcandidates]))
+	else:
+		candidate_vals=[]
+		start=0
+		end=pagesize
+		c=0
+		while len(candidate_vals)<end:
+			candidates=allcandidates[start:end]
+			candidate_vals+=list(set([i[0] for i in candidates]))
+			candidate_vals=list(set(candidate_vals))
+			candidates_count=candidates.count()
+			if candidates_count>=allcandidatescount or end >= allcandidatescount or len(candidate_vals)>=(offset+limit) or time.time()-st>5:
+				break
+			end+=pagesize
+			start+=pagesize
+	
+		candidate_vals.sort()
+		start=offset
+		end=offset+limit
+		if start >= candidates_count:
+			final_vals=[]
+		else:
+			if end >= candidates_count:
+				final_vals=candidate_vals[start:]
+			else:
+				final_vals=candidate_vals[start:end]
+	response=[{"value":v} for v in final_vals]
+	return response

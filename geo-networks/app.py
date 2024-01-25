@@ -26,15 +26,12 @@ class User(UserMixin):
         self.name = name
         self.id = id
         self.active = active
-
     def is_active(self):
         # Here you should write whatever the code is
         # that checks the database if your user is active
         return self.active
-
     def is_anonymous(self):
         return False
-
     def is_authenticated(self):
         return True
 
@@ -44,18 +41,13 @@ def load_user(userid):
 
 login_manager.setup_app(app)
 
-
-
-
 def load_index(rcname,graphname):
 	rc=registered_caches[rcname]
 	dataframe_endpoint=rc['endpoint']
 	if 'graphs' not in rc:
 		rc['graphs']={}
 	picklefilepath='tmp/%s__%s.pickle' %(rcname,graphname)
-	
 	graph_params=[gp for gp in registered_caches[rcname]['graph_params'] if gp['name']==graphname][0]
-	
 	if os.path.exists(picklefilepath):
 		with open(picklefilepath, 'rb') as f:
 			graph_index = pickle.load(f)
@@ -92,13 +84,9 @@ def kickoff():
 		failures_count=0
 		print('BUILDING GRAPHS')
 		for rcname in rcnames:
-# 			try:
 			for graph_params in registered_caches[rcname]['graph_params']:
 				graphname=graph_params['name']
 				load_index(rcname,graphname)
-# 			except:
-# 				failures_count+=1
-# 				print("failed on cache:",rcname)
 		print("failed on %d of %d caches" %(failures_count,len(rcnames)))
 		if failures_count>=len(rcnames):
 			standoff_time=standoff_base**standoff_count
@@ -145,25 +133,22 @@ def network_maps():
 			'id':row_id,
 			'data':nodesdata[row_id],
 			'weights':{
-				'origin':row['origin'],
-				'embarkation':row['embarkation'],
-				'disembarkation':row['disembarkation'],
-				'post-disembarkation':row['post-disembarkation']
+				'origin':int(row['origin']),
+				'embarkation':int(row['embarkation']),
+				'disembarkation':int(row['disembarkation']),
+				'post_disembarkation':int(row['post-disembarkation'])
 			}
 		}
 		for row_id,row in aggnodes.iterrows()
 		if row_id in nodesdata
 	]
 	
-	
-# 	for node in finalnodes:
-# 		if 'name' in node['data']:
-# 			if node['data']['name']=="Sierra Leone":
-# 				print(node)
-	
 	## HAVE TO DROP EDGES WHERE WEIGHT IS ZERO BEFORE I DO THE BELOW:
 	
 	aggedges=aggedges[aggedges['weight']>0]
+	aggedges=aggedges[aggedges['pk'].isin(pks)]
+	
+# 	print("unique pks",len(aggedges['pk'].unique()))
 	
 	aggedges['c1x']=aggedges['c1x']*aggedges['weight']
 	aggedges['c2x']=aggedges['c2x']*aggedges['weight']
@@ -186,6 +171,10 @@ def network_maps():
 			'type':edgesdata['__'.join([str(row['source']),str(row['target'])])]['type']
 		} for row_id,row in aggedges.iterrows()
 	]
+	
+# 	for node in finalnodes:
+# 		print(node)
+	
 	return(jsonify({'nodes':finalnodes,'edges':finaledges}))
 
 @app.route('/rebuild_indices/<indexname>', methods=['GET'])
@@ -202,7 +191,6 @@ def rebuild_index(indexname):
 @app.route('/displayindices', methods=['GET'])
 @login_required
 def displayindices():
-		
 	indices=[
 		[
 			'__'.join([rcname,graph_params['name']]),
@@ -210,7 +198,6 @@ def displayindices():
 		] for rcname in rcnames
 		for graph_params in registered_caches[rcname]['graph_params']
 	]
-
 	return render_template(
 		'displayindices.html',
 		indices=indices
@@ -226,8 +213,6 @@ def login():
 			# Login and validate the user.
 			# user should be an instance of your `User` class
 			login_user(USER_NAMES[username])
-
 			flash('Logged in successfully.')
-
 			return redirect('/displayindices')
 	return render_template('login.html')

@@ -11,34 +11,33 @@ import re
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
-options={}
 
-def load_long_df(endpoint,variables):
+def load_long_df(endpoint,variables,options):
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
-		data=json.dumps({'selected_fields':variables})
+		data=json.dumps({'selected_fields':variables,'filter':[]})
 	)
 	j=json.loads(r.text)
 	df=pd.DataFrame.from_dict(j)
 	#coerce datatypes based on options call
-	for varname in variables:
-		optionsvar=options[varname]
+	for varName in variables:
+		optionsvar=options[varName]
 		vartype=optionsvar['type']	
 		if vartype in [
 			"integer",
 			"number"
 		]:
-			df[varname]=pd.to_numeric(df[varname])
-	print(df)
+			df[varName]=pd.to_numeric(df[varName])
 	return(df)
 
 registered_caches=[
 	voyage_bar_and_donut_charts,
 	voyage_summary_statistics,
 	voyage_pivot_tables,
-	voyage_xyscatter
+	voyage_xyscatter,
+	estimate_pivot_tables
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
@@ -48,14 +47,24 @@ standoff_base=4
 standoff_count=0
 while True:
 	failures_count=0
-	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
-	r=requests.get(url=DJANGO_BASE_URL+'common/schemas/?schema_name=Voyage&hierarchical=False',headers=headers)
-	options=json.loads(r.text)
 	for rc in registered_caches:
+		time.sleep(1)
+		#pull the index keys from the index_vars.py file
+		#and load each cache based on the parameters it sets out
 		endpoint=rc['endpoint']
 		variables=rc['variables']
+		schema_name=rc['schema_name']
+		headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
+		#before we make the dataframes call, we need to get the schema data
+		#via an options call to the django server
+		#because this will allow us to coerce the propert data types (numeric or categorical)
+		#in order to make the math work out properly later!
 		try:
-			rc['df']=load_long_df(endpoint,variables)
+			r=requests.get(url=DJANGO_BASE_URL+'common/schemas/?schema_name=%s&hierarchical=False' %schema_name,headers=headers)
+			options=json.loads(r.text)
+			rc['options']=options
+			rc['df']=load_long_df(endpoint,variables,options)
+			print(rc['df'])
 		except:
 			failures_count+=1
 			print("failed on cache:",rc['name'])
@@ -88,14 +97,13 @@ def groupby():
 	'''
 	st=time.time()
 	rdata=request.json
-	dfname=rdata['cachename'][0]
+	dfname=rdata['cachename']
 	ids=rdata['ids']
-	groupby_by=rdata['groupby_by'][0]
+	groupby_by=rdata['groupby_by']
 	groupby_cols=rdata['groupby_cols']
-	agg_fn=rdata['agg_fn'][0]
+	agg_fn=rdata['agg_fn']
 	df=eval(dfname)['df']
 	df2=df[df['id'].isin(ids)]
-# 	print(df2,df2[groupby_cols[0]].unique())
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
 	ct=ct.fillna(0)
 	resp={groupby_by:list(ct.index)}
@@ -133,81 +141,97 @@ def crosstabs():
 # 	try:
 	st=time.time()
 	rdata=request.json
-	dfname=rdata['cachename'][0]
-
+	dfname=rdata.get('cachename')
+# 	dfname='voyage_pivot_tables'
 	#it must have a list of ids (even if it's all of the ids)
 	ids=rdata['ids']
 
 	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
-	columns=rdata['columns']
-	rows=rdata['rows']
-	val=rdata['value_field'][0]
-	fn=rdata['agg_fn'][0]
-	
-	print("columns",columns)
-	
+	columns=rdata.get('columns')
+	rows=rdata.get('rows')
+	val=rdata.get('value_field')
+	fn=rdata.get('agg_fn')
+	limit=rdata.get('limit') or 10
+	offset=rdata.get('offset') or 0
+	binsize=rdata.get('binsize')
+	order_by=rdata.get('order_by')
+	if order_by is not None:
+		ascending=True
+		order_by=order_by[0]
+		if order_by.startswith("-"):
+			ascending=False
+			order_by=order_by[1:]
+		order_by_list=order_by.split('__')
+		order_by_list=tuple(order_by_list)
+		
 	normalize=rdata.get('normalize')
 	if normalize is not None:
 		normalize=normalize[0]
 	if normalize not in ["columns","index"]:
 		normalize=False
-
+	
 	df=eval(dfname)['df']
-	df2=df[df['id'].isin(ids)]
-	rows=rows[0]
+	options=eval(dfname)['options']
+	df=df[df['id'].isin(ids)]
 	
 	yeargroupmode=False
 	
 	def interval_to_str(s):
 		s=str(s)
 		return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
-	
+
+	def makestr(s):
+		if s is None:
+			return "Unknown"
+		else:
+			return str(s)
+
 	valuetype=options[val]['type']
 	
-	if re.match('.*year__[0-9]+',rows):
+	##TBD --> NEED TO VALIDATE THAT THE ROWS VARIABLE IS
+	####1) NUMERIC TO WORK IN THE FIRST PLACE
+	####2) A YEAR VAR IN ORDER TO MAKE SENSE TO A HUMAN END-USER
+	if binsize is not None:
+		binsize=int(binsize)
 		yeargroupmode=True
-		binsize=int(re.search('[0-9]+',rows).group(0))
-		cutvar=re.sub('_+[0-9]+$','',rows)
-		df2=df2.dropna(subset=[cutvar,val])
-		df2=df2.assign(YEARAM=df2[cutvar].astype('int'))
-		yearam_min=df2[cutvar].min()
-		yearam_max=df2[cutvar].max()
-		year_ints=list(range(int(yearam_min),int(yearam_max+1)))
-		if yearam_max-yearam_min <= binsize:
+		df=df.dropna(subset=[rows,val])
+		df[rows]=df[rows].astype('int')
+		year_min=df[rows].min()
+		year_max=df[rows].max()
+		year_ints=list(range(int(year_min),int(year_max+1)))
+		if year_max-year_min <= binsize:
 			nbins=1
 		else:
-			nbins=int((yearam_max-yearam_min)/binsize)
+			nbins=int((year_max-year_min)/binsize)
 		bin_arrays=np.array_split(year_ints,nbins)
 		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
-		print("BINS",bins)
-		df2=df2.assign(YEARAM_BINS=pd.cut(df2['YEARAM'],bins,include_lowest=True))
-		print('DF2',df2)
-		df3=df2[columns+[val]+['YEARAM_BINS']]
-		df3[val]=df3[val].astype('int')
-		print('df3cols',df3,df3.columns)
-		df3['YEARAM_BINS']=df3['YEARAM_BINS'].apply(interval_to_str)
-		print('df3colsB',df3,df3.columns,df3.dtypes)
+		df=df.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
+		df=df[columns+[val]+['row_bins']]
+		df.rename(columns={"row_bins": rows})
+		df['row_bins']=df['row_bins'].astype('str')
+		df[val]=df[val].astype('int')
+		df['row_bins']=df['row_bins'].apply(interval_to_str)
 		ct=pd.crosstab(
-			[df3['YEARAM_BINS']],
-			[df3[col] for col in columns],
-			values=df3[val],
+			[df['row_bins']],
+			[df[col] for col in columns],
+			values=df[val],
 			aggfunc=fn,
 			margins=True
 		)
 		ct.fillna(0)
-# 		print(ct)
 	else:
 		ct=pd.crosstab(
-			[df2[rows]],
-			[df2[col] for col in columns],
-			values=df2[val],
+			[df[rows]],
+			[df[col] for col in columns],
+			values=df[val],
 			aggfunc=fn,
 			normalize=normalize,
 			margins=True
 		)
 		ct.fillna(0)
 	
-# 	print("crosstabs",ct)
+	if order_by is not None:
+		ct=ct.sort_values(by=order_by_list,ascending=ascending)
 	
 	if len(columns)==1:
 		mlctuples=[[i] for i in list(ct.columns)]
@@ -228,7 +252,8 @@ def crosstabs():
 				if key[0]=='All':
 					key='All'
 				else:
-					key=re.sub('\.','','__'.join(key))
+# 					key=re.sub('\.','','__'.join(key))
+					key='__'.join(key)
 			
 			child={
 				"columnGroupShow":cgsval,
@@ -271,12 +296,8 @@ def crosstabs():
 				colgroups.append(thisfield)
 		return colgroups
 	
-	colgroups=[]
-	indexcol_varname=rows[0]
-	if 'rows_label' in rdata:
-		indexcol_name=rdata['rows_label'][0]
-	else:
-		indexcol_name=''
+	colgroups=[]	
+	indexcol_name=rdata.get('rows_label') or ''
 	indexcolcg=makechild('',isfield=False)
 	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name)
 	indexcolfield['pinned']='left'
@@ -288,10 +309,11 @@ def crosstabs():
 		l.reverse()
 		colgroups=makecolgroups(colgroups,l,mlct)
 	
-	records=[]
+	output_records=[]
 	##N.B. "All" is a reserved column name here, for the margins/totals
 	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
-	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
+# 	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
+	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
 	ct=ct.fillna(0)
 	
@@ -302,9 +324,17 @@ def crosstabs():
 			return float(cellval)
 		elif valuetype=="integer":
 			return int(cellval)
-		
 	
-	for r in ct.to_records():	
+	ctshape=ct.shape
+# 	print(ctshape)
+	rowcount=ctshape[0]	
+	start=offset
+	end=min((offset+limit),rowcount-1)
+	
+	ct=ct.iloc[start:end,]
+	ct_records=ct.to_records()
+	
+	for r in ct_records:	
 		for i in range(len(r)):
 			if i==0:
 				thisrecord={
@@ -313,9 +343,20 @@ def crosstabs():
 					)
 					for i in range(len(r))
 				}
-		records.append(thisrecord)
+		output_records.append(thisrecord)
 	
-	output={'tablestructure':colgroups,'data':records}
+	
+	
+	output={
+		'tablestructure': colgroups,
+		'data': output_records,
+		'metadata':{
+			'total_results_count': rowcount,
+			'offset':offset,
+			'limit':limit
+		}
+	}
+	
 	return json.dumps(output)
 
 # 	except:

@@ -14,7 +14,7 @@ import requests
 import time
 import collections
 import gc
-from voyages3.localsettings import *
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG
 import re
 import pysolr
 from .serializers import *
@@ -25,6 +25,9 @@ from common.reqs import getJSONschema
 import uuid
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+import redis
+
+redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 @extend_schema(exclude=True)
 class Schemas(generics.GenericAPIView):
@@ -35,14 +38,17 @@ class Schemas(generics.GenericAPIView):
 			schema_json=getJSONschema(schema_name,hierarchical)
 			return JsonResponse(schema_json,safe=False)
 		else:
-			return JsonResponse({'status':'false','message':'you must specify schema_name (string) and hierarchical (boolean)'}, status=502)
+			return JsonResponse({'status':'false','message':'you must specify schema_name (string) and hierarchical (boolean)'}, status=502)		
 
-		
-
-@extend_schema(exclude=True)
 class GlobalSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint takes a string and passes it on to Solr, which searches across all indexed text fields (currently all text fields) in our core models (Voyages, Enslaved People, Enslavers, and Blog Posts [documents next...]). It returns counts and the first 10 primary keys for each",
+		request=GlobalSearchRequestSerializer,
+		responses=GlobalSearchResponseItemSerializer
+	)
 	def post(self,request):
 		st=time.time()
 		print("Global Search+++++++\nusername:",request.auth.user)
@@ -51,8 +57,12 @@ class GlobalSearch(generics.GenericAPIView):
 		search_string=params.get('search_string')
 		# Oh, yes. Little Bobby Tables, we call him.
 		
-		output_dict=[]
+		#VALIDATE THE REQUEST
+		serialized_req = GlobalSearchRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 		
+		output_dict=[]
 		coretuples=[
 			['voyages',Voyage.objects.all()],
 			['enslaved',Enslaved.objects.all()],
@@ -72,7 +82,6 @@ class GlobalSearch(generics.GenericAPIView):
 					'ids':topten_ids
 				})
 		else:
-			search_string=search_string[0]
 			search_string=re.sub("\s+"," ",search_string)
 			search_string=search_string.strip()
 			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
@@ -96,21 +105,10 @@ class GlobalSearch(generics.GenericAPIView):
 					'ids':ids
 				})
 
+		#VALIDATE THE RESPONSE
+		serialized_resp=GlobalSearchResponseItemSerializer(data=output_dict,many=True)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(output_dict,safe=False)
-
-# class SparseDateRD(generics.RetrieveDestroyAPIView):
-# 	'''
-# 	The lookup field for sparse dates is "id," the SQL primary key.
-# 	
-# 	Sparse dates consist of nullable integer month, day, and year fields. They are referenced by the voyages dates table as OneToOne relations.
-# 	
-# 	As OneToOne keys, they are built to be created for a specific field in another table to reference, updated only when that field\'s value needs updating, and destroyed as soon as they are no longer needed.
-# 	
-# 	Therefore, the "Create" (or in DRF PUT as Create) should only be used via referencing models. Here, we only want to be able to Retrieve or Destroy this data.
-# 	'''
-# 	queryset=SparseDate.objects.all()
-# 	serializer_class=SparseDateSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)

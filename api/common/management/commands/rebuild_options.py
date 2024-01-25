@@ -5,17 +5,22 @@ from common.reqs import  getJSONschema
 
 
 class Command(BaseCommand):
-	help = 'rebuilds the solr indices'
+	help = 'publishes the schema as flat json and python files, \
+	which are used to populate the options avaiable in the model serializers. \
+	this should be run any time you alter the serializers or models. \
+	outputs go to api/common/static and are included in the git repo.'
 	def handle(self, *args, **options):
 		
 		base_obj_names=[
 			"Author",
 			"Enslaved",
-			"Enslaver",
+			"EnslaverIdentity",
 			"Institution",
 			"Post",
 			"Voyage",
-			"Source"
+			"Source",
+			"Estimate",
+			"EnslavementRelation"
 		]
 		
 		for base_obj_name in base_obj_names:

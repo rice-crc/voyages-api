@@ -82,7 +82,6 @@ class GlobalSearch(generics.GenericAPIView):
 					'ids':topten_ids
 				})
 		else:
-			search_string=search_string[0]
 			search_string=re.sub("\s+"," ",search_string)
 			search_string=search_string.strip()
 			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]

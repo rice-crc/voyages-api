@@ -789,7 +789,7 @@ class EnslavedAggRoutesNodesDataSerializer(serializers.Serializer):
 	lat=serializers.FloatField(allow_null=False)
 	lon=serializers.FloatField(allow_null=False)
 	name=serializers.CharField(allow_null=True)
-	tags=serializers.ListField(child=serializers.CharField(),allow_null=True)
+	tags=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
 
 class EnslavedAggRoutesNodesWeightsSerializer(serializers.Serializer):
 	disembarkation=serializers.IntegerField()

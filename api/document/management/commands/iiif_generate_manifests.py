@@ -253,11 +253,16 @@ class Command(BaseCommand):
 						enslaved_links['value']['en'].append(link)
 					metadata.append(enslaved_links)
 				
+				if type(source.title)!=list:
+					published_title=[source.title]
+				else:
+					published_title=source.title
+				
 				manifest = {
 					"@context": "http://iiif.io/api/presentation/3/context.json",
 					"id": base_id,
 					"type": "Manifest",
-					"label": { 'en': source.title },
+					"label": { 'en': published_title },
 					"metadata": metadata,
 					"viewingDirection": "left-to-right",
 					"behavior": ["paged"],

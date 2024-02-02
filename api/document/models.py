@@ -9,28 +9,30 @@ class DocSparseDate(SparseDateAbstractBase):
 	pass
 
 class Transcription(models.Model):
-    """
-    The text transcription of a page in a document.
-    ADAPTED FROM DELLAMONICA'S MODEL
-    """
-    page = models.ForeignKey(
-    	'Page',
-    	null=False,
-        on_delete=models.CASCADE,
-        related_name='transcriptions'
-    )
-    #page number will come from the sourcepageconnection.order field
+	"""
+	The text transcription of a page in a document.
+	ADAPTED FROM DELLAMONICA'S MODEL
+	"""
+	page = models.ForeignKey(
+		'Page',
+		null=False,
+		on_delete=models.CASCADE,
+		related_name='transcriptions'
+	)
+	#page number will come from the sourcepageconnection.order field
 	#page_number = models.IntegerField(null=False)
-    # A BCP47 language code for the transcription text.
-    # https://www.rfc-editor.org/bcp/bcp47.txt
-    language_code = models.CharField(max_length=20, null=False)
-    text = models.TextField(null=False)
-    # Indicates whether the transcription is in the original language or a
-    # translation.
-    is_translation = models.BooleanField(null=False)
+	# A BCP47 language code for the transcription text.
+	# https://www.rfc-editor.org/bcp/bcp47.txt
+	language_code = models.CharField(max_length=20, null=False)
+	text = models.TextField(null=False)
+	# Indicates whether the transcription is in the original language or a
+	# translation.
+	is_translation = models.BooleanField(null=False)
 
-    def __str__(self):
-        return f"Transcription of page {self.page}: {self.text}"
+	def __str__(self):
+		if len(self.text)>20:
+			snippet=self.text[:19]+"..."
+		return f"Transcription of page {self.page}: {snippet}"
 
 class Page(models.Model):
 	"""

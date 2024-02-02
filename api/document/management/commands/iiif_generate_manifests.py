@@ -14,6 +14,7 @@ from django.db.models import Prefetch
 from document.models import Source
 from voyages3.settings import STATIC_ROOT
 from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_API,STATIC_URL
+import os
 
 # We special case these sources as they have issues with their IIIF Image
 # Service preventing us from creating manifests that point directly to the image
@@ -60,6 +61,7 @@ class Command(BaseCommand):
 		return [m.group(i) for i in [2, 3]]
 
 	def handle(self, *args, **options):
+		
 		manifest_sources=Source.objects.all().filter(~Q(page_connections__page=None))
 		
 		#screen out sources that lack either pages  
@@ -266,6 +268,11 @@ class Command(BaseCommand):
 				
 				filename = f"{source.zotero_group_id}__{source.zotero_item_id}.json"
 				out_dir: pathlib.Path = options['out_dir']
+				
+				if not os.path.exists(out_dir):
+					os.makedirs(out_dir)
+				
+				
 				with open(out_dir.joinpath(filename), 'w', encoding='utf-8') as f:
 					json.dump(manifest, f)
 				source.thumbnail = first_thumb[0]['id']

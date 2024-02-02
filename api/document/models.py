@@ -3,34 +3,36 @@ import re
 from voyage.models import Voyage
 from past.models import Enslaved,EnslaverIdentity,EnslavementRelation
 from common.models import NamedModelAbstractBase,SparseDateAbstractBase
-from voyages3.localsettings import STATIC_URL
+from voyages3.localsettings import STATIC_URL,OPEN_API_BASE_API
 
 class DocSparseDate(SparseDateAbstractBase):
 	pass
 
 class Transcription(models.Model):
-    """
-    The text transcription of a page in a document.
-    ADAPTED FROM DELLAMONICA'S MODEL
-    """
-    page = models.ForeignKey(
-    	'Page',
-    	null=False,
-        on_delete=models.CASCADE,
-        related_name='transcriptions'
-    )
-    #page number will come from the sourcepageconnection.order field
+	"""
+	The text transcription of a page in a document.
+	ADAPTED FROM DELLAMONICA'S MODEL
+	"""
+	page = models.ForeignKey(
+		'Page',
+		null=False,
+		on_delete=models.CASCADE,
+		related_name='transcriptions'
+	)
+	#page number will come from the sourcepageconnection.order field
 	#page_number = models.IntegerField(null=False)
-    # A BCP47 language code for the transcription text.
-    # https://www.rfc-editor.org/bcp/bcp47.txt
-    language_code = models.CharField(max_length=20, null=False)
-    text = models.TextField(null=False)
-    # Indicates whether the transcription is in the original language or a
-    # translation.
-    is_translation = models.BooleanField(null=False)
+	# A BCP47 language code for the transcription text.
+	# https://www.rfc-editor.org/bcp/bcp47.txt
+	language_code = models.CharField(max_length=20, null=False)
+	text = models.TextField(null=False)
+	# Indicates whether the transcription is in the original language or a
+	# translation.
+	is_translation = models.BooleanField(null=False)
 
-    def __str__(self):
-        return f"Transcription of page {self.page}: {self.text}"
+	def __str__(self):
+		if len(self.text)>20:
+			snippet=self.text[:19]+"..."
+		return f"Transcription of page {self.page}: {snippet}"
 
 class Page(models.Model):
 	"""
@@ -342,6 +344,6 @@ class Source(models.Model):
 	@property
 	def iiif_manifest_url(self):
 		if self.has_published_manifest and self.zotero_group_id and self.zotero_item_id is not None:
-			return(f'{STATIC_URL}iiif_manifests/{self.zotero_group_id}__{self.zotero_item_id}.json')
+			return(f'{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/{self.zotero_group_id}__{self.zotero_item_id}.json')
 		else:
 			return None

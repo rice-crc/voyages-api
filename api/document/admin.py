@@ -1,12 +1,24 @@
 from django.contrib import admin
 from document.models import *
 from past.models import *
+import nested_admin
 from voyage.models import *
 
-class PageAdmin(admin.ModelAdmin):
+
+class TranscriptionInline(nested_admin.NestedStackedInline):
+	model=Transcription
+	max_num=1
+	classes = ['collapse']
+	verbose_name_plural="Transcriptions"
+	can_delete=False
+
+class PageAdmin(nested_admin.NestedModelAdmin):
 	readonly_fields=['page_url','image_filename','iiif_baseimage_url']
 	search_fields=['page_url','image_filename']
 	list_display=['page_url','image_filename']
+	inlines=[
+		TranscriptionInline,
+	]
 	model=Page
 
 class ShortRefAdmin(admin.ModelAdmin):

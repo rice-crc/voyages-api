@@ -26,12 +26,18 @@
 				Link to full image: <br/><a href="{{ spc.page.iiif_baseimage_url }}" target="_blank"><img src="{{ spc.page.square_thumbnail }}"></a></li></ul>
 			{% endif %}
 		</td>
-		{% if spc.page.transcription %}
+		{% if spc.page.transcriptions %}
 		<td>
 				<p><b><a href="/admin/document/page/{{ spc.page.id }}/change/" target="_blank">Edit Transcript Here</a></b></p>
-				<p>
-				 {{ spc.page.transcription }}
-				</p>
+				
+				 {% for transcription in spc.page.transcriptions.all  %}
+				 <p>
+				 	{{ transcription.text }}
+				 
+				 </p>
+				 {% endfor %}
+				 
+				
 				<p></p>
 			
 		</td>

@@ -218,7 +218,7 @@ class Command(BaseCommand):
 				source_voyages=source.source_voyage_connections.all()
 				if source_voyages.count()>0:
 					voyage_links={
-						"label": { 'en': "Linked Voyages" },
+						"label": { 'en': ["Linked Voyages"] },
 						"value": { 'en': [] }
 					}
 					for source_voyage in source_voyages:
@@ -230,7 +230,7 @@ class Command(BaseCommand):
 				source_enslavers=source.source_enslaver_connections.all()
 				if source_enslavers.count()>0:
 					enslaver_links={
-						"label": { 'en': "Linked Enslavers" },
+						"label": { 'en': ["Linked Enslavers"] },
 						"value": { 'en': [] }
 					}
 					for enslaver in source_enslavers:
@@ -243,7 +243,7 @@ class Command(BaseCommand):
 				source_enslaved_people=source.source_enslaved_connections.all()
 				if source_enslaved_people.count()>0:
 					enslaved_links={
-						"label": { 'en': "Linked Enslaved People" },
+						"label": { 'en': ["Linked Enslaved People"] },
 						"value": { 'en': [] }
 					}
 					for source_enslaved_person in source_enslaved_people:

@@ -127,7 +127,6 @@ class EstimateDataframesRequestSerializer(serializers.Serializer):
 				],
 				"rows": ["year"],
 				"binsize": 20,
-				"rows_label": "YEAR",
 				"agg_fn": "sum",
 				"vals": ["embarked_slaves","disembarked_slaves"],
 				"mode": "html",

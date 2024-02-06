@@ -119,14 +119,25 @@ class Command(BaseCommand):
 					max_errors=10
 					standoff=1
 					while True:
-						req=requests.get(f"{img_url_base}/info.json", timeout=30)
+						try:
+							req=requests.get(f"{img_url_base}/info.json", timeout=30)
+							req_succeeded=True
+						except:
+							print("Request timeout. Pausing...")
+							error_count+=1
+							if error_count>10:
+								exit()
+							standoff=standoff**2
+							time.sleep(standoff)
+							req_succeeded=False
+							
 						print(req)
-						if req.status_code!=200:
+						if req.status_code!=200 and req_succeeded:
 							print(req.status_code,"error fetching",img_url_base)
 							error_count+=1
 							if error_count>10:
 								exit()
-							standoff=standoff*4
+							standoff=standoff**2
 							time.sleep(standoff)
 						else:
 							img_info=req.json()

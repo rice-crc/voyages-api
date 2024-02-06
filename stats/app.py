@@ -33,10 +33,10 @@ def load_long_df(endpoint,variables,options):
 	return(df)
 
 registered_caches=[
-	voyage_bar_and_donut_charts,
-	voyage_summary_statistics,
-	voyage_pivot_tables,
-	voyage_xyscatter,
+# 	voyage_bar_and_donut_charts,
+# 	voyage_summary_statistics,
+# 	voyage_pivot_tables,
+# 	voyage_xyscatter,
 	estimate_pivot_tables
 ]
 
@@ -122,9 +122,109 @@ class NotNanDict(dict):
 	def __new__(self, a):
 		return {k: v for k, v in a if not self.is_nan(v) and v!={}} 
 
+
+def interval_to_str(s):
+	s=str(s)
+	return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
+
+def makestr(s):
+	if s is None:
+		return "Unknown"
+	else:
+		return str(s)
+
+
+@app.route('/pivot/',methods=['POST'])
+def pivot():
+
+	'''
+	We cannot implement multi-level rows in AG Grid
+		1. because it's in the enterprise version
+		2. because it's ugly
+	It is possible that this is the implementation I was looking for all along.
+	'''
+	st=time.time()
+	rdata=request.json
+	dfname=rdata['cachename']
+	ids=rdata['ids']
+	rows=rdata['rows']
+	cols=rdata['cols']
+	vals=rdata['vals']
+	binsize=rdata.get('binsize')
+	mode=rdata['mode']
+	
+	df=eval(dfname)['df']
+	
+	#filter down on the pk's
+	pv=df[df['id'].isin(ids)]
+	
+	pv=pv.fillna(0)
+	
+	#force ints
+	for val in vals:
+		pv[val]=pv[val].astype('int')
+	
+	#if we are binning, then rows should only have one varname
+	#and that var should be numeric
+	if binsize is not None:
+		rows=rows[0]
+		binsize=int(binsize)
+		pv[rows]=pv[rows]
+		pv[rows]=pv[rows].astype('int')
+		binvar_min=pv[rows].min()
+		binvar_max=pv[rows].max()
+		binvar_ints=list(range(int(binvar_min),int(binvar_max)+1))
+		if binvar_max-binvar_min <=binsize:
+			nbins=1
+		else:
+			nbins=int((binvar_max-binvar_min)/binsize)
+		bin_arrays=np.array_split(binvar_ints,nbins)
+		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
+		pv=pv.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
+		pv=pv[cols+vals+['row_bins']]
+		pv.rename(columns={"row_bins": rows})
+		pv['row_bins']=pv['row_bins'].astype('str')
+		pv['row_bins']=pv['row_bins'].apply(interval_to_str)
+		rows='row_bins'
+	#pivot
+	
+	
+	if len(vals)==1:
+		vals=vals[0]
+		split_cells=False
+	else:
+		split_cells=True
+	
+	pv=pv.pivot_table(
+		columns=cols,
+		index=rows,
+		values=vals,
+		aggfunc="sum"
+	)
+	
+	#if we're doing split cells
+	#pandas puts the values on top -- flip it to get split cells
+	if split_cells:
+		cl=len(cols)
+		if cl==1:
+			pv=pv.swaplevel(0,len(cols),axis=1).sort_index(axis=1)
+		elif cl==2:
+			#there's got. to be. a better. way.
+			pv=pv.swaplevel(0,1,axis=1).sort_index(axis=1)
+			pv=pv.swaplevel(1,2,axis=1).sort_index(axis=1)
+	
+	pv=pv.fillna(0)
+	html=pv.to_html(index_names=False)
+	html=re.sub('\\nS+','',html)
+	return json.dumps(
+		{
+			"data":html
+		}
+	)
+
+
 @app.route('/crosstabs/',methods=['POST'])
 def crosstabs():
-	
 	'''
 	Implements the pandas crosstab function and returns the sparse summary.
 	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
@@ -175,18 +275,10 @@ def crosstabs():
 	df=df[df['id'].isin(ids)]
 	
 	yeargroupmode=False
+
+# 	valuetype=options[val]['type']
 	
-	def interval_to_str(s):
-		s=str(s)
-		return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
-
-	def makestr(s):
-		if s is None:
-			return "Unknown"
-		else:
-			return str(s)
-
-	valuetype=options[val]['type']
+	print([df[v] for v in val])
 	
 	##TBD --> NEED TO VALIDATE THAT THE ROWS VARIABLE IS
 	####1) NUMERIC TO WORK IN THE FIRST PLACE
@@ -221,9 +313,9 @@ def crosstabs():
 		ct.fillna(0)
 	else:
 		ct=pd.crosstab(
-			[df[rows]],
+			[df[row] for row in rows],
 			[df[col] for col in columns],
-			values=df[val],
+			values=val,
 			aggfunc=fn,
 			normalize=normalize,
 			margins=True
@@ -233,10 +325,19 @@ def crosstabs():
 	if order_by is not None:
 		ct=ct.sort_values(by=order_by_list,ascending=ascending)
 	
+	
+	ct=ct.fillna(0)
+	
+	return({"data":json.dumps(ct.to_html())})
+	
+	
 	if len(columns)==1:
 		mlctuples=[[i] for i in list(ct.columns)]
 	else:
 		mlctuples=list(ct.columns)
+	
+	
+	
 	
 # 	print("tuples",mlctuples)
 	
@@ -315,7 +416,8 @@ def crosstabs():
 # 	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
-	ct=ct.fillna(0)
+	
+	
 	
 # 	print(ct)
 	

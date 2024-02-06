@@ -82,7 +82,31 @@ class EstimateCrossTabs(generics.GenericAPIView):
 	@extend_schema(
 		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
 		request=EstimateCrossTabRequestSerializer,
-		responses=EstimateCrossTabResponseSerializer
+		responses=EstimateCrossTabResponseSerializer,
+		examples=[	
+			OpenApiExample(
+				'Paginated request for binned years & embarkation geo vars',
+				summary='Multi-level, paginated, 20-year bins',
+				description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum. We are requesting the first 5 rows of these cross-tab results.',
+				value={
+					"columns":[
+						"embarkation_region__export_area__name",
+						"embarkation_region__name",
+					],
+					"rows":"year",
+					"binsize": 20,
+					"rows_label":"YEAR",
+					"agg_fn":"sum",
+					"value_field":"embarked_slaves",
+					"offset":0,
+					"limit":5,
+					"filter":[
+						
+					]
+				},
+				request_only=True
+			)
+		]
 	)
 	def post(self,request):
 		st=time.time()
@@ -105,13 +129,12 @@ class EstimateCrossTabs(generics.GenericAPIView):
 		
 		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
 		ids=[i[0] for i in queryset.values_list('id')]
-		u2=STATS_BASE_URL+'pivot/'
+		u2=STATS_BASE_URL+'crosstabs/'
 		params=dict(request.data)
 		stats_req_data=params
 		stats_req_data['ids']=ids
 		stats_req_data['cachename']='estimate_pivot_tables'
 		r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
-		
 		#VALIDATE THE RESPONSE
 		if r.ok:
 			j=json.loads(r.text)

@@ -117,16 +117,24 @@ class Command(BaseCommand):
 					
 					error_count=0
 					max_errors=10
-					standoff=1
+					standoff=10
 					while True:
-						req=requests.get(f"{img_url_base}/info.json", timeout=30)
+						try:
+							req=requests.get(f"{img_url_base}/info.json", timeout=30)
+							req_succeeded=True
+						except:
+							print("Request timeout. Pausing...")
+							req_succeeded=False
+							
 						print(req)
-						if req.status_code!=200:
-							print(req.status_code,"error fetching",img_url_base)
+						if req.status_code!=200 or not req_succeeded:
+							if req_succeeded:
+								print(req.status_code)
+							print("error fetching",img_url_base)
 							error_count+=1
-							if error_count>10:
+							if error_count>50:
 								exit()
-							standoff=standoff*4
+							standoff=standoff**2
 							time.sleep(standoff)
 						else:
 							img_info=req.json()
@@ -218,7 +226,7 @@ class Command(BaseCommand):
 				source_voyages=source.source_voyage_connections.all()
 				if source_voyages.count()>0:
 					voyage_links={
-						"label": { 'en': "Linked Voyages" },
+						"label": { 'en': ["Linked Voyages"] },
 						"value": { 'en': [] }
 					}
 					for source_voyage in source_voyages:
@@ -230,7 +238,7 @@ class Command(BaseCommand):
 				source_enslavers=source.source_enslaver_connections.all()
 				if source_enslavers.count()>0:
 					enslaver_links={
-						"label": { 'en': "Linked Enslavers" },
+						"label": { 'en': ["Linked Enslavers"] },
 						"value": { 'en': [] }
 					}
 					for enslaver in source_enslavers:
@@ -243,7 +251,7 @@ class Command(BaseCommand):
 				source_enslaved_people=source.source_enslaved_connections.all()
 				if source_enslaved_people.count()>0:
 					enslaved_links={
-						"label": { 'en': "Linked Enslaved People" },
+						"label": { 'en': ["Linked Enslaved People"] },
 						"value": { 'en': [] }
 					}
 					for source_enslaved_person in source_enslaved_people:

@@ -218,6 +218,9 @@ class SourceType(models.Model):
 		We'll rely on Zotero's controlled vocabulary from now on.
 	'''
 	name = models.CharField(max_length=255,unique=True)
+	def __str__(self):
+		return self.name
+
 
 class Source(models.Model):
 	"""
@@ -229,13 +232,14 @@ class Source(models.Model):
 	
 	item_url=models.URLField(
 		max_length=400,
-		null=True
+		null=True,
+		blank=True
 	)
 	
 	#from dellamonica's models
-	thumbnail = models.TextField(null=True, help_text='URL for a thumbnail of the Document')
-	bib = models.TextField(null=True, help_text='Formatted bibliography for the Document')
-	manifest_content = models.JSONField(help_text='DCTerms imported from Zotero -- NOT the full manifest',null=True)
+	thumbnail = models.TextField(null=True, help_text='URL for a thumbnail of the Document',blank=True)
+	bib = models.TextField(null=True, help_text='Formatted bibliography for the Document',blank=True)
+	manifest_content = models.JSONField(help_text='DCTerms imported from Zotero -- NOT the full manifest',null=True,blank=True)
 	
 	zotero_group_id=models.IntegerField(
 		"Zotero Integer Group ID",
@@ -260,7 +264,8 @@ class Source(models.Model):
 	
 	zotero_url=models.URLField(
 		max_length=400,
-		null=True
+		null=True,
+		blank=True
 	)
 	
 	source_type=models.ForeignKey(

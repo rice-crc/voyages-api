@@ -164,6 +164,18 @@ def pivot():
 	for val in vals:
 		pv[val]=pv[val].astype('int')
 	
+	#handle a duplicate varname request like
+	#rows=['nation__name'],cols=['nation__name']
+	#which is dumb, because who wants a diagonal matrix???
+	duplicate_indices=[i for i in cols if i in rows]
+	
+	c=1
+	for duplicate_index in duplicate_indices:
+		duplicate_position=cols.index(duplicate_index)
+		pv=eval(f'pv.assign(duplicate_col_{c}=pv[duplicate_index])')
+		cols[duplicate_position]=f'duplicate_col_{c}'
+		c+=1
+	
 	#if we are binning, then rows should only have one varname
 	#and that var should be numeric
 	if binsize is not None:

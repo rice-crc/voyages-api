@@ -24,9 +24,10 @@ from voyages3.localsettings import STATS_BASE_URL
 
 
 
-
 #list view. Only keeping it around for the model
-class AssessmentList(generics.RetrieveAPIView):
+class AssessmentList(generics.RetrieveAPIView):	
+	queryset=Estimate.objects.all()
+	lookup_field='id'
 	serializer_class=EstimateSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

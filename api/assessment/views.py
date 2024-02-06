@@ -25,36 +25,13 @@ from voyages3.localsettings import STATS_BASE_URL
 
 
 
-#LONG-FORM TABULAR ENDPOINT. PAGINATION IS A NECESSITY HERE!
-##HAVE NOT YET BUILT IN ORDER-BY FUNCTIONALITY
-@extend_schema(
-        exclude=True
-    )
-#right now, this thing dumps all 7 MB out -- so we can't show it on swagger
-class AssessmentList(generics.GenericAPIView):
+#list view. Only keeping it around for the model
+class AssessmentList(generics.RetrieveAPIView):	
+	queryset=Estimate.objects.all()
+	lookup_field='id'
 	serializer_class=EstimateSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	def post(self,request):
-		#print("username:",request.auth.user)
-		times=[]
-		labels=[]
-		print("FETCHING...")
-		times.append(time.time())
-		queryset=Estimate.objects.all()
-		estimate_options=getJSONschema('Estimate',hierarchical=False)
-		queryset,results_count=post_req(
-			queryset,
-			self,
-			request,
-			Estimate_options,
-			auto_prefetch=True
-		)
-		read_serializer=EstimateSerializer(queryset,many=True,read_only=True)
-		serialized=read_serializer.data
-		headers={"total_results_count":results_count}
-		resp=JsonResponse(serialized,safe=False,headers=headers)
-		return resp
 
 
 class EstimateDataFrames(generics.GenericAPIView):

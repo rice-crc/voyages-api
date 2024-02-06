@@ -76,31 +76,7 @@ class EstimateFilterItemSerializer(serializers.Serializer):
 						"searchTerm":[1750,1775]
 					}
 				]
-			},
-			request_only=True,
-			response_only=False
-		),
-		OpenApiExample(
-			'Multi-level, split value columns',
-			summary='Multi-level, split value columns',
-			description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked, and where they were disembarked. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked and disembarked, and we aggregate these as a sum. We are requesting the first 5 rows of these cross-tab results.',
-			value={
-				"cols": [
-					"embarkation_region__export_area__name",
-					"embarkation_region__name"
-				],
-				"rows": [
-					"disembarkation_region__import_area__name",
-					"disembarkation_region__name"
-				],
-				"binsize": None,
-				"agg_fn": "sum",
-				"vals": ["embarked_slaves"],
-				"mode": "html",
-				"filter": []
-			},
-			request_only=True,
-			response_only=False
+			}
 		)
 	]
 )
@@ -112,36 +88,25 @@ class EstimateDataframesRequestSerializer(serializers.Serializer):
 	)
 	filter=EstimateFilterItemSerializer(many=True,allow_null=True,required=False)
 
-############ CROSSTAB SERIALIZERS
+############ OFFSET PAGINATION SERIALIZERS
+class EstimateOffsetPaginationSerializer(serializers.Serializer):
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	total_results_count=serializers.IntegerField()
 
-@extend_schema_serializer(
-	examples=[
-		OpenApiExample(
-			'Paginated request for binned years & embarkation geo vars',
-			summary='Multi-level, 20-year bins',
-			description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum. We are requesting the first 5 rows of these cross-tab results.',
-			value={
-				"cols": [
-					"embarkation_region__export_area__name",
-					"embarkation_region__name"
-				],
-				"rows": ["year"],
-				"binsize": 20,
-				"agg_fn": "sum",
-				"vals": ["embarked_slaves","disembarked_slaves"],
-				"mode": "html",
-				"filter": []
-			}
-		)
-	]
-)
+############ CROSSTAB SERIALIZERS
 class EstimateCrossTabRequestSerializer(serializers.Serializer):
-	cols=serializers.ListField(child=serializers.CharField())
-	rows=serializers.ListField(child=serializers.CharField())
+	columns=serializers.ListField(child=serializers.CharField())
+	rows=serializers.CharField()
 	binsize=serializers.IntegerField(allow_null=True,required=False)
-	vals=serializers.ListField(child=serializers.CharField())
-	mode=serializers.ChoiceField(choices=["html","csv"])
-	filter=EstimateFilterItemSerializer(many=True,allow_null=True,required=False)
+	rows_label=serializers.CharField(allow_null=True)
+	agg_fn=serializers.CharField()
+	value_field=serializers.CharField()
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 	
 class EstimateCrossTabResponseSerializer(serializers.Serializer):
-	data=serializers.CharField()
+	tablestructure=serializers.JSONField()
+	data=serializers.JSONField()
+	metadata=EstimateOffsetPaginationSerializer()

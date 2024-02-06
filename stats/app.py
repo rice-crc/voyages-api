@@ -33,10 +33,10 @@ def load_long_df(endpoint,variables,options):
 	return(df)
 
 registered_caches=[
-# 	voyage_bar_and_donut_charts,
-# 	voyage_summary_statistics,
-# 	voyage_pivot_tables,
-# 	voyage_xyscatter,
+	voyage_bar_and_donut_charts,
+	voyage_summary_statistics,
+	voyage_pivot_tables,
+	voyage_xyscatter,
 	estimate_pivot_tables
 ]
 
@@ -215,7 +215,7 @@ def pivot():
 	
 	pv=pv.fillna(0)
 	html=pv.to_html(index_names=False)
-	html=re.sub('\\nS+','',html)
+	html=re.sub('\\n\s+','',html)
 	return json.dumps(
 		{
 			"data":html
@@ -225,6 +225,7 @@ def pivot():
 
 @app.route('/crosstabs/',methods=['POST'])
 def crosstabs():
+	
 	'''
 	Implements the pandas crosstab function and returns the sparse summary.
 	Excellent for pivot tables and maps (e.g., Origin/Destination pairs for voyages with summary values for those pairs)
@@ -275,10 +276,18 @@ def crosstabs():
 	df=df[df['id'].isin(ids)]
 	
 	yeargroupmode=False
-
-# 	valuetype=options[val]['type']
 	
-	print([df[v] for v in val])
+	def interval_to_str(s):
+		s=str(s)
+		return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
+
+	def makestr(s):
+		if s is None:
+			return "Unknown"
+		else:
+			return str(s)
+
+	valuetype=options[val]['type']
 	
 	##TBD --> NEED TO VALIDATE THAT THE ROWS VARIABLE IS
 	####1) NUMERIC TO WORK IN THE FIRST PLACE
@@ -313,9 +322,9 @@ def crosstabs():
 		ct.fillna(0)
 	else:
 		ct=pd.crosstab(
-			[df[row] for row in rows],
+			[df[rows]],
 			[df[col] for col in columns],
-			values=val,
+			values=df[val],
 			aggfunc=fn,
 			normalize=normalize,
 			margins=True
@@ -325,19 +334,10 @@ def crosstabs():
 	if order_by is not None:
 		ct=ct.sort_values(by=order_by_list,ascending=ascending)
 	
-	
-	ct=ct.fillna(0)
-	
-	return({"data":json.dumps(ct.to_html())})
-	
-	
 	if len(columns)==1:
 		mlctuples=[[i] for i in list(ct.columns)]
 	else:
 		mlctuples=list(ct.columns)
-	
-	
-	
 	
 # 	print("tuples",mlctuples)
 	
@@ -416,8 +416,7 @@ def crosstabs():
 # 	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
-	
-	
+	ct=ct.fillna(0)
 	
 # 	print(ct)
 	

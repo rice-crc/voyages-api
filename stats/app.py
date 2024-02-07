@@ -123,7 +123,6 @@ class NotNanDict(dict):
 		return {k: v for k, v in a if not self.is_nan(v) and v!={}} 
 
 
-
 def interval_to_str(s):
 	s=str(s)
 	return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
@@ -238,7 +237,6 @@ def pivot():
 			"data":html
 		}
 	)
-
 
 
 @app.route('/crosstabs/',methods=['POST'])

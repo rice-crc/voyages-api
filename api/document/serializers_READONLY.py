@@ -174,6 +174,7 @@ class SourceFilterItemSerializer(serializers.Serializer):
 )
 class SourceRequestSerializer(serializers.Serializer):
 	filter=SourceFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)

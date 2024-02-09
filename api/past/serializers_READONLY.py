@@ -361,6 +361,7 @@ class EnslavementRelationListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	filter=EnslavementRelationFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 ########### PAGINATED ENSLAVED LISTS 
@@ -389,6 +390,7 @@ class EnslavedListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 class EnslavedListResponseSerializer(serializers.Serializer):
@@ -428,6 +430,7 @@ class EnslaverListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 	
 class EnslaverListResponseSerializer(serializers.Serializer):
@@ -470,6 +473,7 @@ class EnslaverAutoCompleteRequestSerializer(serializers.Serializer):
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 class EnslaverAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField()
@@ -510,6 +514,7 @@ class EnslavedAutoCompleteRequestSerializer(serializers.Serializer):
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 class EnslavedAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField()
@@ -616,6 +621,7 @@ class EnslavedDataframesRequestSerializer(serializers.Serializer):
 		])
 	)
 	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 @extend_schema_serializer(
 	examples=[
@@ -646,6 +652,7 @@ class EnslaverDataframesRequestSerializer(serializers.Serializer):
 		])
 	)
 	filter=EnslaverFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 
 @extend_schema_serializer(
@@ -678,6 +685,7 @@ class EnslavementRelationDataframesRequestSerializer(serializers.Serializer):
 		])
 	)
 	filter=EnslavementRelationFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 ############ GEOTREE REQUESTS
 @extend_schema_serializer(
@@ -714,6 +722,7 @@ class EnslavedGeoTreeFilterRequestSerializer(serializers.Serializer):
 		)
 	)
 	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	
 
 ############ GEOTREE REQUESTS
@@ -751,6 +760,7 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 		)
 	)
 	filter=EnslaverFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	
 	
 ############ PAST AGGREGATION ROUTE MAPS
@@ -777,6 +787,7 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 class EnslavedAggRoutesRequestSerializer(serializers.Serializer):
 	zoomlevel=serializers.CharField()
 	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 class EnslavedAggRoutesEdgesSerializer(serializers.Serializer):
 	source=serializers.CharField()

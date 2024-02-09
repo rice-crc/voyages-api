@@ -125,6 +125,7 @@ class PostListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=PostFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 class PostListResponseSerializer(serializers.Serializer):
@@ -160,6 +161,7 @@ class AuthorListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=AuthorFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 class AuthorListResponseSerializer(serializers.Serializer):
@@ -195,6 +197,7 @@ class InstitutionListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=InstitutionFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
 
 class InstitutionListResponseSerializer(serializers.Serializer):
@@ -231,6 +234,7 @@ class PostAutoCompleteRequestSerializer(serializers.Serializer):
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=PostFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 class PostAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField()

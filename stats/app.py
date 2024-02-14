@@ -120,7 +120,9 @@ class NotNanDict(dict):
 		return np.isnan(v)
 
 	def __new__(self, a):
-		return {k: v for k, v in a if not self.is_nan(v) and v!={}} 
+		return {
+			k: v for k, v in a if not self.is_nan(v) and v!={}
+		}
 
 
 def interval_to_str(s):
@@ -134,8 +136,8 @@ def makestr(s):
 		return str(s)
 
 
-@app.route('/pivot/',methods=['POST'])
-def pivot():
+@app.route('/estimates_pivot/',methods=['POST'])
+def estimates_pivot():
 
 	'''
 	We cannot implement multi-level rows in AG Grid
@@ -145,7 +147,6 @@ def pivot():
 	'''
 	st=time.time()
 	rdata=request.json
-	dfname=rdata['cachename']
 	ids=rdata['ids']
 	rows=rdata['rows']
 	cols=rdata['cols']
@@ -153,7 +154,7 @@ def pivot():
 	binsize=rdata.get('binsize')
 	mode=rdata['mode']
 	
-	df=eval(dfname)['df']
+	df=eval('estimate_pivot_tables')['df']
 	
 	#filter down on the pk's
 	pv=df[df['id'].isin(ids)]
@@ -232,11 +233,35 @@ def pivot():
 		pv=pv.fillna(0)
 		html=pv.to_html(index_names=False)
 		html=re.sub('\\n\s+','',html)
+		html=re.sub("disembarked_slaves","Disembarked",html)
+		html=re.sub("embarked_slaves","Embarked",html)
+		html=re.sub("\.0","",html)
 	return json.dumps(
 		{
 			"data":html
 		}
 	)
+
+
+@app.route('/estimates_timeline/',methods=['POST'])
+def estimates_timeline():
+
+	'''
+	Implements the pandas groupby function and returns the sparse summary.
+	Excellent for bar & pie charts.
+	'''
+	st=time.time()
+	rdata=request.json
+	ids=rdata['ids']
+	df=eval('estimate_pivot_tables')['df']
+	cols=['disembarked_slaves','embarked_slaves']
+	df2=df[df['id'].isin(ids)]
+	ct=df2.groupby('year',group_keys=True)[cols].agg('sum')
+	ct=ct.fillna(0)
+	resp={'year':list(ct.index)}
+	for col in cols:
+		resp[col]=list(ct[col])
+	return json.dumps(resp)
 
 
 @app.route('/crosstabs/',methods=['POST'])

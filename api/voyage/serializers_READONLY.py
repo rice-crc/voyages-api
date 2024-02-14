@@ -334,12 +334,14 @@ class VoyageListRequestSerializer(serializers.Serializer):
 	page_size=serializers.IntegerField(required=False,allow_null=True)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	order_by=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 class VoyageListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
 	results=VoyageSerializer(many=True,read_only=True)
+	
 
 ############ BAR, SCATTER, AND PIE CHARTS
 @extend_schema_serializer(
@@ -383,6 +385,7 @@ class VoyageGroupByRequestSerializer(serializers.Serializer):
 		'voyage_bar_and_donut_charts'
 	]
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 # class VoyageGroupByResponseSerializer(serializers.Serializer):
 # 	data=serializers.JSONField()
@@ -418,6 +421,7 @@ class VoyageDataframesRequestSerializer(serializers.Serializer):
 		])
 	)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 # class VoyageDataframesResponseSerializer(serializers.Serializer):
 # 	data=serializers.JSONField()
@@ -458,6 +462,7 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 		)
 	)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 ############ VOYAGE AGGREGATION ROUTE MAPS
 @extend_schema_serializer(
@@ -488,6 +493,7 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 class VoyageAggRoutesRequestSerializer(serializers.Serializer):
 	zoomlevel=serializers.CharField()
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 class VoyageAggRoutesEdgesSerializer(serializers.Serializer):
 	source=serializers.CharField()
@@ -668,6 +674,7 @@ class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 
 class VoyageAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField()

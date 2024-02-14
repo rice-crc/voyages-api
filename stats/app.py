@@ -33,10 +33,10 @@ def load_long_df(endpoint,variables,options):
 	return(df)
 
 registered_caches=[
-# 	voyage_bar_and_donut_charts,
-# 	voyage_summary_statistics,
-# 	voyage_pivot_tables,
-# 	voyage_xyscatter,
+	voyage_bar_and_donut_charts,
+	voyage_summary_statistics,
+	voyage_pivot_tables,
+	voyage_xyscatter,
 	estimate_pivot_tables
 ]
 

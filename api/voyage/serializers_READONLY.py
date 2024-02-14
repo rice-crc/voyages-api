@@ -629,6 +629,7 @@ class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	order_by=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
 	
 class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()

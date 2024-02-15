@@ -124,7 +124,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 			always_commit=True,
 			timeout=10
 		)
-		search_string=params['global_search'][0]
+		search_string=params['global_search']
 		search_string=re.sub("\s+"," ",search_string)
 		search_string=search_string.strip()
 		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
@@ -132,28 +132,26 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		ids=[doc['id'] for doc in results.docs]
 		queryset=queryset.filter(id__in=ids)
-	
-	#used by dataframes calls to prefetch specific columns
-	
-	kwargs={}
-	for item in filter_obj:
-		op=item['op']
-		searchTerm=item["searchTerm"]
-		varName=item["varName"]
-		if varName in all_fields and op in ['lte','gte','exact','in','icontains']:
-			django_filter_term='__'.join([varName,op])
-			kwargs[django_filter_term]=searchTerm
-		elif varName in all_fields and op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
-			searchTerm.sort()
-			min,max=searchTerm
-			kwargs['{0}__{1}'.format(varName, 'lte')]=max
-			kwargs['{0}__{1}'.format(varName, 'gte')]=min		
-		else:
-			if varName not in all_fields:
-				errormessages.append("var %s not in model" %varName)
-			if op not in ['lte','gte','exact','in','icontains']:
-				errormessages.append("%s is not a valid django search operation" %op)
-	queryset=queryset.filter(**kwargs)
+	else:
+		kwargs={}
+		for item in filter_obj:
+			op=item['op']
+			searchTerm=item["searchTerm"]
+			varName=item["varName"]
+			if varName in all_fields and op in ['lte','gte','exact','in','icontains']:
+				django_filter_term='__'.join([varName,op])
+				kwargs[django_filter_term]=searchTerm
+			elif varName in all_fields and op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
+				searchTerm.sort()
+				min,max=searchTerm
+				kwargs['{0}__{1}'.format(varName, 'lte')]=max
+				kwargs['{0}__{1}'.format(varName, 'gte')]=min		
+			else:
+				if varName not in all_fields:
+					errormessages.append("var %s not in model" %varName)
+				if op not in ['lte','gte','exact','in','icontains']:
+					errormessages.append("%s is not a valid django search operation" %op)
+		queryset=queryset.filter(**kwargs)
 	results_count=queryset.count()
 	if DEBUG:
 		print("resultset size:",results_count)

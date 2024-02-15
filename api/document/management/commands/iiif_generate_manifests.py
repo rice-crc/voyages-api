@@ -64,6 +64,8 @@ class Command(BaseCommand):
 		
 		manifest_sources=Source.objects.all().filter(~Q(page_connections__page=None))
 		
+		print(manifest_sources)
+		
 		#screen out sources that lack either pages  
 		sources = Source.objects \
 			.prefetch_related('page_connections') \
@@ -73,7 +75,8 @@ class Command(BaseCommand):
 			.prefetch_related('source_enslaver_connections__enslaver') \
 			.prefetch_related('source_enslaved_connections__enslaved') \
 			.filter(
-				~Q(page_connections__page=None) and ~Q(manifest_content=None)
+				~Q(page_connections__page=None)
+# 				and ~Q(manifest_content=None)
 			)
 		print(f"Found {sources.count()} sources with page images.")
 		
@@ -90,7 +93,9 @@ class Command(BaseCommand):
 		generated_count=0
 		for source in sources:
 			with transaction.atomic():
+				print("--->",source.title)
 				content = source.manifest_content
+# 				print("------->",content)
 				
 				#then do a final pass to ensure that we don't have "pages" without images
 				#some of those did sneak in during the process of indexing transkribus against the library collections
@@ -220,7 +225,10 @@ class Command(BaseCommand):
 				# Append entity connections to metadata.
 				doc_links = {}
 				
-				metadata = list(content['metadata'])
+				if content is not None:
+					metadata = list(content['metadata'])
+				else:
+					metadata=[]
 				
 				#voyage ids
 				source_voyages=source.source_voyage_connections.all()

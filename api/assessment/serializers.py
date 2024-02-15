@@ -112,14 +112,48 @@ class EstimateDataframesRequestSerializer(serializers.Serializer):
 	)
 	filter=EstimateFilterItemSerializer(many=True,allow_null=True,required=False)
 
+############ TIMELINE SERIALIZERS
+
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered for histogram w 2 series',
+			summary='Filtered 2-series histogram',
+			description='Here we request a histogram for numbers of people embarked and disembarked between 1775 and 1820',
+			value={
+				"filter": [
+					{
+						"varName":"year",
+						"op":"btw",
+						"searchTerm":[1775,1820]
+					}
+				]
+			}
+		)
+	]
+)
+class EstimateTimelineRequestSerializer(serializers.Serializer):
+	filter=EstimateFilterItemSerializer(many=True,allow_null=True,required=False)
+	
+class EstimateTimelineResponseSerializer(serializers.Serializer):
+	disembarked_slaves=serializers.ListField(
+		child=serializers.IntegerField()
+	)
+	embarked_slaves=serializers.ListField(
+		child=serializers.IntegerField()
+	)
+	year=serializers.ListField(
+		child=serializers.IntegerField()
+	)
+
 ############ CROSSTAB SERIALIZERS
 
 @extend_schema_serializer(
 	examples=[
 		OpenApiExample(
-			'Paginated request for binned years & embarkation geo vars',
+			'Request for binned years & embarkation geo vars',
 			summary='Multi-level, 20-year bins',
-			description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum. We are requesting the first 5 rows of these cross-tab results.',
+			description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum.',
 			value={
 				"cols": [
 					"embarkation_region__export_area__name",

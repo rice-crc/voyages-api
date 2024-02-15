@@ -74,11 +74,57 @@ class EstimateDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(output_dicts,safe=False)
 
-class EstimateCrossTabs(generics.GenericAPIView):
+
+class EstimateTimeline(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
+		request=EstimateTimelineRequestSerializer,
+		responses=EstimateTimelineResponseSerializer
+	)
+	def post(self,request):
+		st=time.time()
+		print("ESTIMATE TIMELINE+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = EstimateTimelineRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Estimate.objects.all()
+		queryset,results_count=post_req(
+			queryset,
+			self,
+			request,
+			Estimate_options,
+			auto_prefetch=True
+		)
+		
+		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
+		ids=[i[0] for i in queryset.values_list('id')]
+		u2=STATS_BASE_URL+'estimates_timeline/'
+		params=dict(request.data)
+		stats_req_data=params
+		stats_req_data['ids']=ids
+		r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
+		
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			j=json.loads(r.text)
+			serialized_resp=EstimateTimelineResponseSerializer(data=j)
+		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
+		else:
+			return JsonResponse(serialized_resp.data,safe=False)
+
+class EstimateCrossTabs(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="HTML dump crosstabs endpoint, with Pandas as the back-end.",
 		request=EstimateCrossTabRequestSerializer,
 		responses=EstimateCrossTabResponseSerializer
 	)
@@ -103,11 +149,10 @@ class EstimateCrossTabs(generics.GenericAPIView):
 		
 		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
 		ids=[i[0] for i in queryset.values_list('id')]
-		u2=STATS_BASE_URL+'pivot/'
+		u2=STATS_BASE_URL+'estimates_pivot/'
 		params=dict(request.data)
 		stats_req_data=params
 		stats_req_data['ids']=ids
-		stats_req_data['cachename']='estimate_pivot_tables'
 		r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
 		
 		#VALIDATE THE RESPONSE

@@ -607,7 +607,7 @@ class VoyageGET(generics.RetrieveAPIView):
 	serializer_class=VoyageSerializer
 	lookup_field='voyage_id'
 	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
+	permission_classes=[IsAuthenticated]
 
 
 

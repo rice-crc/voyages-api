@@ -135,6 +135,73 @@ def makestr(s):
 	else:
 		return str(s)
 
+@app.route('/voyage_summary_stats/',methods=['POST'])
+def voyage_summary_stats():
+
+	'''
+	https://www.slavevoyages.org/voyage/database#statistics
+	'''
+	st=time.time()
+	rdata=request.json
+	ids=rdata['ids']
+	df=eval('voyage_bar_and_donut_charts')['df']
+	
+	imputed_rows={
+		'voyage_slaves_numbers__imp_total_num_slaves_embarked':'Captives embarked (Imputed)',
+		'voyage_slaves_numbers__imp_total_num_slaves_disembarked':'Captives disembarked (Imputed)',
+	}
+	non_imputed_rows={
+		'voyage_ship__tonnage_mod':'Tonnage of vessel',
+		'voyage_slaves_numbers__percentage_male':'Percentage male',
+		'voyage_slaves_numbers__percentage_child':'Percentage children',
+		'voyage_slaves_numbers__imp_mortality_ratio':'Percentage of captives embarked who died during crossing',
+		'voyage_dates__length_middle_passage_days':"Duration of captives' crossing (in days)"
+	}
+	
+	#filter down on the pk's
+	df=df[df['id'].isin(ids)]
+	outputrecords=[]
+	
+	theaders=[
+		''
+		'Total captives',
+		'Total voyages with this datapoint'
+		'Average',
+		'Median',
+		'Standard deviation'
+	]
+	
+	for k in imputed_rows:
+		v=imputed_rows[k]
+		record={'index':v}
+		record['Total captives']=int(df[k].sum())
+		record['Total voyages with this datapoint']=int(df[k].dropna().shape[0])
+		record['Average']=int(df[k].mean())
+		record['Median']=int(df[k].median())
+		record['Standard deviation']=round(float(df[k].std()),1)
+		outputrecords.append(record)
+	
+	for k in non_imputed_rows:
+		v=non_imputed_rows[k]
+		record={'index':v}
+		record['Total captives']=None
+		record['Total voyages with this datapoint']=int(df[k].dropna().shape[0])
+		record['Average']=round(float(df[k].mean()),1)
+		record['Median']=round(float(df[k].median()),1)
+		record['Standard deviation']=round(float(df[k].std()),1)
+		outputrecords.append(record)
+		
+	df2=pd.DataFrame.from_records(outputrecords)
+	df2=df2.set_index('index')
+	df2['Total captives']=df2['Total captives'].astype('str').str.replace('\.0$','',regex=True)
+	html=df2.to_html(index_names=False,na_rep='')
+	html=re.sub('<td>\S*nan\S*</td>','<td></td>',html)
+	html=re.sub('\\n\s+','',html)
+	return json.dumps(
+		{
+			"data":html
+		}
+	)
 
 @app.route('/estimates_pivot/',methods=['POST'])
 def estimates_pivot():

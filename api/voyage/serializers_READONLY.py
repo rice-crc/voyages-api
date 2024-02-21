@@ -683,3 +683,33 @@ class VoyageAutoCompletekvSerializer(serializers.Serializer):
 class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=VoyageAutoCompletekvSerializer(many=True)
 
+
+
+@extend_schema_serializer(
+	examples=[
+# 		OpenApiExample(
+# 			'Request for binned years & embarkation geo vars',
+# 			summary='Multi-level, 20-year bins',
+# 			description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum.',
+# 			value={
+# 				"cols": [
+# 					"embarkation_region__export_area__name",
+# 					"embarkation_region__name"
+# 				],
+# 				"rows": ["year"],
+# 				"binsize": 20,
+# 				"agg_fn": "sum",
+# 				"vals": ["embarked_slaves","disembarked_slaves"],
+# 				"mode": "html",
+# 				"filter": []
+# 			}
+# 		)
+	]
+)
+class VoyageSummaryStatsRequestSerializer(serializers.Serializer):
+	mode=serializers.ChoiceField(choices=["html","csv"])
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	
+class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
+	data=serializers.CharField()
+

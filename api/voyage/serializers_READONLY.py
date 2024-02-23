@@ -683,3 +683,31 @@ class VoyageAutoCompletekvSerializer(serializers.Serializer):
 class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=VoyageAutoCompletekvSerializer(many=True)
 
+
+
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Summary Stats',
+			summary='Summary Stats',
+			description='This is a customized, kind of funky, summary statistics table. Here, we see summary stats for the transatlantic voyages.',
+			value={
+				"mode": "html",
+				"filter": [
+					{
+						"op": "exact",
+						"varName": "dataset",
+						"searchTerm": 0
+					}
+				]
+			}
+		)
+	]
+)
+class VoyageSummaryStatsRequestSerializer(serializers.Serializer):
+	mode=serializers.ChoiceField(choices=["html","csv"])
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	
+class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
+	data=serializers.CharField()
+

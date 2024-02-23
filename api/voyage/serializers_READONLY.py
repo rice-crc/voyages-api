@@ -687,23 +687,21 @@ class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
 
 @extend_schema_serializer(
 	examples=[
-# 		OpenApiExample(
-# 			'Request for binned years & embarkation geo vars',
-# 			summary='Multi-level, 20-year bins',
-# 			description='Here, we request cross-tabs on the geographic locations where enslaved people were embarked in 20-year periods. We also request that our columns be grouped in a multi-level way, from broad region to region and place. The cell value we wish to calculate is the number of people embarked, and we aggregate these as a sum.',
-# 			value={
-# 				"cols": [
-# 					"embarkation_region__export_area__name",
-# 					"embarkation_region__name"
-# 				],
-# 				"rows": ["year"],
-# 				"binsize": 20,
-# 				"agg_fn": "sum",
-# 				"vals": ["embarked_slaves","disembarked_slaves"],
-# 				"mode": "html",
-# 				"filter": []
-# 			}
-# 		)
+		OpenApiExample(
+			'Summary Stats',
+			summary='Summary Stats',
+			description='This is a customized, kind of funky, summary statistics table. Here, we see summary stats for the transatlantic voyages.',
+			value={
+				"mode": "html",
+				"filter": [
+					{
+						"op": "exact",
+						"varName": "dataset",
+						"searchTerm": 0
+					}
+				]
+			}
+		)
 	]
 )
 class VoyageSummaryStatsRequestSerializer(serializers.Serializer):

@@ -283,7 +283,8 @@ def estimates_pivot():
 			columns=cols,
 			index=rows,
 			values=vals,
-			aggfunc="sum"
+			aggfunc="sum",
+			margins=True
 		)
 		
 		#if we're doing split cells
@@ -296,6 +297,17 @@ def estimates_pivot():
 				#there's got. to be. a better. way.
 				pv=pv.swaplevel(0,1,axis=1).sort_index(axis=1)
 				pv=pv.swaplevel(1,2,axis=1).sort_index(axis=1)
+			colnames_list=pv.columns.tolist()
+			all_column_embark_position=colnames_list.index(('All', 'embarked_slaves'))
+			del(colnames_list[all_column_embark_position])
+			colnames_list.append(('All', 'embarked_slaves'))
+			all_column_disembark_position=colnames_list.index(('All', 'disembarked_slaves'))
+			del(colnames_list[all_column_disembark_position])
+			colnames_list.append(('All', 'disembarked_slaves'))
+			
+			
+			pv=pv[colnames_list]
+			
 		
 		pv=pv.fillna(0)
 		html=pv.to_html(index_names=False)

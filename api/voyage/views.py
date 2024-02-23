@@ -327,7 +327,7 @@ class VoyageSummaryStats(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="HTML dump crosstabs endpoint, with Pandas as the back-end.",
+		description="A summary statistics table. Minimal but customized.",
 		request=VoyageSummaryStatsRequestSerializer,
 		responses=VoyageSummaryStatsResponseSerializer
 	)

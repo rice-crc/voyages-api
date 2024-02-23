@@ -60,7 +60,9 @@ voyage_bar_and_donut_charts={
 		'voyage_itinerary__imp_principal_place_of_slave_purchase__name',
 		'voyage_outcome__resistance__name',
 		'voyage_crew__crew_first_landing',
-		'voyage_slaves_numbers__percentage_male'
+		'voyage_slaves_numbers__percentage_male',
+		'voyage_slaves_numbers__percentage_female',
+		'voyage_slaves_numbers__imp_mortality_ratio'
 	]
 }
 

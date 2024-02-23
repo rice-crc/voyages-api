@@ -74,14 +74,13 @@ class EstimateDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(output_dicts,safe=False)
 
-
 class EstimateTimeline(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
 		request=EstimateTimelineRequestSerializer,
-		responses=EstimateTimelineResponseSerializer
+		responses=EstimateTimeLineResponseItemSerializer
 	)
 	def post(self,request):
 		st=time.time()
@@ -113,7 +112,27 @@ class EstimateTimeline(generics.GenericAPIView):
 		#VALIDATE THE RESPONSE
 		if r.ok:
 			j=json.loads(r.text)
-			serialized_resp=EstimateTimelineResponseSerializer(data=j)
+			
+			#legacy format
+			transformed_j=[]
+			
+# 			try:
+			jvars=[
+				['disembarked_slaves','y0'],
+				['embarked_slaves','y1'],
+				['year','x']
+			]
+			for i in range(len(j[jvars[0][0]])):
+				item={}
+				for k in jvars:
+					val=j[k[0]][i]
+					item[k[1]]=val
+				transformed_j.append(item)
+			
+			serialized_resp=EstimateTimeLineResponseItemSerializer(data=transformed_j,many=True)
+# 			except:
+# 			return JsonResponse(status=500)
+			
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		if not serialized_resp.is_valid():
 			return JsonResponse(serialized_resp.errors,status=400)

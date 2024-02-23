@@ -135,16 +135,21 @@ class EstimateDataframesRequestSerializer(serializers.Serializer):
 class EstimateTimelineRequestSerializer(serializers.Serializer):
 	filter=EstimateFilterItemSerializer(many=True,allow_null=True,required=False)
 	
-class EstimateTimelineResponseSerializer(serializers.Serializer):
-	disembarked_slaves=serializers.ListField(
-		child=serializers.IntegerField()
-	)
-	embarked_slaves=serializers.ListField(
-		child=serializers.IntegerField()
-	)
-	year=serializers.ListField(
-		child=serializers.IntegerField()
-	)
+# class EstimateTimelineResponseSerializer(serializers.Serializer):
+# 	disembarked_slaves=serializers.ListField(
+# 		child=serializers.IntegerField()
+# 	)
+# 	embarked_slaves=serializers.ListField(
+# 		child=serializers.IntegerField()
+# 	)
+# 	year=serializers.ListField(
+# 		child=serializers.IntegerField()
+# 	)
+
+class EstimateTimeLineResponseItemSerializer(serializers.Serializer):
+	x=serializers.IntegerField()
+	y0=serializers.IntegerField()
+	y1=serializers.IntegerField()
 
 ############ CROSSTAB SERIALIZERS
 

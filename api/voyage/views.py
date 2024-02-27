@@ -28,7 +28,6 @@ from .serializers import *
 from .serializers_READONLY import *
 from rest_framework import serializers
 from voyages3.localsettings import REDIS_HOST,REDIS_PORT,GEO_NETWORKS_BASE_URL,STATS_BASE_URL,DEBUG,USE_REDIS_CACHE
-from drf_yasg.utils import swagger_auto_schema
 import re
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
 from drf_spectacular.types import OpenApiTypes

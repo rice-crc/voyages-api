@@ -37,7 +37,8 @@ registered_caches=[
 	voyage_summary_statistics,
 	voyage_pivot_tables,
 	voyage_xyscatter,
-	estimate_pivot_tables
+	estimate_pivot_tables,
+	timelapse
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
@@ -53,6 +54,7 @@ while True:
 		#and load each cache based on the parameters it sets out
 		endpoint=rc['endpoint']
 		variables=rc['variables']
+		rcname=rc['name']
 		schema_name=rc['schema_name']
 		headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 		#before we make the dataframes call, we need to get the schema data
@@ -63,11 +65,26 @@ while True:
 			r=requests.get(url=DJANGO_BASE_URL+'common/schemas/?schema_name=%s&hierarchical=False' %schema_name,headers=headers)
 			options=json.loads(r.text)
 			rc['options']=options
-			rc['df']=load_long_df(endpoint,variables,options)
+			thisdf=load_long_df(endpoint,variables,options)
+			
+			#timelapse needs is na entries filled ahead of time
+			if rcname=='timelapse':
+				for varName in variables:
+					optionsvar=options[varName]
+					vartype=optionsvar['type']	
+					if vartype in [
+						"integer",
+						"number"
+					]:
+						thisdf[varName]=thisdf[varName].fillna(0)
+						thisdf[varName]=thisdf[varName].astype('int')
+					else:
+						thisdf[varName]=thisdf[varName].fillna('')
+			rc['df']=thisdf
 			print(rc['df'])
 		except:
 			failures_count+=1
-			print("failed on cache:",rc['name'])
+			print("failed on cache:",rcname)
 	print("failed on %d of %d caches" %(failures_count,len(registered_caches)))
 	if failures_count==len(registered_caches):
 		standoff_time=standoff_base**standoff_count
@@ -87,6 +104,25 @@ def get_indices():
 	for rc in registered_caches:
 		resp[rc['name']]=rc['variables']
 	return json.dumps(resp)
+
+
+@app.route('/timelapse/',methods=['POST'])
+def timelapse_animation():
+
+	'''
+	https://www.slavevoyages.org/voyage/database#timelapse
+	'''
+	st=time.time()
+	rdata=request.json
+	ids=rdata['ids']
+	df=eval('timelapse')['df']
+	df=df[df['id'].isin(ids)]
+	
+	colname_map={'id': 'voyage_id', 'voyage_ship__imputed_nationality__id':'nat_id','voyage_itinerary__imp_principal_place_of_slave_purchase__id': 'src', 'voyage_itinerary__imp_principal_port_slave_dis__id': 'dst', 'voyage_itinerary__imp_principal_region_of_slave_purchase__id': 'regsrc', 'voyage_itinerary__imp_broad_region_of_slave_purchase__id': 'bregsrc', 'voyage_itinerary__imp_principal_region_slave_dis__id': 'regdst', 'voyage_itinerary__imp_broad_region_slave_dis__id': 'bregdst', 'voyage_slaves_numbers__imp_total_num_slaves_embarked': 'embarked', 'voyage_slaves_numbers__imp_total_num_slaves_disembarked': 'disembarked', 'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year': 'year', 'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__month': 'month', 'voyage_ship__tonnage_mod': 'ship_ton', 'voyage_ship__imputed_nationality__name': 'nat_id', 'voyage_ship__ship_name': 'ship_name'}
+	
+	df=df.rename(columns=colname_map)
+	print(df)
+	return df.to_json(orient="records")
 
 @app.route('/groupby/',methods=['POST'])
 def groupby():
@@ -304,8 +340,6 @@ def estimates_pivot():
 			all_column_disembark_position=colnames_list.index(('All', 'disembarked_slaves'))
 			del(colnames_list[all_column_disembark_position])
 			colnames_list.append(('All', 'disembarked_slaves'))
-			
-			
 			pv=pv[colnames_list]
 			
 		

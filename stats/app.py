@@ -262,7 +262,7 @@ def voyage_summary_stats():
 	
 	headertablerow="".join([f'<th>{h}</th>' for h in headers])
 	
-	headertablerowhtml=f"<tr><th></th>{headertablerow}</tr>"
+	headertablerowhtml=f'<thead><tr style="text-align: right;"><th></th>{headertablerow}</tr></thead>'
 	
 	rowshtml=''
 	
@@ -272,21 +272,10 @@ def voyage_summary_stats():
 		rowhtml=f"<tr><td>{indexname}</td>{row}</tr>"
 		rowshtml+=rowhtml
 	
-	table=f'<table>{headertablerowhtml}{rowshtml}</table>'
-		
-		
+	table=f'<table border="1" class="dataframe">{headertablerowhtml}{rowshtml}</table>'
+	
 	outputrecords.append(record)
-		
-# 	for r in outputrecords:
-		# 
-# 	
-# 	
-# 	df2=pd.DataFrame.from_records(outputrecords)
-# 	df2=df2.set_index('index')
-# 	df2['Total captives']=df2['Total captives'].astype('str').str.replace('\.0$','',regex=True)
-# 	html=df2.to_html(index_names=False,na_rep='')
-# 	html=re.sub('<td>\S*nan\S*</td>','<td></td>',html)
-# 	html=re.sub('\\n\s+','',html)
+	
 	return json.dumps(
 		{
 			"data":table

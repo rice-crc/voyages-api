@@ -33,12 +33,12 @@ def load_long_df(endpoint,variables,options):
 	return(df)
 
 registered_caches=[
-	voyage_bar_and_donut_charts,
+# 	voyage_bar_and_donut_charts,
 	voyage_summary_statistics,
-	voyage_pivot_tables,
-	voyage_xyscatter,
-	estimate_pivot_tables,
-	timelapse
+# 	voyage_pivot_tables,
+# 	voyage_xyscatter,
+# 	estimate_pivot_tables,
+# 	timelapse
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
@@ -180,18 +180,19 @@ def voyage_summary_stats():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
-	df=eval('voyage_bar_and_donut_charts')['df']
+	df=eval('voyage_summary_statistics')['df']
 	
 	imputed_rows={
 		'voyage_slaves_numbers__imp_total_num_slaves_embarked':'Captives embarked (Imputed)',
 		'voyage_slaves_numbers__imp_total_num_slaves_disembarked':'Captives disembarked (Imputed)',
 	}
 	non_imputed_rows={
-		'voyage_ship__tonnage_mod':'Tonnage of vessel',
-		'voyage_slaves_numbers__percentage_male':'Percentage male',
-		'voyage_slaves_numbers__percentage_child':'Percentage children',
 		'voyage_slaves_numbers__imp_mortality_ratio':'Percentage of captives embarked who died during crossing',
-		'voyage_dates__length_middle_passage_days':"Duration of captives' crossing (in days)"
+		'voyage_dates__length_middle_passage_days':"Duration of captives' crossing (in days)",
+		'voyage_slaves_numbers__percentage_male':'Percentage male',
+		'voyage_slaves_numbers__percentage_female':'Percentage female',
+		'voyage_slaves_numbers__percentage_child':'Percentage children',
+		'voyage_ship__tonnage_mod':'Tonnage of vessel'
 	}
 	
 	#filter down on the pk's
@@ -207,35 +208,88 @@ def voyage_summary_stats():
 		'Standard deviation'
 	]
 	
+	percentagerowkeys=[
+		'voyage_slaves_numbers__imp_mortality_ratio',
+		'voyage_slaves_numbers__percentage_male',
+		'voyage_slaves_numbers__percentage_child',
+		'voyage_slaves_numbers__percentage_female'
+	]
+	
 	for k in imputed_rows:
 		v=imputed_rows[k]
 		record={'index':v}
-		record['Total captives']=int(df[k].sum())
-		record['Total voyages with this datapoint']=int(df[k].dropna().shape[0])
-		record['Average']=int(df[k].mean())
-		record['Median']=int(df[k].median())
-		record['Standard deviation']=round(float(df[k].std()),1)
+		record['Total captives']=f'{int(df[k].sum()):,}'
+		record['Total voyages with this datapoint']=f'{int(df[k].dropna().shape[0]):,}'
+		record['Average']=str(round(df[k].mean(),1))
+		record['Median']=str(round(df[k].median(),1))
+		record['Standard deviation']=str(round(df[k].std(),1))
 		outputrecords.append(record)
 	
 	for k in non_imputed_rows:
 		v=non_imputed_rows[k]
 		record={'index':v}
-		record['Total captives']=None
-		record['Total voyages with this datapoint']=int(df[k].dropna().shape[0])
-		record['Average']=round(float(df[k].mean()),1)
-		record['Median']=round(float(df[k].median()),1)
-		record['Standard deviation']=round(float(df[k].std()),1)
-		outputrecords.append(record)
+		record['Total captives']=''
+		record['Total voyages with this datapoint']=f'{int(df[k].dropna().shape[0]):,}'
 		
-	df2=pd.DataFrame.from_records(outputrecords)
-	df2=df2.set_index('index')
-	df2['Total captives']=df2['Total captives'].astype('str').str.replace('\.0$','',regex=True)
-	html=df2.to_html(index_names=False,na_rep='')
-	html=re.sub('<td>\S*nan\S*</td>','<td></td>',html)
-	html=re.sub('\\n\s+','',html)
+		average=df[k].mean()
+		median=df[k].median()
+		std=df[k].std()
+		if k in percentagerowkeys:
+			average=str(round(average*100,1))
+			median=str(round(median*100,1))
+			std=str(round(std*100,1))
+			
+			average=f'{average}%'
+			median=f'{median}%'
+			std=f'{std}%'
+		else:
+			average=str(round(average,1))
+			median=str(round(median,1))
+			std=str(round(std))
+			
+		record['Average']=average
+		record['Median']=median
+		record['Standard deviation']=std
+		outputrecords.append(record)
+	
+	headers=[
+		'Total captives',
+		'Total voyages with this datapoint',
+		'Average',
+		'Median',
+		'Standard deviation'
+	]
+	
+	headertablerow="".join([f'<th>{h}</th>' for h in headers])
+	
+	headertablerowhtml=f"<tr><th></th>{headertablerow}</tr>"
+	
+	rowshtml=''
+	
+	for r in outputrecords:
+		indexname=r['index']
+		row="".join([f'<td>{r[h]}</td>' for h in headers])
+		rowhtml=f"<tr><td>{indexname}</td>{row}</tr>"
+		rowshtml+=rowhtml
+	
+	table=f'<table>{headertablerowhtml}{rowshtml}</table>'
+		
+		
+	outputrecords.append(record)
+		
+# 	for r in outputrecords:
+		# 
+# 	
+# 	
+# 	df2=pd.DataFrame.from_records(outputrecords)
+# 	df2=df2.set_index('index')
+# 	df2['Total captives']=df2['Total captives'].astype('str').str.replace('\.0$','',regex=True)
+# 	html=df2.to_html(index_names=False,na_rep='')
+# 	html=re.sub('<td>\S*nan\S*</td>','<td></td>',html)
+# 	html=re.sub('\\n\s+','',html)
 	return json.dumps(
 		{
-			"data":html
+			"data":table
 		}
 	)
 

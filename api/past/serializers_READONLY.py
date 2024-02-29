@@ -203,7 +203,7 @@ class EnslavedListResponseResultsSerializer(serializers.ModelSerializer):
 		eirs=instance.enslaved_relations.all()
 		voyages=list(set([eir.relation.voyage for eir in eirs if eir.relation.voyage is not None]))
 		return PastVoyageSerializer(voyages,many=True).data
-	def get_enslavers(self,instance):
+	def get_enslavers(self,instance) -> EnslavedEnslaversInRelationListResponseSerializer:
 		edrs=instance.enslaved_relations.all()
 		ed_enslaversinrelation=[]
 		for edr in edrs:

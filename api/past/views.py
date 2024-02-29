@@ -1018,7 +1018,7 @@ class PASTNetworks(generics.GenericAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-class EnslaverRETRIEVE(generics.RetrieveAPIView):
+class EnslaverCARD(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
 	'''
@@ -1067,12 +1067,12 @@ class EnslaverRETRIEVE(generics.RetrieveAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-class EnslavedRETRIEVE(generics.RetrieveAPIView):
+class EnslavedCARD(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
 	'''
 	queryset=Enslaved.objects.all()
-	serializer_class=EnslavedFULLSerializer
+	serializer_class=EnslavedListResponseResultsSerializer
 	lookup_field='enslaved_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

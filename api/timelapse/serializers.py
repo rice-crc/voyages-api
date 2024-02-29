@@ -299,23 +299,28 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 
 
 
+class VoyageAnimationGetCompiledRoutesResponseNodeSerializer(serializers.Serializer):
+	reg=serializers.IntegerField()
+	path=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(),min_length=2,max_length=2,allow_null=True),allow_empty=True)
+	name=serializers.CharField()
 
 
 
 
 
+class VoyageAnimationGetCompiledRoutesResponseSerializer(serializers.Serializer):
+	src=serializers.DictField(child=VoyageAnimationGetCompiledRoutesResponseNodeSerializer())
+	dst=serializers.DictField(child=VoyageAnimationGetCompiledRoutesResponseNodeSerializer())
 
-
-
-
-
-
-
-
-
-
-
-
+class VoyageAnimationGetCompiledRoutesRequestSerializer(serializers.Serializer):
+	networkName=serializers.ChoiceField(choices=[
+		'intra',
+		'trans'
+	])
+	routeType=serializers.ChoiceField(choices=[
+		'regional',
+		'port'
+	])
 
 
 ########### PAGINATED VOYAGE LISTS 

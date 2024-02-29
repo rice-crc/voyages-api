@@ -28,6 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
     path('voyage/',include('voyage.urls')),
+    path('timelapse/',include('timelapse.urls')),
     path('past/',include('past.urls')),
     path('docs/',include('document.urls')),
     path('assessment/',include('assessment.urls')),

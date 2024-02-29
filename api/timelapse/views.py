@@ -22,9 +22,62 @@ import pprint
 import redis
 import hashlib
 from common.static.Voyage_options import Voyage_options
-from geo.models import Location
+from voyage.models import Nationality
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
+class VoyageAnimationGetNations(generics.GenericAPIView):
+	permission_classes=[IsAuthenticated]
+	authentication_classes=[TokenAuthentication]
+	@extend_schema(
+		description="Returns primary-keyed dictionaries of voyage nations",
+		request=None,
+		responses=VoyageAnimationGetNationsResponseSerializer
+	)
+	def get(self,request):
+		st=time.time()
+		print("TIMELAPSE NATIONS+++++++\nusername:",request.auth.user)
+		
+		if USE_REDIS_CACHE:
+			hashdict={
+				'req_name':"ANIMATION NATIONS",
+				'req_data':None
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+
+		if cached_response is None:
+			nationalities=Nationality.objects.all()
+			vls=nationalities.values_list('id','name','value')
+			
+			resp={
+				v[0]:{
+					'name':v[1],
+					'code':v[2]
+				}
+				for v in vls
+			}
+			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(resp, content_type='application/json')
+
+
+
+
+
+
+
+
 
 class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]

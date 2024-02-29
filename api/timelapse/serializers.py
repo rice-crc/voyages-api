@@ -297,16 +297,17 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 
 
 
+class VoyageAnimationGetNationsResponseNodeSerializer(serializers.Serializer):
+	name=serializers.CharField()
+	code=serializers.IntegerField()
 
+class VoyageAnimationGetNationsResponseSerializer(serializers.Serializer):
+	serializers.DictField(child=VoyageAnimationGetNationsResponseNodeSerializer())
 
 class VoyageAnimationGetCompiledRoutesResponseNodeSerializer(serializers.Serializer):
 	reg=serializers.IntegerField()
 	path=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(),min_length=2,max_length=2,allow_null=True),allow_empty=True)
 	name=serializers.CharField()
-
-
-
-
 
 class VoyageAnimationGetCompiledRoutesResponseSerializer(serializers.Serializer):
 	src=serializers.DictField(child=VoyageAnimationGetCompiledRoutesResponseNodeSerializer())

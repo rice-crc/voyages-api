@@ -43,6 +43,31 @@ class crosstabresponseserializer(serializers.Serializer):
 	medatadata=offsetpaginationserializer(many=False)
 
 
+
+
+savedsearchendpointchoices=[
+	'assessment',
+	'past/enslaved',
+	'past/enslaver',
+	'voyage'
+]
+
+class MakeSavedSearchRequestSerializer(serializers.Serializer):
+	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
+	query=serializers.JSONField()
+
+class MakeSavedSearchResponseSerializer(serializers.Serializer):
+	id=serializers.CharField(max_length=8)
+
+
+class UseSavedSearchRequestSerializer(serializers.Serializer):
+	id=serializers.CharField(max_length=8)
+
+class UseSavedSearchResponseSerializer(serializers.Serializer):
+	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
+	query=serializers.JSONField()
+	
+
 ############ GLOBAL SEARCH SERIALIZERS
 @extend_schema_serializer(
 	examples = [

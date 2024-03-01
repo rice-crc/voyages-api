@@ -43,7 +43,6 @@ class Schemas(generics.GenericAPIView):
 class GlobalSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="This endpoint takes a string and passes it on to Solr, which searches across all indexed text fields (currently all text fields) in our core models (Voyages, Enslaved People, Enslavers, and Blog Posts [documents next...]). It returns counts and the first 10 primary keys for each",
 		request=GlobalSearchRequestSerializer,
@@ -112,3 +111,77 @@ class GlobalSearch(generics.GenericAPIView):
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
+
+
+class MakeSavedSearch(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint takes a filter object and specified endpoint, and returns a saved search url",
+		request=MakeSavedSearchRequestSerializer,
+		responses=MakeSavedSearchResponseSerializer
+	)
+	def post(self,request):
+		
+		#VALIDATE THE REQUEST
+		serialized_req = MakeSavedSearchRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		srd=serialized_req.data
+		
+		hash_id=hashlib.sha256(json.dumps(srd,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+		
+		try:
+			sq=SavedQuery.objects.get(hash_id=hash_id)
+		except ObjectDoesNotExist:
+			sq=None
+		
+		if sq is None:
+			unique_hash_id=None
+			offset=0
+			while unique_hash_id is None:
+				try_unique_hash_id=hash_id[offset:offset+8]
+				try:
+					sq=SavedQuery.objects.get(id=try_unique_hash_id)
+					unique_hash_id=try_unique_hash_id
+				except:
+					offset+=1
+			query=serialized_req.data['query']
+			endpoint=serialized_req.data['endpoint']
+			SQ=SavedQuery.objects.create(
+				id=unique_hash_id,
+				hash_id=hash_id,
+				endpoint=endpoint,
+				query=query
+			)
+		
+		return JSONResponse({'id':id})
+		
+class UseSavedSearch(generics.GenericAPIView):	
+	@extend_schema(
+		description="This endpoint takes a string and passes it on to Solr, which searches across all indexed text fields (currently all text fields) in our core models (Voyages, Enslaved People, Enslavers, and Blog Posts [documents next...]). It returns counts and the first 10 primary keys for each",
+		request=UseSavedSearchRequestSerializer,
+		responses=UseSavedSearchResponseSerializer
+	)
+	def post(self,request):
+		#VALIDATE THE REQUEST
+		serialized_req = MakeSavedSearchRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+		
+		id=serialized_req.data['id']
+		
+		try:
+			sq=SavedQuery.objects.get(id=id)
+		except ObjectDoesNotExist:
+			return JsonResponse({'error':'saved search not found'},status=404)
+		
+		resp={
+			'endpoint':sq.endpoint,
+			'query':json.loads(sq.query)
+		}
+		return JSONResponse(resp)
+
+	
+	

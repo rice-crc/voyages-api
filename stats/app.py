@@ -384,16 +384,14 @@ def estimates_pivot():
 				pv=pv.swaplevel(1,2,axis=1).sort_index(axis=1)
 			colnames_list=pv.columns.tolist()
 			
-# 			print(colnames_list)
-			
-			if len(colnames_list)==2:
+			if len(colnames_list[0])==2:
 				all_column_embark_position=colnames_list.index(('All','embarked_slaves'))
 				del(colnames_list[all_column_embark_position])
 				colnames_list.append(('All', 'embarked_slaves'))
 				all_column_disembark_position=colnames_list.index(('All', 'disembarked_slaves'))
 				del(colnames_list[all_column_disembark_position])
 				colnames_list.append(('All', 'disembarked_slaves'))
-			elif len(colnames_list)==3:
+			elif len(colnames_list[0])==3:
 				all_column_embark_position=colnames_list.index(('All','','embarked_slaves'))
 				del(colnames_list[all_column_embark_position])
 				colnames_list.append(('All', '','embarked_slaves'))
@@ -406,6 +404,13 @@ def estimates_pivot():
 # 		pv=pv.fillna(0)
 # 		pv=pv.style.format("{:,.0f}")
 		s=pv.style.format(precision=0, na_rep='0', thousands=",")
+		s=s.set_table_styles(
+			[
+				{"selector": "", "props": [("border", "1px solid grey")]},
+				{"selector": "tbody td", "props": [("border", "1px solid grey")]},
+				{"selector": "th", "props": [("border", "1px solid grey")]}
+			]
+		)
 		s=s.set_table_attributes('class="dataframe",border="1"')
 		html=s.to_html(index_names=False)
 # 		pv.index.name=''

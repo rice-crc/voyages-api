@@ -831,7 +831,7 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 
 )
 class EnslavedAggRoutesRequestSerializer(serializers.Serializer):
-	zoomlevel=serializers.CharField()
+	zoomlevel=serializers.ChoiceField(choices=(('region','region'),('place','place')))
 	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 

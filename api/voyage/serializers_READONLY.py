@@ -491,7 +491,7 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 
 )
 class VoyageAggRoutesRequestSerializer(serializers.Serializer):
-	zoomlevel=serializers.CharField()
+	zoomlevel=serializers.ChoiceField(choices=(('region','region'),('place','place')))
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 

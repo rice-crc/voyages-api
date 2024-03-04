@@ -77,7 +77,9 @@ def load_index(rcname,graphname):
 	if graphname not in rc['graphs']:
 		rc['graphs'][graphname]={'index':graph_index}
 	else:	
-			rc['graphs'][graphname]['index']=graph_index
+		rc['graphs'][graphname]['index']=graph_index
+# 	print("test node record-->",graph_index['nodes'].loc[[0,2]].to_dict())
+# 	print("test edge record-->",graph_index['edges'].loc[[0,2]].to_dict())
 
 def kickoff():
 	standoff_base=4
@@ -103,7 +105,8 @@ def kickoff():
 #on initialization, load every index as a graph, via a call to the django api
 registered_caches={
 	'ao_maps':ao_maps,
-	'voyage_maps':voyage_maps
+	'voyage_maps':voyage_maps,
+	'estimate_maps':estimate_maps
 }
 
 rcnames=list(registered_caches.keys())

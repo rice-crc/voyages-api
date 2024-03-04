@@ -184,3 +184,62 @@ class EstimateCrossTabRequestSerializer(serializers.Serializer):
 	
 class EstimateCrossTabResponseSerializer(serializers.Serializer):
 	data=serializers.CharField()
+
+
+
+
+
+
+
+############ VOYAGE AGGREGATION ROUTE MAPS
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'filtered request for voyages to barbados',
+			summary="Filtered region-level voyage map req",
+			description="Here, using geographic region names, we request voyages that embarked people in 'Sierra Leone' and the 'Gold Coast', and disembarked them in 'Barbados'. We accordingly specify the region zoom level.",
+			value={
+				"zoomlevel":"region",
+				"filter":[
+					{
+						"varName":"year",
+						"op":"btw",
+						"searchTerm":[1775,1820]
+					}
+				]
+			}
+		)
+	]
+
+)
+class EstimateAggRoutesRequestSerializer(serializers.Serializer):
+	zoomlevel=serializers.ChoiceField(choices=(('broad_region','broad_region'),('region','region')))
+	filter=EstimateFilterItemSerializer(many=True,allow_null=True,required=False)
+
+class EstimateAggRoutesEdgesSerializer(serializers.Serializer):
+	source=serializers.CharField()
+	target=serializers.CharField()
+	type=serializers.CharField()
+	weight=serializers.IntegerField()
+	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(allow_null=False)))
+
+class EstimateAggRoutesNodesDataSerializer(serializers.Serializer):
+	lat=serializers.FloatField(allow_null=False)
+	lon=serializers.FloatField(allow_null=False)
+	name=serializers.CharField(allow_null=True)
+	tags=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+
+class EstimateAggRoutesNodesWeightsSerializer(serializers.Serializer):
+	disembarkation=serializers.IntegerField()
+	embarkation=serializers.IntegerField()
+	origin=serializers.IntegerField()
+	post_disembarkation=serializers.IntegerField()
+
+class EstimateAggRoutesNodesSerializer(serializers.Serializer):
+	id=serializers.CharField()
+	weights=EstimateAggRoutesNodesWeightsSerializer()
+	data=EstimateAggRoutesNodesDataSerializer()
+	
+class EstimateAggRoutesResponseSerializer(serializers.Serializer):
+	edges=serializers.ListField(child=EstimateAggRoutesEdgesSerializer())
+	nodes=serializers.ListField(child=EstimateAggRoutesNodesSerializer())

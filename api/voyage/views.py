@@ -595,7 +595,6 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			params=dict(request.data)
-			zoom_level=params.get('zoom_level')
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,

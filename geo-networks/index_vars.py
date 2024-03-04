@@ -274,3 +274,126 @@ ao_maps={
 	},
 	'oceanic_network_file':'maps/ao_routes.js'
 }
+
+estimate_maps={
+	'endpoint':'assessment/dataframes/',
+	## THE NAME OF THE INDEX
+	'name':'estimate_maps',
+	## USE THE VOYAGES SEARCH FILTERS TO ENSURE THAT WE ONLY GET THE OBJECTS WE WANT
+	## FOR INSTANCE, ONLY TRANSATLANTIC VOYAGES
+	'filter':{},
+	## THIS OCEANIC FLAG IS BASICALLY TAKEN FOR GRANTED RIGHT NOW
+	## BUT MAYBE LATER ON WE'LL LOAD IN PERSON-TO-PERSON DATA
+	'type':'oceanic',
+	## STRUCTURE:
+	### THE NAME OF THE GRAPH (E.G., PLACE ROUTES)
+	### THE NODES, IN ORDER (E.G., ORIGIN, EMBARK, OCEAN, DISEMBARK, POST-DISEMBARK)
+	'graph_params': [
+		{
+			'name':'region',
+			'ordered_node_classes':[
+				{
+					## BECAUSE WE WILL ENCOUNTER SOME NODES IN DIFFERENT CONTEXTS
+					### E.G., THE BIGHT OF BIAFRA AS A REGION OF EMBARK & AS DISEMBARK
+					### WE WILL WANT TO MAKE SURE THAT WE 
+					### SO THAT
+					#### A. SUB-GRAPH CALLS WORK PROPERLY
+					###### LIKE WHEN WE'RE LINKING ORIGINS TO EMBARKATIONS TO OCEANIC...
+					#### B. WE DON'T DUPLICATE, OR TOO AGGRESSIVELY DE-DUPLICATE
+					'tag':'embarkation',
+					'values':{
+						'uuid':'embarkation_region__name',
+						'name':'embarkation_region__name',
+						'lat':'embarkation_region__latitude',
+						'lon':'embarkation_region__longitude',
+						'val':'embarkation_region__name'
+					},
+					'tag_connections':[
+						("onramp","source","closest")
+					]
+				},
+				{
+					'tag':'oceanic_waypoint',
+				},
+				{
+					'tag':'disembarkation',
+					'values':{
+						'uuid':'disembarkation_region__name',
+						'name':'disembarkation_region__name',
+						'lat':'disembarkation_region__latitude',
+						'lon':'disembarkation_region__longitude',
+						'val':'disembarkation_region__name'
+					},
+					'tag_connections':[
+						("offramp","target","closest")
+					]
+				}
+			]
+		},
+		{
+			'name':'broad_region',
+			'ordered_node_classes':[
+				{
+					## BECAUSE WE WILL ENCOUNTER SOME NODES IN DIFFERENT CONTEXTS
+					### E.G., THE BIGHT OF BIAFRA AS A REGION OF EMBARK & AS DISEMBARK
+					### WE WILL WANT TO MAKE SURE THAT WE 
+					### SO THAT
+					#### A. SUB-GRAPH CALLS WORK PROPERLY
+					###### LIKE WHEN WE'RE LINKING ORIGINS TO EMBARKATIONS TO OCEANIC...
+					#### B. WE DON'T DUPLICATE, OR TOO AGGRESSIVELY DE-DUPLICATE
+					'tag':'embarkation',
+					'values':{
+						'uuid':'embarkation_region__export_area__name',
+						'name':'embarkation_region__export_area__name',
+						'lat':'embarkation_region__export_area__latitude',
+						'lon':'embarkation_region__export_area__longitude',
+						'val':'embarkation_region__export_area__name'
+					},
+					'tag_connections':[
+						("onramp","source","closest")
+					]
+				},
+				{
+					'tag':'oceanic_waypoint',
+				},
+				{
+					'tag':'disembarkation',
+					'values':{
+						'uuid':'disembarkation_region__import_area__name',
+						'name':'disembarkation_region__import_area__name',
+						'lat':'disembarkation_region__import_area__latitude',
+						'lon':'disembarkation_region__import_area__longitude',
+						'val':'disembarkation_region__import_area__name'
+					},
+					'tag_connections':[
+						("offramp","target","closest")
+					]
+				}
+			]
+		}
+	],
+	'indices':{
+		'region':{
+			'pk':'id',
+			'itinerary':[
+				'embarkation_region__name',
+				'disembarkation_region__name'
+			],
+			'weight':'embarked_slaves'
+		},
+		'broad_region':{
+			'pk':'id',
+			'itinerary':[
+				'embarkation_region__export_area__name',
+				'disembarkation_region__import_area__name'
+			],
+			'weight':'embarked_slaves'
+		},
+		'linklabels':['transportation'],
+		'nodelabels':[
+			'embarkation',
+			'disembarkation'
+		]
+	},
+	'oceanic_network_file':'maps/all_routes.js'
+}

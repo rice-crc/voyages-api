@@ -46,7 +46,10 @@ def load_index(rcname,graphname):
 	dataframe_endpoint=rc['endpoint']
 	if 'graphs' not in rc:
 		rc['graphs']={}
-	picklefilepath='tmp/%s__%s.pickle' %(rcname,graphname)
+	if not os.path.exists(TMP_PATH):
+		os.makedirs(TMP_PATH)
+
+	picklefilepath=f'{TMP_PATH}/{rcname}__{graphname}.pickle'
 	graph_params=[gp for gp in registered_caches[rcname]['graph_params'] if gp['name']==graphname][0]
 	if os.path.exists(picklefilepath):
 		with open(picklefilepath, 'rb') as f:
@@ -180,7 +183,12 @@ def network_maps():
 @app.route('/rebuild_indices/<indexname>', methods=['GET'])
 @login_required
 def rebuild_index(indexname):
-	picklepath="tmp/"+indexname+".pickle"
+	
+	if not os.path.exists(TMP_PATH):
+		os.makedirs(TMP_PATH)
+	
+	picklepath=f"{TMP_PATH}/{indexname}.pickle"
+# 	"tmp/"+indexname+".pickle"
 	if os.path.exists(picklepath):
 		os.remove(picklepath)
 	rcname,graphname=indexname.split("__")
@@ -191,10 +199,13 @@ def rebuild_index(indexname):
 @app.route('/displayindices', methods=['GET'])
 @login_required
 def displayindices():
+	if not os.path.exists(TMP_PATH):
+		os.makedirs(TMP_PATH)
+
 	indices=[
 		[
 			'__'.join([rcname,graph_params['name']]),
-			os.path.exists("tmp/"+'__'.join([rcname,graph_params['name']])+".pickle")
+			os.path.exists(TMP_PATH+"/"+'__'.join([rcname,graph_params['name']])+".pickle")
 		] for rcname in rcnames
 		for graph_params in registered_caches[rcname]['graph_params']
 	]

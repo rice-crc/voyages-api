@@ -58,15 +58,22 @@ class SavedQuery(models.Model):
 	# the query.
 	id = models.CharField(max_length=8, primary_key=True)
 	# A hash string so that the query can be quickly located.
-	hash_id = models.CharField(max_length=255, db_index=True, unique=True)
+	hash_id = models.CharField(
+		max_length=255,
+		unique=True,
+		default=''
+	)
 	# The actual query string.
-	query = models.JSONField(unique=True)
+	query = models.JSONField()
 	# Indicates whether this is a legacy query or a new JSON format query
 	
-	endpoint_choices=[
-		'assessment',
-		'past/enslaved',
-		'past/enslaver',
-		'voyage'
-	]
-	endpoint=models.CharField(choices=endpoint_choices)
+	endpoint=models.CharField(
+		choices=[
+			('assessment','assessment'),
+			('past/enslaved','past/enslaved'),
+			('past/enslaver','past/enslaver'),
+			('voyage','voyage')
+		],
+		max_length=50,
+		default='voyage'
+	)

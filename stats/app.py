@@ -163,7 +163,13 @@ class NotNanDict(dict):
 
 def interval_to_str(s):
 	s=str(s)
-	return re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
+	adashb=re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
+	splitab=adashb.split('-')
+	if splitab[0]==splitab[1]:
+		return splitab[0]
+	else:
+		return adashb
+	
 
 def makestr(s):
 	if s is None:
@@ -340,7 +346,7 @@ def estimates_pivot():
 			if binvar_max-binvar_min <=binsize:
 				nbins=1
 			else:
-				nbins=int((binvar_max-binvar_min)/binsize)
+				nbins=int((binvar_max-binvar_min)/binsize)+1
 			bin_arrays=np.array_split(binvar_ints,nbins)
 			bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
 			pv=pv.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
@@ -377,21 +383,43 @@ def estimates_pivot():
 				pv=pv.swaplevel(0,1,axis=1).sort_index(axis=1)
 				pv=pv.swaplevel(1,2,axis=1).sort_index(axis=1)
 			colnames_list=pv.columns.tolist()
-			all_column_embark_position=colnames_list.index(('All', 'embarked_slaves'))
-			del(colnames_list[all_column_embark_position])
-			colnames_list.append(('All', 'embarked_slaves'))
-			all_column_disembark_position=colnames_list.index(('All', 'disembarked_slaves'))
-			del(colnames_list[all_column_disembark_position])
-			colnames_list.append(('All', 'disembarked_slaves'))
-			pv=pv[colnames_list]
 			
+# 			print(colnames_list)
+			
+			if len(colnames_list)==2:
+				all_column_embark_position=colnames_list.index(('All','embarked_slaves'))
+				del(colnames_list[all_column_embark_position])
+				colnames_list.append(('All', 'embarked_slaves'))
+				all_column_disembark_position=colnames_list.index(('All', 'disembarked_slaves'))
+				del(colnames_list[all_column_disembark_position])
+				colnames_list.append(('All', 'disembarked_slaves'))
+			elif len(colnames_list)==3:
+				all_column_embark_position=colnames_list.index(('All','','embarked_slaves'))
+				del(colnames_list[all_column_embark_position])
+				colnames_list.append(('All', '','embarked_slaves'))
+				all_column_disembark_position=colnames_list.index(('All','' ,'disembarked_slaves'))
+				del(colnames_list[all_column_disembark_position])
+				colnames_list.append(('All','', 'disembarked_slaves'))
+			pv=pv[colnames_list]
 		
-		pv=pv.fillna(0)
-		html=pv.to_html(index_names=False)
-		html=re.sub('\\n\s+','',html)
+		
+# 		pv=pv.fillna(0)
+# 		pv=pv.style.format("{:,.0f}")
+		s=pv.style.format(precision=0, na_rep='0', thousands=",")
+		s=s.set_table_attributes('class="dataframe",border="1"')
+		html=s.to_html(index_names=False)
+# 		pv.index.name=''
+		#index names = false fails after the numeric formatting....?
+# 		html=re.sub('\\n\s+','',html)
 		html=re.sub("disembarked_slaves","Disembarked",html)
 		html=re.sub("embarked_slaves","Embarked",html)
-		html=re.sub("\.0","",html)
+		html=re.sub("disembarkation_region__import_area__name","",html)
+		html=re.sub("disembarkation_region__name","",html)
+		html=re.sub("embarkation_region__name","",html)
+		html=re.sub("nation__name","",html)
+		html=re.sub("row_bins","",html)
+		html=re.sub("duplicate_col[a-z|0-9|_]+","",html)
+		
 	return json.dumps(
 		{
 			"data":html

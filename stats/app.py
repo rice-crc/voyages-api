@@ -33,12 +33,12 @@ def load_long_df(endpoint,variables,options):
 	return(df)
 
 registered_caches=[
-	voyage_bar_and_donut_charts,
-	voyage_summary_statistics,
-	voyage_pivot_tables,
-	voyage_xyscatter,
+# 	voyage_bar_and_donut_charts,
+# 	voyage_summary_statistics,
+# 	voyage_pivot_tables,
+# 	voyage_xyscatter,
 	estimate_pivot_tables,
-	timelapse
+# 	timelapse
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
@@ -364,12 +364,15 @@ def estimates_pivot():
 		else:
 			split_cells=True
 		
+		margins_name='Totals'
+		
 		pv=pv.pivot_table(
 			columns=cols,
 			index=rows,
 			values=vals,
 			aggfunc="sum",
-			margins=True
+			margins=True,
+			margins_name=margins_name
 		)
 		
 		#if we're doing split cells
@@ -385,21 +388,28 @@ def estimates_pivot():
 			colnames_list=pv.columns.tolist()
 			
 			if len(colnames_list[0])==2:
-				all_column_embark_position=colnames_list.index(('All','embarked_slaves'))
+				all_column_embark_position=colnames_list.index((margins_name,'embarked_slaves'))
 				del(colnames_list[all_column_embark_position])
-				colnames_list.append(('All', 'embarked_slaves'))
-				all_column_disembark_position=colnames_list.index(('All', 'disembarked_slaves'))
+				colnames_list.append((margins_name, 'embarked_slaves'))
+				all_column_disembark_position=colnames_list.index((margins_name, 'disembarked_slaves'))
 				del(colnames_list[all_column_disembark_position])
-				colnames_list.append(('All', 'disembarked_slaves'))
+				colnames_list.append((margins_name, 'disembarked_slaves'))
 			elif len(colnames_list[0])==3:
-				all_column_embark_position=colnames_list.index(('All','','embarked_slaves'))
+				all_column_embark_position=colnames_list.index((margins_name,'','embarked_slaves'))
 				del(colnames_list[all_column_embark_position])
-				colnames_list.append(('All', '','embarked_slaves'))
-				all_column_disembark_position=colnames_list.index(('All','' ,'disembarked_slaves'))
+				colnames_list.append((margins_name, '','embarked_slaves'))
+				all_column_disembark_position=colnames_list.index((margins_name,'' ,'disembarked_slaves'))
 				del(colnames_list[all_column_disembark_position])
-				colnames_list.append(('All','', 'disembarked_slaves'))
+				colnames_list.append((margins_name,'', 'disembarked_slaves'))
 			pv=pv[colnames_list]
 		
+# 		print(pv.index)
+# 		print("-->",len(pv.index.names))
+		if len(pv.index.names)==1:
+			pv=pv.rename_axis(None,axis=0)
+		elif len(pv.index.names)==2:
+			pv=pv.rename_axis((None,None),axis=0)
+# 		pv=pv.rename_axis(None,axis=0)
 		
 # 		pv=pv.fillna(0)
 # 		pv=pv.style.format("{:,.0f}")

@@ -71,6 +71,7 @@ class EnslavedList(generics.GenericAPIView):
 
 			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
+			
 			queryset,results_count=post_req(
 				queryset,
 				self,
@@ -78,8 +79,9 @@ class EnslavedList(generics.GenericAPIView):
 				Enslaved_options,
 				auto_prefetch=True
 			)
-
+			
 			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+			
 			resp=EnslavedListResponseSerializer({
 				'count':total_results_count,
 				'page':page_num,
@@ -1016,7 +1018,7 @@ class PASTNetworks(generics.GenericAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-class EnslaverRETRIEVE(generics.RetrieveAPIView):
+class EnslaverCARD(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
 	'''
@@ -1065,12 +1067,12 @@ class EnslaverRETRIEVE(generics.RetrieveAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-class EnslavedRETRIEVE(generics.RetrieveAPIView):
+class EnslavedCARD(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
 	'''
 	queryset=Enslaved.objects.all()
-	serializer_class=EnslavedSerializer
+	serializer_class=EnslavedListResponseResultsSerializer
 	lookup_field='enslaved_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

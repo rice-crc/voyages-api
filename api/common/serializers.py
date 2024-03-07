@@ -43,6 +43,68 @@ class crosstabresponseserializer(serializers.Serializer):
 	medatadata=offsetpaginationserializer(many=False)
 
 
+
+
+savedsearchendpointchoices=[
+	'assessment',
+	'past/enslaved',
+	'past/enslaver',
+	'voyage'
+]
+
+
+
+
+
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Save a search for voyages',
+			summary='Save a search for voyages',
+			description='Here, we save a search for voyages',
+			value={
+				"endpoint": "voyage",
+				"query": [
+					{
+						"op": "gte",
+						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"searchTerm": 1820
+					},
+					{
+						"op": "lte",
+						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+						"searchTerm": 1822
+					},
+					{
+						"op": "in",
+						"varName": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+						"searchTerm": [
+							"Florida",
+							"Cuba"
+						]
+					}
+				]
+			},
+			request_only=True
+		)
+    ]
+)
+class MakeSavedSearchRequestSerializer(serializers.Serializer):
+	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
+	query=serializers.ListField(child=serializers.JSONField())
+
+class MakeSavedSearchResponseSerializer(serializers.Serializer):
+	id=serializers.CharField(max_length=8)
+
+
+class UseSavedSearchRequestSerializer(serializers.Serializer):
+	id=serializers.CharField(max_length=8)
+
+class UseSavedSearchResponseSerializer(serializers.Serializer):
+	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
+	query=serializers.ListField(child=serializers.JSONField())
+	
+
 ############ GLOBAL SEARCH SERIALIZERS
 @extend_schema_serializer(
 	examples = [

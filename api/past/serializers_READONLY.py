@@ -173,13 +173,59 @@ class EnslavedInRelationSerializer(serializers.ModelSerializer):
 		model=EnslavedInRelation
 		fields='__all__'
 
-class EnslavedSerializer(serializers.ModelSerializer):
+
+
+
+class EnslavedFULLSerializer(serializers.ModelSerializer):
 	post_disembark_location=PastLocationSerializer(many=False)
 	captive_fate=CaptiveFateSerializer(many=False)
 	enslaved_relations=EnslavedInRelationSerializer(many=True)
 	captive_status=CaptiveStatusSerializer(many=False)
 	language_group=LanguageGroupSerializer(many=False)
 	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
+	class Meta:
+		model=Enslaved
+		fields='__all__'
+		
+class EnslavedEnslaversInRelationListResponseSerializer(serializers.Serializer):
+	roles=EnslaverRoleSerializer(many=True)
+	enslaver=EnslavedEnslaverIdentitySerializer(many=False)
+	
+class EnslavedListResponseResultsSerializer(serializers.ModelSerializer):
+	post_disembark_location=PastLocationSerializer(many=False)
+	captive_fate=CaptiveFateSerializer(many=False)
+	voyages=serializers.SerializerMethodField()
+	enslavers=serializers.SerializerMethodField()
+	captive_status=CaptiveStatusSerializer(many=False)
+	language_group=LanguageGroupSerializer(many=False)
+	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
+	def get_voyages(self,instance) -> PastVoyageSerializer(many=True):
+		eirs=instance.enslaved_relations.all()
+		voyages=list(set([eir.relation.voyage for eir in eirs if eir.relation.voyage is not None]))
+		return PastVoyageSerializer(voyages,many=True).data
+	def get_enslavers(self,instance) -> EnslavedEnslaversInRelationListResponseSerializer:
+		edrs=instance.enslaved_relations.all()
+		ed_enslaversinrelation=[]
+		for edr in edrs:
+			ed_enslaversinrelation+=edr.relation.relation_enslavers.all()
+		enslavers_and_roles={}
+		for ed_e in ed_enslaversinrelation:
+			roles=ed_e.roles.all()
+			enslaver_identity=ed_e.enslaver_alias.identity
+			e_id=enslaver_identity.id
+			if e_id not in enslavers_and_roles:
+				enslavers_and_roles[e_id]={'roles':roles,'enslaver':enslaver_identity}
+			else:
+				for role in roles:
+					if role not in enslavers_and_roles[e_id]['roles']:
+						enslavers_and_roles[e_id]['roles'].append(role)
+		enslavers_and_roles_list=[enslavers_and_roles[k] for k in enslavers_and_roles]
+		
+		enslavers_in_relation=EnslavedEnslaversInRelationListResponseSerializer(enslavers_and_roles_list,many=True).data
+		
+		return enslavers_in_relation
+		
+		
 	class Meta:
 		model=Enslaved
 		fields='__all__'
@@ -397,7 +443,7 @@ class EnslavedListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
-	results=EnslavedSerializer(many=True,read_only=True)
+	results=EnslavedListResponseResultsSerializer(many=True,read_only=True)
 
 ########### PAGINATED ENSLAVER LISTS 
 @extend_schema_serializer(
@@ -785,7 +831,7 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 
 )
 class EnslavedAggRoutesRequestSerializer(serializers.Serializer):
-	zoomlevel=serializers.CharField()
+	zoomlevel=serializers.ChoiceField(choices=(('region','region'),('place','place')))
 	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 

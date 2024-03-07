@@ -31,3 +31,5 @@ USER_NAMES = dict((u.name, u) for u in USERS.values())
 PW="........."
 
 # DEBUG=True
+
+TMP_PATH="/mnt/geo_networks_tmp"

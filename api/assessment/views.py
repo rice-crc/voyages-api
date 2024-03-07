@@ -20,9 +20,11 @@ import collections
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from common.static.Estimate_options import Estimate_options
-from voyages3.localsettings import STATS_BASE_URL
+from voyages3.localsettings import STATS_BASE_URL,GEO_NETWORKS_BASE_URL,DEBUG,USE_REDIS_CACHE,REDIS_HOST,REDIS_PORT
+import redis
+import hashlib
 
-
+redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 #list view. Only keeping it around for the model
 class AssessmentList(generics.RetrieveAPIView):	
@@ -183,3 +185,82 @@ class EstimateCrossTabs(generics.GenericAPIView):
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
+
+
+
+class EstimateAggRoutes(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint provides a collection of multi-valued weighted nodes and splined, weighted edges. The intended use-case is the drawing of a geographic sankey map.",
+		request=EstimateAggRoutesRequestSerializer,
+		responses=EstimateAggRoutesResponseSerializer,
+	)
+	def post(self,request):
+		st=time.time()
+		if DEBUG:
+			print("ESTIMATES AGGREGATION ROUTES+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = EstimateAggRoutesRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+# 		
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE Estimates BASED ON THE REQUEST'S FILTER OBJECT
+			params=dict(request.data)
+			queryset=Estimate.objects.all()
+			zoomlevel=params.get('zoomlevel','region')
+			queryset,results_count=post_req(
+				queryset,
+				self,
+				request,
+				Estimate_options,
+				auto_prefetch=True
+			)
+		
+			#HAND OFF TO THE FLASK CONTAINER
+			queryset=queryset.order_by('id')
+			values_list=queryset.values_list('id')
+			pks=[v[0] for v in values_list]
+			django_query_time=time.time()
+			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
+			u2=GEO_NETWORKS_BASE_URL+'network_maps/'
+			d2={
+				'graphname':zoomlevel,
+				'cachename':'estimate_maps',
+				'pks':pks
+			}
+			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+	# 			#VALIDATE THE RESPONSE
+			if r.ok:
+				j=json.loads(r.text)
+				serialized_resp=EstimateAggRoutesResponseSerializer(data=j)
+			if not serialized_resp.is_valid():
+				return JsonResponse(serialized_resp.errors,status=400)
+			else:
+				resp=serialized_resp.data
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+# 		print(resp)
+		return JsonResponse(resp,safe=False,status=200)

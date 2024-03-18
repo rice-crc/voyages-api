@@ -18,6 +18,7 @@ import requests
 import time
 from .models import *
 from .serializers import *
+from rest_framework import serializers
 import pprint
 import redis
 import hashlib
@@ -89,7 +90,7 @@ class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 		],
 		description="Returns primary-keyed dictionaries of ports and regions for trans or intra map networks",
 		request=VoyageAnimationGetCompiledRoutesRequestSerializer,
-		responses=VoyageAnimationGetCompiledRoutesResponseSerializer
+		responses=serializers.DictField()
 	)
 	def get(self,request):
 		st=time.time()
@@ -115,13 +116,8 @@ class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 			route_type = request.GET.get('routeType')
 			fpath = os.path.join(settings.STATIC_ROOT, "legacy_timelapse", network_name, route_type + "_routes.json")
 			f=open(fpath, 'rb')
-			data=json.loads(f.read())
-			serialized_resp=VoyageAnimationGetCompiledRoutesResponseSerializer(data=data,many=False)
-			if not serialized_resp.is_valid():
-				return JsonResponse(serialized_resp.errors,status=500,safe=False)
-			else:
-				resp=serialized_resp.data
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			resp=json.loads(f.read())
+			
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))
 		else:

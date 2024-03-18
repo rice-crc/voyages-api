@@ -85,12 +85,11 @@ class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	@extend_schema(
 		parameters=[
-			OpenApiParameter(name='networkName',location=OpenApiParameter.QUERY, description='Network Name', required=True, type=str,enum=['trans', 'intra'],default='trans'),
-			OpenApiParameter(name='routeType',location=OpenApiParameter.QUERY, description='Route Type', required=True, type=str,enum=['port','regional'],default='port')
+			OpenApiParameter(name='networkName',location=OpenApiParameter.QUERY, description='Network Name', required=True, type=str,enum=['trans', 'intra'],default='trans')
 		],
-		description="Returns primary-keyed dictionaries of ports and regions for trans or intra map networks",
+		description="Returns primary-keyed dictionaries of ports and their regional routes for trans or intra map networks",
 		request=VoyageAnimationGetCompiledRoutesRequestSerializer,
-		responses=serializers.DictField()
+		responses=VoyageAnimationGetCompiledRoutesResponseSerializer
 	)
 	def get(self,request):
 		st=time.time()
@@ -114,9 +113,18 @@ class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 		if cached_response is None:
 			network_name = request.GET.get('networkName')
 			route_type = request.GET.get('routeType')
-			fpath = os.path.join(settings.STATIC_ROOT, "legacy_timelapse", network_name, route_type + "_routes.json")
-			f=open(fpath, 'rb')
-			resp=json.loads(f.read())
+			ports_fpath = os.path.join(settings.STATIC_ROOT, "legacy_timelapse", network_name, "port_routes.json")
+			routes_fpath = os.path.join(settings.STATIC_ROOT, "legacy_timelapse", network_name, "regional_routes.json")
+			ports_f=open(ports_fpath, 'rb')
+			routes_f=open(routes_fpath,'rb')
+			
+			ports=json.loads(ports_f.read())
+			routes=json.loads(routes_f.read())
+			
+			resp={
+				"ports":ports,
+				"routes":routes
+			}
 			
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))

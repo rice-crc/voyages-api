@@ -131,7 +131,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
 		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		ids=[doc['id'] for doc in results.docs]
-		queryset=queryset.filter(id__in=ids)
+		filter_queryset=queryset.filter(id__in=ids)
 	else:
 		kwargs={}
 		for item in filter_obj:
@@ -151,11 +151,18 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 					errormessages.append("var %s not in model" %varName)
 				if op not in ['lte','gte','exact','in','icontains']:
 					errormessages.append("%s is not a valid django search operation" %op)
-		queryset=queryset.filter(**kwargs)
+		filter_queryset=queryset.filter(**kwargs)
+	
+	#dedupe m2m filters
+	ids=list(set([v[0] for v in filter_queryset.values_list('id')]))
+	queryset=queryset.filter(id__in=ids)
+	
 	results_count=queryset.count()
 	if DEBUG:
 		print("resultset size:",results_count)
-
+	
+	
+	
 	#PREFETCH REQUISITE FIELDS
 	prefetch_fields=params.get('selected_fields') or []
 	if prefetch_fields==[] and auto_prefetch:

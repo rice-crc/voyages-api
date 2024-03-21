@@ -67,6 +67,8 @@ class SavedQuery(models.Model):
 	query = models.JSONField()
 	# Indicates whether this is a legacy query or a new JSON format query
 	
+	front_end_path=models.CharField(max_length=100,blank=True,null=True)
+	
 	endpoint=models.CharField(
 		choices=[
 			('assessment','assessment'),

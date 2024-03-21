@@ -152,11 +152,13 @@ class MakeSavedSearch(generics.GenericAPIView):
 					id=try_unique_hash_id
 			query=serialized_req.data['query']
 			endpoint=serialized_req.data['endpoint']
+			front_end_path=serialized_req.data.get('front_end_path')
 			SQ=SavedQuery.objects.create(
 				id=id,
 				hash_id=hash_id,
 				endpoint=endpoint,
-				query=query
+				query=query,
+				front_end_path=front_end_path
 			)
 		else:
 			print("retrieving existing saved search")

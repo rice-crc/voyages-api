@@ -61,10 +61,16 @@ savedsearchendpointchoices=[
          OpenApiExample(
 			'Save a search for voyages',
 			summary='Save a search for voyages',
-			description='Here, we save a search for voyages',
+			description='Here, we save a search for Intra-American voyages between 1820-22 that began in Cuba',
 			value={
 				"endpoint": "voyage",
+				"front_end_path":"/voyage/intra-american#bar",
 				"query": [
+					{
+						"op":"exact",
+						"varName":"dataset",
+						"searchterm":1
+					},
 					{
 						"op": "gte",
 						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
@@ -91,6 +97,7 @@ savedsearchendpointchoices=[
 )
 class MakeSavedSearchRequestSerializer(serializers.Serializer):
 	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
+	front_end_path=serializers.CharField(max_length=100,required=False)
 	query=serializers.ListField(child=serializers.JSONField())
 
 class MakeSavedSearchResponseSerializer(serializers.Serializer):
@@ -102,6 +109,7 @@ class UseSavedSearchRequestSerializer(serializers.Serializer):
 
 class UseSavedSearchResponseSerializer(serializers.Serializer):
 	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
+	front_end_path=serializers.CharField(max_length=100,required=False)
 	query=serializers.ListField(child=serializers.JSONField())
 	
 

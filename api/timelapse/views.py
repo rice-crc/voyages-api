@@ -135,8 +135,6 @@ class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
-		r=GZipMiddleware.process_response(request,response)
-		
 		return JsonResponse(resp, content_type='application/json')
 
 class VoyageAnimation(generics.GenericAPIView):

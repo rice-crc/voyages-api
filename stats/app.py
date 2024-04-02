@@ -203,6 +203,7 @@ def voyage_summary_stats():
 	
 	#filter down on the pk's
 	df=df[df['id'].isin(ids)]
+	
 	outputrecords=[]
 	
 	theaders=[
@@ -240,18 +241,28 @@ def voyage_summary_stats():
 		average=df[k].mean()
 		median=df[k].median()
 		std=df[k].std()
+		
 		if k in percentagerowkeys:
 			average=str(round(average*100,1))
 			median=str(round(median*100,1))
-			std=str(round(std*100,1))
+			
+			if str(std)=="nan":
+				std="nan"
+			else:
+				std=str(round(std*100,1))
+				std=f'{std}%'
 			
 			average=f'{average}%'
 			median=f'{median}%'
-			std=f'{std}%'
+			
 		else:
 			average=str(round(average,1))
 			median=str(round(median,1))
-			std=str(round(std))
+			
+			if str(std)=="nan":
+				std="nan"
+			else:
+				std=str(round(std))
 			
 		record['Average']=average
 		record['Median']=median

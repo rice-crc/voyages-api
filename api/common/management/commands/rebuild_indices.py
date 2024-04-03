@@ -79,8 +79,7 @@ class Command(BaseCommand):
 				"core_name":"sources",
 				"fields":[
 					'id',
-					'title',
-					'short_ref__name'
+					'title'
 				]
 			},
 

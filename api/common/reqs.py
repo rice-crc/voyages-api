@@ -399,5 +399,5 @@ def autocomplete_req(queryset,request):
 			else:
 				final_vals=candidate_vals[start:end]
 	response=[{"value":v} for v in final_vals]
-	print(final_vals)
+# 	print(final_vals)
 	return response

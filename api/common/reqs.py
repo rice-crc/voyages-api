@@ -4,7 +4,7 @@ import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
-from voyages3.localsettings import OPEN_API_BASE_API,DEBUG
+from voyages3.localsettings import OPEN_API_BASE_API,DEBUG,SOLR_ENDPOINT
 import requests
 from django.core.paginator import Paginator
 import html
@@ -12,7 +12,7 @@ import re
 import pysolr
 import os
 import uuid
-from past.models import EnslaverRole
+from past.models import EnslaverRole,EnslaverAlias
 from document.models import Source
 
 def clean_long_df(rows,selected_fields):
@@ -117,13 +117,13 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 			"<class 'blog.models.Post'>":'blog'
 		}
 		
-		solrcorename=solrcorenamedict[qsetclassstr]
+		core_name=solrcorenamedict[qsetclassstr]
 		
 		if DEBUG:
-			print("CLASS",qsetclassstr,solrcorename)
+			print("CLASS",qsetclassstr,core_name)
 		
 		solr = pysolr.Solr(
-			'http://voyages-solr:8983/solr/%s/' %solrcorename,
+			f'{SOLR_ENDPOINT}/{core_name}/',
 			always_commit=True,
 			timeout=10
 		)
@@ -287,13 +287,6 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 
 
 #m2m autocomplete variables that simply cannot be fetched through my preferred route
-autocomplete_m2m_bypass={
-	'aliases__enslaver_relations__roles__name':(EnslaverRole,'name'),
-	'aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__title':(Source,'title'),
-	'enslaver_source_connections__source__title':(Source,'title'),
-	'voyage_source_connections__source__title':(Source,'title'),
-	'enslaved_source_connections__source__title':(Source,'title')
-}
 
 def autocomplete_req(queryset,request):
 	
@@ -324,7 +317,11 @@ def autocomplete_req(queryset,request):
 		it times out after 5 seconds just in case
 		going to need caching
 	'''
-	
+
+	autocomplete_m2m_bypass={
+		'aliases__enslaver_relations__roles__name':(EnslaverRole,'name'),
+		'enslaved_relations__relation__relation_enslavers__enslaver_alias__alias':(EnslaverAlias,'alias')
+	}
 	#hard-coded internal pagination for deduping
 	pagesize=500
 	rdata=request.data
@@ -336,10 +333,28 @@ def autocomplete_req(queryset,request):
 	if offset>max_offset:
 		return []
 	if varName in autocomplete_m2m_bypass:
-		#The m2m autocomplete with querying is just not going to cut it sometimes.
-		#I might just have to push this into solr. Damn!
+		#The m2m autocomplete with querying is just not going to cut it with some fields.
 		objclass,varName=autocomplete_m2m_bypass[varName]
 		queryset=objclass.objects.all()
+	elif '__source__' in varName:
+		#and others will straight up require solr
+		core_name='sources'
+		solr = pysolr.Solr(
+			f'{SOLR_ENDPOINT}/{core_name}/',
+			always_commit=True,
+			timeout=10
+		)
+		
+		print("QUERYSTRING",querystr)
+		queryset=Source.objects.all()
+		if querystr=='':
+			queryset=Source.objects.all()
+		else:
+			results=solr.search('text:%s' %querystr,**{'rows':10000000,'fl':'id'})
+			ids=[doc['id'] for doc in results.docs]
+			queryset=Source.objects.all().filter(id__in=ids)
+		queryset.order_by('title')
+		varName='title'
 	else:
 		if '__' in varName:
 			kstub='__'.join(varName.split('__')[:-1])
@@ -350,6 +365,7 @@ def autocomplete_req(queryset,request):
 	allcandidates=queryset.values_list(varName)
 	allcandidatescount=allcandidates.count()
 	st=time.time()
+	
 	if allcandidatescount < limit:
 		final_vals=list(set([i[0] for i in allcandidates]))
 	else:

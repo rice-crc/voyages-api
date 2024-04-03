@@ -2,11 +2,12 @@ import requests
 import json
 from django.core.management.base import BaseCommand, CommandError
 from voyage.models import Voyage
-from past.models import *
+from past.models import EnslaverIdentity,Enslaved
 from blog.models import Post
+from document.models import Source
 import pysolr
 import numpy as np
-
+from voyages3.localsettings import SOLR_ENDPOINT
 
 class Command(BaseCommand):
 	help = 'rebuilds the solr indices'
@@ -148,7 +149,15 @@ class Command(BaseCommand):
 					'content'
 				]
 			},
-			
+			{
+				"model":Source,
+				"core_name":"sources",
+				"fields":[
+					'id',
+					'title',
+					'short_ref__name'
+				]
+			},
 
 			
 			
@@ -168,7 +177,7 @@ class Command(BaseCommand):
 				exit()
 
 			solr = pysolr.Solr(
-				'http://voyages-solr:8983/solr/%s/' %core_name,
+				f'{SOLR_ENDPOINT}/{core_name}/',
 				always_commit=True,
 				timeout=10
 			)

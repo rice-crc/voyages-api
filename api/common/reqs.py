@@ -350,7 +350,13 @@ def autocomplete_req(queryset,request):
 		if querystr=='':
 			queryset=Source.objects.all()
 		else:
-			results=solr.search('text:%s' %querystr,**{'rows':10000000,'fl':'id'})
+				
+			search_string=querystr
+			search_string=re.sub("\s+"," ",search_string)
+			search_string=search_string.strip()
+			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
+			finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+			results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 			ids=[doc['id'] for doc in results.docs]
 			queryset=Source.objects.all().filter(id__in=ids)
 		queryset.order_by('title')
@@ -393,4 +399,5 @@ def autocomplete_req(queryset,request):
 			else:
 				final_vals=candidate_vals[start:end]
 	response=[{"value":v} for v in final_vals]
+	print(final_vals)
 	return response

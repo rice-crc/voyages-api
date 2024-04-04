@@ -15,7 +15,7 @@ import requests
 import time
 import collections
 import gc
-from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,SOLR_ENDPOINT
 import re
 import pysolr
 import hashlib
@@ -92,7 +92,7 @@ class GlobalSearch(generics.GenericAPIView):
 			for core_name in core_names:
 		
 				solr = pysolr.Solr(
-						'http://voyages-solr:8983/solr/%s/' %core_name,
+						f'{SOLR_ENDPOINT}/{core_name}/',
 						always_commit=True,
 						timeout=10
 					)

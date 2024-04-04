@@ -109,6 +109,7 @@ local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c vo
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c enslavers -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c enslaved -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c blog -d /srv/voyages/solr
+local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c sources -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py rebuild_indices'
 ```
 

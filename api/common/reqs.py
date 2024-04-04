@@ -4,7 +4,7 @@ import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
-from voyages3.localsettings import OPEN_API_BASE_API,DEBUG
+from voyages3.localsettings import OPEN_API_BASE_API,DEBUG,SOLR_ENDPOINT
 import requests
 from django.core.paginator import Paginator
 import html
@@ -12,6 +12,8 @@ import re
 import pysolr
 import os
 import uuid
+from past.models import EnslaverRole,EnslaverAlias
+from document.models import Source
 
 def clean_long_df(rows,selected_fields):
 	'''
@@ -104,6 +106,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 	#global search bypasses the normal filtering process
 	#hits solr with a search string (which currently is applied across all text fields on a model)
 	#and then creates its filtered queryset on the basis of the pk's returned by solr
+	print("PRE FILTER COUNT",queryset.count())
 	if 'global_search' in params:
 		qsetclassstr=str(queryset[0].__class__)
 		
@@ -114,13 +117,13 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 			"<class 'blog.models.Post'>":'blog'
 		}
 		
-		solrcorename=solrcorenamedict[qsetclassstr]
+		core_name=solrcorenamedict[qsetclassstr]
 		
 		if DEBUG:
-			print("CLASS",qsetclassstr,solrcorename)
+			print("CLASS",qsetclassstr,core_name)
 		
 		solr = pysolr.Solr(
-			'http://voyages-solr:8983/solr/%s/' %solrcorename,
+			f'{SOLR_ENDPOINT}/{core_name}/',
 			always_commit=True,
 			timeout=10
 		)
@@ -156,7 +159,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 	#dedupe m2m filters
 	ids=list(set([v[0] for v in filter_queryset.values_list('id')]))
 	queryset=queryset.filter(id__in=ids)
-	
+	print("POST FILTER COUNT",queryset.count())
 	results_count=queryset.count()
 	if DEBUG:
 		print("resultset size:",results_count)
@@ -281,6 +284,10 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	
 	return output
 
+
+
+#m2m autocomplete variables that simply cannot be fetched through my preferred route
+
 def autocomplete_req(queryset,request):
 	
 	'''
@@ -310,7 +317,11 @@ def autocomplete_req(queryset,request):
 		it times out after 5 seconds just in case
 		going to need caching
 	'''
-	
+
+	autocomplete_m2m_bypass={
+		'aliases__enslaver_relations__roles__name':(EnslaverRole,'name'),
+		'enslaved_relations__relation__relation_enslavers__enslaver_alias__alias':(EnslaverAlias,'alias')
+	}
 	#hard-coded internal pagination for deduping
 	pagesize=500
 	rdata=request.data
@@ -321,17 +332,44 @@ def autocomplete_req(queryset,request):
 	max_offset=500
 	if offset>max_offset:
 		return []
-
-	if '__' in varName:
-		kstub='__'.join(varName.split('__')[:-1])
-		queryset=queryset.prefetch_related(kstub)
-
-	kwargs={'{0}__{1}'.format(varName, 'icontains'):querystr}
-	queryset=queryset.filter(**kwargs)
+	if varName in autocomplete_m2m_bypass:
+		#The m2m autocomplete with querying is just not going to cut it with some fields.
+		objclass,varName=autocomplete_m2m_bypass[varName]
+		queryset=objclass.objects.all()
+	elif '__source__' in varName:
+		#and others will straight up require solr
+		core_name='sources'
+		solr = pysolr.Solr(
+			f'{SOLR_ENDPOINT}/{core_name}/',
+			always_commit=True,
+			timeout=10
+		)
+		
+		print("QUERYSTRING",querystr)
+		queryset=Source.objects.all()
+		if querystr=='':
+			queryset=Source.objects.all()
+		else:
+				
+			search_string=querystr
+			search_string=re.sub("\s+"," ",search_string)
+			search_string=search_string.strip()
+			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
+			finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+			results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
+			ids=[doc['id'] for doc in results.docs]
+			queryset=Source.objects.all().filter(id__in=ids)
+		queryset.order_by('title')
+		varName='title'
+	else:
+		if '__' in varName:
+			kstub='__'.join(varName.split('__')[:-1])
+			queryset=queryset.prefetch_related(kstub)
+		kwargs={'{0}__{1}'.format(varName, 'icontains'):querystr}
+		queryset=queryset.filter(**kwargs)
 	queryset=queryset.order_by(varName)
 	allcandidates=queryset.values_list(varName)
 	allcandidatescount=allcandidates.count()
-	
 	st=time.time()
 	
 	if allcandidatescount < limit:
@@ -350,7 +388,6 @@ def autocomplete_req(queryset,request):
 				break
 			end+=pagesize
 			start+=pagesize
-	
 		candidate_vals.sort()
 		start=offset
 		end=offset+limit
@@ -362,4 +399,5 @@ def autocomplete_req(queryset,request):
 			else:
 				final_vals=candidate_vals[start:end]
 	response=[{"value":v} for v in final_vals]
+# 	print(final_vals)
 	return response

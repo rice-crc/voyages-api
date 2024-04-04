@@ -24,8 +24,14 @@ import redis
 import hashlib
 from common.static.Voyage_options import Voyage_options
 from voyage.models import Nationality
+from django.middleware.gzip import GZipMiddleware
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
+# def dec(request,response):
+# 	response = func(request)
+# 	return GZipMiddleware.process_response(request, response)
+# 	return dec
 
 class VoyageAnimationGetNations(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
@@ -53,31 +59,24 @@ class VoyageAnimationGetNations(generics.GenericAPIView):
 			nationalities=Nationality.objects.all()
 			vls=nationalities.values_list('id','name','value')
 			
-			resp={
+			resp=GZipMiddleware.process_response({
 				v[0]:{
 					'name':v[1],
 					'code':v[2]
 				}
 				for v in vls
-			}
+			})
 			
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
-			resp=json.loads(cached_response)
+			resp=GZipMiddleware.process_response(json.loads(cached_response))
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp, content_type='application/json')
-
-
-
-
-
-
-
 
 
 class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
@@ -135,6 +134,7 @@ class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
 		return JsonResponse(resp, content_type='application/json')
 
 class VoyageAnimation(generics.GenericAPIView):
@@ -193,14 +193,14 @@ class VoyageAnimation(generics.GenericAPIView):
 			if not serialized_resp.is_valid():
 				return JsonResponse(serialized_resp.errors,status=500,safe=False)
 			else:
-				resp=serialized_resp.data
+				resp=GZipMiddleware.process_response(serialized_resp.data)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
-			resp=json.loads(cached_response)
+			resp=GZipMiddleware.process_response(json.loads(cached_response))
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")

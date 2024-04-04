@@ -26,7 +26,7 @@ from geo.serializers_READONLY import LocationSerializer,LocationSerializerDeep
 from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,GEO_NETWORKS_BASE_URL,PEOPLE_NETWORKS_BASE_URL,USE_REDIS_CACHE
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
-from common.static.Enslaver_options import Enslaver_options
+from common.static.EnslaverIdentity_options import EnslaverIdentity_options
 from common.static.Enslaved_options import Enslaved_options
 from common.static.EnslavementRelation_options import EnslavementRelation_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
@@ -137,7 +137,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 				queryset,
 				self,
 				request,
-				Enslaver_options,
+				EnslaverIdentity_options,
 				auto_prefetch=False
 			)
 			#RUN THE AUTOCOMPLETE ALGORITHM
@@ -195,7 +195,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 				queryset,
 				self,
 				request,
-				Enslaver_options,
+				EnslaverIdentity_options,
 				auto_prefetch=False
 			)
 		
@@ -258,7 +258,7 @@ class EnslaverList(generics.GenericAPIView):
 				queryset,
 				self,
 				request,
-				Enslaver_options,
+				EnslaverIdentity_options,
 				auto_prefetch=True
 			)
 
@@ -393,13 +393,13 @@ class EnslaverAggregations(generics.GenericAPIView):
 				queryset,
 				self,
 				request,
-				Enslaver_options,
+				EnslaverIdentity_options,
 				auto_prefetch=False
 			)
 		
 			#RUN THE AGGREGATIONS
 			aggregation_field=request.data.get('varName')
-			output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Enslaver_options)
+			output_dict,errormessages=get_fieldstats(queryset,aggregation_field,EnslaverIdentity_options)
 		
 			#VALIDATE THE RESPONSE
 			serialized_resp=EnslaverFieldAggregationResponseSerializer(data=output_dict)
@@ -527,7 +527,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 				queryset,
 				self,
 				request,
-				Enslaver_options,
+				EnslaverIdentity_options,
 				auto_prefetch=True
 			)
 		
@@ -716,7 +716,7 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 				queryset,
 				self,
 				reqdict,
-				Enslaver_options
+				EnslaverIdentity_options
 			)
 		
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
@@ -1072,7 +1072,7 @@ class EnslavedCARD(generics.RetrieveAPIView):
 	Retrieve an enslaver record with their pk
 	'''
 	queryset=Enslaved.objects.all()
-	serializer_class=EnslavedListResponseResultsSerializer
+	serializer_class=EnslavedSerializer
 	lookup_field='enslaved_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

@@ -4,9 +4,9 @@ import re
 from .models import *
 from geo.models import Location
 from voyage.models import *
-from document.models import Source, SourceEnslavedConnection, SourceEnslaverConnection
+from document.models import Source, SourceEnslavedConnection, SourceEnslaverConnection,SourceVoyageConnection
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
-from common.static.Enslaver_options import Enslaver_options
+from common.static.EnslaverIdentity_options import EnslaverIdentity_options
 from common.static.Enslaved_options import Enslaved_options
 from common.static.EnslavementRelation_options import EnslavementRelation_options
 
@@ -62,7 +62,19 @@ class PastVoyageItinerarySerializer(serializers.ModelSerializer):
 			'imp_principal_region_slave_dis',
 			'int_first_port_dis'
 		]
-	
+
+
+class PastVoyageSourceSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=Source
+		fields='__all__'
+
+class PastVoyageSourceConnectionSerializer(serializers.ModelSerializer):
+	source=PastVoyageSourceSerializer(many=False,read_only=True)
+	class Meta:
+		model=SourceVoyageConnection
+		fields='__all__'
+
 class PastVoyageDatesSerializer(serializers.ModelSerializer):
 	imp_arrival_at_port_of_dis_sparsedate=PASTSparseDateSerializer(many=False)
 	class Meta:
@@ -90,6 +102,7 @@ class PastVoyageSerializer(serializers.ModelSerializer):
 	voyage_dates=PastVoyageDatesSerializer(many=False)
 	voyage_ship=PastVoyageShipSerializer(many=False)
 	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
+	voyage_source_connections=PastVoyageSourceConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
 		fields=[
@@ -99,7 +112,8 @@ class PastVoyageSerializer(serializers.ModelSerializer):
 			'voyage_itinerary',
 			'voyage_dates',
 			'voyage_ship',
-			'voyage_outcome'
+			'voyage_outcome',
+			'voyage_source_connections'
 		]
 
 ####################### ENSLAVED M2M CONNECTIONS
@@ -230,7 +244,7 @@ class EnslavedListResponseResultsSerializer(serializers.ModelSerializer):
 		model=Enslaved
 		fields='__all__'
 
-class EnslavedPKSerializer(serializers.ModelSerializer):
+class EnslavedSerializer(serializers.ModelSerializer):
 	post_disembark_location=PastLocationSerializer(many=False)
 	captive_fate=CaptiveFateSerializer(many=False)
 	enslaved_relations=EnslavedInRelationSerializer(many=True)
@@ -361,7 +375,7 @@ class AnyField(Field):
 ############ REQUEST FIILTER OBJECTS
 class EnslaverFilterItemSerializer(serializers.Serializer):
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
-	varName=serializers.ChoiceField(choices=[k for k in Enslaver_options])
+	varName=serializers.ChoiceField(choices=[k for k in EnslaverIdentity_options])
 	searchTerm=AnyField()
 
 class EnslavedFilterItemSerializer(serializers.Serializer):
@@ -511,7 +525,7 @@ class EnslaverListResponseSerializer(serializers.Serializer):
 )
 class EnslaverAutoCompleteRequestSerializer(serializers.Serializer):
 	varName=serializers.ChoiceField(choices=[
-		k for k in Enslaver_options if Enslaver_options[k]['type'] in [
+		k for k in EnslaverIdentity_options if EnslaverIdentity_options[k]['type'] in [
 			'string'
 		]
 	])
@@ -620,7 +634,7 @@ class EnslavedFieldAggregationResponseSerializer(serializers.Serializer):
 )
 class EnslaverFieldAggregationRequestSerializer(serializers.Serializer):
 	varName=serializers.ChoiceField(choices=[
-		k for k in Enslaver_options if Enslaver_options[k]['type'] in [
+		k for k in EnslaverIdentity_options if EnslaverIdentity_options[k]['type'] in [
 			'integer',
 			'number'
 		]
@@ -629,7 +643,7 @@ class EnslaverFieldAggregationRequestSerializer(serializers.Serializer):
 	
 class EnslaverFieldAggregationResponseSerializer(serializers.Serializer):
 	varName=serializers.ChoiceField(choices=[
-		k for k in Enslaver_options if Enslaver_options[k]['type'] in [
+		k for k in EnslaverIdentity_options if EnslaverIdentity_options[k]['type'] in [
 			'integer',
 			'number'
 		]
@@ -694,7 +708,7 @@ class EnslavedDataframesRequestSerializer(serializers.Serializer):
 class EnslaverDataframesRequestSerializer(serializers.Serializer):
 	selected_fields=serializers.ListField(
 		child=serializers.ChoiceField(choices=[
-			k for k in Enslaver_options
+			k for k in EnslaverIdentity_options
 		])
 	)
 	filter=EnslaverFilterItemSerializer(many=True,allow_null=True,required=False)
@@ -800,7 +814,7 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 	geotree_valuefields=serializers.ListField(
 		child=serializers.ChoiceField(
 			choices=[
-				k for k in Enslaver_options
+				k for k in EnslaverIdentity_options
 				if (("voyage_itinerary" in k or "place" in k) and k.endswith("value"))
 			]
 		)

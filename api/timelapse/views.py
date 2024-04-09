@@ -66,7 +66,7 @@ class VoyageAnimationGetNations(generics.GenericAPIView):
 		else:
 			if DEBUG:
 				print("cached:",hashed)
-		
+			resp=json.loads(cached_response)
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp, content_type='application/json')

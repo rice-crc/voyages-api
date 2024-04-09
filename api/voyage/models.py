@@ -34,7 +34,7 @@ class Nationality(models.Model):
 	Nationality of ships.
 	"""
 	name = models.CharField(max_length=255,unique=True)
-	value = models.IntegerField()
+	value = models.IntegerField(unique=True)
 
 	class Meta:
 		verbose_name = "Nationality"

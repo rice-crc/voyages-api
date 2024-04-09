@@ -24,14 +24,8 @@ import redis
 import hashlib
 from common.static.Voyage_options import Voyage_options
 from voyage.models import Nationality
-from django.middleware.gzip import GZipMiddleware
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
-
-# def dec(request,response):
-# 	response = func(request)
-# 	return GZipMiddleware.process_response(request, response)
-# 	return dec
 
 class VoyageAnimationGetNations(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
@@ -59,20 +53,19 @@ class VoyageAnimationGetNations(generics.GenericAPIView):
 			nationalities=Nationality.objects.all()
 			vls=nationalities.values_list('id','name','value')
 			
-			resp=GZipMiddleware.process_response({
+			resp={
 				v[0]:{
 					'name':v[1],
 					'code':v[2]
 				}
 				for v in vls
-			})
+			}
 			
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			if DEBUG:
 				print("cached:",hashed)
-			resp=GZipMiddleware.process_response(json.loads(cached_response))
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -169,6 +162,7 @@ class VoyageAnimation(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
+			print("BEFORE---->",queryset.count())
 			queryset,results_count=post_req(
 				queryset,
 				self,
@@ -176,6 +170,7 @@ class VoyageAnimation(generics.GenericAPIView):
 				Voyage_options,
 				auto_prefetch=True
 			)
+			print("AFTER---->",results_count,queryset.count())
 			#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
 			ids=[i[0] for i in queryset.values_list('id')]
 			u2=STATS_BASE_URL+'timelapse/'
@@ -193,14 +188,14 @@ class VoyageAnimation(generics.GenericAPIView):
 			if not serialized_resp.is_valid():
 				return JsonResponse(serialized_resp.errors,status=500,safe=False)
 			else:
-				resp=GZipMiddleware.process_response(serialized_resp.data)
+				resp=serialized_resp.data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))			
 		else:
 			if DEBUG:
 				print("cached:",hashed)
-			resp=GZipMiddleware.process_response(json.loads(cached_response))
+			resp=json.loads(cached_response)
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")

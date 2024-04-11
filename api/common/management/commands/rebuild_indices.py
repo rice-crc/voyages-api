@@ -73,18 +73,7 @@ class Command(BaseCommand):
 					'subtitle',
 					'content'
 				]
-			},
-			{
-				"model":Source,
-				"core_name":"sources",
-				"fields":[
-					'id',
-					'title',
-					'short_ref__name'
-				]
-			},
-
-			
+			}
 			
 		]
 		

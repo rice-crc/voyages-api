@@ -32,6 +32,7 @@ import re
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
 from drf_spectacular.types import OpenApiTypes
 from common.static.Voyage_options import Voyage_options
+import pickle
 
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
@@ -321,7 +322,6 @@ class VoyageGroupBy(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
-
 class VoyageSummaryStats(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -522,20 +522,22 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		
+		srd=serialized_req.data
 		if USE_REDIS_CACHE:
-			srd=serialized_req.data
 			hashdict={
 				'req_name':str(self.request),
 				'req_data':srd
 			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
+			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed_full_req)
 		else:
 			cached_response=None
 
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			#But first let's see if this autocomplete request has been run before (other than the exact letters typed in...)
+						
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
@@ -544,18 +546,20 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 				Voyage_options,
 				auto_prefetch=False
 			)
-			#RUN THE AUTOCOMPLETE ALGORITHM
 			final_vals=autocomplete_req(queryset,request)
+			
+			#RUN THE AUTOCOMPLETE ALGORITHM
+			
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
 			serialized_resp=VoyageAutoCompleteResponseSerializer(data=resp)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))
+				redis_cache.set(hashed_full_req,json.dumps(resp))
 		else:
 			if DEBUG:
-				print("cached:",hashed)
+				print("cached:",hashed_full_req)
 			resp=json.loads(cached_response)
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")

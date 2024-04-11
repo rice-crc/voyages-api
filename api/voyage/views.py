@@ -82,7 +82,6 @@ class VoyageList(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
@@ -149,7 +148,6 @@ class VoyageAggregations(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=False
@@ -212,7 +210,6 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
@@ -292,7 +289,6 @@ class VoyageGroupBy(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=False
@@ -406,7 +402,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
@@ -472,7 +467,6 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				reqdict,
 				Voyage_options
 			)
@@ -538,15 +532,9 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 		if cached_response is None:
 			#But first let's see if this autocomplete request has been run before (other than the exact letters typed in...)
 						
-			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=False
-			)
-			final_vals=autocomplete_req(queryset,request)
+			unfiltered_queryset=Voyage.objects.all()
+			
+			final_vals=autocomplete_req(unfiltered_queryset,request,Voyage_options)
 			
 			#RUN THE AUTOCOMPLETE ALGORITHM
 			
@@ -602,7 +590,6 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True

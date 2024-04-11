@@ -7,7 +7,7 @@ from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Voyage_options import Voyage_options
-from common.management.commands.rebuild_autocomplete_indices import inverted_autocomplete_indices,autocomplete_indices
+
 
 #### GEO
 

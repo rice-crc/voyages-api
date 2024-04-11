@@ -74,7 +74,6 @@ class EnslavedList(generics.GenericAPIView):
 			
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Enslaved_options,
 				auto_prefetch=True
@@ -132,16 +131,9 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 		
 		if cached_response is None:
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
-				queryset,
-				self,
-				request,
-				EnslaverIdentity_options,
-				auto_prefetch=False
-			)
+			unfiltered_queryset=Enslaved.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(queryset,request)
+			final_vals=autocomplete_req(unfiltered_queryset,request,Enslaved_options)
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
@@ -189,21 +181,12 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 			cached_response=None
 		
 		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
-				queryset,
-				self,
-				request,
-				EnslaverIdentity_options,
-				auto_prefetch=False
-			)
-		
+			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
+			unfiltered_queryset=Enslaved.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(queryset,request)
+			final_vals=autocomplete_req(unfiltered_queryset,request,EnslaverIdentity_options)
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
-		
 			#VALIDATE THE RESPONSE
 			serialized_resp=EnslaverAutoCompleteResponseSerializer(data=resp)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
@@ -256,7 +239,6 @@ class EnslaverList(generics.GenericAPIView):
 			queryset=EnslaverIdentity.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				EnslaverIdentity_options,
 				auto_prefetch=True
@@ -323,7 +305,6 @@ class EnslavedAggregations(generics.GenericAPIView):
 			queryset=Enslaved.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Enslaved_options,
 				auto_prefetch=False
@@ -391,7 +372,6 @@ class EnslaverAggregations(generics.GenericAPIView):
 			queryset=EnslaverIdentity.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				EnslaverIdentity_options,
 				auto_prefetch=False
@@ -459,7 +439,6 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			queryset=Enslaved.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Enslaved_options,
 				auto_prefetch=True
@@ -525,7 +504,6 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			queryset=EnslaverIdentity.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				EnslaverIdentity_options,
 				auto_prefetch=True
@@ -585,7 +563,6 @@ class EnslavementRelationList(generics.GenericAPIView):
 			queryset=EnslavementRelation.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				EnslavementRelation_options,
 				auto_prefetch=True
@@ -649,7 +626,6 @@ class EnslavementRelationDataFrames(generics.GenericAPIView):
 			queryset=EnslavementRelation.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				EnslavementRelation_options,
 				auto_prefetch=True
@@ -714,7 +690,6 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 			queryset=EnslaverIdentity.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				reqdict,
 				EnslaverIdentity_options
 			)
@@ -787,7 +762,6 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 			queryset=Enslaved.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				reqdict,
 				Enslaved_options
 			)
@@ -855,7 +829,6 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			queryset=Enslaved.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Enslaved_options,
 				auto_prefetch=True

@@ -133,21 +133,12 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 			cached_response=None
 		
 		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Post.objects.all()
-			queryset,results_count=post_req(
-				queryset,
-				self,
-				request,
-				Post_options,
-				auto_prefetch=False
-			)
-		
+			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
+			unfiltered_queryset=Post.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(queryset,request)
+			final_vals=autocomplete_req(unfiltered_queryset,request,Post_options)
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
-		
 			#VALIDATE THE RESPONSE
 			serialized_resp=PostAutoCompleteResponseSerializer(data=resp)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE

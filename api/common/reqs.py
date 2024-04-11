@@ -15,7 +15,7 @@ import os
 import uuid
 from past.models import EnslaverRole,EnslaverAlias
 from document.models import Source
-from common.management.commands.rebuild_autocomplete_indices import inverted_autocomplete_indices,autocomplete_indices
+from common.autocomplete_indices import get_inverted_autocomplete_indices,autocomplete_indices
 import hashlib
 
 
@@ -88,7 +88,7 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 			}
 	return res,errormessages
 
-def post_req(queryset,s,r,options_dict,auto_prefetch=True):
+def post_req(queryset,r,options_dict,auto_prefetch=True):
 	'''
 		This function handles:
 		1. ensuring that all the fields that will be called are valid on the model
@@ -148,19 +148,16 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 			op=item['op']
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]
-			if varName in all_fields and op in ['lte','gte','exact','in','icontains']:
+			if op in ['lte','gte','exact','in','icontains']:
 				django_filter_term='__'.join([varName,op])
 				kwargs[django_filter_term]=searchTerm
-			elif varName in all_fields and op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
+			elif op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
 				searchTerm.sort()
 				min,max=searchTerm
 				kwargs['{0}__{1}'.format(varName, 'lte')]=max
 				kwargs['{0}__{1}'.format(varName, 'gte')]=min		
 			else:
-				if varName not in all_fields:
-					errormessages.append("var %s not in model" %varName)
-				if op not in ['lte','gte','exact','in','icontains']:
-					errormessages.append("%s is not a valid django search operation" %op)
+				errormessages.append(f"{op} is not a valid django search operation")
 		filter_queryset=queryset.filter(**kwargs)
 	
 	#dedupe m2m filters
@@ -291,38 +288,7 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	
 	return output
 
-
-
-#m2m autocomplete variables that simply cannot be fetched through my preferred route
-
-
-def autocomplete_solrsearch(core_name,search_string,proxy_varname):
-	#and others will straight up require solr
-	core_name='sources'
-	solr = pysolr.Solr(
-		f'{SOLR_ENDPOINT}/{core_name}/',
-		always_commit=True,
-		timeout=10
-	)
-	print("QUERYSTRING",querystr)
-	queryset=Source.objects.all()
-	if querystr=='':
-		queryset=Source.objects.all()
-	else:
-			
-		search_string=querystr
-		search_string=re.sub("\s+"," ",search_string)
-		search_string=search_string.strip()
-		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
-		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
-		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
-		ids=[doc['id'] for doc in results.docs]
-		queryset=Source.objects.all().filter(id__in=ids)
-	queryset.order_by('title')
-	varName='title'
-	return queryset
-
-def autocomplete_req(queryset,request):
+def autocomplete_req(queryset,request,options):
 	
 	#first, get the reqdata
 	rdata=request.data
@@ -332,6 +298,7 @@ def autocomplete_req(queryset,request):
 	limit=int(rdata.get('limit'))
 	
 	#then load the appropriate solr core to assist
+	inverted_autocomplete_indices=get_inverted_autocomplete_indices()
 	inverted_autocomplete_index=inverted_autocomplete_indices[varName]
 	core_name=inverted_autocomplete_index['core_name']
 	ac_field_model=inverted_autocomplete_index['model']
@@ -392,7 +359,14 @@ def autocomplete_req(queryset,request):
 	else:
 		cached_response=None
 	if cached_response is None:
-		varName_pks=[i[0] for i in queryset.values_list(varName_pkfield)]
+
+		filtered_queryset,results_count=post_req(
+			queryset,
+			request,
+			options,
+			auto_prefetch=False
+		)
+		varName_pks=[i[0] for i in filtered_queryset.values_list(varName_pkfield)]
 		if USE_REDIS_CACHE:
 			redis_cache.set(hashed_full_req,json.dumps(varName_pks))
 	else:

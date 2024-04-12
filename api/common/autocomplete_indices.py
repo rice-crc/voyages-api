@@ -58,6 +58,7 @@ autocomplete_indices=[
 		"model":VoyageShip,
 		"core_name":"autocomplete_ship_names",
 		"fields":[
+			'id',
 			'ship_name'
 		],
 		"related_fields":[

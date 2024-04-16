@@ -136,7 +136,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Post.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(unfiltered_queryset,request,Post_options)
+			final_vals=autocomplete_req(unfiltered_queryset,request,Post_options,'Post')
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE

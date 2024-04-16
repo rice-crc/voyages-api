@@ -7,7 +7,7 @@ from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Voyage_options import Voyage_options
-
+from common.autocomplete_indices import get_all_model_autocomplete_fields
 
 #### GEO
 
@@ -667,13 +667,7 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
     ]
 )
 class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=[
-		'voyage_ship__ship_name',
-		'voyage_source_connections__source__title',
-		'voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias',
-		'voyage_enslavement_relations__enslaved_in_relation__enslaved__documented_name',
-		'voyage_enslavement_relations__enslaved_in_relation__enslaved__modern_name'
-	])
+	varName=serializers.ChoiceField(choices=get_all_model_autocomplete_fields('Voyage'))
 	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()

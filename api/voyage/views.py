@@ -534,7 +534,7 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 						
 			unfiltered_queryset=Voyage.objects.all()
 			
-			final_vals=autocomplete_req(unfiltered_queryset,request,Voyage_options)
+			final_vals=autocomplete_req(unfiltered_queryset,request,Voyage_options,'Voyage')
 			
 			#RUN THE AUTOCOMPLETE ALGORITHM
 			

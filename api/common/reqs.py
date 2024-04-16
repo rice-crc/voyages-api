@@ -13,9 +13,13 @@ import pysolr
 import redis
 import os
 import uuid
-from past.models import EnslaverRole,EnslaverAlias
+from past.models import *
+from voyage.models import *
+from blog.models import *
+
+
 from document.models import Source
-from common.autocomplete_indices import get_inverted_autocomplete_indices,autocomplete_indices
+from common.autocomplete_indices import get_inverted_autocomplete_indices,autocomplete_indices,get_inverted_autocomplete_basic_index_field_endings
 import hashlib
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
@@ -284,7 +288,7 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	
 	return output
 
-def autocomplete_req(queryset,request,options):
+def autocomplete_req(queryset,request,options,sourcemodelname):
 	
 	#first, get the reqdata
 	rdata=request.data
@@ -295,22 +299,103 @@ def autocomplete_req(queryset,request,options):
 	
 	#then load the appropriate solr core to assist
 	inverted_autocomplete_indices=get_inverted_autocomplete_indices()
-	inverted_autocomplete_index=inverted_autocomplete_indices[varName]
-	core_name=inverted_autocomplete_index['core_name']
-	ac_field_model=inverted_autocomplete_index['model']
-	ac_index_fields=inverted_autocomplete_index['fields']
+	inverted_autocomplete_basic_index_field_endings=get_inverted_autocomplete_basic_index_field_endings()
+	targetmodelname=inverted_autocomplete_basic_index_field_endings[sourcemodelname][varName]
 	
-	#now get the pk's of the object from solr
-	if querystr=='':
-		#... unless we have an empty search
-		#if we have an empty search
-		#then go ahead and fetch the pk's for the unfiltered queryset of that model
-		#however, this will only ever happen once -- because otherwise we will have those pk's sitting in redis for us
+	##USE SOLR
+	
+	if varName in inverted_autocomplete_indices:
+		inverted_autocomplete_index=inverted_autocomplete_indices[varName]
+		core_name=inverted_autocomplete_index['core_name']
+		ac_field_model=inverted_autocomplete_index['model']
+		ac_index_fields=inverted_autocomplete_index['fields']	
+		#now get the pk's of the object from solr
+		if querystr=='':
+			#... unless we have an empty search
+			#if we have an empty search
+			#then go ahead and fetch the pk's for the unfiltered queryset of that model
+			#however, this will only ever happen once -- because otherwise we will have those pk's sitting in redis for us
+			if USE_REDIS_CACHE:
+				hashdict={
+					'modelname':str(ac_field_model),
+					'req':rdata,
+					'req_type':"WE WANT THE FULL PK LIST ON THE TARGET MODEL"
+				}
+				hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+				cached_response = redis_cache.get(hashed_full_req)
+			else:
+				cached_response=None
+			
+			if cached_response is None:
+				solr_ids=[i[0] for i in ac_field_model.objects.all().values_list('id')]
+				if USE_REDIS_CACHE:
+					redis_cache.set(hashed_full_req,json.dumps(solr_ids))
+			else:
+				solr_ids=cached_response
+			solr_ids=set(solr_ids)
+		else:
+			#if we do have some text to work with, then run the solr search
+			solr = pysolr.Solr(
+				f'{SOLR_ENDPOINT}/{core_name}/',
+				always_commit=True,
+				timeout=10
+			)
+			querystr=re.sub("\s+"," ",querystr)
+			querystr=querystr.strip()
+			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in querystr.split(' ')]
+			finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+			results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
+			solr_ids=set([doc['id'] for doc in results.docs])
+			solr_ids=set(solr_ids)
+		
+		#now we get the primary keys of that variable name from the filtered queryset
+		#for example, if i'm searching in the trans-atlantic database, then I shouln't get any hits for 'OMNO'
+		model_searchfield=[a for a in ac_index_fields if a in varName][0]
+		print("model searchfield---->",model_searchfield)
+		varName_pkfield=re.sub("__[a-z|_]+$","__id",varName)
+		
+		print("PKFIELD",varName_pkfield)
+		
+		#again, use redis internally if possible
 		if USE_REDIS_CACHE:
 			hashdict={
-				'modelname':str(ac_field_model),
+				'modelname':str(queryset),
 				'req':rdata,
-				'req_type':"WE WANT THE FULL PK LIST ON THE TARGET MODEL"
+				'req_type':"WE WANT THE FILTERED PK LIST FOR THE NESTED VARNAME"
+			}
+			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed_full_req)
+		else:
+			cached_response=None
+		if cached_response is None:
+	
+			filtered_queryset,results_count=post_req(
+				queryset,
+				request,
+				options,
+				auto_prefetch=False
+			)
+			varName_pks=[i[0] for i in filtered_queryset.values_list(varName_pkfield)]
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed_full_req,json.dumps(varName_pks))
+		else:
+			varName_pks=cached_response
+		varName_pks=set(varName_pks)
+		
+		#now take the intersection of those sets
+		##to recap, i've, for example,
+		####used solr to get the full list of sources on a text search for 'omno'
+		####hit the orm to get all the full list of applicable source pk's, say, in the intra-american db
+		####and now i want to see where the overlap is
+		results_id=list(solr_ids & varName_pks)
+		
+		#we're almost done. now we are going to pull the actual field the user asked for
+		#and again, cache it
+		if USE_REDIS_CACHE:
+			hashdict={
+				'modelname':str(queryset),
+				'req':rdata,
+				'req_type':"WE WANT THE AC SUGGESTIONS"
 			}
 			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
 			cached_response = redis_cache.get(hashed_full_req)
@@ -318,90 +403,24 @@ def autocomplete_req(queryset,request,options):
 			cached_response=None
 		
 		if cached_response is None:
-			solr_ids=[i[0] for i in ac_field_model.objects.all().values_list('id')]
+			ac_suggestions=[v[0] for v in ac_field_model.objects.all().filter(id__in=results_id).order_by(model_searchfield).values_list(model_searchfield) if v[0] is not None]
 			if USE_REDIS_CACHE:
-				redis_cache.set(hashed_full_req,json.dumps(solr_ids))
+				redis_cache.set(hashed_full_req,json.dumps(ac_suggestions))
 		else:
-			solr_ids=cached_response
-		solr_ids=set(solr_ids)
+			ac_suggestions=cached_response
+	
+		paginated_ac_suggestions=ac_suggestions[offset:(offset+limit)]
+		
+		response=[{"value":v} for v in paginated_ac_suggestions]
 	else:
-		#if we do have some text to work with, then run the solr search
-		solr = pysolr.Solr(
-			f'{SOLR_ENDPOINT}/{core_name}/',
-			always_commit=True,
-			timeout=10
-		)
-		querystr=re.sub("\s+"," ",querystr)
-		querystr=querystr.strip()
-		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in querystr.split(' ')]
-		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
-		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
-		solr_ids=set([doc['id'] for doc in results.docs])
-		solr_ids=set(solr_ids)
-	
-	#now we get the primary keys of that variable name from the filtered queryset
-	#for example, if i'm searching in the trans-atlantic database, then I shouln't get any hits for 'OMNO'
-	model_searchfield=[a for a in ac_index_fields if a in varName][0]
-	print("model searchfield---->",model_searchfield)
-	varName_pkfield=re.sub("__[a-z|_]+$","__id",varName)
-	
-	print("PKFIELD",varName_pkfield)
-	
-	#again, use redis internally if possible
-	if USE_REDIS_CACHE:
-		hashdict={
-			'modelname':str(queryset),
-			'req':rdata,
-			'req_type':"WE WANT THE FILTERED PK LIST FOR THE NESTED VARNAME"
-		}
-		hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-		cached_response = redis_cache.get(hashed_full_req)
-	else:
-		cached_response=None
-	if cached_response is None:
-
-		filtered_queryset,results_count=post_req(
-			queryset,
-			request,
-			options,
-			auto_prefetch=False
-		)
-		varName_pks=[i[0] for i in filtered_queryset.values_list(varName_pkfield)]
-		if USE_REDIS_CACHE:
-			redis_cache.set(hashed_full_req,json.dumps(varName_pks))
-	else:
-		varName_pks=cached_response
-	varName_pks=set(varName_pks)
-	
-	#now take the intersection of those sets
-	##to recap, i've, for example,
-	####used solr to get the full list of sources on a text search for 'omno'
-	####hit the orm to get all the full list of applicable source pk's, say, in the intra-american db
-	####and now i want to see where the overlap is
-	results_id=list(solr_ids & varName_pks)
-	
-	#we're almost done. now we are going to pull the actual field the user asked for
-	#and again, cache it
-	if USE_REDIS_CACHE:
-		hashdict={
-			'modelname':str(queryset),
-			'req':rdata,
-			'req_type':"WE WANT THE AC SUGGESTIONS"
-		}
-		hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-		cached_response = redis_cache.get(hashed_full_req)
-	else:
-		cached_response=None
-	
-	if cached_response is None:
-		ac_suggestions=[v[0] for v in ac_field_model.objects.all().filter(id__in=results_id).order_by(model_searchfield).values_list(model_searchfield) if v[0] is not None]
-		if USE_REDIS_CACHE:
-			redis_cache.set(hashed_full_req,json.dumps(ac_suggestions))
-	else:
-		ac_suggestions=cached_response
-
-	paginated_ac_suggestions=ac_suggestions[offset:(offset+limit)]
-	
-	response=[{"value":v} for v in paginated_ac_suggestions]
-	
+		fieldtail=re.sub('.*?__','',varName)
+		evalstr=f'{targetmodelname}.objects.all().values_list("{fieldtail}")'
+		acvals=eval(evalstr)
+		listacvals=[v[0] for v in list(acvals)]
+		listacvals.sort()
+		response=[{"value":str(v)} for v in listacvals]
+# 		print("---->",acvals)
+# 		response=[{"value":v for v in acvals}]
+# 		print("RESPONSE",response)
+# 	print("RREEEEEEESSSPSONNNNNSSESEEEE",response)
 	return response

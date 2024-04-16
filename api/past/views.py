@@ -133,7 +133,7 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Enslaved.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(unfiltered_queryset,request,Enslaved_options)
+			final_vals=autocomplete_req(unfiltered_queryset,request,Enslaved_options,'Enslaved')
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
@@ -184,7 +184,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Enslaved.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(unfiltered_queryset,request,EnslaverIdentity_options)
+			final_vals=autocomplete_req(unfiltered_queryset,request,EnslaverIdentity_options,'EnslaverIdentity')
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE

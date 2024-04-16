@@ -3,6 +3,13 @@ from past.models import EnslaverAlias,Enslaved
 from blog.models import Post
 from document.models import Source
 
+autocomplete_basic_index_field_endings=[
+	'tags__name',
+	'authors__name',
+	'title',
+	''
+]
+
 autocomplete_indices=[
 	{
 		"model":Source,
@@ -62,7 +69,6 @@ autocomplete_indices=[
 			'ship_name'
 		],
 		"related_fields":[
-			'voyage__voyage_ship__ship_name',
 			'voyage_ship__ship_name',
 			'aliases__enslaver_relations__relation__voyage__voyage_ship__ship_name',
 			'enslaved_relations__relation__voyage__voyage_ship__ship_name'

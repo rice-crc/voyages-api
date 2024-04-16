@@ -457,7 +457,7 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 		child=serializers.ChoiceField(
 			choices=[
 				k for k in Voyage_options
-				if k.startswith("voyage_itinerary")
+				if (re.match("voyage_itinerary[a-z|_]+",k) or re.match("voyage_ship[a-z|_]+[region|place][a-z|_]+",k))
 				and k.endswith("value")
 			]
 		)
@@ -668,6 +668,7 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
 )
 class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
 	varName=serializers.ChoiceField(choices=[
+		'voyage_ship__ship_name',
 		'voyage_source_connections__source__title',
 		'voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias',
 		'voyage_enslavement_relations__enslaved_in_relation__enslaved__documented_name',

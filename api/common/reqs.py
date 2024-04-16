@@ -18,9 +18,7 @@ from document.models import Source
 from common.autocomplete_indices import get_inverted_autocomplete_indices,autocomplete_indices
 import hashlib
 
-
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
-
 
 def clean_long_df(rows,selected_fields):
 	'''
@@ -167,8 +165,6 @@ def post_req(queryset,r,options_dict,auto_prefetch=True):
 	results_count=queryset.count()
 	if DEBUG:
 		print("resultset size:",results_count)
-	
-	
 	
 	#PREFETCH REQUISITE FIELDS
 	prefetch_fields=params.get('selected_fields') or []
@@ -346,7 +342,11 @@ def autocomplete_req(queryset,request,options):
 	#now we get the primary keys of that variable name from the filtered queryset
 	#for example, if i'm searching in the trans-atlantic database, then I shouln't get any hits for 'OMNO'
 	model_searchfield=[a for a in ac_index_fields if a in varName][0]
-	varName_pkfield=re.sub("_[a-z]+$","_id",varName)
+	print("model searchfield---->",model_searchfield)
+	varName_pkfield=re.sub("__[a-z|_]+$","__id",varName)
+	
+	print("PKFIELD",varName_pkfield)
+	
 	#again, use redis internally if possible
 	if USE_REDIS_CACHE:
 		hashdict={
@@ -394,7 +394,7 @@ def autocomplete_req(queryset,request,options):
 		cached_response=None
 	
 	if cached_response is None:
-		ac_suggestions=[v[0] for v in ac_field_model.objects.all().filter(id__in=results_id).order_by(model_searchfield).values_list(model_searchfield)]
+		ac_suggestions=[v[0] for v in ac_field_model.objects.all().filter(id__in=results_id).order_by(model_searchfield).values_list(model_searchfield) if v[0] is not None]
 		if USE_REDIS_CACHE:
 			redis_cache.set(hashed_full_req,json.dumps(ac_suggestions))
 	else:

@@ -24,7 +24,7 @@ class PASTSparseDate(SparseDateAbstractBase):
 	pass
 
 class EnslaverInfoAbstractBase(models.Model):
-	principal_alias = models.CharField(max_length=255)
+	principal_alias = models.CharField(db_index=True,max_length=255)
 	# Personal info.
 	birth_year = models.IntegerField(null=True,blank=True)
 	birth_month = models.IntegerField(null=True,blank=True)
@@ -46,13 +46,13 @@ class EnslaverInfoAbstractBase(models.Model):
 		on_delete=models.SET_NULL,
 		related_name='+'
 	)
-	father_name = models.CharField(max_length=255, null=True,blank=True)
-	father_occupation = models.CharField(max_length=255, null=True,blank=True)
-	mother_name = models.CharField(max_length=255, null=True,blank=True)
-	probate_date = models.CharField(max_length=12, null=True,blank=True)
-	will_value_pounds = models.CharField(max_length=12, null=True,blank=True)
-	will_value_dollars = models.CharField(max_length=12, null=True,blank=True)
-	will_court = models.CharField(max_length=12, null=True,blank=True)
+	father_name = models.CharField(db_index=True,max_length=255, null=True,blank=True)
+	father_occupation = models.CharField(db_index=True,max_length=255, null=True,blank=True)
+	mother_name = models.CharField(db_index=True,max_length=255, null=True,blank=True)
+	probate_date = models.CharField(db_index=True,max_length=12, null=True,blank=True)
+	will_value_pounds = models.CharField(db_index=True,max_length=12, null=True,blank=True)
+	will_value_dollars = models.CharField(db_index=True,max_length=12, null=True,blank=True)
+	will_court = models.CharField(db_index=True,max_length=12, null=True,blank=True)
 	principal_location = models.ForeignKey(
 		Location,
 		null=True,
@@ -94,11 +94,11 @@ class EnslaverAlias(models.Model):
 	records under different names (aliases).
 	"""
 	identity = models.ForeignKey(EnslaverIdentity, on_delete=models.CASCADE, related_name='aliases')
-	alias = models.CharField(max_length=255)
+	alias = models.CharField(db_index=True,max_length=255)
 	
 	# The manual id can be used to track the original entries in sheets produced
 	# by the researchers.
-	manual_id = models.CharField(max_length=30, null=True)
+	manual_id = models.CharField(db_index=True,max_length=30, null=True)
 	last_updated=models.DateTimeField(auto_now=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 	#It's going to be hairy mapping all this data over from legacy
@@ -190,13 +190,13 @@ class Enslaved(models.Model):
 	# For Oceans of Kinfolk, this field is used to store the Western
 	# Name of the enslaved.
 	enslaved_id = models.IntegerField(unique=True,blank=False,null=False)
-	documented_name = models.CharField(max_length=100, blank=True,null=True)
-	name_first = models.CharField(max_length=100, null=True, blank=True)
-	name_second = models.CharField(max_length=100, null=True, blank=True)
-	name_third = models.CharField(max_length=100, null=True, blank=True)
-	modern_name = models.CharField(max_length=100, null=True, blank=True)
+	documented_name = models.CharField(db_index=True,max_length=100, blank=True,null=True)
+	name_first = models.CharField(db_index=True,max_length=100, null=True, blank=True)
+	name_second = models.CharField(db_index=True,max_length=100, null=True, blank=True)
+	name_third = models.CharField(db_index=True,max_length=100, null=True, blank=True)
+	modern_name = models.CharField(db_index=True,max_length=100, null=True, blank=True)
 	# Certainty is used for African Origins only.
-	editor_modern_names_certainty = models.CharField(max_length=255,
+	editor_modern_names_certainty = models.CharField(db_index=True,max_length=255,
 													 null=True,
 													 blank=True)
 	# Personal data
@@ -248,8 +248,8 @@ class Enslaved(models.Model):
 		ordering=['id']
 
 class EnslavedName(models.Model):
-	name = models.CharField(max_length=255, null=False, blank=False)
-	language = models.CharField(max_length=3, null=False, blank=False)
+	name = models.CharField(db_index=True,max_length=255, null=False, blank=False)
+	language = models.CharField(db_index=True,max_length=3, null=False, blank=False)
 	recordings_count = models.IntegerField()
 
 class EnslavementRelationType(NamedModelAbstractBase):
@@ -263,7 +263,7 @@ class EnslavementRelation(models.Model):
 # 	id = models.IntegerField(primary_key=True)
 	relation_type = models.ForeignKey(EnslavementRelationType, null=False,blank=False, on_delete=models.DO_NOTHING)
 	place = models.ForeignKey(Location, null=True,blank=True, on_delete=models.SET_NULL, related_name='+')
-	date = models.CharField(max_length=12, null=True,blank=True,
+	date = models.CharField(db_index=True,max_length=12, null=True,blank=True,
 		help_text="Date in MM,DD,YYYY format with optional fields.")
 	amount = models.FloatField(null=True,blank=True)
 	voyage = models.ForeignKey(

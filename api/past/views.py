@@ -182,7 +182,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 		
 		if cached_response is None:
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
-			unfiltered_queryset=Enslaved.objects.all()
+			unfiltered_queryset=EnslaverIdentity.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
 			final_vals=autocomplete_req(unfiltered_queryset,request,EnslaverIdentity_options,'EnslaverIdentity')
 			resp=dict(request.data)

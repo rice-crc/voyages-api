@@ -451,6 +451,7 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 				'req_name':str(self.request),
 				'req_data':srd
 			}
+			print(self.request,srd)
 			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
 			cached_response = redis_cache.get(hashed)
 		else:

@@ -9,6 +9,8 @@ from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.EnslaverIdentity_options import EnslaverIdentity_options
 from common.static.Enslaved_options import Enslaved_options
 from common.static.EnslavementRelation_options import EnslavementRelation_options
+from common.autocomplete_indices import get_all_model_autocomplete_fields
+
 
 ############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
 
@@ -524,11 +526,7 @@ class EnslaverListResponseSerializer(serializers.Serializer):
     ]
 )
 class EnslaverAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=[
-		k for k in EnslaverIdentity_options if EnslaverIdentity_options[k]['type'] in [
-			'string'
-		]
-	])
+	varName=serializers.ChoiceField(choices=get_all_model_autocomplete_fields('EnslaverIdentity'))
 	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
@@ -565,11 +563,7 @@ class EnslaverAutoCompleteResponseSerializer(serializers.Serializer):
     ]
 )
 class EnslavedAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=[
-		k for k in Enslaved_options if Enslaved_options[k]['type'] in [
-			'string'
-		]
-	])
+	varName=serializers.ChoiceField(choices=get_all_model_autocomplete_fields('Enslaved'))
 	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()

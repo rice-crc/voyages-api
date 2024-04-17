@@ -16,7 +16,11 @@ autocomplete_basic_index_field_endings=[
 	('SlavesOutcome','Voyage','voyage_outcome__outcome_slaves__name'),
 	('VesselCapturedOutcome','Voyage','voyage_outcome__vessel_captured_outcome__name'),
 	('OwnerOutcome','Voyage','voyage_outcome__outcome_owner__name'),
-	('Resistance','Voyage','voyage_outcome__resistance__name')
+	('Resistance','Voyage','voyage_outcome__resistance__name'),
+	('CaptiveFate','Enslaved','captive_fate__name'),
+	('ParticularOutcome','Enslaved','enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__name'),
+	('Source','Enslaved','enslaved_source_connections__source__title'),
+	('EnslaverRole','EnslaverIdentity','aliases__enslaver_relations__roles__name')
 ]
 
 autocomplete_indices=[
@@ -30,7 +34,7 @@ autocomplete_indices=[
 		],
 		"related_fields":[
 			('Enslaved','enslaved_source_connections__source__title'),
-			('EnslaverIdentity','aliases__enslaver_voyage_connection__voyage__voyage_source_connections__source__title'),
+			('EnslaverIdentity','enslaver_source_connections__source__title'),
 			('EnslaverIdentity','aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__title'),
 			('Voyage','voyage_source_connections__source__title')
 		]
@@ -46,7 +50,6 @@ autocomplete_indices=[
 		"related_fields":[
 			('Enslaved','enslaved_relations__relation__relation_enslavers__enslaver_alias__alias'),
 			('Voyage','voyage__voyage_enslaver_connection__enslaver_alias__alias'),
-			('EnslaverIdentity','enslavers__enslaver_alias__alias'),
 			('Voyage','voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias'),
 			('EnslaverIdentity','aliases__alias'),
 			('EnslaverIdentity','voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias'),
@@ -56,7 +59,7 @@ autocomplete_indices=[
 		"model":Enslaved,
 		"core_name":"autocomplete_enslaved_names",
 		"fields":[
-			'id',
+			'enslaved_id',
 			'documented_name',
 			'modern_name'
 		],
@@ -123,7 +126,7 @@ def get_all_model_autocomplete_fields(modelname):
 					model_autocomplete_fields.append(field)
 	
 	
-	print("MODEL AC FIELDS",model_autocomplete_fields)
+# 	print("MODEL AC FIELDS",model_autocomplete_fields)
 	
 	return(model_autocomplete_fields)	
 	

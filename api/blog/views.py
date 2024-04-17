@@ -70,7 +70,6 @@ class PostList(generics.GenericAPIView):
 			queryset=Post.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Post_options,
 				auto_prefetch=True

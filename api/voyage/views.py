@@ -32,7 +32,7 @@ import re
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
 from drf_spectacular.types import OpenApiTypes
 from common.static.Voyage_options import Voyage_options
-
+import pickle
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
@@ -81,7 +81,6 @@ class VoyageList(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
@@ -148,7 +147,6 @@ class VoyageAggregations(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=False
@@ -211,7 +209,6 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
@@ -291,7 +288,6 @@ class VoyageGroupBy(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=False
@@ -320,7 +316,6 @@ class VoyageGroupBy(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
 		return JsonResponse(resp,safe=False,status=200)
-
 
 class VoyageSummaryStats(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -406,7 +401,6 @@ class VoyageDataFrames(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
@@ -456,6 +450,7 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 				'req_name':str(self.request),
 				'req_data':srd
 			}
+			print(self.request,srd)
 			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
 			cached_response = redis_cache.get(hashed)
 		else:
@@ -472,7 +467,6 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				reqdict,
 				Voyage_options
 			)
@@ -522,40 +516,38 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		
+		srd=serialized_req.data
 		if USE_REDIS_CACHE:
-			srd=serialized_req.data
 			hashdict={
 				'req_name':str(self.request),
 				'req_data':srd
 			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
+			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed_full_req)
 		else:
 			cached_response=None
 
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=False
-			)
+			#But first let's see if this autocomplete request has been run before (other than the exact letters typed in...)
+						
+			unfiltered_queryset=Voyage.objects.all()
+			
+			final_vals=autocomplete_req(unfiltered_queryset,request,Voyage_options,'Voyage')
+			
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(queryset,request)
+			
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
 			serialized_resp=VoyageAutoCompleteResponseSerializer(data=resp)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))
+				redis_cache.set(hashed_full_req,json.dumps(resp))
 		else:
 			if DEBUG:
-				print("cached:",hashed)
+				print("cached:",hashed_full_req)
 			resp=json.loads(cached_response)
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -598,7 +590,6 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			queryset=Voyage.objects.all()
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
@@ -638,8 +629,6 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
 		return JsonResponse(resp,safe=False,status=200)
-
-
 
 ######## CRUD ENDPOINTS
 

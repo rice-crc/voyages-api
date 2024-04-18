@@ -212,7 +212,7 @@ timelapse={
 		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
 		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
 		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__month',
-		'voyage_ship__imputed_nationality__id',
+		'voyage_ship__imputed_nationality__value',
 		'voyage_ship__tonnage_mod',
 		'voyage_ship__ship_name'
 	]

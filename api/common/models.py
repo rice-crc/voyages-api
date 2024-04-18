@@ -26,17 +26,20 @@ class SparseDateAbstractBase(models.Model):
 	day = models.IntegerField(
 		null=True,
 		blank=True,
-		validators=[MinValueValidator(1),MaxValueValidator(31)]
+		validators=[MinValueValidator(1),MaxValueValidator(31)],
+		db_index=True
 	)
 	month = models.IntegerField(
 		null=True,
 		blank=True,
-		validators=[MinValueValidator(1),MaxValueValidator(12)]
+		validators=[MinValueValidator(1),MaxValueValidator(12)],
+		db_index=True
 	)
 	year = models.IntegerField(
 		null=True,
 		blank=True,
-		validators=[MinValueValidator(0),MaxValueValidator(2050)]
+		validators=[MinValueValidator(0),MaxValueValidator(2050)],
+		db_index=True
 	)
 
 	def __str__(self):

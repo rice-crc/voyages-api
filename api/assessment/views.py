@@ -226,7 +226,6 @@ class EstimateAggRoutes(generics.GenericAPIView):
 			zoomlevel=params.get('zoomlevel','region')
 			queryset,results_count=post_req(
 				queryset,
-				self,
 				request,
 				Estimate_options,
 				auto_prefetch=True

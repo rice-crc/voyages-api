@@ -34,7 +34,6 @@ from drf_spectacular.types import OpenApiTypes
 from common.static.Voyage_options import Voyage_options
 import pickle
 
-
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 class VoyageList(generics.GenericAPIView):
@@ -630,8 +629,6 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
 		return JsonResponse(resp,safe=False,status=200)
-
-
 
 ######## CRUD ENDPOINTS
 

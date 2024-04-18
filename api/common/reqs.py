@@ -395,7 +395,7 @@ def autocomplete_req(queryset,request,options,sourcemodelname):
 		querystr=querystr.strip()
 		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in querystr.split(' ')]
 		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
-		print(finalsearchstring)
+# 		print(finalsearchstring)
 		
 		if finalsearchstring=="()":
 			print("BLANK SEARCH")
@@ -406,6 +406,7 @@ def autocomplete_req(queryset,request,options,sourcemodelname):
 			results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		solr_ids=set([doc['id'] for doc in results.docs])
 		solr_ids=set(solr_ids)
+# 		print(solr_ids)
 # 		solr_ids={0,3,7,12}		
 		#now we get the primary keys of that variable name from the filtered queryset
 		#for example, if i'm searching in the trans-atlantic database, then I shouln't get any hits for 'OMNO'
@@ -415,8 +416,6 @@ def autocomplete_req(queryset,request,options,sourcemodelname):
 			varName_pkfield='__'.join(decomposed_varname[:-1])+"__id"
 		else:
 			varName_pkfield='id'
-		
-		
 		
 		print("VARNAME PKFIELD",varName_pkfield)
 		#again, use redis internally if possible
@@ -484,4 +483,5 @@ def autocomplete_req(queryset,request,options,sourcemodelname):
 		listacvals=[v[0] for v in list(acvals)]
 		listacvals.sort()
 		response=[{"value":str(v)} for v in listacvals]
+	print(response)
 	return response

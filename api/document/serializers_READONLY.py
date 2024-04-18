@@ -6,6 +6,9 @@ from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from django.core.exceptions import ObjectDoesNotExist
 from voyages3.localsettings import STATIC_URL,OPEN_API_BASE_API
 from common.static.Source_options import Source_options
+from voyage.models import VoyageShip
+from common.autocomplete_indices import get_all_model_autocomplete_fields
+
 
 class SourceTypeSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -22,26 +25,36 @@ class DocSparseDateSerializer(serializers.ModelSerializer):
 		model=DocSparseDate
 		fields='__all__'
 
+class SourceVoyageShipSerializer(serializers.ModelSerializer):
+	ship_name=serializers.CharField()
+	class Meta:
+		model=VoyageShip
+		fields=('ship_name',)
+
 class SourceVoyageSerializer(serializers.ModelSerializer):
+	voyage_ship=SourceVoyageShipSerializer(many=False,read_only=True)
+	voyage_id=serializers.IntegerField(read_only=True)
+	id=serializers.IntegerField(read_only=True)
 	class Meta:
 		model=Voyage
-		fields='__all__'
+		fields=('voyage_ship','voyage_id','id')
 
 class SourceVoyageConnectionSerializer(serializers.ModelSerializer):
-	voyage=SourceVoyageSerializer(many=False)
+	voyage=SourceVoyageSerializer(many=False,read_only=True)
 	class Meta:
 		model=SourceVoyageConnection
-		fields='__all__'
+		fields=('voyage',)
+
+class SourceVoyageConnectionResponseSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=SourceVoyageConnection
+		fields=('voyage',)
+
 
 class SourceEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
 		fields='__all__'
-	def create(self, validated_data):
-		try:
-			return Enslaved.objects.get(enslaved_id=validated_data['enslaved_id'])
-		except ObjectDoesNotExist:
-			return super(SourceEnslavedSerializer, self).create(validated_data)
 
 class SourceEnslavedConnectionSerializer(serializers.ModelSerializer):
 	enslaved=SourceEnslavedSerializer(many=False,read_only=True)
@@ -117,6 +130,24 @@ class SourceSerializer(serializers.ModelSerializer):
 		else:
 			return None
 
+class SourceResponseSerializer(serializers.ModelSerializer):
+	source_type=SourceTypeSerializer(many=False,read_only=True)
+	page_connections=SourcePageConnectionSerializer(many=True,read_only=True)
+	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True,read_only=True)
+	source_voyage_connections=SourceVoyageConnectionSerializer(many=True,read_only=True)
+	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True,read_only=True)
+	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True,read_only=True)
+	short_ref=SourceShortRefSerializer(many=False,allow_null=False,read_only=True)
+	date=DocSparseDateSerializer(many=False,allow_null=True,read_only=True)
+	iiif_manifest_url=SerializerMethodField()
+	class Meta:
+		model=Source
+		fields='__all__'
+	def get_iiif_manifest_url(self,obj):
+		if obj.has_published_manifest and obj.zotero_group_id and obj.zotero_item_id is not None:
+			return(f'{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
+		else:
+			return None
 
 ############ REQUEST FIILTER OBJECTS
 class AnyField(Field):
@@ -155,8 +186,8 @@ class SourceFilterItemSerializer(serializers.Serializer):
 			response_only=False
         ),
 		OpenApiExample(
-            'Exact match on a nested field',
-            summary='Exact match on a nested field',
+            'Exact match on a nested field (short_ref)',
+            summary='Exact match on a nested field (short_ref)',
             description='Here, we search for an exact match on the short valuefield.',
             value={
             	"filter":[
@@ -164,6 +195,22 @@ class SourceFilterItemSerializer(serializers.Serializer):
 						"varName":"short_ref__name",
 						"op":"in",
 						"searchTerm":["1713Poll"]
+					}
+            	]
+			},
+			request_only=True,
+			response_only=False
+        ),
+		OpenApiExample(
+            'Exact match on a nested ship field (ship_name)',
+            summary='Exact match on a nested field (ship_name)',
+            description='Here, we search for an exact match on the short valuefield.',
+            value={
+            	"filter":[
+					{
+						"varName":"source_voyage_connections__voyage__voyage_ship__ship_name",
+						"op":"in",
+						"searchTerm":["Brazos","Nelson"]
 					}
             	]
 			},
@@ -182,4 +229,42 @@ class SourceListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
-	results=SourceSerializer(many=True,read_only=True)
+	results=SourceResponseSerializer(many=True,read_only=True)
+
+############ AUTOCOMPLETE SERIALIZERS
+@extend_schema_serializer(
+	examples = [
+         OpenApiExample(
+			'Filtered, paginated autocomplete on sources',
+			summary='Filtered, paginated autocomplete on enslaver names',
+			description='Here, we are requesting 20 suggested values, starting with the 41st item, ship names like "manif" in the Outward Manifests from New Orleans collection',
+			value={
+				"varName": "source_voyage_connections__voyage__voyage_ship__ship_name",
+				"querystr": "zong",
+				"offset": 0,
+				"limit": 20,
+				"filter": [
+					{
+						"varName": "source_voyage_connections__voyage__dataset",
+						"op": "exact",
+						"searchTerm": 0
+					},
+				]
+			},
+			request_only=True
+		)
+    ]
+)
+class SourceAutoCompleteRequestSerializer(serializers.Serializer):
+	varName=serializers.ChoiceField(choices=get_all_model_autocomplete_fields('Source'))
+	querystr=serializers.CharField(allow_null=True,allow_blank=True)
+	offset=serializers.IntegerField()
+	limit=serializers.IntegerField()
+	filter=SourceFilterItemSerializer(many=True,allow_null=True,required=False)
+# 	global_search=serializers.CharField(allow_null=True,required=False)
+
+class SourceAutoCompletekvSerializer(serializers.Serializer):
+	value=serializers.CharField()
+
+class SourceAutoCompleteResponseSerializer(serializers.Serializer):
+	suggested_values=SourceAutoCompletekvSerializer(many=True)

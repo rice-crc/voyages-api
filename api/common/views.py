@@ -90,7 +90,7 @@ class GlobalSearch(generics.GenericAPIView):
 			searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
 		
 			core_names=[ct[0] for ct in coretuples]
-		
+			
 			for core_name in core_names:
 		
 				solr = pysolr.Solr(
@@ -99,14 +99,19 @@ class GlobalSearch(generics.GenericAPIView):
 						timeout=10
 					)
 				finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
-				results=solr.search('text:%s' %finalsearchstring)
+				results=solr.search(f'text:{finalsearchstring}')
 				results_count=results.hits
+				
 				ids=[r['id'] for r in results]
 				output_dict.append({
 					'type':core_name,
 					'results_count':results_count,
 					'ids':ids
 				})
+				if core_name=='voyages':
+					print("-----------------")
+					print(finalsearchstring,results,results_count)
+					print(output_dict)
 
 		#VALIDATE THE RESPONSE
 		serialized_resp=GlobalSearchResponseItemSerializer(data=output_dict,many=True)

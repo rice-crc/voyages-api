@@ -40,10 +40,10 @@ class SourceVoyageSerializer(serializers.ModelSerializer):
 		fields=('voyage_ship','voyage_id','id')
 
 class SourceVoyageConnectionSerializer(serializers.ModelSerializer):
-	voyage=SourceVoyageSerializer(many=False,read_only=True)
+# 	voyage=SourceVoyageSerializer(many=False,read_only=True)
 	class Meta:
 		model=SourceVoyageConnection
-		fields=('voyage',)
+		fields=('voyage_id',)
 
 class SourceVoyageConnectionResponseSerializer(serializers.ModelSerializer):
 	class Meta:

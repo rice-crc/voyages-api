@@ -79,18 +79,24 @@ class SourceList(generics.GenericAPIView):
 			queryset=queryset.order_by('id')
 			queryset,results_count=post_req(	
 				queryset,
-				self,
 				request,
 				Source_options
 			)
+			
+# 			print("returned queryset-->",queryset,queryset.count())
+			
 
 			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
+# 			print("results??")
 			resp=SourceListResponseSerializer({
 				'count':total_results_count,
 				'page':page_num,
 				'page_size':page_size,
 				'results':results
 			}).data
+			
+# 			print(len(resp))
+# 			print(resp)
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
@@ -101,7 +107,7 @@ class SourceList(generics.GenericAPIView):
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			
+
 		return JsonResponse(resp,safe=False,status=200)
 
 ####################### CLASSIC DJANGO TEMPLATED VIEWS -- KILL THESE AS SOON AS THE CONTRIBUTE FORM IS WORKING
@@ -153,6 +159,60 @@ def Gallery(request,collection_id=None,pagenumber=1):
 	else:
 		return HttpResponseForbidden("Forbidden")
 
+class SourceCharFieldAutoComplete(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, documentary sources). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the sources list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=SourceAutoCompleteRequestSerializer,
+		responses=SourceAutoCompleteResponseSerializer,
+	)
+	def post(self,request):
+		st=time.time()
+		print("Source CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		#VALIDATE THE REQUEST
+		serialized_req = SourceAutoCompleteRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		
+		srd=serialized_req.data
+		if USE_REDIS_CACHE:
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed_full_req)
+		else:
+			cached_response=None
+
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#But first let's see if this autocomplete request has been run before (other than the exact letters typed in...)
+						
+			unfiltered_queryset=Source.objects.all()
+			
+			final_vals=autocomplete_req(unfiltered_queryset,request,Source_options,'Source')
+			
+			#RUN THE AUTOCOMPLETE ALGORITHM
+			
+			resp=dict(request.data)
+			resp['suggested_values']=final_vals
+			#VALIDATE THE RESPONSE
+			serialized_resp=SourceAutoCompleteResponseSerializer(data=resp)
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed_full_req,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed_full_req)
+			resp=json.loads(cached_response)
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		return JsonResponse(resp,safe=False,status=200)
+
 # then the individual page view
 @extend_schema(
 		exclude=True
@@ -200,6 +260,7 @@ class SourceRetrieve(generics.RetrieveAPIView):
 	'''
 	The lookup field for sources is the pk (id)
 	'''
+	serializer_class=SourceSerializer
 	queryset=Source.objects.all()
 	serializer_class=SourceSerializerCRUD
 	lookup_field='id'

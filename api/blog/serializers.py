@@ -10,6 +10,7 @@ from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Post_options import Post_options
 from common.static.Author_options import Author_options
 from common.static.Institution_options import Institution_options
+from common.autocomplete_indices import get_all_model_autocomplete_fields
 
 class AuthorInstitutionSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -223,11 +224,7 @@ class InstitutionListResponseSerializer(serializers.Serializer):
     ]
 )
 class PostAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=[
-		k for k in Post_options if Post_options[k]['type'] in [
-			'string'
-		]
-	])
+	varName=serializers.ChoiceField(choices=get_all_model_autocomplete_fields('Post'))
 	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()

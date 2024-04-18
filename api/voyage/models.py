@@ -14,7 +14,7 @@ class VoyageGroupings(models.Model):
 	"""
 	Labels for groupings names.
 	"""
-	name = models.CharField(max_length=30,unique=True)
+	name = models.CharField(db_index=True,max_length=30,unique=True)
 	value = models.IntegerField()
 
 	class Meta:
@@ -71,7 +71,7 @@ class RigOfVessel(models.Model):
 	"""
 	Rig of Vessel.
 	"""
-	name = models.CharField(max_length=25,unique=True)
+	name = models.CharField(db_index=True,max_length=25,unique=True)
 	value = models.IntegerField()
 
 	class Meta:
@@ -264,7 +264,7 @@ class ParticularOutcome(models.Model):
 	"""
 	Particular outcome.
 	"""
-	name = models.CharField("Outcome label", max_length=200)
+	name = models.CharField("Outcome label",max_length=200)
 	value = models.IntegerField("Code of outcome")
 	def __str__(self):
 		return self.__unicode__()
@@ -279,7 +279,7 @@ class SlavesOutcome(models.Model):
 	"""
 	Outcome of voyage for slaves.
 	"""
-	name = models.CharField("Outcome label", max_length=200)
+	name = models.CharField("Outcome label",max_length=200)
 	value = models.IntegerField("Code of outcome")
 	def __str__(self):
 		return self.__unicode__()

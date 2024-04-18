@@ -7,6 +7,7 @@ from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Voyage_options import Voyage_options
+from common.autocomplete_indices import get_all_model_autocomplete_fields
 
 #### GEO
 
@@ -456,7 +457,7 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 		child=serializers.ChoiceField(
 			choices=[
 				k for k in Voyage_options
-				if k.startswith("voyage_itinerary")
+				if (re.match("voyage_itinerary[a-z|_]+",k) or re.match("voyage_ship[a-z|_]+[region|place][a-z|_]+",k))
 				and k.endswith("value")
 			]
 		)
@@ -644,7 +645,7 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
 			summary='Paginated autocomplete on enslaver names',
 			description='Here, we are requesting 5 suggested values, starting with the 10th item, of enslaver aliases (names) associated with voyages between 1820-1840',
 			value={
-				"varName": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias",
+				"varName": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias",
 				"querystr": "george",
 				"offset": 10,
 				"limit": 5,
@@ -666,11 +667,7 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
     ]
 )
 class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=[
-		k for k in Voyage_options if Voyage_options[k]['type'] in [
-			'string'
-		]
-	])
+	varName=serializers.ChoiceField(choices=get_all_model_autocomplete_fields('Voyage'))
 	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()

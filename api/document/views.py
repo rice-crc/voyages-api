@@ -79,6 +79,7 @@ class SourceList(generics.GenericAPIView):
 			queryset=queryset.order_by('id')
 			queryset,results_count=post_req(	
 				queryset,
+				self,
 				request,
 				Source_options
 			)
@@ -194,7 +195,7 @@ class SourceCharFieldAutoComplete(generics.GenericAPIView):
 						
 			unfiltered_queryset=Source.objects.all()
 			
-			final_vals=autocomplete_req(unfiltered_queryset,request,Source_options,'Source')
+			final_vals=autocomplete_req(unfiltered_queryset,self,request,Source_options,'Source')
 			
 			#RUN THE AUTOCOMPLETE ALGORITHM
 			

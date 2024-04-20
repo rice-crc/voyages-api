@@ -165,6 +165,7 @@ class VoyageAnimation(generics.GenericAPIView):
 			print("BEFORE---->",queryset.count())
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True

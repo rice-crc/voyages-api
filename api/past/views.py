@@ -30,6 +30,8 @@ from common.static.EnslaverIdentity_options import EnslaverIdentity_options
 from common.static.Enslaved_options import Enslaved_options
 from common.static.EnslavementRelation_options import EnslavementRelation_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
+from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
+
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
@@ -74,6 +76,7 @@ class EnslavedList(generics.GenericAPIView):
 			
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				Enslaved_options,
 				auto_prefetch=True
@@ -111,8 +114,15 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("ENSLAVED CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in EnslavedBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
+
 		#VALIDATE THE REQUEST
-		serialized_req = EnslavedAutoCompleteRequestSerializer(data=request.data)
+		serialized_req = EnslavedAutoCompleteRequestSerializer(data=reqdict)
 		
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
@@ -133,8 +143,8 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Enslaved.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(unfiltered_queryset,request,Enslaved_options,'Enslaved')
-			resp=dict(request.data)
+			final_vals=autocomplete_req(unfiltered_queryset,self,reqdict,Enslaved_options,'Enslaved')
+			resp=reqdict
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
 			serialized_resp=EnslavedAutoCompleteResponseSerializer(data=resp)
@@ -192,7 +202,6 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 		resp=[elgt[v] for v in elgt]
 		return JsonResponse(resp,safe=False,status=200)
 
-
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -204,9 +213,15 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("ENSLAVER CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-		
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in EnslaverBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
+
 		#VALIDATE THE REQUEST
-		serialized_req = EnslaverAutoCompleteRequestSerializer(data=request.data)
+		serialized_req = EnslaverAutoCompleteRequestSerializer(data=reqdict)
 			
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
@@ -227,7 +242,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=EnslaverIdentity.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(unfiltered_queryset,request,EnslaverIdentity_options,'EnslaverIdentity')
+			final_vals=autocomplete_req(unfiltered_queryset,self,reqdict,EnslaverIdentity_options,'EnslaverIdentity')
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
@@ -282,6 +297,7 @@ class EnslaverList(generics.GenericAPIView):
 			queryset=EnslaverIdentity.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				EnslaverIdentity_options,
 				auto_prefetch=True
@@ -348,6 +364,7 @@ class EnslavedAggregations(generics.GenericAPIView):
 			queryset=Enslaved.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				Enslaved_options,
 				auto_prefetch=False
@@ -415,6 +432,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 			queryset=EnslaverIdentity.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				EnslaverIdentity_options,
 				auto_prefetch=False
@@ -482,6 +500,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			queryset=Enslaved.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				Enslaved_options,
 				auto_prefetch=True
@@ -547,6 +566,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 			queryset=EnslaverIdentity.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				EnslaverIdentity_options,
 				auto_prefetch=True
@@ -606,6 +626,7 @@ class EnslavementRelationList(generics.GenericAPIView):
 			queryset=EnslavementRelation.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				EnslavementRelation_options,
 				auto_prefetch=True
@@ -669,6 +690,7 @@ class EnslavementRelationDataFrames(generics.GenericAPIView):
 			queryset=EnslavementRelation.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				EnslavementRelation_options,
 				auto_prefetch=True
@@ -696,17 +718,24 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="This endpoint is tricky. In addition to taking a filter object, it also takes a list of geographic value variable names, like 'aliases__enslaver_relations__relation__voyage__voyage_itinerary__port_of_departure__value'. \n\
-		What it returns is a hierarchical tree of SlaveVoyages geographic data, filtered down to only the values used in those 'geotree valuefields' after applying the filter object.\n\
+		What it returns is a hierarchical tree of SlaveVoyages geographic data, filtered down to only the values used in those 'geotree valuefields' after applying A PARED DOWN VERSION OF the filter object.\n\
 		So if you were to ask for aliases__enslaver_relations__relation__voyage__voyage_itinerary__port_of_departure__value, you would mostly get locations in Europe and the Americas; and if you searched 'aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__name', you would principally get places in the Americas and Africa.",
 		request=EnslaverGeoTreeFilterRequestSerializer,
 		responses=LocationSerializerDeep
 	)
 	def post(self,request):
 		st=time.time()
-		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		print("ENSLAVER GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in EnslaverBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
 		
 		#VALIDATE THE REQUEST
-		serialized_req = EnslaverGeoTreeFilterRequestSerializer(data=request.data)
+		serialized_req = EnslaverGeoTreeFilterRequestSerializer(data=reqdict)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
@@ -725,7 +754,6 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
 			#extract and then peel out the geotree_valuefields
-			reqdict=dict(request.data)
 			geotree_valuefields=reqdict['geotree_valuefields']
 			del(reqdict['geotree_valuefields'])
 		
@@ -733,6 +761,7 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 			queryset=EnslaverIdentity.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				reqdict,
 				EnslaverIdentity_options
 			)
@@ -776,7 +805,13 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
-		
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in EnslavedBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
+
 		#VALIDATE THE REQUEST
 		serialized_req = EnslavedGeoTreeFilterRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
@@ -805,6 +840,7 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 			queryset=Enslaved.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				reqdict,
 				Enslaved_options
 			)
@@ -872,6 +908,7 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			queryset=Enslaved.objects.all()
 			queryset,results_count=post_req(
 				queryset,
+				self,
 				request,
 				Enslaved_options,
 				auto_prefetch=True

@@ -8,6 +8,7 @@ from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Voyage_options import Voyage_options
 from common.autocomplete_indices import get_all_model_autocomplete_fields
+from voyage.cross_filter_fields import VoyageBasicFilterVarNames
 
 #### GEO
 
@@ -290,9 +291,19 @@ class AnyField(Field):
 		return data
 
 ############ REQUEST FIILTER OBJECTS
+class VoyageBasicFilterItemSerializer(serializers.Serializer):
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	##It's rather costly for our filter requests like autocomplete and geotree to themselves "cross-filter" on too many nested variables
+	##At the same time, some cross-filters are essential to build the menus properly
+	varName=serializers.ChoiceField(choices=VoyageBasicFilterVarNames)
+	searchTerm=AnyField()
+
+
 class VoyageFilterItemSerializer(serializers.Serializer):
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
-	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	varName=serializers.ChoiceField(choices=[
+		k for k in Voyage_options
+	])
 	searchTerm=AnyField()
 
 ########### PAGINATED VOYAGE LISTS 
@@ -433,19 +444,19 @@ class VoyageDataframesRequestSerializer(serializers.Serializer):
 		OpenApiExample(
 			'filtered request for voyages',
 			summary="Filtered geo tree request",
-			description="Here, we are looking for a tree of all the values used for the port of departure variable on voyages that disembarked between 1820-40 after embarking enslaved people in Sierra Leone and the Gold Coast",
+			description="Here, we are looking for a tree of all the values used for the port of departure variable on Transatlantic voyages that disembarked enslaved people in Baltimore",
 			value={
 				"geotree_valuefields":["voyage_itinerary__port_of_departure__value"],
 				"filter":[
 					{
-						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
-						"op": "btw",
-						"searchTerm": [1820,1840]
+						"varName": "voyage_itinerary__imp_principal_port_slave_dis__name",
+						"op": "in",
+						"searchTerm": ["Baltimore"]
 					},
 					{
-						"varName":"voyage_itinerary__imp_principal_region_of_slave_purchase__name",
-						"searchTerm":["Sierra Leone","Gold Coast"],
-						"op":"in"
+						"varName": "dataset",
+						"op": "exact",
+						"searchTerm": 0
 					}
 				]
 			}
@@ -457,12 +468,12 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 		child=serializers.ChoiceField(
 			choices=[
 				k for k in Voyage_options
-				if (re.match("voyage_itinerary[a-z|_]+",k) or re.match("voyage_ship[a-z|_]+[region|place][a-z|_]+",k))
+				if (re.match("^voyage_itinerary[a-z|_]+",k) or re.match("^voyage_ship[a-z|_]+[region|place][a-z|_]+",k))
 				and k.endswith("value")
 			]
 		)
 	)
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	filter=VoyageBasicFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 
 ############ VOYAGE AGGREGATION ROUTE MAPS
@@ -643,7 +654,7 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
          OpenApiExample(
 			'Paginated autocomplete on enslaver names',
 			summary='Paginated autocomplete on enslaver names',
-			description='Here, we are requesting 5 suggested values, starting with the 10th item, of enslaver aliases (names) associated with voyages between 1820-1840',
+			description='Here, we are requesting 5 suggested values, starting with the 10th item, of enslaver aliases (names) associated with voyages that disembarked enslaved people in Baltimore',
 			value={
 				"varName": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias",
 				"querystr": "george",
@@ -651,14 +662,9 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
 				"limit": 5,
 				"filter": [
 					{
-						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
-						"op": "gte",
-						"searchTerm": 1820
-					},
-					{
-						"varName": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
-						"op": "lte",
-						"searchTerm": 1840
+						"varName": "voyage__voyage_itinerary__imp_principal_port_slave_dis__value",
+						"op": "in",
+						"searchTerm": ['Baltimore']
 					}
 				]
 			},
@@ -671,7 +677,7 @@ class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
 	querystr=serializers.CharField(allow_null=True,allow_blank=True)
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	filter=VoyageBasicFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 
 class VoyageAutoCompletekvSerializer(serializers.Serializer):

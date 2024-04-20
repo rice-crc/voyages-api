@@ -741,6 +741,14 @@ class EnslavementRelationDataframesRequestSerializer(serializers.Serializer):
 	filter=EnslavementRelationFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 
+
+
+
+	
+	
+
+
+
 ############ GEOTREE REQUESTS
 @extend_schema_serializer(
 	examples=[

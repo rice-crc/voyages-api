@@ -206,10 +206,10 @@ def post_req(queryset,r,options_dict,auto_prefetch=True):
 		prefetch_fields=list(all_fields.keys())
 	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
 
-	if DEBUG:
-		print(f'--prefetch A: {len(prefetch_vars)} vars--')
-	for p in prefetch_vars:
-		queryset=queryset.prefetch_related(p)
+# 	if DEBUG:
+# 		print(f'--prefetch A: {len(prefetch_vars)} vars--')
+# 	for p in prefetch_vars:
+# 		queryset=queryset.prefetch_related(p)
 
 
 	ids=list(set([v[0] for v in filter_queryset.values_list('id')]))

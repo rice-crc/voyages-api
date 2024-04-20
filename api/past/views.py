@@ -150,6 +150,34 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp,safe=False,status=200)
 
+class EnslavedLanguageGroupTree(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, enslaver identities). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the enslavers list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		request=serializers.JSONField(),
+		responses=serializers.JSONField(),
+	)	
+	def post(self,request):
+		st=time.time()
+		print("LANGUAGE GROUP TREE (#NOFILTER)+++++++\nusername:",request.auth.user)
+		serialized_req = EnslaverAutoCompleteRequestSerializer(data=request.data)
+		elgs=LanguageGroup.objects.all()
+		elgt={"Multi-Country":{"children":[],"id":None}}
+		for elg in elgs:
+			lg_dict={'id':elg.id,'name':elg.name}
+			mc_set=elg.moderncountry_set.all()
+			if len(mc_set)>1:
+				mc_name="Multi-Country"
+			else:
+				mc_name=mc_set[0].name
+			if mc_name in elgt:
+				elgt[mc_name]['children'].append(lg_dict)
+			else:
+				elgt[mc_name]={"children":[lg_dict]}
+		return JsonResponse(elgt,safe=False,status=200)
+
+
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

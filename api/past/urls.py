@@ -19,6 +19,7 @@ urlpatterns = [
 	path('networks/',views.PASTNetworks.as_view()),
 	path('enslaved/geotree/',views.EnslavedGeoTreeFilter.as_view()),
 	path('enslaver/geotree/',views.EnslaverGeoTreeFilter.as_view()),
+	path('enslaved/languagegrouptree/',views.EnslavedLanguageGroupTree.as_view())
 # 	path('enslavementrelation/CREATE/',views.EnslavementRelationCREATE.as_view()),
 # 	path('enslavementrelation/<int:id>',views.EnslavementRelationRETRIEVE.as_view()),
 # 	path('enslavementrelation/UPDATE/<int:id>',views.EnslavementRelationUPDATE.as_view()),

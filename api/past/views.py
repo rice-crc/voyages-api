@@ -154,28 +154,43 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, enslaver identities). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the enslavers list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
+		description="For African Origins. A two-level tree of Modern African Countries with the child items being the African languages that were historically located within the current bounds of those countries. Language groups that are associated with more than one country are grouped under the artificial key 'Multi-Country', which is not in the database.",
 		request=serializers.JSONField(),
 		responses=serializers.JSONField(),
-	)	
+	)
 	def post(self,request):
 		st=time.time()
 		print("LANGUAGE GROUP TREE (#NOFILTER)+++++++\nusername:",request.auth.user)
 		serialized_req = EnslaverAutoCompleteRequestSerializer(data=request.data)
 		elgs=LanguageGroup.objects.all()
-		elgt={"Multi-Country":{"children":[],"id":None}}
+		elgt={
+			None: {
+				"name":"Multi-Country",
+				"id":None,
+				"children":[]
+			}
+		}
 		for elg in elgs:
 			lg_dict={'id':elg.id,'name':elg.name}
 			mc_set=elg.moderncountry_set.all()
 			if len(mc_set)>1:
 				mc_name="Multi-Country"
+				mc_id=None
 			else:
 				mc_name=mc_set[0].name
-			if mc_name in elgt:
-				elgt[mc_name]['children'].append(lg_dict)
+				mc_id=mc_set[0].id
+				
+				
+			if mc_id in elgt:
+				elgt[mc_id]['children'].append(lg_dict)
 			else:
-				elgt[mc_name]={"children":[lg_dict]}
-		return JsonResponse(elgt,safe=False,status=200)
+				elgt[mc_id]={
+					"name":mc_name,
+					"id":mc_id,
+					"children": [lg_dict]
+				}
+		resp=[elgt[v] for v in elgt]
+		return JsonResponse(resp,safe=False,status=200)
 
 
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):

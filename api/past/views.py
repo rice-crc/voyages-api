@@ -51,6 +51,7 @@ class EnslavedList(generics.GenericAPIView):
 		
 		st=time.time()
 		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
+		st2=time.time()
 		#VALIDATE THE REQUEST
 		serialized_req = EnslavedListRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
@@ -67,10 +68,10 @@ class EnslavedList(generics.GenericAPIView):
 			cached_response = redis_cache.get(hashed)
 		else:
 			cached_response=None
-		
+		print(f'PREFLIGHT AND REDIS TIME: {time.time()-st2}')
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
-
+			st3=time.time()
 			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
 			
@@ -81,15 +82,18 @@ class EnslavedList(generics.GenericAPIView):
 				Enslaved_options,
 				auto_prefetch=True
 			)
-			
+			print(f'QUERYSET TIME: {time.time()-st3}')
+			st4=time.time()
 			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-			
+			print(f'PAGINATION TIME: {time.time()-st4}')
+			st5=time.time()
 			resp=EnslavedListResponseSerializer({
 				'count':total_results_count,
 				'page':page_num,
 				'page_size':page_size,
 				'results':results
 			}).data
+			print(f'SERIALIZATION TIME: {time.time()-st5}')
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE

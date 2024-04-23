@@ -16,6 +16,7 @@ import uuid
 from past.models import *
 from voyage.models import *
 from blog.models import *
+import pickle
 
 
 from document.models import Source
@@ -51,6 +52,7 @@ def paginate_queryset(queryset,request):
 		page_size (int)
 		page (int)
 	'''
+	
 	params=request.data
 	page_size=params.get('page_size',10)
 	page=params.get('page',1)
@@ -90,7 +92,7 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 			}
 	return res,errormessages
 
-def post_req(queryset,s,r,options_dict,auto_prefetch=True):
+def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True):
 	'''
 		This function handles:
 		1. ensuring that all the fields that will be called are valid on the model
@@ -99,6 +101,8 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		4. ordering the queryset
 		5. attempting to intelligently prefetch related fields for performance
 	'''
+	st=time.time()
+	
 	errormessages=[]
 	results_count=None
 	
@@ -112,12 +116,15 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		print("----\npost req params:",json.dumps(params,indent=1))
 	filter_obj=params.get('filter') or {}
 	
+	print(f"REQ PREP TIME: {time.time()-st}")
+	
 	#global search bypasses the normal filtering process
 	#hits solr with a search string (which currently is applied across all text fields on a model)
 	#and then creates its filtered queryset on the basis of the pk's returned by solr
-	print("PRE FILTER COUNT",queryset.count())
+	st=time.time()
+	print("PRE FILTER COUNT",orig_queryset.count())
 	if 'global_search' in params:
-		qsetclassstr=str(queryset[0].__class__)
+		qsetclassstr=str(orig_queryset[0].__class__)
 		
 		solrcorenamedict={
 			"<class 'voyage.models.Voyage'>":'voyages',
@@ -143,7 +150,7 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
 		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		ids=[doc['id'] for doc in results.docs]
-		filter_queryset=queryset.filter(id__in=ids)
+		filter_queryset=orig_queryset.filter(id__in=ids)
 	else:
 		kwargs={}
 		for item in filter_obj:
@@ -160,11 +167,14 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 				kwargs['{0}__{1}'.format(varName, 'gte')]=min		
 			else:
 				errormessages.append(f"{op} is not a valid django search operation")
-		filter_queryset=queryset.filter(**kwargs)
+		filter_queryset=orig_queryset.filter(**kwargs)
+	print(f"REQ FILTER TIME: {time.time()-st}")
 	
 	##I WOULD LOVE TO SPEED UP THE M2M DEDUPE WITH REDIS
 	##BUT IT TOTALLY THROWS OFF THE GEO TREE ENDPOINTS, AT LEAST ON VOYAGE ITINERARIES...
 	##HAVE TO DEBUG THAT BEFORE I CAN IMPLEMENT THIS.
+	st=time.time()
+	st2=time.time()
 	if USE_REDIS_CACHE:
 		req_copy=dict(params)
 		if 'order_by' in req_copy:
@@ -180,59 +190,41 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 		cached_response=None
 	
 	if cached_response is None:
-		#PREFETCH REQUISITE FIELDS
-		prefetch_fields=params.get('selected_fields') or []
-		if prefetch_fields==[] and auto_prefetch:
-			prefetch_fields=list(all_fields.keys())
-		prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
-	
-		if DEBUG:
-			print(f'--prefetch A: {len(prefetch_vars)} vars--')
-		for p in prefetch_vars:
-			queryset=queryset.prefetch_related(p)
-		
 		#dedupe m2m filters
-		ids=list(set([v[0] for v in filter_queryset.values_list('id')]))
+		ids=[v[0] for v in filter_queryset.values_list('id')]
 
 		if USE_REDIS_CACHE:
 			redis_cache.set(hashed_full_req,json.dumps(ids))
 	else:
 		ids=cached_response
 	ids=list(set(ids))
-
-
-	#PREFETCH REQUISITE FIELDS
-	prefetch_fields=params.get('selected_fields') or []
-	if prefetch_fields==[] and auto_prefetch:
-		prefetch_fields=list(all_fields.keys())
-	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
-
-# 	if DEBUG:
-# 		print(f'--prefetch A: {len(prefetch_vars)} vars--')
-# 	for p in prefetch_vars:
-# 		queryset=queryset.prefetch_related(p)
-
-
-	ids=list(set([v[0] for v in filter_queryset.values_list('id')]))
-	queryset=queryset.filter(id__in=ids)
-	print("POST FILTER COUNT",queryset.count())
-	results_count=queryset.count()
+	print(f"DEDUPE GET IDS TIME: {time.time()-st2}")
+	
+	st3=time.time()
+	
+	###THIS IS THE COSTLY BIT -- FETCHING THE QUERYSET BY THE PK.
+	###IN ORDER TO CACHE IT WE'LL HAVE TO PICKLE IT
+	
+	filter_queryset=orig_queryset.filter(id__in=ids)
+	print("POST FILTER COUNT",filter_queryset.count())
+	results_count=filter_queryset.count()
 	if DEBUG:
 		print("resultset size:",results_count)
+	print(f"DEDUPE RE-FILTER PKS TIME: {time.time()-st3}")
 	
 	#PREFETCH REQUISITE FIELDS
 	prefetch_fields=params.get('selected_fields') or []
 	if prefetch_fields==[] and auto_prefetch:
 		prefetch_fields=list(all_fields.keys())
 	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
-
 	if DEBUG:
-		print(f'--prefetch B: {len(prefetch_vars)} vars--')
+		print(f'--prefetch: {len(prefetch_vars)} vars--')
 	for p in prefetch_vars:
-		queryset=queryset.prefetch_related(p)
-		
+		filter_queryset=filter_queryset.prefetch_related(p)
+	print(f"DEDUPE TIME: {time.time()-st}")
+	
 	#ORDER RESULTS
-	#queryset=queryset.order_by('-voyage_slaves_numbers__imp_total_num_slaves_embarked','-voyage_id')
+	st=time.time()
 	order_by=params.get('order_by')
 	if order_by is not None:
 		if DEBUG:
@@ -247,15 +239,15 @@ def post_req(queryset,s,r,options_dict,auto_prefetch=True):
 			
 			if k in all_fields:
 				if asc:
-					queryset=queryset.order_by(F(k).asc(nulls_last=True))
+					filter_queryset=filter_queryset.order_by(F(k).asc(nulls_last=True))
 				else:
-					queryset=queryset.order_by(F(k).desc(nulls_last=True))
+					filter_queryset=filter_queryset.order_by(F(k).desc(nulls_last=True))
 			else:
-				queryset=queryset.order_by('id')
+				filter_queryset=filter_queryset.order_by('id')
 	else:
-		queryset=queryset.order_by('id')
-						
-	return queryset,results_count
+		filter_queryset=filter_queryset.order_by('id')
+	print(f"ORDER BY TIME: {time.time()-st}")
+	return filter_queryset,results_count
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	'''

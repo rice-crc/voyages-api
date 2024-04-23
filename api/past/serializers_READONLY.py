@@ -215,45 +215,23 @@ class EnslavedListResponseResultsSerializer(serializers.ModelSerializer):
 	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True,read_only=True)
 	def get_voyages(self,instance) -> PastVoyageSerializer(many=True):
 		eirs=instance.enslaved_relations.all().exclude(relation__voyage__isnull=True)
-# 		eirs=eirs.prefetch_related('relation__voyage')
 		voyages=list(set([eir.relation.voyage for eir in eirs]))
 		return PastVoyageSerializer(voyages,many=True,read_only=True).data
 	def get_enslavers(self,instance) -> EnslavedEnslaversInRelationListResponseSerializer:
-# 		enslavers_roles=instance.enslaved_relation
 		edrs=instance.enslaved_relations.all()
 		edrs=edrs.prefetch_related('relation__relation_enslavers__roles','relation__relation_enslavers__enslaver_alias__identity')
 		enslaver_roles_and_identity_pks=edrs.values_list('relation__relation_enslavers__roles__id','relation__relation_enslavers__enslaver_alias__identity_id')
 		enslavers_and_roles={}
 		for eraipk in enslaver_roles_and_identity_pks:
 			rolepk,enslaverpk=eraipk
-			if enslaverpk not in enslavers_and_roles:
-				enslavers_and_roles[enslaverpk]=[rolepk]
-			else:
-				enslavers_and_roles[enslaverpk].append(rolepk)
-		enslavers_and_roles_list=[{'roles':[EnslaverRole.objects.get(id=rolepk) for rolepk in enslavers_and_roles[enslaverpk]],'enslaverid':EnslaverIdentity.objects.get(id=enslaverpk)} for enslaverpk in enslavers_and_roles]
-
-# 		print("NEW FORMAT",enslavers_and_roles_list2)
-# 		ed_enslaversinrelation=[]
-# 		for edr in edrs:
-# 			ed_enslaversinrelation+=edr.relation.relation_enslavers.all()
-# 		enslavers_and_roles={}
-# 		for ed_e in ed_enslaversinrelation:
-# 			roles=ed_e.roles.all()
-# 			enslaver_identity=ed_e.enslaver_alias.identity
-# 			e_id=enslaver_identity.id
-# 			if e_id not in enslavers_and_roles:
-# 				enslavers_and_roles[e_id]={'roles':roles,'enslaver':enslaver_identity}
-# 			else:
-# 				for role in roles:
-# 					if role not in enslavers_and_roles[e_id]['roles']:
-# 						enslavers_and_roles[e_id]['roles'].append(role)
-# 		enslavers_and_roles_list=[enslavers_and_roles[k] for k in enslavers_and_roles]
-# 		print("OLD FORMAT",enslavers_and_roles_list)
-# 		
-		enslavers_in_relation=EnslavedEnslaversInRelationListResponseSerializer(enslavers_and_roles_list,many=True,read_only=True).data
-		
+			if rolepk is not None and enslaverpk is not None:
+				if enslaverpk not in enslavers_and_roles:
+					enslavers_and_roles[enslaverpk]=[rolepk]
+				else:
+					enslavers_and_roles[enslaverpk].append(rolepk)
+		enslavers_and_roles_list=[{'roles':[EnslaverRole.objects.get(id=rolepk) for rolepk in enslavers_and_roles[enslaverpk]],'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)} for enslaverpk in enslavers_and_roles]
+		enslavers_in_relation=EnslavedEnslaversInRelationListResponseSerializer(enslavers_and_roles_list,many=True,read_only=True).data		
 		return enslavers_in_relation
-		
 		
 	class Meta:
 		model=Enslaved

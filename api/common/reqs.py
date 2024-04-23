@@ -101,6 +101,13 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True):
 		4. ordering the queryset
 		5. attempting to intelligently prefetch related fields for performance
 	'''
+	
+	nonquerysetkeysforredis=[
+		"page",
+		"page_size",
+		"order_by"
+	]
+	
 	st=time.time()
 	
 	errormessages=[]
@@ -116,13 +123,15 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True):
 		print("----\npost req params:",json.dumps(params,indent=1))
 	filter_obj=params.get('filter') or {}
 	
-	print(f"REQ PREP TIME: {time.time()-st}")
+	if DEBUG:
+		print(f"REQ PREP TIME: {time.time()-st}")
 	
 	#global search bypasses the normal filtering process
 	#hits solr with a search string (which currently is applied across all text fields on a model)
 	#and then creates its filtered queryset on the basis of the pk's returned by solr
 	st=time.time()
-	print("PRE FILTER COUNT",orig_queryset.count())
+	if DEBUG:
+		print("PRE FILTER COUNT",orig_queryset.count())
 	if 'global_search' in params:
 		qsetclassstr=str(orig_queryset[0].__class__)
 		
@@ -168,7 +177,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True):
 			else:
 				errormessages.append(f"{op} is not a valid django search operation")
 		filter_queryset=orig_queryset.filter(**kwargs)
-	print(f"REQ FILTER TIME: {time.time()-st}")
+	if DEBUG:
+		print(f"REQ FILTER TIME: {time.time()-st}")
 	
 	##I WOULD LOVE TO SPEED UP THE M2M DEDUPE WITH REDIS
 	##BUT IT TOTALLY THROWS OFF THE GEO TREE ENDPOINTS, AT LEAST ON VOYAGE ITINERARIES...
@@ -177,8 +187,9 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True):
 	st2=time.time()
 	if USE_REDIS_CACHE:
 		req_copy=dict(params)
-		if 'order_by' in req_copy:
-			del(req_copy['order_by'])
+		for nqsk in nonquerysetkeysforredis:
+			if nqsk in req_copy:
+				del(req_copy[nqsk])
 		hashdict={
 			'req':req_copy,
 			'self':str(s.request._stream),
@@ -198,19 +209,45 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True):
 	else:
 		ids=cached_response
 	ids=list(set(ids))
-	print(f"DEDUPE GET IDS TIME: {time.time()-st2}")
+	if DEBUG:
+		print(f"DEDUPE GET IDS TIME: {time.time()-st2}")
 	
 	st3=time.time()
 	
 	###THIS IS THE COSTLY BIT -- FETCHING THE QUERYSET BY THE PK.
 	###IN ORDER TO CACHE IT WE'LL HAVE TO PICKLE IT
+	if USE_REDIS_CACHE:
+		req_copy=dict(params)
+		for nqsk in nonquerysetkeysforredis:
+			if nqsk in req_copy:
+				del(req_copy[nqsk])
+		hashdict={
+			'req':req_copy,
+			'self':str(s.request._stream),
+			'req_type':"We want the pickled queryset!!!"
+		}
+		hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+		if DEBUG:
+			print("HASH------>",hashed_full_req)
+		cached_response = redis_cache.get(hashed_full_req)
+	else:
+		cached_response=None
 	
-	filter_queryset=orig_queryset.filter(id__in=ids)
-	print("POST FILTER COUNT",filter_queryset.count())
-	results_count=filter_queryset.count()
+	
+	
+	if cached_response is None:
+		#dedupe m2m filters
+		filter_queryset=orig_queryset.filter(id__in=ids)
+		
+		if USE_REDIS_CACHE:
+			redis_cache.set(hashed_full_req,pickle.dumps(filter_queryset.query))
+	else:
+		filter_queryset=orig_queryset
+		filter_queryset.query=pickle.loads(cached_response)
+
 	if DEBUG:
 		print("resultset size:",results_count)
-	print(f"DEDUPE RE-FILTER PKS TIME: {time.time()-st3}")
+		print(f"DEDUPE RE-FILTER PKS TIME: {time.time()-st3}")
 	
 	#PREFETCH REQUISITE FIELDS
 	prefetch_fields=params.get('selected_fields') or []
@@ -219,16 +256,16 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True):
 	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
 	if DEBUG:
 		print(f'--prefetch: {len(prefetch_vars)} vars--')
+		print(f"DEDUPE TIME: {time.time()-st}")
 	for p in prefetch_vars:
 		filter_queryset=filter_queryset.prefetch_related(p)
-	print(f"DEDUPE TIME: {time.time()-st}")
 	
 	#ORDER RESULTS
 	st=time.time()
 	order_by=params.get('order_by')
 	if order_by is not None:
 		if DEBUG:
-			print("---->order by---->",order_by)
+			print(f"ORDER BY: {order_by}")
 		for ob in order_by:
 			if ob.startswith('-'):
 				k=ob[1:]
@@ -246,7 +283,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True):
 				filter_queryset=filter_queryset.order_by('id')
 	else:
 		filter_queryset=filter_queryset.order_by('id')
-	print(f"ORDER BY TIME: {time.time()-st}")
+	if DEBUG:
+		print(f"ORDER BY TIME: {time.time()-st}")
 	return filter_queryset,results_count
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):

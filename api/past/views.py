@@ -32,7 +32,6 @@ from common.static.EnslavementRelation_options import EnslavementRelation_option
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
 from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
 
-
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 class EnslavedList(generics.GenericAPIView):
@@ -101,7 +100,6 @@ class EnslavedList(generics.GenericAPIView):
 				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			resp=json.loads(cached_response)
-		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			

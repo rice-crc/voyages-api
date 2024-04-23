@@ -167,8 +167,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
 		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		ids=[doc['id'] for doc in results.docs]
-		filtered_queryset=orig_queryset.filter(id__in=ids)
-		results_count=filtered_queryset.count()
+		results_count=len(ids)
 	else:
 		st=time.time()
 		kwargs={}
@@ -218,7 +217,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			print(f"ORDER BY TIME: {time.time()-st}")
 		
 		# M2M DEDUPE
-		st=time.time()
 		st2=time.time()
 		if USE_REDIS_CACHE:
 			req_copy=dict(params)
@@ -254,33 +252,31 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		if DEBUG:
 			print("COUNT W DUPLICATES:",results_count)
 		
-		st=time.time()
-		if paginate:
-			page_size=params.get('page_size',10)
-			page=params.get('page',1)
-			if page<0:
-				page=1
-			page=page-1
-			offset=page*page_size
-			
-			end_idx=offset+page_size
-			if end_idx>=results_count:
-				end_idx=results_count-1
-			if offset>results_count:
-				results=[]
-			else:
-				results=orig_queryset.filter
-				
-				page_ids=ids[offset:end_idx]
-				
-				results=orig_queryset.filter(id__in=page_ids)
+	st=time.time()
+	if paginate:
+		page_size=params.get('page_size',10)
+		page=params.get('page',1)
+		if page<0:
+			page=1
+		page=page-1
+		offset=page*page_size
+		
+		end_idx=offset+page_size
+		if end_idx>=results_count:
+			end_idx=results_count
+		if offset>results_count:
+			results=[]
 		else:
-			results=orig_queryset.filter(id__in=ids)
-			print("TOTAL RESULTS:",results)
-			page=None
-			page_size=None
-		if DEBUG:
-			print(f"FILTER ON IDS TIME: {time.time()-st2}")
+			
+			page_ids=ids[offset:end_idx]
+			results=orig_queryset.filter(id__in=page_ids)
+		
+	else:
+		results=orig_queryset.filter(id__in=ids)
+		page=None
+		page_size=None
+	if DEBUG:
+		print(f"FILTER ON IDS TIME: {time.time()-st}")
 	
 	return results,results_count,page,page_size
 

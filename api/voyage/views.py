@@ -410,7 +410,8 @@ class VoyageDataFrames(generics.GenericAPIView):
 				self,
 				request,
 				Voyage_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=False
 			)
 		
 			queryset=queryset.order_by('id')

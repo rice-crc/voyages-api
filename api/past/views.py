@@ -369,7 +369,7 @@ class EnslavedAggregations(generics.GenericAPIView):
 				request,
 				Enslaved_options,
 				auto_prefetch=False,
-				paginate=True
+				paginate=False
 			)
 		
 			#RUN THE AGGREGATIONS
@@ -438,7 +438,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 				request,
 				EnslaverIdentity_options,
 				auto_prefetch=False,
-				paginate=True
+				paginate=False
 			)
 		
 			#RUN THE AGGREGATIONS
@@ -507,7 +507,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 				request,
 				Enslaved_options,
 				auto_prefetch=True,
-				paginate=True
+				paginate=False
 			)
 		
 			queryset=queryset.order_by('id')
@@ -574,7 +574,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 				request,
 				EnslaverIdentity_options,
 				auto_prefetch=True,
-				paginate=True
+				paginate=False
 			)
 		
 			queryset=queryset.order_by('id')
@@ -700,7 +700,7 @@ class EnslavementRelationDataFrames(generics.GenericAPIView):
 				request,
 				EnslavementRelation_options,
 				auto_prefetch=True,
-				paginate=True
+				paginate=False
 			)
 			queryset=queryset.order_by('id')
 			sf=request.data.get('selected_fields')
@@ -772,7 +772,7 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 				reqdict,
 				EnslaverIdentity_options,
 				auto_prefetch=False,
-				paginate=True
+				paginate=False
 			)
 		
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
@@ -853,7 +853,7 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 				reqdict,
 				Enslaved_options,
 				auto_prefetch=False,
-				paginate=True
+				paginate=False
 			)
 		
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD

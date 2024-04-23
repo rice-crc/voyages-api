@@ -81,17 +81,17 @@ class VoyageList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				Voyage_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
 			resp=VoyageListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			}).data
@@ -148,7 +148,7 @@ class VoyageAggregations(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
@@ -157,7 +157,7 @@ class VoyageAggregations(generics.GenericAPIView):
 			)
 			#RUN THE AGGREGATIONS
 			aggregation_field=request.data.get('varName')
-			output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Voyage_options)
+			output_dict,errormessages=get_fieldstats(results,aggregation_field,Voyage_options)
 			#VALIDATE THE RESPONSE
 			serialized_resp=VoyageFieldAggregationResponseSerializer(data=output_dict)
 			if not serialized_resp.is_valid():
@@ -211,7 +211,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
@@ -291,7 +291,7 @@ class VoyageGroupBy(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
@@ -342,7 +342,7 @@ class VoyageSummaryStats(generics.GenericAPIView):
 		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
-		queryset,results_count=post_req(
+		queryset,results_count,page,page_size=post_req(
 			queryset,
 			self,
 			request,
@@ -405,7 +405,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
@@ -477,7 +477,7 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				reqdict,
@@ -609,7 +609,7 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			params=dict(request.data)
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,

@@ -67,32 +67,32 @@ class EnslavedList(generics.GenericAPIView):
 			cached_response = redis_cache.get(hashed)
 		else:
 			cached_response=None
-		print(f'PREFLIGHT AND REDIS TIME: {time.time()-st2}')
+		if DEBUG:
+			print(f'PREFLIGHT AND REDIS TIME: {time.time()-st2}')
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
 			st3=time.time()
 			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
-			
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				Enslaved_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-			print(f'QUERYSET TIME: {time.time()-st3}')
-			st4=time.time()
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-			print(f'PAGINATION TIME: {time.time()-st4}')
+			if DEBUG:
+				print(f'QUERYSET TIME: {time.time()-st3}')
 			st5=time.time()
 			resp=EnslavedListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			}).data
-			print(f'SERIALIZATION TIME: {time.time()-st5}')
+			if DEBUG:
+				print(f'SERIALIZATION TIME: {time.time()-st5}')
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
@@ -297,18 +297,17 @@ class EnslaverList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				EnslaverIdentity_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
 			resp=EnslaverListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			}).data
@@ -364,12 +363,13 @@ class EnslavedAggregations(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				Enslaved_options,
-				auto_prefetch=False
+				auto_prefetch=False,
+				paginate=True
 			)
 		
 			#RUN THE AGGREGATIONS
@@ -432,12 +432,13 @@ class EnslaverAggregations(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				EnslaverIdentity_options,
-				auto_prefetch=False
+				auto_prefetch=False,
+				paginate=True
 			)
 		
 			#RUN THE AGGREGATIONS
@@ -500,12 +501,13 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				Enslaved_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
 		
 			queryset=queryset.order_by('id')
@@ -566,12 +568,13 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				EnslaverIdentity_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
 		
 			queryset=queryset.order_by('id')
@@ -626,12 +629,13 @@ class EnslavementRelationList(generics.GenericAPIView):
 
 			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslavementRelation.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				EnslavementRelation_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
 
 			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
@@ -690,12 +694,13 @@ class EnslavementRelationDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslavementRelation.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				EnslavementRelation_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
 			queryset=queryset.order_by('id')
 			sf=request.data.get('selected_fields')
@@ -761,11 +766,13 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				reqdict,
-				EnslaverIdentity_options
+				EnslaverIdentity_options,
+				auto_prefetch=False,
+				paginate=True
 			)
 		
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
@@ -840,11 +847,13 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				reqdict,
-				Enslaved_options
+				Enslaved_options,
+				auto_prefetch=False,
+				paginate=True
 			)
 		
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
@@ -908,12 +917,13 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			params=dict(request.data)
 			zoom_level=params.get('zoom_level')
 			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				Enslaved_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=False
 			)
 		
 			#HAND OFF TO THE FLASK CONTAINER

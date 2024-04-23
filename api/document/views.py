@@ -77,21 +77,17 @@ class SourceList(generics.GenericAPIView):
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Source.objects.all()
 			queryset=queryset.order_by('id')
-			queryset,results_count=post_req(	
+			results,results_count,page,page_size=post_req(	
 				queryset,
 				self,
 				request,
-				Source_options
+				Source_options,
+				auto_prefetch=True,
+				paginate=True
 			)
-			
-# 			print("returned queryset-->",queryset,queryset.count())
-			
-
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-# 			print("results??")
 			resp=SourceListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			}).data

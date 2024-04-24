@@ -215,38 +215,40 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		
 		if DEBUG:
 			print(f"ORDER BY TIME: {time.time()-st}")
-		
+
+#SOMETHING ABOUT THE WAY THIS M2M DEDUPE IS CONSTRUCTED IS RESULTING IN EMPTY RESULTS SETS FOR DOCS....
+#DEACTIVATING UNTIL I CAN GET TO THE BOTTOM OF IT....
 		# M2M DEDUPE
-		st2=time.time()
-		if USE_REDIS_CACHE:
-			req_copy=dict(params)
-			for nqsk in nonquerysetkeysforredis:
-				if nqsk in req_copy:
-					del(req_copy[nqsk])
-			hashdict={
-				'req':req_copy,
-				'self':str(s.request._stream),
-				'req_type':"WE WANT THE FULL PK LIST ON THE TARGET MODEL"
-			}
-			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed_full_req)
-		else:
-			cached_response=None
+# 		st2=time.time()
+# 		if USE_REDIS_CACHE:
+# 			req_copy=dict(params)
+# 			for nqsk in nonquerysetkeysforredis:
+# 				if nqsk in req_copy:
+# 					del(req_copy[nqsk])
+# 			hashdict={
+# 				'req':req_copy,
+# 				'self':str(s.request._stream),
+# 				'req_type':"WE WANT THE FULL PK LIST ON THE TARGET MODEL"
+# 			}
+# 			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+# 			cached_response = redis_cache.get(hashed_full_req)
+# 		else:
+# 		cached_response=None
 		
-		if cached_response is None:
+# 		if cached_response is None:
 			#dedupe m2m filters
-			ids=[v[0] for v in filtered_queryset.values_list('id')]
+		ids=[v[0] for v in filtered_queryset.values_list('id')]
 	
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed_full_req,json.dumps(ids))
-		else:
-			ids=cached_response
+# 			if USE_REDIS_CACHE:
+# 				redis_cache.set(hashed_full_req,json.dumps(ids))
+# 		else:
+# 			ids=cached_response
 		
 # 		for i in ids[:20]:
 # 			print(i,filtered_queryset.get(enslaved_id=i).age)
 		
-		if DEBUG:
-			print(f"DEDUPE GET IDS TIME: {time.time()-st2}")
+# 		if DEBUG:
+# 			print(f"DEDUPE GET IDS TIME: {time.time()-st2}")
 	
 		results_count=len(ids)
 		if DEBUG:
@@ -267,16 +269,17 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		if offset>results_count:
 			results=[]
 		else:
-			
 			page_ids=ids[offset:end_idx]
 			results=orig_queryset.filter(id__in=page_ids)
-		
 	else:
 		results=orig_queryset.filter(id__in=ids)
 		page=None
 		page_size=None
+	
 	if DEBUG:
 		print(f"FILTER ON IDS TIME: {time.time()-st}")
+		print(f"FINAL RESULTS COUNT: {results_count}")
+
 	
 	return results,results_count,page,page_size
 

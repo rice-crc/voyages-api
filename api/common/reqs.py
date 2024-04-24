@@ -364,10 +364,14 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	
 	return output
 
-def autocomplete_req(queryset,self,reqdict,options,sourcemodelname):
+def autocomplete_req(queryset,self,r,options,sourcemodelname):
 	
 	#first, get the reqdata
-	rdata=reqdict
+	if type(r)==dict:
+		rdata=r
+	else:
+		rdata=dict(r.data)
+		
 	varName=str(rdata.get('varName'))
 	querystr=str(rdata.get('querystr'))
 	offset=int(rdata.get('offset'))

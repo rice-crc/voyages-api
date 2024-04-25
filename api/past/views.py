@@ -30,6 +30,7 @@ from common.static.EnslaverIdentity_options import EnslaverIdentity_options
 from common.static.Enslaved_options import Enslaved_options
 from common.static.EnslavementRelation_options import EnslavementRelation_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
+from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
@@ -49,6 +50,7 @@ class EnslavedList(generics.GenericAPIView):
 		
 		st=time.time()
 		print("ENSLAVED LIST+++++++\nusername:",request.auth.user)
+		st2=time.time()
 		#VALIDATE THE REQUEST
 		serialized_req = EnslavedListRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
@@ -65,28 +67,32 @@ class EnslavedList(generics.GenericAPIView):
 			cached_response = redis_cache.get(hashed)
 		else:
 			cached_response=None
-		
+		if DEBUG:
+			print(f'PREFLIGHT AND REDIS TIME: {time.time()-st2}')
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
-
+			st3=time.time()
 			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
-			
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Enslaved_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-			
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-			
+			if DEBUG:
+				print(f'QUERYSET TIME: {time.time()-st3}')
+			st5=time.time()
 			resp=EnslavedListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			}).data
+			if DEBUG:
+				print(f'SERIALIZATION TIME: {time.time()-st5}')
 			#I'm having the most difficult time in the world validating this nested paginated response
 			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
@@ -94,7 +100,6 @@ class EnslavedList(generics.GenericAPIView):
 				redis_cache.set(hashed,json.dumps(resp))
 		else:
 			resp=json.loads(cached_response)
-		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 			
@@ -111,8 +116,15 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("ENSLAVED CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in EnslavedBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
+
 		#VALIDATE THE REQUEST
-		serialized_req = EnslavedAutoCompleteRequestSerializer(data=request.data)
+		serialized_req = EnslavedAutoCompleteRequestSerializer(data=reqdict)
 		
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
@@ -133,8 +145,8 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Enslaved.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(unfiltered_queryset,request,Enslaved_options,'Enslaved')
-			resp=dict(request.data)
+			final_vals=autocomplete_req(unfiltered_queryset,self,reqdict,Enslaved_options,'Enslaved')
+			resp=reqdict
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
 			serialized_resp=EnslavedAutoCompleteResponseSerializer(data=resp)
@@ -150,6 +162,48 @@ class EnslavedCharFieldAutoComplete(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp,safe=False,status=200)
 
+class EnslavedLanguageGroupTree(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="For African Origins. A two-level tree of Modern African Countries with the child items being the African languages that were historically located within the current bounds of those countries. Language groups that are associated with more than one country are grouped under the artificial key 'Multi-Country', which is not in the database.",
+		request=serializers.JSONField(),
+		responses=serializers.JSONField(),
+	)
+	def post(self,request):
+		st=time.time()
+		print("LANGUAGE GROUP TREE (#NOFILTER)+++++++\nusername:",request.auth.user)
+		serialized_req = EnslaverAutoCompleteRequestSerializer(data=request.data)
+		elgs=LanguageGroup.objects.all()
+		elgt={
+			None: {
+				"name":"Multi-Country",
+				"id":None,
+				"children":[]
+			}
+		}
+		for elg in elgs:
+			lg_dict={'id':elg.id,'name':elg.name}
+			mc_set=elg.moderncountry_set.all()
+			if len(mc_set)>1:
+				mc_name="Multi-Country"
+				mc_id=None
+			else:
+				mc_name=mc_set[0].name
+				mc_id=mc_set[0].id
+				
+				
+			if mc_id in elgt:
+				elgt[mc_id]['children'].append(lg_dict)
+			else:
+				elgt[mc_id]={
+					"name":mc_name,
+					"id":mc_id,
+					"children": [lg_dict]
+				}
+		resp=[elgt[v] for v in elgt]
+		return JsonResponse(resp,safe=False,status=200)
+
 class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -161,9 +215,15 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("ENSLAVER CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-		
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in EnslaverBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
+
 		#VALIDATE THE REQUEST
-		serialized_req = EnslaverAutoCompleteRequestSerializer(data=request.data)
+		serialized_req = EnslaverAutoCompleteRequestSerializer(data=reqdict)
 			
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
@@ -184,7 +244,7 @@ class EnslaverCharFieldAutoComplete(generics.GenericAPIView):
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=EnslaverIdentity.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(unfiltered_queryset,request,EnslaverIdentity_options,'EnslaverIdentity')
+			final_vals=autocomplete_req(unfiltered_queryset,self,reqdict,EnslaverIdentity_options,'EnslaverIdentity')
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
@@ -237,17 +297,17 @@ class EnslaverList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				EnslaverIdentity_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
 			resp=EnslaverListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			}).data
@@ -303,11 +363,13 @@ class EnslavedAggregations(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Enslaved_options,
-				auto_prefetch=False
+				auto_prefetch=False,
+				paginate=False
 			)
 		
 			#RUN THE AGGREGATIONS
@@ -370,11 +432,13 @@ class EnslaverAggregations(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				EnslaverIdentity_options,
-				auto_prefetch=False
+				auto_prefetch=False,
+				paginate=False
 			)
 		
 			#RUN THE AGGREGATIONS
@@ -437,11 +501,13 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Enslaved_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=False
 			)
 		
 			queryset=queryset.order_by('id')
@@ -502,11 +568,13 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				EnslaverIdentity_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=False
 			)
 		
 			queryset=queryset.order_by('id')
@@ -561,11 +629,13 @@ class EnslavementRelationList(generics.GenericAPIView):
 
 			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslavementRelation.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				EnslavementRelation_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
 
 			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
@@ -624,11 +694,13 @@ class EnslavementRelationDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslavementRelation.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				EnslavementRelation_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=False
 			)
 			queryset=queryset.order_by('id')
 			sf=request.data.get('selected_fields')
@@ -653,17 +725,24 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="This endpoint is tricky. In addition to taking a filter object, it also takes a list of geographic value variable names, like 'aliases__enslaver_relations__relation__voyage__voyage_itinerary__port_of_departure__value'. \n\
-		What it returns is a hierarchical tree of SlaveVoyages geographic data, filtered down to only the values used in those 'geotree valuefields' after applying the filter object.\n\
+		What it returns is a hierarchical tree of SlaveVoyages geographic data, filtered down to only the values used in those 'geotree valuefields' after applying A PARED DOWN VERSION OF the filter object.\n\
 		So if you were to ask for aliases__enslaver_relations__relation__voyage__voyage_itinerary__port_of_departure__value, you would mostly get locations in Europe and the Americas; and if you searched 'aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__name', you would principally get places in the Americas and Africa.",
 		request=EnslaverGeoTreeFilterRequestSerializer,
 		responses=LocationSerializerDeep
 	)
 	def post(self,request):
 		st=time.time()
-		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		print("ENSLAVER GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in EnslaverBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
 		
 		#VALIDATE THE REQUEST
-		serialized_req = EnslaverGeoTreeFilterRequestSerializer(data=request.data)
+		serialized_req = EnslaverGeoTreeFilterRequestSerializer(data=reqdict)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
@@ -682,16 +761,18 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
 			#extract and then peel out the geotree_valuefields
-			reqdict=dict(request.data)
 			geotree_valuefields=reqdict['geotree_valuefields']
 			del(reqdict['geotree_valuefields'])
 		
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				reqdict,
-				EnslaverIdentity_options
+				EnslaverIdentity_options,
+				auto_prefetch=False,
+				paginate=False
 			)
 		
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
@@ -733,7 +814,13 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
-		
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in EnslavedBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
+
 		#VALIDATE THE REQUEST
 		serialized_req = EnslavedGeoTreeFilterRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
@@ -760,10 +847,13 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		
 			#FILTER THE ENSLAVED PEOPLE BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				reqdict,
-				Enslaved_options
+				Enslaved_options,
+				auto_prefetch=False,
+				paginate=False
 			)
 		
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
@@ -827,11 +917,13 @@ class EnslavedAggRoutes(generics.GenericAPIView):
 			params=dict(request.data)
 			zoom_level=params.get('zoom_level')
 			queryset=Enslaved.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Enslaved_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=False
 			)
 		
 			#HAND OFF TO THE FLASK CONTAINER

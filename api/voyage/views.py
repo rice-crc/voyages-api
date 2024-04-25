@@ -33,6 +33,8 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 from drf_spectacular.types import OpenApiTypes
 from common.static.Voyage_options import Voyage_options
 import pickle
+from voyage.cross_filter_fields import VoyageBasicFilterVarNames
+
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
@@ -79,16 +81,17 @@ class VoyageList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Voyage_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
 			resp=VoyageListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			}).data
@@ -145,15 +148,16 @@ class VoyageAggregations(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Voyage_options,
 				auto_prefetch=False
 			)
 			#RUN THE AGGREGATIONS
 			aggregation_field=request.data.get('varName')
-			output_dict,errormessages=get_fieldstats(queryset,aggregation_field,Voyage_options)
+			output_dict,errormessages=get_fieldstats(results,aggregation_field,Voyage_options)
 			#VALIDATE THE RESPONSE
 			serialized_resp=VoyageFieldAggregationResponseSerializer(data=output_dict)
 			if not serialized_resp.is_valid():
@@ -207,8 +211,9 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
@@ -286,8 +291,9 @@ class VoyageGroupBy(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Voyage_options,
 				auto_prefetch=False
@@ -336,7 +342,7 @@ class VoyageSummaryStats(generics.GenericAPIView):
 		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
-		queryset,results_count=post_req(
+		queryset,results_count,page,page_size=post_req(
 			queryset,
 			self,
 			request,
@@ -399,11 +405,13 @@ class VoyageDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Voyage_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=False
 			)
 		
 			queryset=queryset.order_by('id')
@@ -437,9 +445,15 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE GEO TREE FILTER+++++++\nusername:",request.auth.user)
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in VoyageBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
 		
 		#VALIDATE THE REQUEST
-		serialized_req = VoyageGeoTreeFilterRequestSerializer(data=request.data)
+		serialized_req = VoyageGeoTreeFilterRequestSerializer(data=reqdict)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		
@@ -459,14 +473,14 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:		
 			#extract and then peel out the geotree_valuefields
-			reqdict=dict(request.data)
 			geotree_valuefields=reqdict['geotree_valuefields']
 			del(reqdict['geotree_valuefields'])
 		
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				reqdict,
 				Voyage_options
 			)
@@ -510,8 +524,16 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 	def post(self,request):
 		st=time.time()
 		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		if 'filter' in reqdict:		
+			for filteritem in list(reqdict['filter']):
+				if filteritem['varName'] not in VoyageBasicFilterVarNames:
+					reqdict['filter'].remove(filteritem)
+
+		
 		#VALIDATE THE REQUEST
-		serialized_req = VoyageAutoCompleteRequestSerializer(data=request.data)
+		serialized_req = VoyageAutoCompleteRequestSerializer(data=reqdict)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
@@ -534,11 +556,11 @@ class VoyageCharFieldAutoComplete(generics.GenericAPIView):
 						
 			unfiltered_queryset=Voyage.objects.all()
 			
-			final_vals=autocomplete_req(unfiltered_queryset,request,Voyage_options,'Voyage')
+			final_vals=autocomplete_req(unfiltered_queryset,self,reqdict,Voyage_options,'Voyage')
 			
 			#RUN THE AUTOCOMPLETE ALGORITHM
 			
-			resp=dict(request.data)
+			resp=reqdict
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
 			serialized_resp=VoyageAutoCompleteResponseSerializer(data=resp)
@@ -588,8 +610,9 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			params=dict(request.data)
 			queryset=Voyage.objects.all()
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True

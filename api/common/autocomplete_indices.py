@@ -27,7 +27,8 @@ autocomplete_basic_index_field_endings=[
 	('CaptiveFate','Enslaved','captive_fate__name'),
 	('ParticularOutcome','Enslaved','enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__name'),
 	('Source','Enslaved','enslaved_source_connections__source__title'),
-	('EnslaverRole','EnslaverIdentity','aliases__enslaver_relations__roles__name')
+	('EnslaverRole','EnslaverIdentity','aliases__enslaver_relations__roles__name'),
+	('LanguageGroup','Enslaved','language_group__name')
 ]
 
 #there are more complex indices that need to be pushed into solr

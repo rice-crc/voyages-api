@@ -103,8 +103,6 @@ Run the app setup and configuration tasks.
 ```bash
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py collectstatic --noinput'
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py migrate'
-local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_geo_data'
-local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py sync_voyage_dates_data'
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c voyages -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c enslavers -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c enslaved -d /srv/voyages/solr

@@ -189,7 +189,7 @@ class Enslaved(models.Model):
 	# For African Origins dataset documented_name is an African Name.
 	# For Oceans of Kinfolk, this field is used to store the Western
 	# Name of the enslaved.
-	enslaved_id = models.IntegerField(unique=True,blank=False,null=False)
+	enslaved_id = models.IntegerField(db_index=True,unique=True,blank=False,null=False)
 	documented_name = models.CharField(db_index=True,max_length=100, blank=True,null=True)
 	name_first = models.CharField(db_index=True,max_length=100, null=True, blank=True)
 	name_second = models.CharField(db_index=True,max_length=100, null=True, blank=True)

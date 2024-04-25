@@ -55,7 +55,7 @@ class EstimateDataFrames(generics.GenericAPIView):
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Estimate.objects.all()
 # 		print(queryset)
-		queryset,results_count=post_req(
+		queryset,results_count,page,page_size=post_req(
 			queryset,
 			self,
 			request,
@@ -95,7 +95,7 @@ class EstimateTimeline(generics.GenericAPIView):
 		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Estimate.objects.all()
-		queryset,results_count=post_req(
+		queryset,results_count,page,page_size=post_req(
 			queryset,
 			self,
 			request,
@@ -160,7 +160,7 @@ class EstimateCrossTabs(generics.GenericAPIView):
 		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Estimate.objects.all()
-		queryset,results_count=post_req(
+		results,results_count,page,page_size=post_req(
 			queryset,
 			self,
 			request,
@@ -224,8 +224,9 @@ class EstimateAggRoutes(generics.GenericAPIView):
 			params=dict(request.data)
 			queryset=Estimate.objects.all()
 			zoomlevel=params.get('zoomlevel','region')
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Estimate_options,
 				auto_prefetch=True

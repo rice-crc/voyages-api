@@ -68,18 +68,18 @@ class PostList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Post.objects.all()
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Post_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-			results,total_results_count,page_num,page_size=\
-			paginate_queryset(queryset,request)
 			
 			resp=PostListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			}).data
@@ -135,7 +135,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Post.objects.all()
 			#RUN THE AUTOCOMPLETE ALGORITHM
-			final_vals=autocomplete_req(unfiltered_queryset,request,Post_options,'Post')
+			final_vals=autocomplete_req(unfiltered_queryset,self,request,Post_options,'Post')
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
@@ -200,10 +200,9 @@ class AuthorList(generics.GenericAPIView):
 				self,
 				request,
 				Author_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-			results,total_results_count,page_num,page_size=\
-			paginate_queryset(queryset,request)
 			
 			resp=AuthorListResponseSerializer({
 				'count':total_results_count,
@@ -261,17 +260,17 @@ class InstitutionList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Institution.objects.all()
-			queryset,results_count=post_req(
+			results,results_count,page,page_size=post_req(
 				queryset,
 				self,
 				request,
 				Institution_options,
-				auto_prefetch=True
+				auto_prefetch=True,
+				paginate=True
 			)
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
 			resp=InstitutionListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
+				'count':results_count,
+				'page':page,
 				'page_size':page_size,
 				'results':results
 			},read_only=True).data

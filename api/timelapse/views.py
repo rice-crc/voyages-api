@@ -163,8 +163,9 @@ class VoyageAnimation(generics.GenericAPIView):
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
 			print("BEFORE---->",queryset.count())
-			queryset,results_count=post_req(
+			queryset,results_count,page,page_size=post_req(
 				queryset,
+				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True

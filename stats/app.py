@@ -33,12 +33,12 @@ def load_long_df(endpoint,variables,options):
 	return(df)
 
 registered_caches=[
-	voyage_bar_and_donut_charts,
-	voyage_summary_statistics,
+# 	voyage_bar_and_donut_charts,
+# 	voyage_summary_statistics,
 	voyage_pivot_tables,
-	voyage_xyscatter,
-	estimate_pivot_tables,
-	timelapse
+# 	voyage_xyscatter,
+# 	estimate_pivot_tables,
+# 	timelapse
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
@@ -358,13 +358,24 @@ def estimates_pivot():
 				nbins=1
 			else:
 				nbins=int((binvar_max-binvar_min)/binsize)+1
-			bin_arrays=np.array_split(binvar_ints,nbins)
-			bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
+			
+			bin_tuples=[]
+			for nbin in range(nbins):
+				nbinmin=binvar_min+(binsize*nbin)
+				nbinmax=binvar_min+(binsize*(nbin+1))-1
+				if nbinmax>=binvar_max:
+					nbinmax=binvar_max
+				thisbin=(nbinmin,nbinmax)
+				bin_tuples.append(thisbin)
+			bins=pd.IntervalIndex.from_tuples(bin_tuples,closed='both')
 			pv=pv.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
 			pv=pv[cols+vals+['row_bins']]
 			pv.rename(columns={"row_bins": rows})
 			pv['row_bins']=pv['row_bins'].astype('str')
 			pv['row_bins']=pv['row_bins'].apply(interval_to_str)
+			
+			
+			
 			rows='row_bins'
 		#pivot
 		
@@ -507,7 +518,8 @@ def crosstabs():
 	offset=rdata.get('offset') or 0
 	binsize=rdata.get('binsize')
 	order_by=rdata.get('order_by')
-	if order_by is not None:
+	if order_by is not None and order_by not in [['Year range'],['-Year range']]:
+		
 		ascending=True
 		order_by=order_by[0]
 		if order_by.startswith("-"):
@@ -515,12 +527,31 @@ def crosstabs():
 			order_by=order_by[1:]
 		order_by_list=order_by.split('__')
 		order_by_list=tuple(order_by_list)
+	else:
+# 		print('ORDERBYISSTR',type(order_by)==list,type(order_by))
+		if type(order_by)==list:
+			if order_by[0].startswith("-"):
+				ascending=False
+			else:
+				ascending=True
+		else:
+			ascending=False
+		order_by_list=(rows,)
+	
+	if len(order_by_list)==1:
+		order_by_list=order_by_list[0]
+		
+	
+# 	print("FIRST ORDER BY--->",order_by)
+# 	print("ASCENDING",ascending)
+# 	print("FIRST OBL--->",order_by_list)
 		
 	normalize=rdata.get('normalize')
 	if normalize is not None:
 		normalize=normalize[0]
 	if normalize not in ["columns","index"]:
 		normalize=False
+	
 	
 	df=eval(dfname)['df']
 	options=eval(dfname)['options']
@@ -544,19 +575,45 @@ def crosstabs():
 	####1) NUMERIC TO WORK IN THE FIRST PLACE
 	####2) A YEAR VAR IN ORDER TO MAKE SENSE TO A HUMAN END-USER
 	if binsize is not None:
+# 		print("ROWS",rows)
+		binrows=rows
+# 		print(binrows)
+# 		print(df)
 		binsize=int(binsize)
-		yeargroupmode=True
 		df=df.dropna(subset=[rows,val])
-		df[rows]=df[rows].astype('int')
-		year_min=df[rows].min()
-		year_max=df[rows].max()
-		year_ints=list(range(int(year_min),int(year_max+1)))
-		if year_max-year_min <= binsize:
+		df[binrows]=df[binrows].astype('int')
+		binvar_min=df[binrows].min()
+		binvar_max=df[binrows].max()
+		binvar_ints=list(range(int(binvar_min),int(binvar_max)+1))
+		if binvar_max-binvar_min <=binsize:
 			nbins=1
 		else:
-			nbins=int((year_max-year_min)/binsize)
-		bin_arrays=np.array_split(year_ints,nbins)
-		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
+			nbins=int((binvar_max-binvar_min)/binsize)+1
+		
+		bin_tuples=[]
+		for nbin in range(nbins):
+			nbinmin=binvar_min+(binsize*nbin)
+			nbinmax=binvar_min+(binsize*(nbin+1))-1
+			if nbinmax>=binvar_max:
+				nbinmax=binvar_max
+			thisbin=(nbinmin,nbinmax)
+			bin_tuples.append(thisbin)
+			
+			
+		bins=pd.IntervalIndex.from_tuples(bin_tuples,closed='both')
+# 		binsize=int(binsize)
+# 		yeargroupmode=True
+# 		df=df.dropna(subset=[rows,val])
+# 		df[rows]=df[rows].astype('int')
+# 		year_min=df[rows].min()
+# 		year_max=df[rows].max()
+# 		year_ints=list(range(int(year_min),int(year_max+1)))
+# 		if year_max-year_min <= binsize:
+# 			nbins=1
+# 		else:
+# 			nbins=int((year_max-year_min)/binsize)
+# 		bin_arrays=np.array_split(year_ints,nbins)
+# 		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
 		df=df.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
 		df=df[columns+[val]+['row_bins']]
 		df.rename(columns={"row_bins": rows})
@@ -570,7 +627,13 @@ def crosstabs():
 			aggfunc=fn,
 			margins=True
 		)
-		ct.fillna(0)
+		ct=ct.fillna(0)
+		
+		if order_by_list in [rows,"-"+rows]:
+			order_by_list='row_bins'
+# 		print("ROWS---->",rows)
+# 		print("OBL---->",order_by_list)
+		
 	else:
 		ct=pd.crosstab(
 			[df[rows]],
@@ -582,8 +645,11 @@ def crosstabs():
 		)
 		ct.fillna(0)
 	
+# 	print(ct)
 	if order_by is not None:
+# 		print("ASCENDING--->",ascending)
 		ct=ct.sort_values(by=order_by_list,ascending=ascending)
+# 		print(ct)
 	
 	if len(columns)==1:
 		mlctuples=[[i] for i in list(ct.columns)]
@@ -681,7 +747,7 @@ def crosstabs():
 # 	print(ctshape)
 	rowcount=ctshape[0]	
 	start=offset
-	end=min((offset+limit),rowcount-1)
+	end=min((offset+limit),rowcount)
 	
 	ct=ct.iloc[start:end,]
 	ct_records=ct.to_records()
@@ -697,7 +763,17 @@ def crosstabs():
 				}
 		output_records.append(thisrecord)
 	
+	all_row=None
 	
+	for output_record in output_records:
+# 		print(allcolumns[0],output_record[allcolumns[0]])
+		if output_record[allcolumns[0]]=="All":
+			output_records.remove(output_record)
+			marginrow=output_record
+	output_records.append(marginrow)
+	
+# 	for output_record in output_records:
+# 		print(allcolumns[0],output_record[allcolumns[0]])
 	
 	output={
 		'tablestructure': colgroups,

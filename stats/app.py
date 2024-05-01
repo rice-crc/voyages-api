@@ -540,18 +540,16 @@ def crosstabs():
 	
 	if len(order_by_list)==1:
 		order_by_list=order_by_list[0]
-		
 	
 # 	print("FIRST ORDER BY--->",order_by)
 # 	print("ASCENDING",ascending)
 # 	print("FIRST OBL--->",order_by_list)
-		
+	
 	normalize=rdata.get('normalize')
 	if normalize is not None:
 		normalize=normalize[0]
 	if normalize not in ["columns","index"]:
 		normalize=False
-	
 	
 	df=eval(dfname)['df']
 	options=eval(dfname)['options']
@@ -598,8 +596,7 @@ def crosstabs():
 				nbinmax=binvar_max
 			thisbin=(nbinmin,nbinmax)
 			bin_tuples.append(thisbin)
-			
-			
+		
 		bins=pd.IntervalIndex.from_tuples(bin_tuples,closed='both')
 # 		binsize=int(binsize)
 # 		yeargroupmode=True
@@ -636,7 +633,7 @@ def crosstabs():
 		
 	else:
 		ct=pd.crosstab(
-			[df[rows]],
+			df[rows],
 			[df[col] for col in columns],
 			values=df[val],
 			aggfunc=fn,
@@ -645,18 +642,18 @@ def crosstabs():
 		)
 		ct.fillna(0)
 	
-# 	print(ct)
-	if order_by is not None:
-# 		print("ASCENDING--->",ascending)
-		ct=ct.sort_values(by=order_by_list,ascending=ascending)
-# 		print(ct)
-	
 	if len(columns)==1:
 		mlctuples=[[i] for i in list(ct.columns)]
 	else:
 		mlctuples=list(ct.columns)
 	
-# 	print("tuples",mlctuples)
+# 	print("TABLE TUPLES",mlctuples)
+# 	
+# 	print(order_by_list,type(order_by_list),type(order_by_list)==tuple)
+		
+	if order_by is not None:
+		ct=ct.sort_values(by=order_by_list,ascending=ascending)
+	
 	
 	def makechild(name,isfield=False,columngroupshow=False,key=None):
 		if columngroupshow:
@@ -680,6 +677,10 @@ def crosstabs():
 				"filter": 'agNumberColumnFilter',
 				"sort": 'desc'
 			}
+			
+			if ascending:
+				child['sort']='asc'
+			
 			if key=='All':
 				child['pinned']='right'
 		else:
@@ -734,7 +735,6 @@ def crosstabs():
 	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
 	ct=ct.fillna(0)
-	
 # 	print(ct)
 	
 	def convertcell(cellval,valuetype):
@@ -747,29 +747,37 @@ def crosstabs():
 # 	print(ctshape)
 	rowcount=ctshape[0]	
 	start=offset
-	end=min((offset+limit),rowcount)
+	end=min((offset+limit),rowcount-1)
 	
-	ct=ct.iloc[start:end,]
+# 	ct=ct.iloc[start:end,]
 	ct_records=ct.to_records()
+# 	
+# 	for output_record in output_records:
+# 		print(allcolumns[0],output_record[allcolumns[0]])
+# 		if output_record[allcolumns[0]]=="All":
+# 			output_records.remove(output_record)
+# 			marginrow=output_record
+# 
+# 	
 	
-	for r in ct_records:	
-		for i in range(len(r)):
+	for r in range(len(ct_records)):
+# 	ct_records[start:end]:	
+		row=ct_records[r]
+		for i in range(len(row)):
 			if i==0:
 				thisrecord={
 					allcolumns[i]:(
-						convertcell(r[i],valuetype) if i!=0 else r[i]
+						convertcell(row[i],valuetype) if i!=0 else row[i]
 					)
-					for i in range(len(r))
+					for i in range(len(row))
 				}
-		output_records.append(thisrecord)
+# 		print("---->",thisrecord[allcolumns[0]])
+		if thisrecord[allcolumns[0]]!="All" and (r>=start and r<=end):
+			output_records.append(thisrecord)
+		elif thisrecord[allcolumns[0]]=="All":
+			marginrow=thisrecord
 	
-	all_row=None
 	
-	for output_record in output_records:
-# 		print(allcolumns[0],output_record[allcolumns[0]])
-		if output_record[allcolumns[0]]=="All":
-			output_records.remove(output_record)
-			marginrow=output_record
 	output_records.append(marginrow)
 	
 # 	for output_record in output_records:

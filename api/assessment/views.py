@@ -183,6 +183,12 @@ class EstimateCrossTabs(generics.GenericAPIView):
 			j=json.loads(r.text)
 			serialized_resp=EstimateCrossTabResponseSerializer(data=j)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		
+		
+		#WE NEED TO SEND BACK THE RESPONSE AS A CSV, PROBABLY USING THIS: django.http.response.FileResponse
+		
+		
 		if not serialized_resp.is_valid():
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:

@@ -37,7 +37,7 @@ registered_caches=[
 # 	voyage_summary_statistics,
 	voyage_pivot_tables,
 # 	voyage_xyscatter,
-# 	estimate_pivot_tables,
+	estimate_pivot_tables,
 # 	timelapse
 ]
 
@@ -126,7 +126,6 @@ def timelapse_animation():
 
 @app.route('/groupby/',methods=['POST'])
 def groupby():
-
 	'''
 	Implements the pandas groupby function and returns the sparse summary.
 	Excellent for bar & pie charts.
@@ -160,7 +159,6 @@ class NotNanDict(dict):
 			k: v for k, v in a if not self.is_nan(v) and v!={}
 		}
 
-
 def interval_to_str(s):
 	s=str(s)
 	adashb=re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
@@ -170,7 +168,6 @@ def interval_to_str(s):
 	else:
 		return adashb
 	
-
 def makestr(s):
 	if s is None:
 		return "Unknown"
@@ -303,10 +300,16 @@ def voyage_summary_stats():
 def estimates_pivot():
 
 	'''
+	
+	Compare this to the crosstabs endpoint below that's used for voyage pivot tables.
+	
 	We cannot implement multi-level rows in AG Grid
 		1. because it's in the enterprise version
 		2. because it's ugly
 	It is possible that this is the implementation I was looking for all along.
+	
+	However, I don't know how to manage a multi-level column sort if we go this route.
+	
 	'''
 	st=time.time()
 	rdata=request.json
@@ -367,15 +370,18 @@ def estimates_pivot():
 					nbinmax=binvar_max
 				thisbin=(nbinmin,nbinmax)
 				bin_tuples.append(thisbin)
+				
 			bins=pd.IntervalIndex.from_tuples(bin_tuples,closed='both')
-			pv=pv.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
+			
+			if binsize==1:
+				binlabels=[i[0] for i in bin_tuples]
+				pv=pv.assign(row_bins=pd.cut(df[rows],bins,labels=binlabels,include_lowest=True))
+			else:
+				pv=pv.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
 			pv=pv[cols+vals+['row_bins']]
 			pv.rename(columns={"row_bins": rows})
 			pv['row_bins']=pv['row_bins'].astype('str')
 			pv['row_bins']=pv['row_bins'].apply(interval_to_str)
-			
-			
-			
 			rows='row_bins'
 		#pivot
 		
@@ -435,31 +441,36 @@ def estimates_pivot():
 		
 # 		pv=pv.fillna(0)
 # 		pv=pv.style.format("{:,.0f}")
-		s=pv.style.format(precision=0, na_rep='0', thousands=",")
-		s=s.set_table_styles(
-			[
-				{"selector": "", "props": [("border", "1px solid grey")]},
-				{"selector": "tbody td", "props": [("border", "1px solid grey")]},
-				{"selector": "th", "props": [("border", "1px solid grey")]}
-			]
-		)
-		s=s.set_table_attributes('class="dataframe",border="1"')
-		html=s.to_html(index_names=False)
+		if mode=='html':
+			s=pv.style.format(precision=0, na_rep='0', thousands=",")
+			s=s.set_table_styles(
+				[
+					{"selector": "", "props": [("border", "1px solid grey")]},
+					{"selector": "tbody td", "props": [("border", "1px solid grey")]},
+					{"selector": "th", "props": [("border", "1px solid grey")]}
+				]
+			)
+			s=s.set_table_attributes('class="dataframe",border="1"')
+			data=s.to_html(index_names=False)
+			data=re.sub("disembarked_slaves","Disembarked",data)
+			data=re.sub("embarked_slaves","Embarked",data)
+			data=re.sub("disembarkation_region__import_area__name","",data)
+			data=re.sub("disembarkation_region__name","",data)
+			data=re.sub("embarkation_region__name","",data)
+			data=re.sub("nation__name","",data)
+			data=re.sub("row_bins","",data)
+			data=re.sub("duplicate_col[a-z|0-9|_]+","",data)
+		elif mode=='csv':
+			data=pv.to_csv()
+		
 # 		pv.index.name=''
 		#index names = false fails after the numeric formatting....?
 # 		html=re.sub('\\n\s+','',html)
-		html=re.sub("disembarked_slaves","Disembarked",html)
-		html=re.sub("embarked_slaves","Embarked",html)
-		html=re.sub("disembarkation_region__import_area__name","",html)
-		html=re.sub("disembarkation_region__name","",html)
-		html=re.sub("embarkation_region__name","",html)
-		html=re.sub("nation__name","",html)
-		html=re.sub("row_bins","",html)
-		html=re.sub("duplicate_col[a-z|0-9|_]+","",html)
-		
+
+	#WE NEED TO SEND BACK THE RESPONSE AS A CSV, PROBABLY USING THIS: django.http.response.FileResponse
 	return json.dumps(
 		{
-			"data":html
+			"data":data
 		}
 	)
 
@@ -611,6 +622,8 @@ def crosstabs():
 # 			nbins=int((year_max-year_min)/binsize)
 # 		bin_arrays=np.array_split(year_ints,nbins)
 # 		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
+
+
 		df=df.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
 		df=df[columns+[val]+['row_bins']]
 		df.rename(columns={"row_bins": rows})
@@ -759,10 +772,11 @@ def crosstabs():
 # 			marginrow=output_record
 # 
 # 	
-	
+	indexkey=allcolumns[0]
 	for r in range(len(ct_records)):
 # 	ct_records[start:end]:	
 		row=ct_records[r]
+# 		print(row)
 		for i in range(len(row)):
 			if i==0:
 				thisrecord={
@@ -771,10 +785,20 @@ def crosstabs():
 					)
 					for i in range(len(row))
 				}
-# 		print("---->",thisrecord[allcolumns[0]])
-		if thisrecord[allcolumns[0]]!="All" and (r>=start and r<=end):
+# 				print("RECORD---->",thisrecord)
+				#THIS IS A RATHER UGLY WAY OF ENSURING THAT INDIVIDUAL YEARS DON'T APPEAR AS HYPHEN-SEPARATED REPEATS, LIKE 1900-1900
+				indexkeyval=thisrecord[indexkey]
+				if binsize==1 and re.match("[0-9]+-[0-9]+",indexkeyval):
+					indexkeyval=thisrecord[indexkey]
+# 					print("INDEXKEYVAL",indexkeyval)
+					indexkeyval_a,indexkeyval_b=str(indexkeyval).split("-")
+					if indexkeyval_a==indexkeyval_b:
+						thisrecord[indexkey]=indexkeyval_a
+# 		print("RECORD INDEX---->",thisrecord[allcolumns[0]])
+# 		print("RECORD---->",thisrecord)
+		if thisrecord[indexkey]!="All" and (r>=start and r<=end):
 			output_records.append(thisrecord)
-		elif thisrecord[allcolumns[0]]=="All":
+		elif thisrecord[indexkey]=="All":
 			marginrow=thisrecord
 	
 	

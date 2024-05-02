@@ -126,7 +126,6 @@ def timelapse_animation():
 
 @app.route('/groupby/',methods=['POST'])
 def groupby():
-
 	'''
 	Implements the pandas groupby function and returns the sparse summary.
 	Excellent for bar & pie charts.
@@ -160,7 +159,6 @@ class NotNanDict(dict):
 			k: v for k, v in a if not self.is_nan(v) and v!={}
 		}
 
-
 def interval_to_str(s):
 	s=str(s)
 	adashb=re.sub('[\s,]+','-',re.sub('[\[\]]','',s))
@@ -170,7 +168,6 @@ def interval_to_str(s):
 	else:
 		return adashb
 	
-
 def makestr(s):
 	if s is None:
 		return "Unknown"
@@ -303,10 +300,16 @@ def voyage_summary_stats():
 def estimates_pivot():
 
 	'''
+	
+	Compare this to the crosstabs endpoint below that's used for voyage pivot tables.
+	
 	We cannot implement multi-level rows in AG Grid
 		1. because it's in the enterprise version
 		2. because it's ugly
 	It is possible that this is the implementation I was looking for all along.
+	
+	However, I don't know how to manage a multi-level column sort if we go this route.
+	
 	'''
 	st=time.time()
 	rdata=request.json
@@ -358,9 +361,23 @@ def estimates_pivot():
 				nbins=1
 			else:
 				nbins=int((binvar_max-binvar_min)/binsize)+1
-			bin_arrays=np.array_split(binvar_ints,nbins)
-			bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
-			pv=pv.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
+			
+			bin_tuples=[]
+			for nbin in range(nbins):
+				nbinmin=binvar_min+(binsize*nbin)
+				nbinmax=binvar_min+(binsize*(nbin+1))-1
+				if nbinmax>=binvar_max:
+					nbinmax=binvar_max
+				thisbin=(nbinmin,nbinmax)
+				bin_tuples.append(thisbin)
+				
+			bins=pd.IntervalIndex.from_tuples(bin_tuples,closed='both')
+			
+			if binsize==1:
+				binlabels=[i[0] for i in bin_tuples]
+				pv=pv.assign(row_bins=pd.cut(df[rows],bins,labels=binlabels,include_lowest=True))
+			else:
+				pv=pv.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
 			pv=pv[cols+vals+['row_bins']]
 			pv.rename(columns={"row_bins": rows})
 			pv['row_bins']=pv['row_bins'].astype('str')
@@ -424,31 +441,36 @@ def estimates_pivot():
 		
 # 		pv=pv.fillna(0)
 # 		pv=pv.style.format("{:,.0f}")
-		s=pv.style.format(precision=0, na_rep='0', thousands=",")
-		s=s.set_table_styles(
-			[
-				{"selector": "", "props": [("border", "1px solid grey")]},
-				{"selector": "tbody td", "props": [("border", "1px solid grey")]},
-				{"selector": "th", "props": [("border", "1px solid grey")]}
-			]
-		)
-		s=s.set_table_attributes('class="dataframe",border="1"')
-		html=s.to_html(index_names=False)
+		if mode=='html':
+			s=pv.style.format(precision=0, na_rep='0', thousands=",")
+			s=s.set_table_styles(
+				[
+					{"selector": "", "props": [("border", "1px solid grey")]},
+					{"selector": "tbody td", "props": [("border", "1px solid grey")]},
+					{"selector": "th", "props": [("border", "1px solid grey")]}
+				]
+			)
+			s=s.set_table_attributes('class="dataframe",border="1"')
+			data=s.to_html(index_names=False)
+			data=re.sub("disembarked_slaves","Disembarked",data)
+			data=re.sub("embarked_slaves","Embarked",data)
+			data=re.sub("disembarkation_region__import_area__name","",data)
+			data=re.sub("disembarkation_region__name","",data)
+			data=re.sub("embarkation_region__name","",data)
+			data=re.sub("nation__name","",data)
+			data=re.sub("row_bins","",data)
+			data=re.sub("duplicate_col[a-z|0-9|_]+","",data)
+		elif mode=='csv':
+			data=pv.to_csv()
+		
 # 		pv.index.name=''
 		#index names = false fails after the numeric formatting....?
 # 		html=re.sub('\\n\s+','',html)
-		html=re.sub("disembarked_slaves","Disembarked",html)
-		html=re.sub("embarked_slaves","Embarked",html)
-		html=re.sub("disembarkation_region__import_area__name","",html)
-		html=re.sub("disembarkation_region__name","",html)
-		html=re.sub("embarkation_region__name","",html)
-		html=re.sub("nation__name","",html)
-		html=re.sub("row_bins","",html)
-		html=re.sub("duplicate_col[a-z|0-9|_]+","",html)
-		
+
+	#WE NEED TO SEND BACK THE RESPONSE AS A CSV, PROBABLY USING THIS: django.http.response.FileResponse
 	return json.dumps(
 		{
-			"data":html
+			"data":data
 		}
 	)
 
@@ -507,7 +529,8 @@ def crosstabs():
 	offset=rdata.get('offset') or 0
 	binsize=rdata.get('binsize')
 	order_by=rdata.get('order_by')
-	if order_by is not None:
+	if order_by is not None and order_by not in [['Year range'],['-Year range']]:
+		
 		ascending=True
 		order_by=order_by[0]
 		if order_by.startswith("-"):
@@ -515,7 +538,24 @@ def crosstabs():
 			order_by=order_by[1:]
 		order_by_list=order_by.split('__')
 		order_by_list=tuple(order_by_list)
-		
+	else:
+# 		print('ORDERBYISSTR',type(order_by)==list,type(order_by))
+		if type(order_by)==list:
+			if order_by[0].startswith("-"):
+				ascending=False
+			else:
+				ascending=True
+		else:
+			ascending=False
+		order_by_list=(rows,)
+	
+	if len(order_by_list)==1:
+		order_by_list=order_by_list[0]
+	
+# 	print("FIRST ORDER BY--->",order_by)
+# 	print("ASCENDING",ascending)
+# 	print("FIRST OBL--->",order_by_list)
+	
 	normalize=rdata.get('normalize')
 	if normalize is not None:
 		normalize=normalize[0]
@@ -544,19 +584,46 @@ def crosstabs():
 	####1) NUMERIC TO WORK IN THE FIRST PLACE
 	####2) A YEAR VAR IN ORDER TO MAKE SENSE TO A HUMAN END-USER
 	if binsize is not None:
+# 		print("ROWS",rows)
+		binrows=rows
+# 		print(binrows)
+# 		print(df)
 		binsize=int(binsize)
-		yeargroupmode=True
 		df=df.dropna(subset=[rows,val])
-		df[rows]=df[rows].astype('int')
-		year_min=df[rows].min()
-		year_max=df[rows].max()
-		year_ints=list(range(int(year_min),int(year_max+1)))
-		if year_max-year_min <= binsize:
+		df[binrows]=df[binrows].astype('int')
+		binvar_min=df[binrows].min()
+		binvar_max=df[binrows].max()
+		binvar_ints=list(range(int(binvar_min),int(binvar_max)+1))
+		if binvar_max-binvar_min <=binsize:
 			nbins=1
 		else:
-			nbins=int((year_max-year_min)/binsize)
-		bin_arrays=np.array_split(year_ints,nbins)
-		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
+			nbins=int((binvar_max-binvar_min)/binsize)+1
+		
+		bin_tuples=[]
+		for nbin in range(nbins):
+			nbinmin=binvar_min+(binsize*nbin)
+			nbinmax=binvar_min+(binsize*(nbin+1))-1
+			if nbinmax>=binvar_max:
+				nbinmax=binvar_max
+			thisbin=(nbinmin,nbinmax)
+			bin_tuples.append(thisbin)
+		
+		bins=pd.IntervalIndex.from_tuples(bin_tuples,closed='both')
+# 		binsize=int(binsize)
+# 		yeargroupmode=True
+# 		df=df.dropna(subset=[rows,val])
+# 		df[rows]=df[rows].astype('int')
+# 		year_min=df[rows].min()
+# 		year_max=df[rows].max()
+# 		year_ints=list(range(int(year_min),int(year_max+1)))
+# 		if year_max-year_min <= binsize:
+# 			nbins=1
+# 		else:
+# 			nbins=int((year_max-year_min)/binsize)
+# 		bin_arrays=np.array_split(year_ints,nbins)
+# 		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
+
+
 		df=df.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
 		df=df[columns+[val]+['row_bins']]
 		df.rename(columns={"row_bins": rows})
@@ -570,10 +637,16 @@ def crosstabs():
 			aggfunc=fn,
 			margins=True
 		)
-		ct.fillna(0)
+		ct=ct.fillna(0)
+		
+		if order_by_list in [rows,"-"+rows]:
+			order_by_list='row_bins'
+# 		print("ROWS---->",rows)
+# 		print("OBL---->",order_by_list)
+		
 	else:
 		ct=pd.crosstab(
-			[df[rows]],
+			df[rows],
 			[df[col] for col in columns],
 			values=df[val],
 			aggfunc=fn,
@@ -582,15 +655,18 @@ def crosstabs():
 		)
 		ct.fillna(0)
 	
-	if order_by is not None:
-		ct=ct.sort_values(by=order_by_list,ascending=ascending)
-	
 	if len(columns)==1:
 		mlctuples=[[i] for i in list(ct.columns)]
 	else:
 		mlctuples=list(ct.columns)
 	
-# 	print("tuples",mlctuples)
+# 	print("TABLE TUPLES",mlctuples)
+# 	
+# 	print(order_by_list,type(order_by_list),type(order_by_list)==tuple)
+		
+	if order_by is not None:
+		ct=ct.sort_values(by=order_by_list,ascending=ascending)
+	
 	
 	def makechild(name,isfield=False,columngroupshow=False,key=None):
 		if columngroupshow:
@@ -614,6 +690,10 @@ def crosstabs():
 				"filter": 'agNumberColumnFilter',
 				"sort": 'desc'
 			}
+			
+			if ascending:
+				child['sort']='asc'
+			
 			if key=='All':
 				child['pinned']='right'
 		else:
@@ -668,7 +748,6 @@ def crosstabs():
 	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
 	ct=ct.fillna(0)
-	
 # 	print(ct)
 	
 	def convertcell(cellval,valuetype):
@@ -683,21 +762,50 @@ def crosstabs():
 	start=offset
 	end=min((offset+limit),rowcount-1)
 	
-	ct=ct.iloc[start:end,]
+# 	ct=ct.iloc[start:end,]
 	ct_records=ct.to_records()
-	
-	for r in ct_records:	
-		for i in range(len(r)):
+# 	
+# 	for output_record in output_records:
+# 		print(allcolumns[0],output_record[allcolumns[0]])
+# 		if output_record[allcolumns[0]]=="All":
+# 			output_records.remove(output_record)
+# 			marginrow=output_record
+# 
+# 	
+	indexkey=allcolumns[0]
+	for r in range(len(ct_records)):
+# 	ct_records[start:end]:	
+		row=ct_records[r]
+# 		print(row)
+		for i in range(len(row)):
 			if i==0:
 				thisrecord={
 					allcolumns[i]:(
-						convertcell(r[i],valuetype) if i!=0 else r[i]
+						convertcell(row[i],valuetype) if i!=0 else row[i]
 					)
-					for i in range(len(r))
+					for i in range(len(row))
 				}
-		output_records.append(thisrecord)
+# 				print("RECORD---->",thisrecord)
+				#THIS IS A RATHER UGLY WAY OF ENSURING THAT INDIVIDUAL YEARS DON'T APPEAR AS HYPHEN-SEPARATED REPEATS, LIKE 1900-1900
+				indexkeyval=thisrecord[indexkey]
+				if binsize==1 and re.match("[0-9]+-[0-9]+",indexkeyval):
+					indexkeyval=thisrecord[indexkey]
+# 					print("INDEXKEYVAL",indexkeyval)
+					indexkeyval_a,indexkeyval_b=str(indexkeyval).split("-")
+					if indexkeyval_a==indexkeyval_b:
+						thisrecord[indexkey]=indexkeyval_a
+# 		print("RECORD INDEX---->",thisrecord[allcolumns[0]])
+# 		print("RECORD---->",thisrecord)
+		if thisrecord[indexkey]!="All" and (r>=start and r<=end):
+			output_records.append(thisrecord)
+		elif thisrecord[indexkey]=="All":
+			marginrow=thisrecord
 	
 	
+	output_records.append(marginrow)
+	
+# 	for output_record in output_records:
+# 		print(allcolumns[0],output_record[allcolumns[0]])
 	
 	output={
 		'tablestructure': colgroups,

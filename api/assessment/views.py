@@ -95,7 +95,7 @@ class EstimateTimeline(generics.GenericAPIView):
 		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Estimate.objects.all()
-		queryset,results_count,page,page_size=post_req(
+		results,results_count,page,page_size=post_req(
 			queryset,
 			self,
 			request,
@@ -104,7 +104,7 @@ class EstimateTimeline(generics.GenericAPIView):
 		)
 		
 		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
-		ids=[i[0] for i in queryset.values_list('id')]
+		ids=[i[0] for i in results.values_list('id')]
 		u2=STATS_BASE_URL+'estimates_timeline/'
 		params=dict(request.data)
 		stats_req_data=params
@@ -165,11 +165,13 @@ class EstimateCrossTabs(generics.GenericAPIView):
 			self,
 			request,
 			Estimate_options,
-			auto_prefetch=True
+			auto_prefetch=True,
+			paginate=False
 		)
 		
 		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
-		ids=[i[0] for i in queryset.values_list('id')]
+		ids=[i[0] for i in results.values_list('id')]
+		print(f"NUMBER OF IDS: {len(ids)}")
 		u2=STATS_BASE_URL+'estimates_pivot/'
 		params=dict(request.data)
 		stats_req_data=params
@@ -181,6 +183,12 @@ class EstimateCrossTabs(generics.GenericAPIView):
 			j=json.loads(r.text)
 			serialized_resp=EstimateCrossTabResponseSerializer(data=j)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		
+		
+		#WE NEED TO SEND BACK THE RESPONSE AS A CSV, PROBABLY USING THIS: django.http.response.FileResponse
+		
+		
 		if not serialized_resp.is_valid():
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
@@ -233,8 +241,8 @@ class EstimateAggRoutes(generics.GenericAPIView):
 			)
 		
 			#HAND OFF TO THE FLASK CONTAINER
-			queryset=queryset.order_by('id')
-			values_list=queryset.values_list('id')
+			results=results.order_by('id')
+			values_list=results.values_list('id')
 			pks=[v[0] for v in values_list]
 			django_query_time=time.time()
 			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")

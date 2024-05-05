@@ -9,7 +9,6 @@ urlpatterns = [
 	path('enslaved/aggregations/',views.EnslavedAggregations.as_view()),
 	path('enslaved/dataframes/',views.EnslavedDataFrames.as_view()),
 	path('enslaved/aggroutes/',views.EnslavedAggRoutes.as_view()),
-	path('enslavementrelation/',views.EnslavementRelationList.as_view()),
 	path('enslavementrelation/dataframes/',views.EnslavementRelationDataFrames.as_view()),
 	path('enslaver/',views.EnslaverList.as_view()),
 	path('enslaver/<int:id>',views.EnslaverCARD.as_view()),

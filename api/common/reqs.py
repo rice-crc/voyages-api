@@ -167,6 +167,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
 		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		ids=[doc['id'] for doc in results.docs]
+		filtered_queryset=orig_queryset.filter(id__in=ids)
 		results_count=len(ids)
 	else:
 		st=time.time()
@@ -190,69 +191,48 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		if DEBUG:
 			print(f"REQ FILTER TIME: {time.time()-st}")
 	
-		# ORDER RESULTS
-		st=time.time()
-		order_by=params.get('order_by')
-		if order_by is not None:
-			if DEBUG:
-				print(f"------>ORDER BY: {order_by}")
-			for ob in order_by:
-				if ob.startswith('-'):
-					k=ob[1:]
-					asc=False
-				else:
-					asc=True
-					k=ob
-				if k in all_fields:
-					if asc:
-						filtered_queryset=filtered_queryset.order_by(F(k).asc(nulls_last=True))
-					else:
-						filtered_queryset=filtered_queryset.order_by(F(k).desc(nulls_last=True))
-				else:
-					filtered_queryset=filtered_queryset.order_by('id')
-		else:
-			filtered_queryset=filtered_queryset.order_by('id')
-		
+	# ORDER RESULTS
+	st=time.time()
+	order_by=params.get('order_by')
+	if order_by is not None:
 		if DEBUG:
-			print(f"ORDER BY TIME: {time.time()-st}")
-
-#SOMETHING ABOUT THE WAY THIS M2M DEDUPE IS CONSTRUCTED IS RESULTING IN EMPTY RESULTS SETS FOR DOCS....
-#DEACTIVATING UNTIL I CAN GET TO THE BOTTOM OF IT....
-		# M2M DEDUPE
-# 		st2=time.time()
-# 		if USE_REDIS_CACHE:
-# 			req_copy=dict(params)
-# 			for nqsk in nonquerysetkeysforredis:
-# 				if nqsk in req_copy:
-# 					del(req_copy[nqsk])
-# 			hashdict={
-# 				'req':req_copy,
-# 				'self':str(s.request._stream),
-# 				'req_type':"WE WANT THE FULL PK LIST ON THE TARGET MODEL"
-# 			}
-# 			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-# 			cached_response = redis_cache.get(hashed_full_req)
-# 		else:
-# 		cached_response=None
-		
-# 		if cached_response is None:
-			#dedupe m2m filters
+			print(f"------>ORDER BY: {order_by}")
+		for ob in order_by:
+			if ob.startswith('-'):
+				k=ob[1:]
+				asc=False
+			else:
+				asc=True
+				k=ob
+			if k in all_fields:
+				if asc:
+					filtered_queryset=filtered_queryset.order_by(F(k).asc(nulls_last=True))
+				else:
+					filtered_queryset=filtered_queryset.order_by(F(k).desc(nulls_last=True))
+			else:
+				filtered_queryset=filtered_queryset.order_by('id')
+	else:
+		filtered_queryset=filtered_queryset.order_by('id')
+	
+	if DEBUG:
+		print(f"ORDER BY TIME: {time.time()-st}")
+	
+	if '__' in order_by:
+		st2=time.time()
+		#dedupe ordered results
+		#https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
+		def f7(seq):
+			seen = set()
+			seen_add = seen.add
+			return [x for x in seq if not (x in seen or seen_add(x))]
 		ids=[v[0] for v in filtered_queryset.values_list('id')]
-	
-# 			if USE_REDIS_CACHE:
-# 				redis_cache.set(hashed_full_req,json.dumps(ids))
-# 		else:
-# 			ids=cached_response
-		
-# 		for i in ids[:20]:
-# 			print(i,filtered_queryset.get(enslaved_id=i).age)
-		
-# 		if DEBUG:
-# 			print(f"DEDUPE GET IDS TIME: {time.time()-st2}")
-	
-		results_count=len(ids)
+		ids=f7(ids)
 		if DEBUG:
-			print("COUNT W DUPLICATES:",results_count)
+			print(f"DEDUPE TIME: {time.time()-st2}")
+		
+	results_count=len(ids)
+	if DEBUG:
+		print("COUNT W DUPLICATES:",results_count)
 		
 	st=time.time()
 	if paginate:
@@ -436,7 +416,6 @@ def autocomplete_req(queryset,self,r,options,sourcemodelname):
 # 			print("real search")
 			results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 		solr_ids=set([doc['id'] for doc in results.docs])
-		solr_ids=set(solr_ids)
 # 		print(solr_ids)
 # 		solr_ids={0,3,7,12}		
 		#now we get the primary keys of that variable name from the filtered queryset

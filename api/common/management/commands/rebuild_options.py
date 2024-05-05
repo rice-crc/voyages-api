@@ -11,17 +11,17 @@ class Command(BaseCommand):
 	outputs go to api/common/static and are included in the git repo.'
 	def handle(self, *args, **options):
 		
-		base_obj_names=[
-			"Author",
-			"Enslaved",
-			"EnslaverIdentity",
-			"Institution",
-			"Post",
-			"Voyage",
-			"Source",
-			"Estimate",
-			"EnslavementRelation"
-		]
-		
-		for base_obj_name in base_obj_names:
-			getJSONschema(base_obj_name,hierarchical=False,rebuild=True)
+# 		base_obj_names=[
+# 			"Author",
+# 			"Enslaved",
+# 			"EnslaverIdentity",
+# 			"Institution",
+# 			"Post",
+# 			"Voyage",
+# 			"Source",
+# 			"Estimate",
+# 			"EnslavementRelation"
+# 		]
+# 		
+# 		for base_obj_name in base_obj_names:
+# 			getJSONschema(base_obj_name,hierarchical=False,rebuild=True)

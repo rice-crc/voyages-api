@@ -119,6 +119,28 @@ class PastVoyageSerializer(serializers.ModelSerializer):
 			'voyage_source_connections'
 		]
 
+class PastEnslaverVoyageSerializer(serializers.ModelSerializer):
+	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
+	voyage_dates=PastVoyageDatesSerializer(many=False)
+	voyage_ship=PastVoyageShipSerializer(many=False)
+	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
+	voyage_source_connections=PastVoyageSourceConnectionSerializer(many=True,read_only=True)
+	enslaver_roles=EnslaverRoleSerializer(many=True,read_only=True)
+	class Meta:
+		model=Voyage
+		fields=[
+			'voyage_id',
+			'id',
+			'dataset',
+			'voyage_itinerary',
+			'voyage_dates',
+			'voyage_ship',
+			'voyage_outcome',
+			'voyage_source_connections',
+			'enslaver_roles'
+		]
+
+
 ####################### ENSLAVED M2M CONNECTIONS
 
 #### FROM ENSLAVED TO ENSLAVERS
@@ -271,9 +293,10 @@ class EnslaverEnslavedSerializer(serializers.ModelSerializer):
 	
 class EnslaverEnslavedInRelationSerializer(serializers.ModelSerializer):
 	enslaved=EnslaverEnslavedSerializer(many=False)
+	enslaver_roles=EnslaverRoleSerializer(many=True,read_only=True)
 	class Meta:
 		model=EnslavedInRelation
-		fields='__all__'
+		fields=('enslaved','enslaver_roles')
 
 class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
 	enslaved_in_relation=EnslaverEnslavedInRelationSerializer(many=True)
@@ -292,10 +315,9 @@ class EnslaverEnslaverInRelationSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class EnslaverAliasSerializer(serializers.ModelSerializer):
-	enslaver_relations=EnslaverEnslaverInRelationSerializer(many=True)
 	class Meta:
 		model=EnslaverAlias
-		fields='__all__'
+		fields=('alias',)
 
 class EnslaverIdentitySerializer(serializers.ModelSerializer):
 	birth_place=PastLocationSerializer(many=False)
@@ -303,9 +325,46 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 	aliases=EnslaverAliasSerializer(many=True)
 	principal_location=PastLocationSerializer(many=False)
 	enslaver_source_connections=PastSourceEnslaverConnectionSerializer(many=True)
+	named_enslaved_people=serializers.SerializerMethodField()
+	voyages=serializers.SerializerMethodField()
+	def get_named_enslaved_people(self,instance):
+		aliases=instance.aliases.all()
+		eirs=[]
+		for alias in aliases:
+			alias_eirs=alias.enslaver_relations.all()
+			for aeir in alias_eirs:
+				eirs.append(aeir)
+		eirs=list(set(eirs))
+		enslaver_enslaved_dict={}
+		for eir in eirs:
+			enslaved_people_in_relation=eir.relation.enslaved_in_relation.all()
+			for e in enslaved_people_in_relation:
+				e.enslaver_roles=eir.roles.all()
+				enslaver_enslaved_dict[e.id]=e
+		return EnslaverEnslavedInRelationSerializer([enslaver_enslaved_dict[e] for e in enslaver_enslaved_dict],many=True,read_only=True).data
+
+	def get_voyages(self,instance):
+		aliases=instance.aliases.all()
+		eirs=[]
+		for alias in aliases:
+			alias_eirs=alias.enslaver_relations.all()
+			for aeir in alias_eirs:
+				eirs.append(aeir)
+		eirs=list(set(eirs))
+		
+		enslaver_voyages_dict={}
+		for eir in eirs:
+			voyage=eir.relation.voyage
+			if voyage is not None:
+				voyage.enslaver_roles=eir.roles.all()
+				enslaver_voyages_dict[voyage.id]=voyage
+
+		return PastEnslaverVoyageSerializer([enslaver_voyages_dict[v] for v in enslaver_voyages_dict],many=True,read_only=True).data
+
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
+		
 
 ############### ENSLAVEMENT RELATIONS -- OUT TO ENSLAVERS, ENSLAVED, AND VOYAGES
 

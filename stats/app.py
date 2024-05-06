@@ -12,22 +12,21 @@ import re
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
-def load_long_df(endpoint,variables,options):
+def load_long_df(endpoint,variables):
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
-		data=json.dumps({'selected_fields':variables,'filter':[]})
+		data=json.dumps({'selected_fields':[v for v in variables],'filter':[]})
 	)
 	j=json.loads(r.text)
 	df=pd.DataFrame.from_dict(j)
 	#coerce datatypes based on options call
 	for varName in variables:
-		optionsvar=options[varName]
-		vartype=optionsvar['type']	
+		vartype=variables[varName]['type']	
 		if vartype in [
-			"integer",
-			"number"
+			"int",
+			"pct"
 		]:
 			df[varName]=pd.to_numeric(df[varName])
 	return(df)
@@ -61,30 +60,26 @@ while True:
 		#via an options call to the django server
 		#because this will allow us to coerce the propert data types (numeric or categorical)
 		#in order to make the math work out properly later!
-		try:
-			r=requests.get(url=DJANGO_BASE_URL+'common/schemas/?schema_name=%s&hierarchical=False' %schema_name,headers=headers)
-			options=json.loads(r.text)
-			rc['options']=options
-			thisdf=load_long_df(endpoint,variables,options)
-			
-			#timelapse needs is na entries filled ahead of time
-			if rcname=='timelapse':
-				for varName in variables:
-					optionsvar=options[varName]
-					vartype=optionsvar['type']	
-					if vartype in [
-						"integer",
-						"number"
-					]:
-						thisdf[varName]=thisdf[varName].fillna(0)
-						thisdf[varName]=thisdf[varName].astype('int')
-					else:
-						thisdf[varName]=thisdf[varName].fillna('')
-			rc['df']=thisdf
-			print(rc['df'])
-		except:
-			failures_count+=1
-			print("failed on cache:",rcname)
+# 		try:
+		rc['options']=variables
+		thisdf=load_long_df(endpoint,variables)
+		#timelapse needs is na entries filled ahead of time
+		if rcname=='timelapse':
+			for varName in variables:
+				vartype=variables[varName]['type']	
+				if vartype in [
+					"int",
+					"pct"
+				]:
+					thisdf[varName]=thisdf[varName].fillna(0)
+					thisdf[varName]=thisdf[varName].astype('int')
+				else:
+					thisdf[varName]=thisdf[varName].fillna('')
+		rc['df']=thisdf
+		print(rc['df'])
+# 		except:
+# 			failures_count+=1
+# 			print("failed on cache:",rcname)
 	print("failed on %d of %d caches" %(failures_count,len(registered_caches)))
 	if failures_count==len(registered_caches):
 		standoff_time=standoff_base**standoff_count
@@ -580,6 +575,14 @@ def crosstabs():
 
 	valuetype=options[val]['type']
 	
+	pandasvaluetypemap={
+		'pct':'float',
+		'int':'int',
+		'str':'object'
+	}
+	
+	pandasvaluetype=pandasvaluetypemap[valuetype]
+	
 	##TBD --> NEED TO VALIDATE THAT THE ROWS VARIABLE IS
 	####1) NUMERIC TO WORK IN THE FIRST PLACE
 	####2) A YEAR VAR IN ORDER TO MAKE SENSE TO A HUMAN END-USER
@@ -668,7 +671,7 @@ def crosstabs():
 		ct=ct.sort_values(by=order_by_list,ascending=ascending)
 	
 	
-	def makechild(name,isfield=False,columngroupshow=False,key=None):
+	def makechild(name,isfield=False,columngroupshow=False,key=None,dtype=None):
 		if columngroupshow:
 			cgsval="open"
 		else:
@@ -683,16 +686,22 @@ def crosstabs():
 # 					key=re.sub('\.','','__'.join(key))
 					key='__'.join(key)
 			
+			
+			
 			child={
 				"columnGroupShow":cgsval,
 				"headerName":name,
 				"field":key,
-				"filter": 'agNumberColumnFilter',
-				"sort": 'desc'
+				"dtype":valuetype
+# 				"filter": 'agNumberColumnFilter',
+# 				"sort": 'desc'
 			}
 			
-			if ascending:
-				child['sort']='asc'
+			if dtype is not None:
+				child['dtype']=dtype
+			
+# 			if ascending:
+# 				child['sort']='asc'
 			
 			if key=='All':
 				child['pinned']='right'
@@ -721,6 +730,7 @@ def crosstabs():
 				##N.B. "All" is a reserved column name here, for the margins/totals
 				thiscg=makechild('',isfield=False)
 				thisfield=makechild(k,isfield=True,key=fullpath)
+# 				print(thisfield,k,fullpath)
 				thiscg['children'].append(thisfield)
 				colgroups.append(thiscg)
 			else:
@@ -731,12 +741,14 @@ def crosstabs():
 	colgroups=[]	
 	indexcol_name=rdata.get('rows_label') or ''
 	indexcolcg=makechild('',isfield=False)
-	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name)
+	indexcolfield=makechild(indexcol_name,isfield=True,key=indexcol_name,dtype="str")
 	indexcolfield['pinned']='left'
 	indexcolcg['children'].append(indexcolfield)
 	colgroups.append(indexcolcg)
 	
 	for mlct in mlctuples:
+# 		print("MLCT",mlct)
+# 		print("dtype-->",ct.dtypes[mlct])
 		l=list(mlct)
 		l.reverse()
 		colgroups=makecolgroups(colgroups,l,mlct)
@@ -750,10 +762,10 @@ def crosstabs():
 	ct=ct.fillna(0)
 # 	print(ct)
 	
-	def convertcell(cellval,valuetype):
-		if valuetype == "number":
+	def convertcell(cellval,pandasvaluetype):
+		if pandasvaluetype == "float":
 			return float(cellval)
-		elif valuetype=="integer":
+		elif pandasvaluetype=="int":
 			return int(cellval)
 	
 	ctshape=ct.shape
@@ -781,7 +793,7 @@ def crosstabs():
 			if i==0:
 				thisrecord={
 					allcolumns[i]:(
-						convertcell(row[i],valuetype) if i!=0 else row[i]
+						convertcell(row[i],pandasvaluetype) if i!=0 else row[i]
 					)
 					for i in range(len(row))
 				}
@@ -806,6 +818,10 @@ def crosstabs():
 	
 # 	for output_record in output_records:
 # 		print(allcolumns[0],output_record[allcolumns[0]])
+	
+# 	for cg in colgroups:
+# 		print("CG",cg)
+	
 	
 	output={
 		'tablestructure': colgroups,

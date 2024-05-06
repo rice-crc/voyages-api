@@ -12,7 +12,6 @@ from common.static.EnslavementRelation_options import EnslavementRelation_option
 from common.autocomplete_indices import get_all_model_autocomplete_fields
 from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
 
-
 ############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
 
 class PASTSparseDateSerializer(serializers.ModelSerializer):
@@ -29,7 +28,6 @@ class EnslaverRoleSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverRole
 		fields='__all__'
-
 
 class EnslavementRelationTypeSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -100,7 +98,7 @@ class PastVoyageOutcomeSerializer(serializers.ModelSerializer):
 		model=VoyageOutcome
 		fields=['particular_outcome']
 
-class PastVoyageSerializer(serializers.ModelSerializer):
+class PastEnslavedVoyageSerializer(serializers.ModelSerializer):
 	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
 	voyage_dates=PastVoyageDatesSerializer(many=False)
 	voyage_ship=PastVoyageShipSerializer(many=False)
@@ -144,32 +142,7 @@ class PastEnslaverVoyageSerializer(serializers.ModelSerializer):
 ####################### ENSLAVED M2M CONNECTIONS
 
 #### FROM ENSLAVED TO ENSLAVERS
-class EnslavedEnslaverIdentitySerializer(serializers.ModelSerializer):
-	class Meta:
-		model=EnslaverIdentity
-		fields='__all__'
 
-class EnslavedEnslaverAliasSerializer(serializers.ModelSerializer):
-	identity=EnslavedEnslaverIdentitySerializer(many=False)
-	class Meta:
-		model=EnslaverAlias
-		fields='__all__'
-
-class EnslavedEnslaverInRelationSerializer(serializers.ModelSerializer):
-	enslaver_alias=EnslavedEnslaverAliasSerializer(many=False)
-	roles=EnslaverRoleSerializer(many=True)
-	class Meta:
-		model=EnslaverInRelation
-		fields='__all__'
-
-class EnslavedEnslavementRelationSerializer(serializers.ModelSerializer):
-	relation_type=EnslavementRelationTypeSerializer(many=False)
-	relation_enslavers=EnslavedEnslaverInRelationSerializer(many=True)
-	voyage=PastVoyageSerializer(many=False)
-	place=PastLocationSerializer(many=False)
-	class Meta:
-		model=EnslavementRelation
-		fields='__all__'
 
 #### FROM ENSLAVED TO SOURCES
 class PastSourceEnslavedConnectionSerializer(serializers.ModelSerializer):
@@ -183,15 +156,11 @@ class PastSourceEnslavedConnectionSerializer(serializers.ModelSerializer):
 #### ENSLAVED & ONE-TO-ONE RELATIONS
 
 class CaptiveFateSerializer(serializers.ModelSerializer):
-	
 	class Meta:
 		model=CaptiveFate
 		fields='__all__'
 
-
-
 class CaptiveStatusSerializer(serializers.ModelSerializer):
-
 	class Meta:
 		model=CaptiveStatus
 		fields='__all__'
@@ -206,28 +175,19 @@ class RegisterCountrySerializer(serializers.ModelSerializer):
 		model=RegisterCountry
 		fields='__all__'
 
-class EnslavedInRelationSerializer(serializers.ModelSerializer):
-	relation=EnslavedEnslavementRelationSerializer(many=False)
+class EnslavedEnslaverIdentitySerializer(serializers.ModelSerializer):
 	class Meta:
-		model=EnslavedInRelation
+		model=EnslaverIdentity
 		fields='__all__'
 
-class EnslavedFULLSerializer(serializers.ModelSerializer):
-	post_disembark_location=PastLocationSerializer(many=False)
-	captive_fate=CaptiveFateSerializer(many=False)
-	enslaved_relations=EnslavedInRelationSerializer(many=True)
-	captive_status=CaptiveStatusSerializer(many=False)
-	language_group=LanguageGroupSerializer(many=False)
-	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
-	class Meta:
-		model=Enslaved
-		fields='__all__'
-		
+
 class EnslavedEnslaversInRelationListResponseSerializer(serializers.Serializer):
-	roles=EnslaverRoleSerializer(many=True,read_only=True)
 	enslaver=EnslavedEnslaverIdentitySerializer(many=False,read_only=True)
+	roles=serializers.CharField()
+
 	
-class EnslavedListResponseResultsSerializer(serializers.ModelSerializer):
+	
+class EnslavedSerializer(serializers.ModelSerializer):
 	post_disembark_location=PastLocationSerializer(many=False,read_only=True)
 	captive_fate=CaptiveFateSerializer(many=False,read_only=True)
 	voyages=serializers.SerializerMethodField()
@@ -235,10 +195,10 @@ class EnslavedListResponseResultsSerializer(serializers.ModelSerializer):
 	captive_status=CaptiveStatusSerializer(many=False,read_only=True)
 	language_group=LanguageGroupSerializer(many=False,read_only=True)
 	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True,read_only=True)
-	def get_voyages(self,instance) -> PastVoyageSerializer(many=True):
+	def get_voyages(self,instance) -> PastEnslavedVoyageSerializer(many=True):
 		eirs=instance.enslaved_relations.all().exclude(relation__voyage__isnull=True)
 		voyages=list(set([eir.relation.voyage for eir in eirs]))
-		return PastVoyageSerializer(voyages,many=True,read_only=True).data
+		return PastEnslavedVoyageSerializer(voyages,many=True,read_only=True).data
 	def get_enslavers(self,instance) -> EnslavedEnslaversInRelationListResponseSerializer:
 		edrs=instance.enslaved_relations.all()
 		edrs=edrs.prefetch_related('relation__relation_enslavers__roles','relation__relation_enslavers__enslaver_alias__identity')
@@ -251,25 +211,14 @@ class EnslavedListResponseResultsSerializer(serializers.ModelSerializer):
 					enslavers_and_roles[enslaverpk]=[rolepk]
 				else:
 					enslavers_and_roles[enslaverpk].append(rolepk)
-		enslavers_and_roles_list=[{'roles':[EnslaverRole.objects.get(id=rolepk) for rolepk in enslavers_and_roles[enslaverpk]],'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)} for enslaverpk in enslavers_and_roles]
+		enslavers_and_roles_list=[{'roles':", ".join([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]),'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)} for enslaverpk in enslavers_and_roles]
 		enslavers_in_relation=EnslavedEnslaversInRelationListResponseSerializer(enslavers_and_roles_list,many=True,read_only=True).data		
 		return enslavers_in_relation
-		
+				
+
 	class Meta:
 		model=Enslaved
 		fields='__all__'
-
-class EnslavedSerializer(serializers.ModelSerializer):
-	post_disembark_location=PastLocationSerializer(many=False)
-	captive_fate=CaptiveFateSerializer(many=False)
-	enslaved_relations=EnslavedInRelationSerializer(many=True)
-	captive_status=CaptiveStatusSerializer(many=False)
-	language_group=LanguageGroupSerializer(many=False)
-	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
-	class Meta:
-		model=Enslaved
-		fields='__all__'
-
 
 #######################
 
@@ -297,22 +246,6 @@ class EnslaverEnslavedInRelationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslavedInRelation
 		fields=('enslaved','enslaver_roles')
-
-class EnslaverEnslavementRelationSerializer(serializers.ModelSerializer):
-	enslaved_in_relation=EnslaverEnslavedInRelationSerializer(many=True)
-	relation_type=EnslavementRelationTypeSerializer(many=False)
-	place=PastLocationSerializer(many=False)
-	voyage=PastVoyageSerializer(many=False)
-	class Meta:
-		model=EnslavementRelation
-		fields='__all__'
-
-class EnslaverEnslaverInRelationSerializer(serializers.ModelSerializer):
-	relation = EnslaverEnslavementRelationSerializer(many=False)
-	roles=EnslaverRoleSerializer(many=False)
-	class Meta:
-		model=EnslaverInRelation
-		fields='__all__'
 
 class EnslaverAliasSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -364,56 +297,7 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields='__all__'
-		
 
-############### ENSLAVEMENT RELATIONS -- OUT TO ENSLAVERS, ENSLAVED, AND VOYAGES
-
-class RelationEnslavedSerializer(serializers.ModelSerializer):
-	post_disembark_location=PastLocationSerializer(many=False)
-	captive_fate=CaptiveFateSerializer(many=False)
-	captive_status=CaptiveStatusSerializer(many=False)
-	language_group=LanguageGroupSerializer(many=False)
-	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True)
-	class Meta:
-		model=Enslaved
-		fields='__all__'
-
-class RelationEnslavedInRelationSerializer(serializers.ModelSerializer):
-	enslaved=RelationEnslavedSerializer(many=False)
-	class Meta:
-		model=EnslavedInRelation
-		fields='__all__'
-
-class RelationEnslaverIdentitySerializer(serializers.ModelSerializer):
-	birth_place=PastLocationSerializer(many=False,read_only=True)
-	death_place=PastLocationSerializer(many=False,read_only=True)
-	principal_location=PastLocationSerializer(many=False,read_only=True)
-	class Meta:
-		model=EnslaverIdentity
-		fields='__all__'
-
-class RelationEnslaverAliasSerializer(serializers.ModelSerializer):
-	identity=RelationEnslaverIdentitySerializer(many=False)
-	class Meta:
-		model=EnslaverAlias
-		fields='__all__'
-
-class RelationEnslaverInRelationSerializer(serializers.ModelSerializer):
-	enslaver_alias = RelationEnslaverAliasSerializer(many=False)
-	roles=EnslaverRoleSerializer(many=False)
-	class Meta:
-		model=EnslaverInRelation
-		fields='__all__'
-		
-class EnslavementRelationSerializer(serializers.ModelSerializer):
-	relation_type=EnslavementRelationTypeSerializer(many=False,allow_null=True)
-	place=PastLocationSerializer(many=False,allow_null=True)
-	relation_enslavers=RelationEnslaverInRelationSerializer(many=True,allow_null=True)
-	enslaved_in_relation=RelationEnslavedInRelationSerializer(many=True,allow_null=True)
-	voyage=PastVoyageSerializer(many=False,allow_null=True)
-	class Meta:
-		model=EnslavementRelation
-		fields='__all__'
 
 #################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR PAGINATED LISTS. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
 
@@ -454,42 +338,6 @@ class EnslavementRelationFilterItemSerializer(serializers.Serializer):
 	varName=serializers.ChoiceField(choices=[k for k in EnslavementRelation_options])
 	searchTerm=AnyField()
 
-########### PAGINATED ENSLAVEMENT RELATION LISTS 
-
-class EnslavementRelationListResponseSerializer(serializers.Serializer):
-	page=serializers.IntegerField()
-	page_size=serializers.IntegerField()
-	count=serializers.IntegerField()
-	results=EnslavementRelationSerializer(many=True,read_only=True)
-
-@extend_schema_serializer(
-	examples = [
-         OpenApiExample(
-			'Paginated, filtered list of enslavement relations',
-			summary='Paginated, filtered list of enslavement relations',
-			description='Here, we look for all enslavement relations connected to voyage 135096, the ',
-			value={
-			  "filter": [
-					{
-						"varName":"voyage__voyage_id",
-						"searchTerm":135096,
-						"op":"exact"
-					}
-				],
-				"page": 1,
-				"page_size": 10
-			},
-			request_only=True
-		)
-    ]
-)
-class EnslavementRelationListRequestSerializer(serializers.Serializer):
-	page=serializers.IntegerField()
-	page_size=serializers.IntegerField()
-	filter=EnslavementRelationFilterItemSerializer(many=True,required=False,allow_null=True)
-	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
-	global_search=serializers.CharField(allow_null=True,required=False)
-
 ########### PAGINATED ENSLAVED LISTS 
 @extend_schema_serializer(
 	examples = [
@@ -523,7 +371,7 @@ class EnslavedListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
-	results=EnslavedListResponseResultsSerializer(many=True,read_only=True)
+	results=EnslavedSerializer(many=True,read_only=True)
 
 ########### PAGINATED ENSLAVER LISTS 
 @extend_schema_serializer(
@@ -708,6 +556,11 @@ class EnslaverFieldAggregationResponseSerializer(serializers.Serializer):
 	])
 	min=serializers.IntegerField(allow_null=True)
 	max=serializers.IntegerField(allow_null=True)
+
+
+
+
+
 
 ############ DATAFRAMES ENDPOINTS
 @extend_schema_serializer(

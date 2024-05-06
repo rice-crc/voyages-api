@@ -1020,7 +1020,7 @@ class PASTNetworks(generics.GenericAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-class EnslaverCARD(generics.RetrieveAPIView):
+class EnslaverGET(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
 	'''
@@ -1069,7 +1069,7 @@ class EnslaverCARD(generics.RetrieveAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-class EnslavedCARD(generics.RetrieveAPIView):
+class EnslavedGET(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
 	'''

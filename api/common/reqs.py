@@ -217,18 +217,18 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	if DEBUG:
 		print(f"ORDER BY TIME: {time.time()-st}")
 	
-	if '__' in order_by:
-		st2=time.time()
-		#dedupe ordered results
-		#https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
-		def f7(seq):
-			seen = set()
-			seen_add = seen.add
-			return [x for x in seq if not (x in seen or seen_add(x))]
-		ids=[v[0] for v in filtered_queryset.values_list('id')]
-		ids=f7(ids)
-		if DEBUG:
-			print(f"DEDUPE TIME: {time.time()-st2}")
+
+	st2=time.time()
+	#dedupe ordered results
+	#https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
+	def f7(seq):
+		seen = set()
+		seen_add = seen.add
+		return [x for x in seq if not (x in seen or seen_add(x))]
+	ids=[v[0] for v in filtered_queryset.values_list('id')]
+	ids=f7(ids)
+	if DEBUG:
+		print(f"DEDUPE TIME: {time.time()-st2}")
 		
 	results_count=len(ids)
 	if DEBUG:

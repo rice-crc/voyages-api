@@ -595,69 +595,6 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
-class EnslavementRelationList(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	@extend_schema(
-		description="We are going to try to serialize as a paginated list the model that makes this into a graph database, against all better judgement.",
-		request=EnslavementRelationListRequestSerializer,
-		responses=EnslavementRelationListResponseSerializer
-	)
-	def post(self,request):
-		
-		st=time.time()
-		print("ENSLAVEMENT RELATION LIST (GODSPEED)+++++++\nusername:",request.auth.user)
-		#VALIDATE THE REQUEST
-		serialized_req = EnslavementRelationListRequestSerializer(data=request.data)
-		if not serialized_req.is_valid():
-			return JsonResponse(serialized_req.errors,status=400)
-
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
-		
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-
-			#FILTER THE ENSLAVED PEOPLE ENTRIES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=EnslavementRelation.objects.all()
-			queryset,results_count,page,page_size=post_req(
-				queryset,
-				self,
-				request,
-				EnslavementRelation_options,
-				auto_prefetch=True,
-				paginate=True
-			)
-
-			results,total_results_count,page_num,page_size=paginate_queryset(queryset,request)
-			resp=EnslavementRelationListResponseSerializer({
-				'count':total_results_count,
-				'page':page_num,
-				'page_size':page_size,
-				'results':results
-			}).data
-			#I'm having the most difficult time in the world validating this nested paginated response
-			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))
-		else:
-			resp=json.loads(cached_response)
-		
-		if DEBUG:
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-			
-		return JsonResponse(resp,safe=False,status=200)
-
 class EnslavementRelationDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -1083,7 +1020,7 @@ class PASTNetworks(generics.GenericAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-class EnslaverCARD(generics.RetrieveAPIView):
+class EnslaverGET(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
 	'''
@@ -1132,7 +1069,7 @@ class EnslaverCARD(generics.RetrieveAPIView):
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAdminUser]
 # 
-class EnslavedCARD(generics.RetrieveAPIView):
+class EnslavedGET(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
 	'''

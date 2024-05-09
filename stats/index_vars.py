@@ -2,154 +2,367 @@ voyage_xyscatter={
 	'endpoint':'voyage/dataframes/',
 	'schema_name':'Voyage',
 	'name':'voyage_xyscatter',
-	'variables': [
-		'id',
-		'voyage_id',
-		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
-		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
-		'voyage_dates__length_middle_passage_days',
-		'voyage_dates__imp_length_home_to_disembark',
-		'voyage_crew__crew_first_landing',
-		'voyage_crew__crew_voyage_outset',
-		'voyage_ship__tonnage_mod',
-		'voyage_slaves_numbers__imp_jamaican_cash_price',
-		'voyage_slaves_numbers__imp_mortality_ratio',
-		'voyage_slaves_numbers__percentage_women_among_embarked_slaves'
-	]
+	'variables': {
+		 "id": {
+			"type": "int"
+		 },
+		 "voyage_id": {
+			"type": "int"
+		 },
+		 "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year": {
+			"type": "int"
+		 },
+		 "voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
+			"type": "int"
+		 },
+		 "voyage_slaves_numbers__imp_total_num_slaves_embarked": {
+			"type": "int"
+		 },
+		 "voyage_dates__length_middle_passage_days": {
+			"type": "int"
+		 },
+		 "voyage_dates__imp_length_home_to_disembark": {
+			"type": "int"
+		 },
+		 "voyage_crew__crew_first_landing": {
+			"type": "int"
+		 },
+		 "voyage_crew__crew_voyage_outset": {
+			"type": "int"
+		 },
+		 "voyage_ship__tonnage_mod": {
+			"type": "int"
+		 },
+		 "voyage_slaves_numbers__imp_jamaican_cash_price": {
+			"type": "int"
+		 },
+		 "voyage_slaves_numbers__imp_mortality_ratio": {
+			"type": "pct"
+		 },
+		 "voyage_slaves_numbers__percentage_women_among_embarked_slaves": {
+			"type": "pct"
+		 }
+	}
 }
 
 voyage_bar_and_donut_charts={
 	'endpoint':'voyage/dataframes/',
 	'schema_name':'Voyage',
 	'name':'voyage_bar_and_donut_charts',
-	'variables': [
-		'id',
-		'voyage_outcome__vessel_captured_outcome__name',
-		'voyage_dates__length_middle_passage_days',
-		'voyage_ship__imputed_nationality__name',
-		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-		'voyage_dates__imp_length_home_to_disembark',
-		'voyage_itinerary__imp_region_voyage_begin__name',
-		'voyage_ship__rig_of_vessel__name',
-		'voyage_itinerary__place_voyage_ended__name',
-		'voyage_dates__slave_purchase_began_sparsedate__month',
-		'voyage_slaves_numbers__percentage_men',
-		'voyage_dates__voyage_completed_sparsedate__month',
-		'voyage_itinerary__region_of_return__name',
-		'voyage_slaves_numbers__percentage_boy',
-		'voyage_crew__crew_voyage_outset',
-		'voyage_itinerary__imp_principal_region_slave_dis__name',
-		'voyage_itinerary__imp_principal_region_of_slave_purchase__name',
-		'voyage_dates__date_departed_africa_sparsedate__month',
-		'voyage_dates__voyage_began_sparsedate__month',
-		'voyage_itinerary__imp_port_voyage_begin__name',
-		'voyage_dates__first_dis_of_slaves_sparsedate__month',
-		'voyage_itinerary__imp_broad_region_slave_dis__name',
-		'voyage_slaves_numbers__percentage_girl',
-		'voyage_outcome__particular_outcome__name',
-		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
-		'voyage_itinerary__imp_principal_port_slave_dis__name',
-		'voyage_ship__tonnage_mod',
-		'voyage_slaves_numbers__percentage_child',
-		'voyage_slaves_numbers__percentage_women',
-		'voyage_dates__departure_last_place_of_landing_sparsedate__month',
-		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
-		'voyage_outcome__outcome_owner__name',
-		'voyage_outcome__outcome_slaves__name',
-		'voyage_itinerary__imp_principal_place_of_slave_purchase__name',
-		'voyage_outcome__resistance__name',
-		'voyage_crew__crew_first_landing',
-		'voyage_slaves_numbers__percentage_male',
-		'voyage_slaves_numbers__percentage_female',
-		'voyage_slaves_numbers__imp_mortality_ratio'
-	]
+	'variables': {
+	 "id": {
+		"type": "int"
+	 },
+	 "voyage_outcome__vessel_captured_outcome__name": {
+		"type": "str"
+	 },
+	 "voyage_dates__length_middle_passage_days": {
+		"type": "int"
+	 },
+	 "voyage_ship__imputed_nationality__name": {
+		"type": "str"
+	 },
+	 "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year": {
+		"type": "int"
+	 },
+	 "voyage_dates__imp_length_home_to_disembark": {
+		"type": "int"
+	 },
+	 "voyage_itinerary__imp_region_voyage_begin__name": {
+		"type": "str"
+	 },
+	 "voyage_ship__rig_of_vessel__name": {
+		"type": "str"
+	 },
+	 "voyage_itinerary__place_voyage_ended__name": {
+		"type": "str"
+	 },
+	 "voyage_dates__slave_purchase_began_sparsedate__month": {
+		"type": "int"
+	 },
+	 "voyage_slaves_numbers__percentage_men": {
+		"type": "pct"
+	 },
+	 "voyage_dates__voyage_completed_sparsedate__month": {
+		"type": "int"
+	 },
+	 "voyage_itinerary__region_of_return__name": {
+		"type": "str"
+	 },
+	 "voyage_slaves_numbers__percentage_boy": {
+		"type": "pct"
+	 },
+	 "voyage_crew__crew_voyage_outset": {
+		"type": "int"
+	 },
+	 "voyage_itinerary__imp_principal_region_slave_dis__name": {
+		"type": "str"
+	 },
+	 "voyage_itinerary__imp_principal_region_of_slave_purchase__name": {
+		"type": "str"
+	 },
+	 "voyage_dates__date_departed_africa_sparsedate__month": {
+		"type": "int"
+	 },
+	 "voyage_dates__voyage_began_sparsedate__month": {
+		"type": "int"
+	 },
+	 "voyage_itinerary__imp_port_voyage_begin__name": {
+		"type": "str"
+	 },
+	 "voyage_dates__first_dis_of_slaves_sparsedate__month": {
+		"type": "int"
+	 },
+	 "voyage_itinerary__imp_broad_region_slave_dis__name": {
+		"type": "str"
+	 },
+	 "voyage_slaves_numbers__percentage_girl": {
+		"type": "pct"
+	 },
+	 "voyage_outcome__particular_outcome__name": {
+		"type": "str"
+	 },
+	 "voyage_slaves_numbers__imp_total_num_slaves_embarked": {
+		"type": "int"
+	 },
+	 "voyage_itinerary__imp_principal_port_slave_dis__name": {
+		"type": "str"
+	 },
+	 "voyage_ship__tonnage_mod": {
+		"type": "int"
+	 },
+	 "voyage_slaves_numbers__percentage_child": {
+		"type": "pct"
+	 },
+	 "voyage_slaves_numbers__percentage_women": {
+		"type": "pct"
+	 },
+	 "voyage_dates__departure_last_place_of_landing_sparsedate__month": {
+		"type": "int"
+	 },
+	 "voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
+		"type": "int"
+	 },
+	 "voyage_outcome__outcome_owner__name": {
+		"type": "str"
+	 },
+	 "voyage_outcome__outcome_slaves__name": {
+		"type": "str"
+	 },
+	 "voyage_itinerary__imp_principal_place_of_slave_purchase__name": {
+		"type": "str"
+	 },
+	 "voyage_outcome__resistance__name": {
+		"type": "str"
+	 },
+	 "voyage_crew__crew_first_landing": {
+		"type": "int"
+	 },
+	 "voyage_slaves_numbers__percentage_male": {
+		"type": "pct"
+	 },
+	 "voyage_slaves_numbers__percentage_female": {
+		"type": "pct"
+	 },
+	 "voyage_slaves_numbers__imp_mortality_ratio": {
+		"type": "pct"
+	 }
+	}
 }
 
 voyage_pivot_tables={
 	'endpoint':'voyage/dataframes/',
 	'schema_name':'Voyage',
 	'name':'voyage_pivot_tables',
-	'variables': [
-		'id',
-		'voyage_ship__imputed_nationality__name',
-		'voyage_ship__tonnage_mod',
-		'voyage_itinerary__imp_broad_region_voyage_begin__name',
-		'voyage_itinerary__imp_region_voyage_begin__name',
-		'voyage_itinerary__imp_port_voyage_begin__name',
-		'voyage_itinerary__imp_principal_region_of_slave_purchase__name',
-		'voyage_itinerary__imp_principal_place_of_slave_purchase__name',
-		'voyage_itinerary__imp_broad_region_of_slave_purchase__name',
-		'voyage_itinerary__imp_principal_region_slave_dis__name',
-		'voyage_itinerary__imp_broad_region_slave_dis__name',
-		'voyage_itinerary__imp_principal_port_slave_dis__name',
-		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-		'voyage_dates__length_middle_passage_days',
-		'voyage_slaves_numbers__percentage_female',
-		'voyage_slaves_numbers__percentage_male',
-		'voyage_slaves_numbers__percentage_child',
-		'voyage_slaves_numbers__imp_mortality_ratio',
-		'voyage_slaves_numbers__imp_jamaican_cash_price',
-		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
-		'voyage_slaves_numbers__imp_total_num_slaves_disembarked'
-	]
+	'variables': {
+		"id": {
+			"type": "int"
+		},
+		"voyage_ship__imputed_nationality__name": {
+			"type": "str"
+		},
+		"voyage_ship__tonnage_mod": {
+			"type": "int"
+		},
+		"voyage_itinerary__imp_broad_region_voyage_begin__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_region_voyage_begin__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_port_voyage_begin__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_principal_region_of_slave_purchase__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_principal_place_of_slave_purchase__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_broad_region_of_slave_purchase__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_principal_region_slave_dis__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_broad_region_slave_dis__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_principal_port_slave_dis__name": {
+			"type": "str"
+		},
+		"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year": {
+			"type": "int"
+		},
+		"voyage_dates__length_middle_passage_days": {
+			"type": "int"
+		},
+		"voyage_slaves_numbers__percentage_female": {
+			"type": "pct"
+		},
+		"voyage_slaves_numbers__percentage_male": {
+			"type": "pct"
+		},
+		"voyage_slaves_numbers__percentage_child": {
+			"type": "pct"
+		},
+		"voyage_slaves_numbers__imp_mortality_ratio": {
+			"type": "pct"
+		},
+		"voyage_slaves_numbers__imp_jamaican_cash_price": {
+			"type": "int"
+		},
+		"voyage_slaves_numbers__imp_total_num_slaves_embarked": {
+			"type": "int"
+		},
+		"voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
+			"type": "int"
+		}
+	}
 }
 
 voyage_summary_statistics={
 	'endpoint':'voyage/dataframes/',
 	'schema_name':'Voyage',
 	'name':'voyage_summary_statistics',
-	'variables': [
-		'id',
-		'voyage_ship__imputed_nationality__name',
-		'voyage_ship__tonnage_mod',
-		'voyage_dates__length_middle_passage_days',
-		'voyage_slaves_numbers__percentage_female',
-		'voyage_slaves_numbers__percentage_male',
-		'voyage_slaves_numbers__percentage_child',
-		'voyage_slaves_numbers__imp_mortality_ratio',
-		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
-		'voyage_slaves_numbers__imp_total_num_slaves_disembarked'
-	]
+	'variables': {
+		"id": {
+			"type": "int"
+		},
+		"voyage_ship__imputed_nationality__name": {
+			"type": "str"
+		},
+		"voyage_ship__tonnage_mod": {
+			"type": "int"
+		},
+		"voyage_dates__length_middle_passage_days": {
+			"type": "int"
+		},
+		"voyage_slaves_numbers__percentage_female": {
+			"type": "pct"
+		},
+		"voyage_slaves_numbers__percentage_male": {
+			"type": "pct"
+		},
+		"voyage_slaves_numbers__percentage_child": {
+			"type": "pct"
+		},
+		"voyage_slaves_numbers__imp_mortality_ratio": {
+			"type": "pct"
+		},
+		"voyage_slaves_numbers__imp_total_num_slaves_embarked": {
+			"type": "int"
+		},
+		"voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
+			"type": "int"
+		}
+	}
+
 }
 
 voyage_maps={
 	'endpoint':'voyage/dataframes/',
 	'schema_name':'Voyage',
 	'name':'voyage_maps',
-	'variables':[
-		'id',
-		'voyage_itinerary__imp_broad_region_voyage_begin__name',
-		'voyage_itinerary__imp_region_voyage_begin__name',
-		'voyage_itinerary__imp_port_voyage_begin__name',
-		'voyage_itinerary__imp_principal_region_of_slave_purchase__name',
-		'voyage_itinerary__imp_principal_place_of_slave_purchase__name',
-		'voyage_itinerary__imp_principal_region_slave_dis__name',
-		'voyage_itinerary__imp_broad_region_slave_dis__name',
-		'voyage_itinerary__imp_principal_port_slave_dis__name',
-		"voyage_itinerary__imp_broad_region_of_slave_purchase__name",
-		'voyage_ship__imputed_nationality__name',
-		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
-		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
-		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-	]
+	'variables':{
+		"id": {
+			"type": "int"
+		},
+		"voyage_itinerary__imp_broad_region_voyage_begin__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_region_voyage_begin__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_port_voyage_begin__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_principal_region_of_slave_purchase__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_principal_place_of_slave_purchase__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_principal_region_slave_dis__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_broad_region_slave_dis__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_principal_port_slave_dis__name": {
+			"type": "str"
+		},
+		"voyage_itinerary__imp_broad_region_of_slave_purchase__name": {
+			"type": "str"
+		},
+		"voyage_ship__imputed_nationality__name": {
+			"type": "str"
+		},
+		"voyage_slaves_numbers__imp_total_num_slaves_embarked": {
+			"type": "int"
+		},
+		"voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
+			"type": "int"
+		},
+		"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year": {
+			"type": "int"
+		}
+	}
 }
 
 enslaved_maps={
 	'endpoint':'past/enslaved/dataframes/',
 	'schema_name':'Voyage',
 	'name':'enslaved_maps',
-	'variables':[
-		'id',
-		'documented_name',
-		'post_disembark_location__name',
-		'language_group__name',
-		'voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__name',
-		'voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name',
-		'voyage__voyage_itinerary__imp_principal_region_slave_dis__name',
-		'voyage__voyage_itinerary__imp_principal_port_slave_dis__name',
-		'voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-	]
+	'variables':{
+		"id": {
+			"type": "int"
+		},
+		"documented_name": {
+			"type": "int"
+		},
+		"post_disembark_location__name": {
+			"type": "int"
+		},
+		"language_group__name": {
+			"type": "int"
+		},
+		"voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__name": {
+			"type": "int"
+		},
+		"voyage__voyage_itinerary__imp_principal_place_of_slave_purchase__name": {
+			"type": "int"
+		},
+		"voyage__voyage_itinerary__imp_principal_region_slave_dis__name": {
+			"type": "int"
+		},
+		"voyage__voyage_itinerary__imp_principal_port_slave_dis__name": {
+			"type": "int"
+		},
+		"voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year": {
+			"type": "int"
+		}
+	}
 }
 
 
@@ -157,64 +370,139 @@ estimate_pivot_tables={
 	'endpoint':'assessment/dataframes/',
 	'schema_name':'Estimate',
 	'name':'estimate_pivot_tables',
-	'variables':[
-		'id',
-		'nation__id',
-		'nation__name',
-		'nation__order_num',
-		'embarkation_region__id',
-		'embarkation_region__export_area__id',
-		'embarkation_region__export_area__name',
-		'embarkation_region__export_area__order_num',
-		'embarkation_region__export_area__latitude',
-		'embarkation_region__export_area__longitude',
-		'embarkation_region__export_area__show_at_zoom',
-		'embarkation_region__export_area__show_on_map',
-		'embarkation_region__name',
-		'embarkation_region__order_num',
-		'embarkation_region__latitude',
-		'embarkation_region__longitude',
-		'embarkation_region__show_at_zoom',
-		'embarkation_region__show_on_map',
-		'disembarkation_region__id',
-		'disembarkation_region__import_area__id',
-		'disembarkation_region__import_area__name',
-		'disembarkation_region__import_area__order_num',
-		'disembarkation_region__import_area__latitude',
-		'disembarkation_region__import_area__longitude',
-		'disembarkation_region__import_area__show_at_zoom',
-		'disembarkation_region__import_area__show_on_map',
-		'disembarkation_region__name',
-		'disembarkation_region__order_num',
-		'disembarkation_region__latitude',
-		'disembarkation_region__longitude',
-		'disembarkation_region__show_at_zoom',
-		'disembarkation_region__show_on_map',
-		'year',
-		'embarked_slaves',
-		'disembarked_slaves'
-	]
+		'variables':{
+	  "id": {
+			"type": "int"
+		},
+		"nation__id": {
+			"type": "int"
+		},
+		"nation__name": {
+			"type": "str"
+		},
+		"nation__order_num": {
+			"type": "int"
+		},
+		"embarkation_region__id": {
+			"type": "int"
+		},
+		"embarkation_region__export_area__id": {
+			"type": "int"
+		},
+		"embarkation_region__export_area__name": {
+			"type": "str"
+		},
+		"embarkation_region__export_area__order_num": {
+			"type": "int"
+		},
+		"embarkation_region__export_area__latitude": {
+			"type": "int"
+		},
+		"embarkation_region__export_area__longitude": {
+			"type": "int"
+		},
+		"embarkation_region__name": {
+			"type": "str"
+		},
+		"embarkation_region__order_num": {
+			"type": "int"
+		},
+		"embarkation_region__latitude": {
+			"type": "int"
+		},
+		"embarkation_region__longitude": {
+			"type": "int"
+		},
+		"disembarkation_region__id": {
+			"type": "int"
+		},
+		"disembarkation_region__import_area__id": {
+			"type": "int"
+		},
+		"disembarkation_region__import_area__name": {
+			"type": "str"
+		},
+		"disembarkation_region__import_area__order_num": {
+			"type": "int"
+		},
+		"disembarkation_region__import_area__latitude": {
+			"type": "int"
+		},
+		"disembarkation_region__import_area__longitude": {
+			"type": "int"
+		},
+		"disembarkation_region__name": {
+			"type": "str"
+		},
+		"disembarkation_region__order_num": {
+			"type": "int"
+		},
+		"disembarkation_region__latitude": {
+			"type": "int"
+		},
+		"disembarkation_region__longitude": {
+			"type": "int"
+		},
+		"year": {
+			"type": "int"
+		},
+		"embarked_slaves": {
+			"type": "int"
+		},
+		"disembarked_slaves": {
+			"type": "int"
+		}
+	}
+
 }
 
 timelapse={
 	'endpoint':'voyage/dataframes/',
 	'schema_name':'Voyage',
 	'name':'timelapse',
-	'variables':[
-		'id',
-		'voyage_itinerary__imp_broad_region_of_slave_purchase__id',
-		'voyage_itinerary__imp_principal_region_of_slave_purchase__id',
-		'voyage_itinerary__imp_principal_place_of_slave_purchase__id',
-		'voyage_itinerary__imp_broad_region_slave_dis__id',
-		'voyage_itinerary__imp_principal_region_slave_dis__id',
-		'voyage_itinerary__imp_principal_port_slave_dis__id',
-		'voyage_slaves_numbers__imp_total_num_slaves_embarked',
-		'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
-		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year',
-		'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__month',
-		'voyage_ship__imputed_nationality__value',
-		'voyage_ship__tonnage_mod',
-		'voyage_ship__ship_name'
-	]
+	'variables':{
+		"id": {
+			"type": "int"
+		},
+		"voyage_itinerary__imp_broad_region_of_slave_purchase__id": {
+			"type": "int"
+		},
+		"voyage_itinerary__imp_principal_region_of_slave_purchase__id": {
+			"type": "int"
+		},
+		"voyage_itinerary__imp_principal_place_of_slave_purchase__id": {
+			"type": "int"
+		},
+		"voyage_itinerary__imp_broad_region_slave_dis__id": {
+			"type": "int"
+		},
+		"voyage_itinerary__imp_principal_region_slave_dis__id": {
+			"type": "int"
+		},
+		"voyage_itinerary__imp_principal_port_slave_dis__id": {
+			"type": "int"
+		},
+		"voyage_slaves_numbers__imp_total_num_slaves_embarked": {
+			"type": "int"
+		},
+		"voyage_slaves_numbers__imp_total_num_slaves_disembarked": {
+			"type": "int"
+		},
+		"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year": {
+			"type": "int"
+		},
+		"voyage_dates__imp_arrival_at_port_of_dis_sparsedate__month": {
+			"type": "int"
+		},
+		"voyage_ship__imputed_nationality__value": {
+			"type": "int"
+		},
+		"voyage_ship__tonnage_mod": {
+			"type": "int"
+		},
+		"voyage_ship__ship_name": {
+			"type": "str"
+		}
+	}
 }
 

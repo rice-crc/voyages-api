@@ -200,42 +200,14 @@ class VoyageEnslaverIdentitySerializer(serializers.ModelSerializer):
 		model=EnslaverIdentity
 		fields='__all__'
 
-class VoyageEnslaverAliasSerializer(serializers.ModelSerializer):
-	identity=VoyageEnslaverIdentitySerializer(many=False,read_only=True)
-	class Meta:
-		model=EnslaverAlias
-		fields='__all__'
-
-class VoyageEnslaverInRelationSerializer(serializers.ModelSerializer):
-	roles=VoyageEnslaverRoleSerializer(many=True,read_only=True)
-	enslaver_alias=VoyageEnslaverAliasSerializer(many=False,read_only=True)
-	class Meta:
-		model=EnslaverInRelation
-		fields='__all__'
+class VoyageEnslaverRelationListResponseSerializer(serializers.Serializer):
+	roles=serializers.CharField()
+	enslaver=VoyageEnslaverIdentitySerializer(many=False,read_only=True)
 
 class VoyageEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
-		fields=['id','documented_name']
-
-class VoyageEnslavedInRelationSerializer(serializers.ModelSerializer):
-	enslaved=VoyageEnslavedSerializer(many=False,read_only=True)
-	class Meta:
-		model=EnslavedInRelation
-		fields='__all__'
-
-class VoyageEnslavementRelationTypeSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=EnslavementRelationType
-		fields='__all__'
-
-class VoyageEnslavementRelationsSerializer(serializers.ModelSerializer):
-	enslaved_in_relation=VoyageEnslavedInRelationSerializer(many=True,read_only=True)
-	relation_enslavers=VoyageEnslaverInRelationSerializer(many=True,read_only=True)
-	relation_type=VoyageEnslavementRelationTypeSerializer(many=False,read_only=True)
-	class Meta:
-		model=EnslavementRelation
-		fields='__all__'
+		fields=['id','enslaved_id','documented_name']
 
 class VoyageGroupingsSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -270,7 +242,10 @@ class VoyageSerializer(serializers.ModelSerializer):
 	voyage_source_connections=VoyageVoyageSourceConnectionSerializer(many=True,read_only=True)
 	voyage_itinerary=VoyageItinerarySerializer(many=False,read_only=True)
 	voyage_dates=VoyageDatesSerializer(many=False,read_only=True)
-	voyage_enslavement_relations=VoyageEnslavementRelationsSerializer(many=True,read_only=True)
+	enslavers=serializers.SerializerMethodField()
+	named_enslaved_people=serializers.SerializerMethodField()
+	
+	
 	voyage_crew=VoyageCrewSerializer(many=False,read_only=True)
 	voyage_ship=VoyageShipSerializer(many=False,read_only=True)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False,read_only=True)
@@ -279,6 +254,30 @@ class VoyageSerializer(serializers.ModelSerializer):
 	cargo=VoyageCargoConnectionSerializer(many=True,read_only=True)
 	african_info=AfricanInfoSerializer(many=True,read_only=True)
 	##DIDN'T DO LINKED VOYAGES YET
+	
+	def get_named_enslaved_people(self,instance) -> VoyageEnslavedSerializer(many=True):
+		ers=instance.voyage_enslavement_relations.all()
+		enslaved_dict={}
+		for er in ers:
+			er_enslaved_people=er.enslaved_in_relation.all()
+			for e in er_enslaved_people:
+				enslaved_dict[e.id]=e
+		return VoyageEnslavedSerializer([enslaved_dict[i] for i in enslaved_dict],many=True,read_only=True).data
+	def get_enslavers(self,instance) -> VoyageEnslaverRelationListResponseSerializer:
+		ers=instance.voyage_enslavement_relations.all()
+		ers=ers.prefetch_related('relation_enslavers__roles','relation_enslavers__enslaver_alias__identity')
+		enslaver_roles_and_identity_pks=ers.values_list('relation_enslavers__roles__id','relation_enslavers__enslaver_alias__identity_id')
+		enslavers_and_roles={}
+		for eraipk in enslaver_roles_and_identity_pks:
+			rolepk,enslaverpk=eraipk
+			if rolepk is not None and enslaverpk is not None:
+				if enslaverpk not in enslavers_and_roles:
+					enslavers_and_roles[enslaverpk]=[rolepk]
+				else:
+					enslavers_and_roles[enslaverpk].append(rolepk)
+		enslavers_and_roles_list=[{'roles':', '.join([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]),'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)} for enslaverpk in enslavers_and_roles]
+		enslavers_in_relation=VoyageEnslaverRelationListResponseSerializer(enslavers_and_roles_list,many=True,read_only=True).data		
+		return enslavers_in_relation
 	class Meta:
 		model=Voyage
 		fields='__all__'

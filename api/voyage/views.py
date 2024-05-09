@@ -666,26 +666,26 @@ class VoyageGET(generics.RetrieveAPIView):
 	permission_classes=[IsAuthenticated]
 
 
-
-class VoyageCreate(generics.CreateAPIView):
-	'''
-	Create a Voyage. You MUST supply a voyage_id
-	'''
-	queryset=Voyage.objects.all()
-	serializer_class=VoyageSerializerCRUD
-	lookup_field='voyage_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class VoyageRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-	'''
-	Retrieve, Update, or Delete a Voyage
-	'''
-	queryset=Voyage.objects.all()
-	serializer_class=VoyageSerializerCRUD
-	lookup_field='voyage_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
+# 
+# class VoyageCreate(generics.CreateAPIView):
+# 	'''
+# 	Create a Voyage. You MUST supply a voyage_id
+# 	'''
+# 	queryset=Voyage.objects.all()
+# 	serializer_class=VoyageSerializerCRUD
+# 	lookup_field='voyage_id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
+# 
+# class VoyageRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+# 	'''
+# 	Retrieve, Update, or Delete a Voyage
+# 	'''
+# 	queryset=Voyage.objects.all()
+# 	serializer_class=VoyageSerializerCRUD
+# 	lookup_field='voyage_id'
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAdminUser]
 
 ######## READ-ONLY CONTROLLED VOCAB ENDPOINTS
 

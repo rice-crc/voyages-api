@@ -4,7 +4,7 @@ import re
 from .models import *
 from geo.models import Location
 from voyage.models import *
-from document.models import Source, SourceEnslavedConnection, SourceEnslaverConnection,SourceVoyageConnection
+from document.models import Source, ShortRef,SourceEnslavedConnection, SourceEnslaverConnection,SourceVoyageConnection
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.EnslaverIdentity_options import EnslaverIdentity_options
 from common.static.Enslaved_options import Enslaved_options
@@ -39,7 +39,15 @@ class PastLocationSerializer(serializers.ModelSerializer):
 		model=Location
 		fields='__all__'
 
+class PastSourceShortRefSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=ShortRef
+		fields=['id','name']
+
+
 class PastSourceSerializer(serializers.ModelSerializer):
+	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+	short_ref=PastSourceShortRefSerializer(many=False)
 	class Meta:
 		model=Source
 		fields='__all__'
@@ -139,17 +147,6 @@ class PastEnslaverVoyageSerializer(serializers.ModelSerializer):
 		]
 
 
-####################### ENSLAVED M2M CONNECTIONS
-
-#### FROM ENSLAVED TO ENSLAVERS
-
-
-#### FROM ENSLAVED TO SOURCES
-class PastSourceEnslavedConnectionSerializer(serializers.ModelSerializer):
-	source=PastSourceSerializer(many=False)
-	class Meta:
-		model=SourceEnslavedConnection
-		fields='__all__'
 
 #######################
 
@@ -194,7 +191,21 @@ class EnslavedSerializer(serializers.ModelSerializer):
 	enslavers=serializers.SerializerMethodField()
 	captive_status=CaptiveStatusSerializer(many=False,read_only=True)
 	language_group=LanguageGroupSerializer(many=False,read_only=True)
-	enslaved_source_connections=PastSourceEnslavedConnectionSerializer(many=True,read_only=True)
+	sources=serializers.SerializerMethodField()
+	def get_sources(self,instance) -> PastSourceSerializer(many=True):
+		escs=instance.enslaved_source_connections.all()
+		sources_dict={}
+		for esc in escs:
+			page_range=esc.page_range
+			s=esc.source
+			s_id=s.id
+			s.page_ranges=[page_range]
+			if s_id not in sources_dict:
+				sources_dict[s_id]=s
+			else:
+				sources_dict[s_id].page_ranges.append(page_range)
+		return PastSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True).data
+
 	def get_voyages(self,instance) -> PastEnslavedVoyageSerializer(many=True):
 		eirs=instance.enslaved_relations.all().exclude(relation__voyage__isnull=True)
 		voyages=list(set([eir.relation.voyage for eir in eirs]))
@@ -229,12 +240,6 @@ class EnslavedSerializer(serializers.ModelSerializer):
 
 #### FROM ENSLAVERS OUTWARDS
 
-class PastSourceEnslaverConnectionSerializer(serializers.ModelSerializer):
-	source=PastSourceSerializer(many=False)
-	class Meta:
-		model=SourceEnslaverConnection
-		fields='__all__'
-
 class EnslaverEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Enslaved
@@ -257,9 +262,23 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 	death_place=PastLocationSerializer(many=False)
 	aliases=EnslaverAliasSerializer(many=True)
 	principal_location=PastLocationSerializer(many=False)
-	enslaver_source_connections=PastSourceEnslaverConnectionSerializer(many=True)
 	named_enslaved_people=serializers.SerializerMethodField()
 	voyages=serializers.SerializerMethodField()
+	sources=serializers.SerializerMethodField()
+	def get_sources(self,instance) -> PastSourceSerializer(many=True):
+		escs=instance.enslaver_source_connections.all()
+		sources_dict={}
+		for esc in escs:
+			page_range=esc.page_range
+			s=esc.source
+			s_id=s.id
+			s.page_ranges=[page_range]
+			if s_id not in sources_dict:
+				sources_dict[s_id]=s
+			else:
+				sources_dict[s_id].page_ranges.append(page_range)
+		return PastSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True).data
+
 	def get_named_enslaved_people(self,instance):
 		aliases=instance.aliases.all()
 		eirs=[]

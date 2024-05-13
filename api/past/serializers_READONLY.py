@@ -329,31 +329,31 @@ class AnyField(Field):
 
 ############ REQUEST FIILTER OBJECTS
 class EnslaverBasicFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	##It's rather costly for our filter requests like autocomplete and geotree to themselves "cross-filter" on too many nested variables
 	##At the same time, some cross-filters are essential to build the menus properly
 	varName=serializers.ChoiceField(choices=EnslaverBasicFilterVarNames)
 	searchTerm=AnyField()
 
 class EnslaverFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[k for k in EnslaverIdentity_options])
 	searchTerm=AnyField()
 
 class EnslavedBasicFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=EnslavedBasicFilterVarNames)
 	searchTerm=AnyField()
 
 class EnslavedFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[
 		k for k in Enslaved_options
 	])
 	searchTerm=AnyField()
 
 class EnslavementRelationFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[k for k in EnslavementRelation_options])
 	searchTerm=AnyField()
 

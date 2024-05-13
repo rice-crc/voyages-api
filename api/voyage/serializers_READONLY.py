@@ -301,7 +301,7 @@ class AnyField(Field):
 
 ############ REQUEST FIILTER OBJECTS
 class VoyageBasicFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	##It's rather costly for our filter requests like autocomplete and geotree to themselves "cross-filter" on too many nested variables
 	##At the same time, some cross-filters are essential to build the menus properly
 	varName=serializers.ChoiceField(choices=VoyageBasicFilterVarNames)
@@ -309,7 +309,7 @@ class VoyageBasicFilterItemSerializer(serializers.Serializer):
 
 
 class VoyageFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[
 		k for k in Voyage_options
 	])

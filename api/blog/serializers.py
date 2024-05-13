@@ -83,17 +83,17 @@ class AnyField(Field):
 		return data
 
 class PostFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[k for k in Post_options])
 	searchTerm=AnyField()
 
 class AuthorFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[k for k in Author_options])
 	searchTerm=AnyField()
 
 class InstitutionFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[k for k in Institution_options])
 	searchTerm=AnyField()
 

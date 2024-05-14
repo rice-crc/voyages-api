@@ -187,6 +187,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 # 			print("------->enslavernameandrole")
 			if varName=="EnslaverNameAndRole":
 				class_name=solrcorenamedict[qsetclassstr]
+				searchTerm=searchTerm[0]
 				name=searchTerm['name']
 				roles=searchTerm['roles']
 # 				print("ROLES",roles)

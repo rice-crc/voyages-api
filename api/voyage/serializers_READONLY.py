@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
 import re
 from .models import *
-from document.models import Source,Page,SourcePageConnection,SourceVoyageConnection
+from document.models import Source,Page,ShortRef,SourcePageConnection,SourceVoyageConnection
 from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
@@ -174,10 +174,15 @@ class VoyageDatesSerializer(serializers.ModelSerializer):
 		model=VoyageDates
 		fields='__all__'
 	
-	
+class VoyageSourceShortRefSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=ShortRef
+		fields=['id','name']
+
 
 class VoyageSourceSerializer(serializers.ModelSerializer):
 	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+	short_ref=VoyageSourceShortRefSerializer(many=False)
 	class Meta:
 		model=Source
 		fields='__all__'

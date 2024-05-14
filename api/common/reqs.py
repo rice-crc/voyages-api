@@ -144,14 +144,14 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	## bypasses the normal filters. 
 	## hits solr with a search string (which currently is applied across all text fields on a model)
 	## and then creates its filtered queryset on the basis of the pk's returned by solr
+	qsetclassstr=str(orig_queryset[0].__class__)
+	solrcorenamedict={
+		"<class 'voyage.models.Voyage'>":'voyages',
+		"<class 'past.models.EnslaverIdentity'>":'enslavers',
+		"<class 'past.models.Enslaved'>":'enslaved',
+		"<class 'blog.models.Post'>":'blog'
+	}
 	if 'global_search' in params:
-		qsetclassstr=str(orig_queryset[0].__class__)
-		solrcorenamedict={
-			"<class 'voyage.models.Voyage'>":'voyages',
-			"<class 'past.models.EnslaverIdentity'>":'enslavers',
-			"<class 'past.models.Enslaved'>":'enslaved',
-			"<class 'blog.models.Post'>":'blog'
-		}
 		core_name=solrcorenamedict[qsetclassstr]
 		if DEBUG:
 			print("CLASS",qsetclassstr,core_name)
@@ -175,6 +175,51 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		
 		ids=None
 		filtered_queryset=orig_queryset
+		c=0
+		
+		
+		
+		
+		for item in filter_obj:
+			op=item['op']
+			searchTerm=item["searchTerm"]
+			varName=item["varName"]
+# 			print("------->enslavernameandrole")
+			if varName=="EnslaverNameAndRole":
+				class_name=solrcorenamedict[qsetclassstr]
+				name=searchTerm['name']
+				roles=searchTerm['roles']
+# 				print("ROLES",roles)
+				if class_name=='voyages':
+					enslavernamehits=filtered_queryset.filter(voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains=name)
+# 					print("enslavernamehits",enslavernamehits.count(),enslavernamehits)
+					ids=[]
+					enslaverinrelationnamehits=[]
+					for enslavernamehit in enslavernamehits:
+						ers=enslavernamehit.voyage_enslavement_relations.all()
+						for er in ers:
+							eirs=er.relation_enslavers.all()
+							eirs=eirs.filter(enslaver_alias__alias__icontains=name)
+							for eir in eirs:
+								enslavernamehitroles=[v[0] for v in eir.roles.all().values_list("name")]
+								hit=False
+								if op=="andlist":
+									hit=False
+									
+									
+									if set(enslavernamehitroles)>=set(roles):
+										ids.append(enslavernamehit.id)
+										hit=True
+								elif op=="in":
+									if len(set(enslavernamehitroles)&set(roles))>0:
+										ids.append(enslavernamehit.id)
+										hit=True
+# 								print(hit,enslavernamehitroles,roles)
+			ids=list(set(ids))
+# 			print(len(ids),"IDS")
+			filtered_queryset=filtered_queryset.filter(id__in=ids)
+			filter_obj.remove(item)
+				
 		for item in filter_obj:
 			if ids is not None:
 				filtered_queryset=filtered_queryset.filter(id__in=ids)
@@ -195,7 +240,9 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			else:
 				errormessages.append(f"{op} is not a valid django search operation")
 			filtered_queryset=filtered_queryset.filter(**kwargs)
-			ids=[i[0] for i in filtered_queryset.values_list('id')]
+			if c<len(filter_obj):
+				ids=[i[0] for i in filtered_queryset.values_list('id')]
+			c+=1
 		if DEBUG:
 			print(f"REQ FILTER TIME: {time.time()-st}")
 	

@@ -216,10 +216,9 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 										ids.append(enslavernamehit.id)
 										hit=True
 # 								print(hit,enslavernamehitroles,roles)
-			ids=list(set(ids))
-# 			print(len(ids),"IDS")
-			filtered_queryset=filtered_queryset.filter(id__in=ids)
-			filter_obj.remove(item)
+				ids=list(set(ids))
+				filtered_queryset=filtered_queryset.filter(id__in=ids)
+				filter_obj.remove(item)
 				
 		for item in filter_obj:
 			if ids is not None:

@@ -18,10 +18,8 @@ class AnyField(Field):
 ############ VOYAGE REQUEST FIILTER OBJECTS
 class VoyageFilterItemSerializer(serializers.Serializer):
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
-	varName=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	varName=serializers.ChoiceField(choices=[k for k in Voyage_options] + ["EnslaverNameAndRole"])
 	searchTerm=AnyField()
-
-
 
 
 class VoyageAnimationGetNationsResponseNodeSerializer(serializers.Serializer):

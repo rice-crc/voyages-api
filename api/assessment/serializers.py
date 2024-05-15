@@ -51,7 +51,7 @@ class AnyField(Field):
 
 ############ REQUEST FIILTER OBJECTS
 class EstimateFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[k for k in Estimate_options])
 	searchTerm=AnyField()
 

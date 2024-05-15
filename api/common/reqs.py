@@ -144,14 +144,14 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	## bypasses the normal filters. 
 	## hits solr with a search string (which currently is applied across all text fields on a model)
 	## and then creates its filtered queryset on the basis of the pk's returned by solr
+	qsetclassstr=str(orig_queryset[0].__class__)
+	solrcorenamedict={
+		"<class 'voyage.models.Voyage'>":'voyages',
+		"<class 'past.models.EnslaverIdentity'>":'enslavers',
+		"<class 'past.models.Enslaved'>":'enslaved',
+		"<class 'blog.models.Post'>":'blog'
+	}
 	if 'global_search' in params:
-		qsetclassstr=str(orig_queryset[0].__class__)
-		solrcorenamedict={
-			"<class 'voyage.models.Voyage'>":'voyages',
-			"<class 'past.models.EnslaverIdentity'>":'enslavers',
-			"<class 'past.models.Enslaved'>":'enslaved',
-			"<class 'blog.models.Post'>":'blog'
-		}
 		core_name=solrcorenamedict[qsetclassstr]
 		if DEBUG:
 			print("CLASS",qsetclassstr,core_name)
@@ -172,14 +172,66 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	else:
 		st=time.time()
 		kwargs={}
-			
+		
+		ids=None
+		filtered_queryset=orig_queryset
+		c=0
+		
+		
+		
+		
 		for item in filter_obj:
+			op=item['op']
+			searchTerm=item["searchTerm"]
+			varName=item["varName"]
+# 			print("------->enslavernameandrole")
+			if varName=="EnslaverNameAndRole":
+				class_name=solrcorenamedict[qsetclassstr]
+				searchTerm=searchTerm[0]
+				name=searchTerm['name']
+				roles=searchTerm['roles']
+# 				print("ROLES",roles)
+				if class_name=='voyages':
+					enslavernamehits=filtered_queryset.filter(voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains=name)
+# 					print("enslavernamehits",enslavernamehits.count(),enslavernamehits)
+					ids=[]
+					enslaverinrelationnamehits=[]
+					for enslavernamehit in enslavernamehits:
+						ers=enslavernamehit.voyage_enslavement_relations.all()
+						for er in ers:
+							eirs=er.relation_enslavers.all()
+							eirs=eirs.filter(enslaver_alias__alias__icontains=name)
+							for eir in eirs:
+								enslavernamehitroles=[v[0] for v in eir.roles.all().values_list("name")]
+								hit=False
+								if op=="andlist":
+									hit=False
+									
+									
+									if set(enslavernamehitroles)>=set(roles):
+										ids.append(enslavernamehit.id)
+										hit=True
+								elif op=="in":
+									if len(set(enslavernamehitroles)&set(roles))>0:
+										ids.append(enslavernamehit.id)
+										hit=True
+# 								print(hit,enslavernamehitroles,roles)
+					ids=list(set(ids))
+					filtered_queryset=filtered_queryset.filter(id__in=ids)
+					filter_obj.remove(item)
+				
+		for item in filter_obj:
+			if ids is not None:
+				filtered_queryset=filtered_queryset.filter(id__in=ids)
 			op=item['op']
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]
 			if op in ['lte','gte','exact','in','icontains']:
 				django_filter_term='__'.join([varName,op])
 				kwargs[django_filter_term]=searchTerm
+			elif op == ['andlist']:
+				for st in searchTerm:
+					filtered_queryset=eval(f'filtered_queryset.filter({searchTerm}={varName})')
 			elif op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
 				searchTerm.sort()
 				min,max=searchTerm
@@ -187,7 +239,10 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				kwargs['{0}__{1}'.format(varName, 'gte')]=min		
 			else:
 				errormessages.append(f"{op} is not a valid django search operation")
-		filtered_queryset=orig_queryset.filter(**kwargs)
+			filtered_queryset=filtered_queryset.filter(**kwargs)
+			if c<len(filter_obj):
+				ids=[i[0] for i in filtered_queryset.values_list('id')]
+			c+=1
 		if DEBUG:
 			print(f"REQ FILTER TIME: {time.time()-st}")
 	
@@ -217,7 +272,9 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	if DEBUG:
 		print(f"ORDER BY TIME: {time.time()-st}")
 	
-
+	
+	if DEBUG:
+		print("COUNT W DUPLICATES:",filtered_queryset.count())
 	st2=time.time()
 	#dedupe ordered results
 	#https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
@@ -232,7 +289,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		
 	results_count=len(ids)
 	if DEBUG:
-		print("COUNT W DUPLICATES:",results_count)
+		print("COUNT W/O DUPLICATES:",results_count)
 		
 	st=time.time()
 	if paginate:

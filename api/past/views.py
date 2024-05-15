@@ -432,6 +432,19 @@ class EnslaverAggregations(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
+			
+			#clean the request
+			reqdict=dict(serialized_req.data)
+			var_name=reqdict.get('varName')
+			filteritems=reqdict.get('filter')
+			cleanedfilteritems=[]
+			if filteritems is not None:
+				for filteritem in filteritems:
+					if var_name!=filteritem['varName']:
+						cleanedfilteritems.append(filteritem)
+			reqdict['filter']=cleanedfilteritems
+			
+			
 			queryset,results_count,page,page_size=post_req(
 				queryset,
 				self,

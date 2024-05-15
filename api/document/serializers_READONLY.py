@@ -157,7 +157,7 @@ class AnyField(Field):
 		return data
 
 class SourceFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[k for k in Source_options])
 	searchTerm=AnyField()
 

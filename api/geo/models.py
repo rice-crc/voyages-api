@@ -24,7 +24,8 @@ class LocationType(models.Model):
 	name = models.CharField(
 		"Geographic Location Type",
 		max_length=255,
-		unique=True
+		unique=True,
+		db_index=True
 	)
 	def __str__(self):
 		return self.name
@@ -82,7 +83,8 @@ class Location(models.Model):
 	
 	value = models.IntegerField(
 		"SPSS code",
-		unique=True
+		unique=True,
+		db_index=True
 	)
 
 	def __str__(self):

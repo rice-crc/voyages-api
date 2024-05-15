@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
 import re
 from .models import *
-from document.models import Source,Page,SourcePageConnection,SourceVoyageConnection
+from document.models import Source,Page,ShortRef,SourcePageConnection,SourceVoyageConnection
 from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
@@ -174,17 +174,17 @@ class VoyageDatesSerializer(serializers.ModelSerializer):
 		model=VoyageDates
 		fields='__all__'
 	
-	
+class VoyageSourceShortRefSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=ShortRef
+		fields=['id','name']
+
 
 class VoyageSourceSerializer(serializers.ModelSerializer):
+	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+	short_ref=VoyageSourceShortRefSerializer(many=False)
 	class Meta:
 		model=Source
-		fields='__all__'
-
-class VoyageVoyageSourceConnectionSerializer(serializers.ModelSerializer):
-	source=VoyageSourceSerializer(many=False,read_only=True)
-	class Meta:
-		model=SourceVoyageConnection
 		fields='__all__'
 
 class VoyageEnslaverRoleSerializer(serializers.ModelSerializer):
@@ -239,7 +239,7 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class VoyageSerializer(serializers.ModelSerializer):
-	voyage_source_connections=VoyageVoyageSourceConnectionSerializer(many=True,read_only=True)
+	sources=serializers.SerializerMethodField()
 	voyage_itinerary=VoyageItinerarySerializer(many=False,read_only=True)
 	voyage_dates=VoyageDatesSerializer(many=False,read_only=True)
 	enslavers=serializers.SerializerMethodField()
@@ -254,7 +254,22 @@ class VoyageSerializer(serializers.ModelSerializer):
 	cargo=VoyageCargoConnectionSerializer(many=True,read_only=True)
 	african_info=AfricanInfoSerializer(many=True,read_only=True)
 	##DIDN'T DO LINKED VOYAGES YET
-	
+	def get_sources(self,instance) -> VoyageSourceSerializer(many=True):
+		vscs=instance.voyage_source_connections.all()
+		
+		sources_dict={}
+		
+		for vsc in vscs:
+			page_range=vsc.page_range
+			s=vsc.source
+			s_id=s.id
+			s.page_ranges=[page_range]
+			if s_id not in sources_dict:
+				sources_dict[s_id]=s
+			else:
+				sources_dict[s_id].page_ranges.append(page_range)
+		return VoyageSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True).data
+
 	def get_named_enslaved_people(self,instance) -> VoyageEnslavedSerializer(many=True):
 		ers=instance.voyage_enslavement_relations.all()
 		enslaved_dict={}
@@ -291,7 +306,7 @@ class AnyField(Field):
 
 ############ REQUEST FIILTER OBJECTS
 class VoyageBasicFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	##It's rather costly for our filter requests like autocomplete and geotree to themselves "cross-filter" on too many nested variables
 	##At the same time, some cross-filters are essential to build the menus properly
 	varName=serializers.ChoiceField(choices=VoyageBasicFilterVarNames)
@@ -299,10 +314,10 @@ class VoyageBasicFilterItemSerializer(serializers.Serializer):
 
 
 class VoyageFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw"])
+	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[
 		k for k in Voyage_options
-	])
+	]+["EnslaverNameAndRole"])
 	searchTerm=AnyField()
 
 ########### PAGINATED VOYAGE LISTS 

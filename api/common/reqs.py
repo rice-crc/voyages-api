@@ -192,7 +192,16 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				roles=searchTerm['roles']
 # 				print("ROLES",roles)
 				if class_name=='voyages':
-					enslavernamehits=filtered_queryset.filter(voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains=name)
+					# we need to get hits for both these formats:
+					## lastname, firstname
+					## firstname lastname
+					namesegments=[re.sub('[,|.| ]','',n) for n in name.split(" ") if re.sub('[,|.| ]','',n)!='']
+					enslavernamehits=filtered_queryset
+					# so we filter on each chunk of the name, serially, stripped of punctuation
+					for namesegment in namesegments:
+						enslavernamehits=filtered_queryset.filter(
+							voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains=namesegment
+						)
 # 					print("enslavernamehits",enslavernamehits.count(),enslavernamehits)
 					ids=[]
 					enslaverinrelationnamehits=[]
@@ -206,8 +215,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 								hit=False
 								if op=="andlist":
 									hit=False
-									
-									
 									if set(enslavernamehitroles)>=set(roles):
 										ids.append(enslavernamehit.id)
 										hit=True
@@ -219,7 +226,10 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					ids=list(set(ids))
 					filtered_queryset=filtered_queryset.filter(id__in=ids)
 					filter_obj.remove(item)
-				
+		# I had to run this as a series of individual lookups because the ORM was acting odd
+		# Specifically, we noticed that
+		## when searching for voyage years simultaneously with other variables like ports of embarkation
+		## despite indexing, and only on staging, it kicked off a hugely inefficient db query
 		for item in filter_obj:
 			if ids is not None:
 				filtered_queryset=filtered_queryset.filter(id__in=ids)

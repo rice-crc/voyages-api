@@ -196,20 +196,35 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					## lastname, firstname
 					## firstname lastname
 					namesegments=[re.sub('[,|.| ]','',n) for n in name.split(" ") if re.sub('[,|.| ]','',n)!='']
-					enslavernamehits=filtered_queryset
+# 					print("NAMESEGMENTS",namesegments)
 					# so we filter on each chunk of the name, serially, stripped of punctuation
+					qobjstrs=[]
 					for namesegment in namesegments:
-						enslavernamehits=filtered_queryset.filter(
-							voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains=namesegment
-						)
-# 					print("enslavernamehits",enslavernamehits.count(),enslavernamehits)
+						qobjstr=f'Q(voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains="{namesegment}")'
+						qobjstrs.append(qobjstr)
+					qobjstr=' , '.join(qobjstrs)
+					execobjstr=f'filtered_queryset.filter({qobjstr})'
+# 					print("EXECOBJSTR",execobjstr)
+					enslavernamehits=eval(execobjstr)
+# 					print("enslavernamehits",enslavernamehits)
+# 					print("enslavernamehitscount",enslavernamehits.count())
 					ids=[]
 					enslaverinrelationnamehits=[]
 					for enslavernamehit in enslavernamehits:
+# 						print("ENSLAVERNAMEHIT",enslavernamehit)
 						ers=enslavernamehit.voyage_enslavement_relations.all()
 						for er in ers:
-							eirs=er.relation_enslavers.all()
-							eirs=eirs.filter(enslaver_alias__alias__icontains=name)
+							eirs_unfiltered=er.relation_enslavers.all()
+							qobjstrs=[]
+							for namesegment in namesegments:
+								qobjstr=f'Q(enslaver_alias__alias__icontains="{namesegment}")'
+# 								print("--->",qobjstr)
+								qobjstrs.append(qobjstr)
+							qobjstr=' , '.join(qobjstrs)
+							execobjstr=f'eirs_unfiltered.filter({qobjstr})'
+# 							print("EXECOBJSTR",execobjstr)
+							eirs=eval(execobjstr)
+# 							print("EIRS",eirs)
 							for eir in eirs:
 								enslavernamehitroles=[v[0] for v in eir.roles.all().values_list("name")]
 								hit=False
@@ -226,6 +241,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					ids=list(set(ids))
 					filtered_queryset=filtered_queryset.filter(id__in=ids)
 					filter_obj.remove(item)
+# 		print("FILTER OBJ",filter_obj)
+# 		print("IDS",ids)
 		# I had to run this as a series of individual lookups because the ORM was acting odd
 		# Specifically, we noticed that
 		## when searching for voyage years simultaneously with other variables like ports of embarkation

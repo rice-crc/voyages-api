@@ -192,22 +192,44 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				roles=searchTerm['roles']
 # 				print("ROLES",roles)
 				if class_name=='voyages':
-					enslavernamehits=filtered_queryset.filter(voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains=name)
-# 					print("enslavernamehits",enslavernamehits.count(),enslavernamehits)
+					# we need to get hits for both these formats:
+					## lastname, firstname
+					## firstname lastname
+					namesegments=[re.sub('[,|.| ]','',n) for n in name.split(" ") if re.sub('[,|.| ]','',n)!='']
+# 					print("NAMESEGMENTS",namesegments)
+					# so we filter on each chunk of the name, serially, stripped of punctuation
+					qobjstrs=[]
+					for namesegment in namesegments:
+						qobjstr=f'Q(voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains="{namesegment}")'
+						qobjstrs.append(qobjstr)
+					qobjstr=' , '.join(qobjstrs)
+					execobjstr=f'filtered_queryset.filter({qobjstr})'
+# 					print("EXECOBJSTR",execobjstr)
+					enslavernamehits=eval(execobjstr)
+# 					print("enslavernamehits",enslavernamehits)
+# 					print("enslavernamehitscount",enslavernamehits.count())
 					ids=[]
 					enslaverinrelationnamehits=[]
 					for enslavernamehit in enslavernamehits:
+# 						print("ENSLAVERNAMEHIT",enslavernamehit)
 						ers=enslavernamehit.voyage_enslavement_relations.all()
 						for er in ers:
-							eirs=er.relation_enslavers.all()
-							eirs=eirs.filter(enslaver_alias__alias__icontains=name)
+							eirs_unfiltered=er.relation_enslavers.all()
+							qobjstrs=[]
+							for namesegment in namesegments:
+								qobjstr=f'Q(enslaver_alias__alias__icontains="{namesegment}")'
+# 								print("--->",qobjstr)
+								qobjstrs.append(qobjstr)
+							qobjstr=' , '.join(qobjstrs)
+							execobjstr=f'eirs_unfiltered.filter({qobjstr})'
+# 							print("EXECOBJSTR",execobjstr)
+							eirs=eval(execobjstr)
+# 							print("EIRS",eirs)
 							for eir in eirs:
 								enslavernamehitroles=[v[0] for v in eir.roles.all().values_list("name")]
 								hit=False
 								if op=="andlist":
 									hit=False
-									
-									
 									if set(enslavernamehitroles)>=set(roles):
 										ids.append(enslavernamehit.id)
 										hit=True
@@ -219,7 +241,12 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					ids=list(set(ids))
 					filtered_queryset=filtered_queryset.filter(id__in=ids)
 					filter_obj.remove(item)
-				
+# 		print("FILTER OBJ",filter_obj)
+# 		print("IDS",ids)
+		# I had to run this as a series of individual lookups because the ORM was acting odd
+		# Specifically, we noticed that
+		## when searching for voyage years simultaneously with other variables like ports of embarkation
+		## despite indexing, and only on staging, it kicked off a hugely inefficient db query
 		for item in filter_obj:
 			if ids is not None:
 				filtered_queryset=filtered_queryset.filter(id__in=ids)

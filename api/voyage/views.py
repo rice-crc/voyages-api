@@ -674,8 +674,9 @@ class VoyageGET(generics.RetrieveAPIView):
 	queryset=Voyage.objects.all()
 	serializer_class=VoyageSerializer
 	lookup_field='voyage_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAuthenticated]
 
 
 # 
@@ -713,8 +714,6 @@ class RigOfVesselList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=RigOfVesselSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
 
 class NationalityList(generics.ListAPIView):
 	'''
@@ -728,8 +727,6 @@ class NationalityList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=NationalitySerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
 
 class TonTypeList(generics.ListAPIView):
 	'''
@@ -743,8 +740,6 @@ class TonTypeList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=TonTypeSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
 	
 class ParticularOutcomeList(generics.ListAPIView):
 	'''
@@ -758,8 +753,6 @@ class ParticularOutcomeList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=ParticularOutcomeSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
 
 class SlavesOutcomeList(generics.ListAPIView):
 	'''
@@ -773,8 +766,6 @@ class SlavesOutcomeList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=SlavesOutcomeSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
 
 class ResistanceList(generics.ListAPIView):
 	'''
@@ -788,8 +779,6 @@ class ResistanceList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=ResistanceSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
 	
 class OwnerOutcomeList(generics.ListAPIView):
 	'''
@@ -803,8 +792,6 @@ class OwnerOutcomeList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=OwnerOutcomeSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
 
 class VesselCapturedOutcomeList(generics.ListAPIView):
 	'''
@@ -818,5 +805,3 @@ class VesselCapturedOutcomeList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=VesselCapturedOutcomeSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]

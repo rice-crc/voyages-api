@@ -127,9 +127,9 @@ class Command(BaseCommand):
 							
 							doctype=thisdoc['doctype']
 							if doctype.lower()=="letter":
-								title=f"{thisdoc['title']} (letter) {datestr}"
+								title=f"{thisdoc['title']} (letter)"
 							elif doctype.lower()=="journal entry":
-								title=f"{thisdoc['title']} (journal) {datestr}"
+								title=f"{thisdoc['title']} (journal)"
 							else:
 								print("DOCTYPE",doctype)
 							
@@ -149,7 +149,7 @@ class Command(BaseCommand):
 								name=shortTitle
 							)
 							
-							docdict['title']+=': %s' %pagelabels_str
+# 							docdict['title']+=': %s' %pagelabels_str
 							
 							thisdocpages=[]
 							

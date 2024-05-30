@@ -674,8 +674,9 @@ class VoyageGET(generics.RetrieveAPIView):
 	queryset=Voyage.objects.all()
 	serializer_class=VoyageSerializer
 	lookup_field='voyage_id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+	
+# 	authentication_classes=[TokenAuthentication]
+# 	permission_classes=[IsAuthenticated]
 
 
 # 

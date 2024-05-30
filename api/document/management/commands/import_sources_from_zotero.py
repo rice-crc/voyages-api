@@ -151,17 +151,18 @@ class Command(BaseCommand):
 	@staticmethod
 	def _get_zotero_data(options, group_ids: list[int]):
 		# Check if we already have cached data from the Zotero API.
-		if not options.get('--ignore-cache', False):
-			try:
-				with open(_zotero_cache_filename, encoding='utf-8') as f:
-					cached = json.load(f)
-					print(f"Importing Zotero entries from cached file. {len(cached.keys())} group libraries are present...")
-					for group_id in cached:
-						print(f"+Library ID {group_id} has {len(cached[group_id].keys())} items.")
-					
-					return cached
-			except:
-				print("No cached Zotero data")
+		#May 29 -- this isn't working for some reason?
+# 		if not options.get('--ignore-cache', False):
+# 			try:
+# 				with open(_zotero_cache_filename, encoding='utf-8') as f:
+# 					cached = json.load(f)
+# 					print(f"Importing Zotero entries from cached file. {len(cached.keys())} group libraries are present...")
+# 					for group_id in cached:
+# 						print(f"+Library ID {group_id} has {len(cached[group_id].keys())} items.")
+# 					
+# 					return cached
+# 			except:
+# 				print("No cached Zotero data")
 
 		def extract_from_rdf(rdf):
 			# Map all the entries first and later keep only those that have a

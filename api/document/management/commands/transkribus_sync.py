@@ -64,19 +64,21 @@ class Command(BaseCommand):
 		transkribus_collection_id=transkribus_collection_ids[0]
 		
 		page_pks=transkribus_shortrefs.values_list('transkribus_docId','short_ref_sources__page_connections__page__id')
-		
+		print(page_pks)
 		pd={}
 		for ppk in page_pks:
 			a,b=ppk
-			if a in pd:
-				pd[a].append(b)
-			else:
-				pd[a]=[b]
+			if b is not None:
+				if a in pd:
+					pd[a].append(b)
+				else:
+					pd[a]=[b]
 		
 		for docId in pd:
-			print(docId)
+			print('DOCIDS',docId)
 			pages=pd[docId]
 			pages.sort()
+			print('PAGES',pages)
 			
 			for pagepk in pages:
 				page=Page.objects.get(id=pagepk)
@@ -90,11 +92,14 @@ class Command(BaseCommand):
 			
 			c=1
 			for transkribus_page in doc['pageList']['pages']:
+# 				print("PAGES",pages,'COUNT',len(pages))
+# 				print("C=",c)
 				pagetexturls=[]
-				sp=Page.objects.get(id=pages[c])
-				print(c)
+				sp=Page.objects.get(id=pages[c-1])
 				print(sp.source_connections.first().source)
-				if sp.transcription not in ['',None]:
+				
+				
+				if sp.transcriptions.all() != []:
 					print("transcription already exists")
 				else:
 					imgFileName=transkribus_page['imgFileName']
@@ -136,9 +141,17 @@ class Command(BaseCommand):
 					if re.match('\s+',pagetext,re.S):
 						pagetext=None
 					
-					sp.transkribus_pageid=transkribus_pageId
-					sp.transcription=pagetext
-					sp.save()
+# 					sp.transkribus_pageid=transkribus_pageId
+					Transcription.objects.create(
+						page=sp,
+						language_code='en',
+						text=pagetext,
+						is_translation=False
+					)
+					
+# 					sp.transcriptions.add=pagetext
+# 					sp.save()
+					
 					
 					
 

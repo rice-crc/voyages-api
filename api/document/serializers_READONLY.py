@@ -274,6 +274,9 @@ class SourceAutoCompleteResponseSerializer(serializers.Serializer):
 
 
 class DocumentSearchSerializer(serializers.Serializer):
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
+	page=serializers.IntegerField(required=False,allow_null=True)
+	page_size=serializers.IntegerField(required=False,allow_null=True)
 	title=serializers.CharField(required=False,allow_null=True)
 	fullText=serializers.CharField(required=False,allow_null=True)
 	bib=serializers.CharField(required=False,allow_null=True)

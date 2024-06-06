@@ -20,6 +20,7 @@ import time
 from .models import *
 import pprint
 from common.reqs import *
+import pysolr
 import collections
 import gc
 from .serializers import *
@@ -35,6 +36,125 @@ from common.static.Source_options import Source_options
 from rest_framework import filters
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
+class DocumentSearch(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		request=DocumentSearchSerializer,
+		responses=SourceListResponseSerializer
+	)
+	
+	def post(self,request):
+		st=time.time()
+		print("DOCUMENT SEARCH+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = DocumentSearchSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		srd=serialized_req.data
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+
+		def solrfilter(queryset,core_name,search_string):
+			if type(search_string)!=list:
+				search_list=[search_string]
+			else:
+				search_list=search_string
+			
+			for search_string in search_list:
+				print("SEARCH STRING",search_string)
+				solr = pysolr.Solr(
+						f'{SOLR_ENDPOINT}/{core_name}/',
+						always_commit=True,
+						timeout=10
+					)
+				searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
+				finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+				results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
+				ids=[doc['id'] for doc in results.docs]
+				queryset=queryset.filter(id__in=ids)
+			return queryset
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Source.objects.all()
+			
+			source_title=srd.get('title')
+			
+			if source_title is not None:
+				queryset=queryset.filter(title__icontains=source_title)
+			
+			bib=srd.get('bib')
+			
+			if bib is not None:
+				queryset=queryset.filter(bib__icontains=bib)
+			
+			enslavers=srd.get('enslavers')
+			
+			if enslavers is not None:
+				queryset=solrfilter(queryset,'enslavers',enslavers)
+			
+			if queryset.count()>0:
+			
+				ids=[i[0] for i in queryset.values_list('id')]
+				
+				request={'filter':[
+					{
+						'varName':'id',
+						'op':'in',
+						'searchTerm':ids,
+					}
+				]}
+				
+				results,results_count,page,page_size=post_req(	
+					queryset,
+					self,
+					request,
+					Source_options,
+					auto_prefetch=True,
+					paginate=True
+				)
+				
+			else:
+				results=[]
+				results_count=0
+				page=1
+				page_size=0
+							
+			
+			resp=SourceListResponseSerializer({
+				'count':results_count,
+				'page':page,
+				'page_size':page_size,
+				'results':results
+			}).data
+			
+# 			print(len(resp))
+# 			print(resp)
+			#I'm having the most difficult time in the world validating this nested paginated response
+			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
+		else:
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+
+		return JsonResponse(resp,safe=False,status=200)
 
 class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

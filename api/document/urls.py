@@ -17,7 +17,8 @@ urlpatterns = [
 # 	path('UPDATE/<int:id>',views.SourceUpdate.as_view()),
 	path('RETRIEVE/<int:id>',views.SourceRetrieve.as_view()),
 	#READ-ONLY CONTROLLED VOCAB ENDPOINTS (FOR CONTRIBUTE CLIENTS)
-	path('SourceTypeList/',views.SourceTypeList.as_view())
+	path('SourceTypeList/',views.SourceTypeList.as_view()),
+	path('DocumentSearch/',views.DocumentSearch.as_view())
 ]
 
 

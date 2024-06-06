@@ -268,3 +268,18 @@ class SourceAutoCompletekvSerializer(serializers.Serializer):
 
 class SourceAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=SourceAutoCompletekvSerializer(many=True)
+	
+	
+	
+
+
+class DocumentSearchSerializer(serializers.Serializer):
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
+	page=serializers.IntegerField(required=False,allow_null=True)
+	page_size=serializers.IntegerField(required=False,allow_null=True)
+	title=serializers.CharField(required=False,allow_null=True)
+	fullText=serializers.CharField(required=False,allow_null=True)
+	bib=serializers.CharField(required=False,allow_null=True)
+	enslavers=serializers.ListField(child=serializers.CharField(),required=False,allow_null=True)
+	voyageIds=serializers.ListField(child=serializers.IntegerField(),required=False,allow_null=True)
+

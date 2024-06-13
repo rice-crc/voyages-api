@@ -677,9 +677,6 @@ class VoyageGET(generics.RetrieveAPIView):
 	
 # 	authentication_classes=[TokenAuthentication]
 # 	permission_classes=[IsAuthenticated]
-
-
-# 
 # class VoyageCreate(generics.CreateAPIView):
 # 	'''
 # 	Create a Voyage. You MUST supply a voyage_id

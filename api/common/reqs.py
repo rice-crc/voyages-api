@@ -248,6 +248,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		## when searching for voyage years simultaneously with other variables like ports of embarkation
 		## despite indexing, and only on staging, it kicked off a hugely inefficient db query
 		for item in filter_obj:
+# 			print("FILTER ITEM OBJECT--->",item)
 			if ids is not None:
 				filtered_queryset=filtered_queryset.filter(id__in=ids)
 			op=item['op']
@@ -256,6 +257,9 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			if op in ['lte','gte','exact','in','icontains']:
 				django_filter_term='__'.join([varName,op])
 				kwargs[django_filter_term]=searchTerm
+			elif op in ['exact']:
+				django_filter_term='__'.join([varName,op])
+				kwargs[op]=searchTerm
 			elif op == ['andlist']:
 				for st in searchTerm:
 					filtered_queryset=eval(f'filtered_queryset.filter({searchTerm}={varName})')
@@ -267,6 +271,10 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			else:
 				errormessages.append(f"{op} is not a valid django search operation")
 			filtered_queryset=filtered_queryset.filter(**kwargs)
+			
+# 			print("COUNT-->",filtered_queryset.count())
+			
+			
 			if c<len(filter_obj):
 				ids=[i[0] for i in filtered_queryset.values_list('id')]
 			c+=1

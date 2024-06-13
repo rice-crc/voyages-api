@@ -64,6 +64,7 @@ class EnslaverInfoAbstractBase(models.Model):
 	notes = models.CharField(null=True, max_length=8192,blank=True)
 	is_natural_person = models.BooleanField(null=False, default=True,blank=True)
 	last_updated=models.DateTimeField(auto_now=True)
+	number_enslaved_people=models.IntegerField(null=True,blank=True)
 	human_reviewed=models.BooleanField(default=False,blank=True,null=True)
 	#It's going to be hairy mapping all this data over from legacy
 	#so I'm going to have to maintain a sort of shadow pk for use in migrations

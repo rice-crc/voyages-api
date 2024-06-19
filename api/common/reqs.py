@@ -284,6 +284,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	# ORDER RESULTS
 	st=time.time()
 	order_by=params.get('order_by')
+	dedupe=False
 	if order_by is not None:
 		if DEBUG:
 			print(f"------>ORDER BY: {order_by}")
@@ -295,6 +296,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				asc=True
 				k=ob
 			if k in all_fields:
+				if all_fields[k]['many']:
+					dedupe=True
 				if asc:
 					filtered_queryset=filtered_queryset.order_by(F(k).asc(nulls_last=True))
 				else:
@@ -313,16 +316,21 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	st2=time.time()
 	#dedupe ordered results
 	#https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
-	def f7(seq):
-		seen = set()
-		seen_add = seen.add
-		return [x for x in seq if not (x in seen or seen_add(x))]
-	ids=[v[0] for v in filtered_queryset.values_list('id')]
-	ids=f7(ids)
-	if DEBUG:
-		print(f"DEDUPE TIME: {time.time()-st2}")
+	if dedupe:
+		def f7(seq):
+			seen = set()
+			seen_add = seen.add
+			return [x for x in seq if not (x in seen or seen_add(x))]
+		ids=[v[0] for v in filtered_queryset.values_list('id')]
+		ids=f7(ids)
+		if DEBUG:
+			print(f"DEDUPE TIME: {time.time()-st2}")
+	
+	if dedupe:
+		results_count=len(ids)
+	else:
+		results_count=filtered_queryset.count()
 		
-	results_count=len(ids)
 	if DEBUG:
 		print("COUNT W/O DUPLICATES:",results_count)
 		
@@ -341,10 +349,16 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		if offset>results_count:
 			results=[]
 		else:
-			page_ids=ids[offset:end_idx]
-			results=orig_queryset.filter(id__in=page_ids)
+			if dedupe:
+				page_ids=ids[offset:end_idx]
+				results=orig_queryset.filter(id__in=page_ids)
+			else:
+				results=filtered_queryset[offset:end_idx]
 	else:
-		results=orig_queryset.filter(id__in=ids)
+		if dedupe:
+			results=orig_queryset.filter(id__in=ids)
+		else:
+			results=filtered_queryset
 		page=None
 		page_size=None
 	

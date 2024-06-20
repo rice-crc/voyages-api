@@ -55,21 +55,21 @@ class PastSourceSerializer(serializers.ModelSerializer):
 ############ VOYAGES
 
 class PastVoyageItinerarySerializer(serializers.ModelSerializer):
-	imp_port_voyage_begin=PastLocationSerializer(many=False)
+# 	imp_port_voyage_begin=PastLocationSerializer(many=False)
 	imp_principal_place_of_slave_purchase=PastLocationSerializer(many=False)
 	imp_principal_port_slave_dis=PastLocationSerializer(many=False)
-	imp_principal_region_slave_dis=PastLocationSerializer(many=False)
-	imp_principal_region_of_slave_purchase=PastLocationSerializer(many=False)
-	int_first_port_dis=PastLocationSerializer(many=False)
+# 	imp_principal_region_slave_dis=PastLocationSerializer(many=False)
+# 	imp_principal_region_of_slave_purchase=PastLocationSerializer(many=False)
+# 	int_first_port_dis=PastLocationSerializer(many=False)
 	class Meta:
 		model=VoyageItinerary
 		fields=[
-			'imp_port_voyage_begin',
+# 			'imp_port_voyage_begin',
 			'imp_principal_place_of_slave_purchase',
 			'imp_principal_port_slave_dis',
-			'imp_principal_region_of_slave_purchase',
-			'imp_principal_region_slave_dis',
-			'int_first_port_dis'
+# 			'imp_principal_region_of_slave_purchase',
+# 			'imp_principal_region_slave_dis',
+# 			'int_first_port_dis'
 		]
 
 
@@ -110,8 +110,8 @@ class PastEnslavedVoyageSerializer(serializers.ModelSerializer):
 	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
 	voyage_dates=PastVoyageDatesSerializer(many=False)
 	voyage_ship=PastVoyageShipSerializer(many=False)
-	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
-	voyage_source_connections=PastVoyageSourceConnectionSerializer(many=True,read_only=True)
+# 	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
+# 	voyage_source_connections=PastVoyageSourceConnectionSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
 		fields=[
@@ -121,16 +121,16 @@ class PastEnslavedVoyageSerializer(serializers.ModelSerializer):
 			'voyage_itinerary',
 			'voyage_dates',
 			'voyage_ship',
-			'voyage_outcome',
-			'voyage_source_connections'
+# 			'voyage_outcome',
+# 			'voyage_source_connections'
 		]
 
 class PastEnslaverVoyageSerializer(serializers.ModelSerializer):
-	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
+# 	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
 	voyage_dates=PastVoyageDatesSerializer(many=False)
 	voyage_ship=PastVoyageShipSerializer(many=False)
-	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
-	voyage_source_connections=PastVoyageSourceConnectionSerializer(many=True,read_only=True)
+# 	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
+# 	voyage_source_connections=PastVoyageSourceConnectionSerializer(many=True,read_only=True)
 	enslaver_roles=EnslaverRoleSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
@@ -138,11 +138,11 @@ class PastEnslaverVoyageSerializer(serializers.ModelSerializer):
 			'voyage_id',
 			'id',
 			'dataset',
-			'voyage_itinerary',
+# 			'voyage_itinerary',
 			'voyage_dates',
 			'voyage_ship',
-			'voyage_outcome',
-			'voyage_source_connections',
+# 			'voyage_outcome',
+# 			'voyage_source_connections',
 			'enslaver_roles'
 		]
 

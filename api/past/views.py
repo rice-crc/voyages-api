@@ -971,6 +971,22 @@ class PASTNetworks(generics.GenericAPIView):
 
 #CONTRIBUTIONS
 
+######## READ-ONLY CONTROLLED VOCAB ENDPOINTS
+
+class EnslaverRoleList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	'''
+	model=EnslaverRole
+	queryset=EnslaverRole.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=EnslaverRoleSerializer
+
+
+
 # @extend_schema(
 # 		exclude=True
 # 	)

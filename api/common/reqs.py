@@ -247,10 +247,19 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		# Specifically, we noticed that
 		## when searching for voyage years simultaneously with other variables like ports of embarkation
 		## despite indexing, and only on staging, it kicked off a hugely inefficient db query
+		dedupe=False
 		for item in filter_obj:
 # 			print("FILTER ITEM OBJECT--->",item)
 			if ids is not None:
 				filtered_queryset=filtered_queryset.filter(id__in=ids)
+
+			if varName in all_fields:
+				if all_fields[varName]['many']:
+					dedupe=True
+
+
+
+
 			op=item['op']
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]
@@ -284,7 +293,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	# ORDER RESULTS
 	st=time.time()
 	order_by=params.get('order_by')
-	dedupe=False
 	if order_by is not None:
 		if DEBUG:
 			print(f"------>ORDER BY: {order_by}")

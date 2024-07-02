@@ -728,11 +728,14 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
 			for geotree_valuefield in geotree_valuefields:
 				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
-				queryset=queryset.select_related(geotree_valuefield_stub)
+				queryset=queryset.prefetch_related(geotree_valuefield_stub)
 			vls=[]
 			for geotree_valuefield in geotree_valuefields:		
 				vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
 			vls=list(set(vls))
+			print("GEOTREE VALUEFIELDS",geotree_valuefields)
+			print("queryset",queryset)
+			print("vls",vls)
 		
 			#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
 			resp=GeoTreeFilter(spss_vals=vls)
@@ -809,7 +812,9 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 			#THEN GET THE CORRESPONDING GEO VALUES ON THAT FIELD
 			for geotree_valuefield in geotree_valuefields:
 				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
-				queryset=queryset.select_related(geotree_valuefield_stub)
+				queryset=queryset.prefetch_related(geotree_valuefield_stub)
+			print("GEOTREE VALUEFIELDS",geotree_valuefields)
+			print("queryset",queryset)
 			vls=[]
 			for geotree_valuefield in geotree_valuefields:		
 				vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]

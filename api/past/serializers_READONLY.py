@@ -246,7 +246,7 @@ class EnslaverEnslavedSerializer(serializers.ModelSerializer):
 		fields=['documented_name','enslaved_id','id']
 	
 class EnslaverEnslavedInRelationSerializer(serializers.ModelSerializer):
-# 	enslaved=EnslaverEnslavedSerializer(many=False)
+	enslaved=EnslaverEnslavedSerializer(many=False)
 	enslaver_roles=EnslaverRoleSerializer(many=True,read_only=True)
 	class Meta:
 		model=EnslavedInRelation
@@ -287,12 +287,15 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 			for aeir in alias_eirs:
 				eirs.append(aeir)
 		eirs=list(set(eirs))
+# 		print(eirs)
 		enslaver_enslaved_dict={}
 		for eir in eirs:
 			enslaved_people_in_relation=eir.relation.enslaved_in_relation.all()
 			for e in enslaved_people_in_relation:
+				print("e",e)
 				e.enslaver_roles=eir.roles.all()
 				enslaver_enslaved_dict[e.id]=e
+# 		print(enslaver_enslaved_dict)
 		return EnslaverEnslavedInRelationSerializer([enslaver_enslaved_dict[e] for e in enslaver_enslaved_dict],many=True,read_only=True).data
 
 	def get_voyages(self,instance):

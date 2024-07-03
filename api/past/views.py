@@ -532,7 +532,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 			
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			print()
+# 			print()
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))
 		else:
@@ -733,9 +733,9 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 			for geotree_valuefield in geotree_valuefields:		
 				vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
 			vls=list(set(vls))
-			print("GEOTREE VALUEFIELDS",geotree_valuefields)
-			print("queryset",queryset)
-			print("vls",vls)
+# 			print("GEOTREE VALUEFIELDS",geotree_valuefields)
+# 			print("queryset",queryset)
+# 			print("vls",vls)
 		
 			#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
 			resp=GeoTreeFilter(spss_vals=vls)
@@ -813,8 +813,8 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 			for geotree_valuefield in geotree_valuefields:
 				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 				queryset=queryset.prefetch_related(geotree_valuefield_stub)
-			print("GEOTREE VALUEFIELDS",geotree_valuefields)
-			print("queryset",queryset)
+# 			print("GEOTREE VALUEFIELDS",geotree_valuefields)
+# 			print("queryset",queryset)
 			vls=[]
 			for geotree_valuefield in geotree_valuefields:		
 				vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]

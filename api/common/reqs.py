@@ -120,7 +120,11 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		params=dict(r.data)
 	
 	if DEBUG:
-		print("----\npost req params:",json.dumps(params,indent=1))
+		params_wo_ids=params
+		for f in params_wo_ids['filter']:
+			print(f.keys())
+# 		del(params_wo_ids['id'])
+# 		print("----\npost req params:",json.dumps(params,indent=1))
 	filter_obj=params.get('filter') or {}
 	
 	if DEBUG:
@@ -346,6 +350,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	if paginate:
 		page_size=params.get('page_size',10)
 		page=params.get('page',1)
+		print("PAGINATION:",paginate, page_size,page)
 		if page<0:
 			page=1
 		page=page-1

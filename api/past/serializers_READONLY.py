@@ -185,6 +185,7 @@ class EnslavedEnslaversInRelationListResponseSerializer(serializers.Serializer):
 	
 	
 class EnslavedSerializer(serializers.ModelSerializer):
+	enslaved_id=serializers.IntegerField(read_only=True)
 	post_disembark_location=PastLocationSerializer(many=False,read_only=True)
 	captive_fate=CaptiveFateSerializer(many=False,read_only=True)
 	voyages=serializers.SerializerMethodField()

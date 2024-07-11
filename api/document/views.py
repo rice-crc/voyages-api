@@ -49,6 +49,8 @@ class DocumentSearch(generics.GenericAPIView):
 		st=time.time()
 		print("DOCUMENT SEARCH+++++++\nusername:",request.auth.user)
 		
+		
+		
 		#VALIDATE THE REQUEST
 		serialized_req = DocumentSearchSerializer(data=request.data)
 		if not serialized_req.is_valid():
@@ -67,6 +69,7 @@ class DocumentSearch(generics.GenericAPIView):
 			cached_response=None
 
 		def solrfilter(queryset,core_name,search_string):
+			
 			if type(search_string)!=list:
 				search_list=[search_string]
 			else:
@@ -83,13 +86,16 @@ class DocumentSearch(generics.GenericAPIView):
 				finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
 				results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
 				ids=[doc['id'] for doc in results.docs]
+				
 				queryset=queryset.filter(id__in=ids)
+				
 			return queryset
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Source.objects.all()
+			queryset=queryset.filter(has_published_manifest=True)
 			
 			source_title=srd.get('title')
 			
@@ -110,13 +116,14 @@ class DocumentSearch(generics.GenericAPIView):
 			
 				ids=[i[0] for i in queryset.values_list('id')]
 				
-				request={'filter':[
+				request=dict(request.data)
+				request['filter']=[
 					{
 						'varName':'id',
 						'op':'in',
 						'searchTerm':ids,
 					}
-				]}
+				]
 				
 				results,results_count,page,page_size=post_req(	
 					queryset,

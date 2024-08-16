@@ -4,7 +4,7 @@ FROM python:3.9-slim AS build
 
 WORKDIR /srv/voyages-geo-networks
 
-COPY geo-networks/requirements.txt .
+COPY requirements.txt .
 
 RUN pip install --user --no-cache-dir -r ./requirements.txt
 
@@ -20,7 +20,7 @@ ENV PATH=/root/.local/bin:$PATH
 
 COPY --from=build /root/.local /root/.local
 
-COPY geo-networks/ .
+COPY . .
 
 ARG FLASK_PORT=5005
 

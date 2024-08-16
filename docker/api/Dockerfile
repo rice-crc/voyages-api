@@ -34,7 +34,7 @@ RUN apt-get update -y \
 
 WORKDIR /srv/voyages-api
 
-COPY api/requirements.txt .
+COPY requirements.txt .
 
 RUN pip install --user --no-cache-dir -r ./requirements.txt
 
@@ -49,7 +49,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PATH=/root/.local/bin:$PATH
 
 COPY --from=build /root/.local /root/.local
-COPY api/ .
+COPY . .
 
 ARG GUNICORN_PORT="8000"
 ARG GUNICORN_OPTS="--reload --workers 3 --threads 2 --worker-class gthread"

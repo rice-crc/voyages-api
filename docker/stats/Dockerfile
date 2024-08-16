@@ -4,7 +4,7 @@ FROM python:3.9-slim AS build
 
 WORKDIR /srv/voyages-stats
 
-COPY stats/requirements.txt .
+COPY requirements.txt .
 
 RUN pip install --user --no-cache-dir -r ./requirements.txt
 
@@ -20,7 +20,7 @@ ENV PATH=/root/.local/bin:$PATH
 
 COPY --from=build /root/.local /root/.local
 
-COPY stats/ .
+COPY . .
 
 ARG FLASK_PORT=5000
 

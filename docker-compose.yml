@@ -14,8 +14,8 @@ services:
     networks:
       - "voyages"
     volumes:
-      - "./data:/docker-entrypoint-initdb.d"
       - "mysql_volume:/var/lib/mysql"
+      - "./data:/docker-entrypoint-initdb.d"
     command: "--slow-query-log=ON --long-query-time=3 --slow-query-log-file=/tmp/slow.log"
     environment:
       MYSQL_DATABASE: "voyages_api"
@@ -34,7 +34,7 @@ services:
       - "voyages"
     volumes:
       - "solr_volume:/var/solr"
-      - "./solr:/srv/voyages/solr"
+      - "./src/solr:/srv/voyages/solr"
     environment:
       SOLR_JAVA_MEM: "-Xms1g -Xmx1g"
 
@@ -63,10 +63,61 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
-      - "./api/:/srv/voyages-api"
+      - "./src/api:/srv/voyages-api"
     build:
-      context: "."
-      dockerfile: "./docker/api/Dockerfile"
+      context: "./src/api"
+      dockerfile: "../../docker/api/Dockerfile"
+
+  voyages-stats:
+    image: "voyages-stats"
+    container_name: "voyages-stats"
+    hostname: "voyages-stats"
+    restart: "on-failure"
+    networks:
+      - "voyages"
+    depends_on:
+      - "voyages-api"
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - "./src/stats:/srv/voyages-stats"
+    build:
+      context: "./src/stats"
+      dockerfile: "../../docker/stats/Dockerfile"
+
+  voyages-people-networks:
+    image: "voyages-people-networks"
+    container_name: "voyages-people-networks"
+    hostname: "voyages-people-networks"
+    restart: "on-failure"
+    networks:
+      - "voyages"
+    depends_on:
+      - "voyages-api"
+    ports:
+      - "127.0.0.1:5006:5006"
+    volumes:
+      - "./src/people-networks:/srv/voyages-people-networks"
+    build:
+      context: "./src/people-networks"
+      dockerfile: "../../docker/people-networks/Dockerfile"
+
+  voyages-geo-networks:
+    image: "voyages-geo-networks"
+    container_name: "voyages-geo-networks"
+    hostname: "voyages-geo-networks"
+    restart: "on-failure"
+    networks:
+      - "voyages"
+    depends_on:
+      - "voyages-api"
+    ports:
+      - "127.0.0.1:5005:5005"
+    volumes:
+      - "./src/geo-networks:/srv/voyages-geo-networks"
+    build:
+      context: "./src/geo-networks"
+      dockerfile: "../../docker/geo-networks/Dockerfile"
 
   voyages-adminer:
     image: "adminer:latest"
@@ -81,57 +132,6 @@ services:
       - "voyages"
     environment:
       ADMINER_DEFAULT_SERVER: "voyages-mysql"
-
-  voyages-stats:
-    image: "voyages-stats"
-    container_name: "voyages-stats"
-    hostname: "voyages-stats"
-    restart: "on-failure"
-    networks:
-      - "voyages"
-    depends_on:
-      - "voyages-api"
-    ports:
-      - "127.0.0.1:5000:5000"
-    volumes:
-      - "./stats/:/srv/voyages-stats"
-    build:
-      context: "."
-      dockerfile: "./docker/stats/Dockerfile"
-
-  voyages-people-networks:
-    image: "voyages-people-networks"
-    container_name: "voyages-people-networks"
-    hostname: "voyages-people-networks"
-    restart: "on-failure"
-    networks:
-      - "voyages"
-    depends_on:
-      - "voyages-api"
-    ports:
-      - "127.0.0.1:5006:5006"
-    volumes:
-      - "./people-networks/:/srv/voyages-people-networks"
-    build:
-      context: "."
-      dockerfile: "./docker/people-networks/Dockerfile"
-
-  voyages-geo-networks:
-    image: "voyages-geo-networks"
-    container_name: "voyages-geo-networks"
-    hostname: "voyages-geo-networks"
-    restart: "on-failure"
-    networks:
-      - "voyages"
-    depends_on:
-      - "voyages-api"
-    ports:
-      - "127.0.0.1:5005:5005"
-    volumes:
-      - "./geo-networks/:/srv/voyages-geo-networks"
-    build:
-      context: "."
-      dockerfile: "./docker/geo-networks/Dockerfile"
 
 networks:
     voyages:

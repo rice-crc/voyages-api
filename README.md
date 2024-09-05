@@ -11,7 +11,7 @@ For a Swagger UI presentation of the API documentation's generic public endpoint
 
 ## System Requirements
 
-For reference, this document was written while testing on a 2022 MacBook Pro 
+For reference, this document was written while testing on a 2022 MacBook Pro
 running MacOS Ventura and Docker Desktop 4.21.1.
 
 Install the macOS Xcode Command Line Tools.
@@ -67,13 +67,13 @@ local:~/Projects$ cd voyages-api
 Copy the default config files for each app component.
 
 ```bash
-local:~/Projects/voyages-api$ cp api/voyages3/localsettings.py{-default,}
-local:~/Projects/voyages-api$ cp geo-networks/localsettings.py{-default,}
-local:~/Projects/voyages-api$ cp people-networks/localsettings.py{-default,}
-local:~/Projects/voyages-api$ cp stats/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp src/api/voyages3/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp src/geo-networks/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp src/people-networks/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp src/stats/localsettings.py{-default,}
 ```
 
-Download the latest database dump from the Google Drive project share and 
+Download the latest database dump from the Google Drive project share and
 expand into the `data/` directory. Rename the expanded file to `data/voyages_prod.sql`.
 
 Build the API containers. The component containers must be built separately.
@@ -131,11 +131,11 @@ Create a new Django superuser account through the CLI.
 local:~/Projects/voyages-api$ docker exec -it voyages-api bash -c 'python3 manage.py createsuperuser'
 ```
 
-Use those credentials to log in to the Django admin interface at 
-[http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) and create an API 
+Use those credentials to log in to the Django admin interface at
+[http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) and create an API
 token for the account.
 
-Update the `stats/localsettings.py` and `networks/localsettings.py` files with 
+Update the `src/stats/localsettings.py` and `src/networks/localsettings.py` files with
 the new token.
 
 Restart the Flask component containers.
@@ -155,6 +155,7 @@ local:~/Projects/voyagesapi$ docker image prune -f
 local:~/Projects/voyagesapi$ docker volume prune -f
 local:~/Projects/voyagesapi$ docker network prune -f
 ```
+
 ## Resources
 
 Note the following project resources:
@@ -176,14 +177,14 @@ When initialized for the first time, for voyages and people, at region and place
 * Creates a basic geographic network in NetworkX
 * Asks the voyages-api component for relevant geo data to flesh the map out
 * Then pulls the full itinerary for
-	* the class in question (voyages or people)
-	* at the resolution in question (regions or places)
+  * the class in question (voyages or people)
+  * at the resolution in question (regions or places)
 * For each of those entities
-	* It draws the full, splined path
-	* Stores the touched nodes and edges in a dataframe
+  * It draws the full, splined path
+  * Stores the touched nodes and edges in a dataframe
 * At the end of each run, it
-	* Loads the full dataframe into memory
-	* And dumps the results to a pickle file under /tmp
+  * Loads the full dataframe into memory
+  * And dumps the results to a pickle file under /tmp
 
 This can take 15 minutes. When initialized subsequently, it loads the pickles into memory in about 2 seconds.
 
@@ -191,7 +192,7 @@ This can take 15 minutes. When initialized subsequently, it loads the pickles in
 
 The Adminer container is provided as an optional way of working with the database.
 
-Visit http://127.0.0.1:8080 and log in with the following values.
+Visit [http://127.0.0.1:8080](http://127.0.0.1:8080) and log in with the following values.
 
 * Server: voyages-mysql
 * User: voyages

@@ -1,2 +1,5 @@
-api/static/*
-!api/static/empty
+static/*
+!static/empty
+
+staticfiles/*
+!staticfiles/empty

@@ -21,8 +21,8 @@ class Command(BaseCommand):
 		with open(csvpath,'r',encoding='utf-8-sig') as csvfile:
 			reader=csv.DictReader(csvfile)
 			for row in reader:
-				vid=row['VOYAGEID']
-				if vid in row:
+				vid=row['VOYAGEID'].strip()
+				if vid in texas_voyage_enslaved:
 					texas_voyage_enslaved[vid].append(row)
 				else:
 					texas_voyage_enslaved[vid]=[row]
@@ -34,7 +34,7 @@ class Command(BaseCommand):
 		with open(csvpath,'r',encoding='utf-8-sig') as csvfile:
 			reader=csv.DictReader(csvfile)
 			for row in reader:
-				vid=row['VOYAGEID']
+				vid=row['VOYAGEID'].strip()
 				texas_voyage_enslavers[vid]=row
 		
 		combined_voyage_ids=list(set(
@@ -150,7 +150,7 @@ class Command(BaseCommand):
 # 		texas_voyage_enslaved
 # 		
 # 		texas_voyage_enslavers
-		transportation_type=EnslavementRelationType.objects.get(name="Transportation")
+		relation_type=EnslavementRelationType.objects.get(name="Transportation")
 		for vid in texas_voyage_enslavers:
 			voyage_row = texas_voyage_enslavers[vid]
 			voyage=Voyage.objects.get(voyage_id=vid)
@@ -160,7 +160,7 @@ class Command(BaseCommand):
 			captain_c=voyage_row['OWNERA']
 			
 			er = EnslavementRelation.objects.create(
-				relation_type=transportation_type,
+				relation_type=relation_type,
 				voyage=voyage
 			)
 			
@@ -195,6 +195,10 @@ class Command(BaseCommand):
 					if role not in eir_role_labels:
 						eir.roles.add(role)
 						eir.save()
+				else:
+					eir=None
+				
+				return eir
 			
 			row_enslavers=[
 				[owner_a,'Investor'],
@@ -208,35 +212,108 @@ class Command(BaseCommand):
 				connect_enslaver(name,role,er)
 			
 			voyage_enslaved=texas_voyage_enslaved[vid]
+# 			if vid=='135509':
+# 				print(voyage_enslaved)
 			
 			for enslaved_row in voyage_enslaved:
 				eid=enslaved_row["ID"]
 				enslaved=Enslaved.objects.get(id=eid)
 				
-				EnslavedInRelation.objects.create(
-					enslaved=enslaved,
-					relation=er
-				)
-				
 				shipper=enslaved_row["Shipper"]
 				owner_a=enslaved_row["Owner A"]
 				owner_b=enslaved_row["Owner B"]
 				
-				row_enslavers=[
-					[shipper,'Shipper'],
+				if shipper not in ['',None]:
+					relation_type=EnslavementRelationType.objects.get(name="Transportation")
+					name=shipper
+					role="Shipper"
+					EnslavedInRelation.objects.create(
+						enslaved=enslaved,
+						relation=er
+					)
+					connect_enslaver(name,role,er)
+				
+				row_owners=[
 					[owner_a,'Owner'],
 					[owner_b,'Owner']
 				]
 				
-				for row_enslaver in row_enslavers:
-					name,role=row_enslaver
-					connect_enslaver(name,role,er)
-				
-				
-				
-				
-				
-				
-				
+				relation_type=EnslavementRelationType.objects.get(name="Ownership")
+				enslaver_role=EnslaverRole.objects.get(name="Owner")
+				for row_owner in row_owners:
+					name,role=row_owner
+					role=enslaver_role.name
+					name=name.strip()
+					if name not in ['',None]:
+						
+# 						enslaver_aliases=EnslaverAlias.objects.all().filter(
+# 							alias=name,
+# 							manual_id__icontains='TEXAS_ENSLAVER'
+# 						)
+# 						if enslaver_aliases.count()>1:
+# 							for ea in enslaver_aliases:
+# 								print(ea)
+# 							exit()
+						
+						if vid=='135509':
+							print(name)
+						
+						enslaver_alias=EnslaverAlias.objects.get(
+							alias=name,
+							manual_id__icontains='TEXAS_ENSLAVER'
+						)
+						
+						candidate_enslavement_relations=EnslavementRelation.objects.all().filter(
+							voyage=voyage,
+							relation_enslavers__enslaver_alias=enslaver_alias,
+							relation_enslavers__roles__name=role
+						)
+						
+						if len(candidate_enslavement_relations)>=1:
+							er=candidate_enslavement_relations[0]
+						else:
+							er=EnslavementRelation.objects.create(
+								voyage=voyage,
+								relation_type=relation_type
+							)
+							
+						EnslavedInRelation.objects.create(
+							enslaved=enslaved,
+							relation=er
+						)
+						
+						candidate_eirs,candidate_eirs_isnew=EnslaverInRelation.objects.get_or_create(
+							enslaver_alias=enslaver_alias,
+							relation=er
+						)
+						
+						if not candidate_eirs_isnew:
+							eir=candidate_eirs
+						else:
+							eir=EnslaverInRelation.objects.get(
+								enslaver_alias=enslaver_alias,
+								relation=er
+							)
+						eir_role_labels=[r.name for r in eir.roles.all()]
+# 						
+						if role not in eir_role_labels:
+							eir.roles.add(enslaver_role)
+							eir.save()
+						# 
+# 						
+# 						
+# 						eir,eir_isnew=EnslaverInRelation.objects.get_or_create(
+# 							enslaver_alias=enslaver_alias,
+# 							relation=er
+# 						)
+# 						
+# 						eir_role_labels=[r.name for r in eir.roles.all()]
+# 						
+# 						if role not in eir_role_labels:
+# 							eir.roles.add(enslaver_role)
+# 							eir.save()
+# 				
+# 				
+# 				
 				
 				

@@ -18,19 +18,19 @@ standoff_count=0
 
 st=time.time()
 # G=load_graph()
-while True:
-	failed=False
-	try:
-		G=load_graph()
-	except:
-		failed=True
-	if failed:
-		standoff_time=standoff_base**standoff_count
-		print("retrying after %d seconds" %(standoff_time))
-		time.sleep(standoff_time)
-		standoff_count+=1
-	else:
-		break
+# while True:
+# 	failed=False
+# 	try:
+G=load_graph()
+# 	except:
+# 		failed=True
+# 	if failed:
+# 		standoff_time=standoff_base**standoff_count
+# 		print("retrying after %d seconds" %(standoff_time))
+# 		time.sleep(standoff_time)
+# 		standoff_count+=1
+# 	else:
+# 		break
 print("finished building graphs in %d seconds" %int(time.time()-st))
 
 

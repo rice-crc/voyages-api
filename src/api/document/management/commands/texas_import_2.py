@@ -52,7 +52,7 @@ class Command(BaseCommand):
 			enslavementrelations=voyage.voyage_enslavement_relations.all()
 			
 			for enslavementrelation in enslavementrelations:
-				print(enslavementrelation)
+# 				print(enslavementrelation)
 				if enslavementrelation.id != None:
 					
 					relations_enslavers=enslavementrelation.relation_enslavers.all()
@@ -126,6 +126,9 @@ class Command(BaseCommand):
 				)
 				
 				
+# 				if vid=='135509':
+# 					print("AAA",enslaver_name)
+				
 				alias,alias_isnew=EnslaverAlias.objects.get_or_create(
 					alias=enslaver_name,
 					identity=identity
@@ -155,9 +158,9 @@ class Command(BaseCommand):
 			voyage_row = texas_voyage_enslavers[vid]
 			voyage=Voyage.objects.get(voyage_id=vid)
 			owner_a=voyage_row['OWNERA']
-			captain_a=voyage_row['OWNERA']
-			captain_b=voyage_row['OWNERA']
-			captain_c=voyage_row['OWNERA']
+			captain_a=voyage_row['CAPTAINA']
+			captain_b=voyage_row['CAPTAINB']
+			captain_c=voyage_row['CAPTAINC']
 			
 			er = EnslavementRelation.objects.create(
 				relation_type=relation_type,
@@ -175,10 +178,10 @@ class Command(BaseCommand):
 						alias=name,
 						manual_id__icontains='TEXAS_ENSLAVER'
 					)
-					if enslaver_aliases.count()>1:
-						for ea in enslaver_aliases:
-							print(ea)
-						exit()
+# 					if enslaver_aliases.count()>1:
+# 						for ea in enslaver_aliases:
+# 							print(ea)
+# 						exit()
 					
 					enslaver_alias=EnslaverAlias.objects.get(
 						alias=name,
@@ -255,8 +258,8 @@ class Command(BaseCommand):
 # 								print(ea)
 # 							exit()
 						
-						if vid=='135509':
-							print(name)
+# 						if vid=='135509':
+# 							print(name)
 						
 						enslaver_alias=EnslaverAlias.objects.get(
 							alias=name,

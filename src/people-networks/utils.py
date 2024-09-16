@@ -142,26 +142,40 @@ def load_graph():
 	j=json.loads(r.text)
 	
 # 	print("RELATIONS COUNT------>",len(j[selected_fields[0]]),"<--------RELATIONS COUNT")
-	
+	relations_check=[]
 	for row_idx in range(len(j[selected_fields[0]])):
 		rowdict={}
 		for sf in selected_fields:
 			rowdict[sf]=j[sf][row_idx]
+			
 		relation_id=rowdict['id']
+		if rowdict['voyage__id']==135509:
+# 			print(rowdict['voyage__id'],"--->",rowdict['enslaved_in_relation__enslaved__id'])
+			relations_check.append(relation_id)
 		if relation_id not in relations_dict:
 			relations_dict[relation_id]=[rowdict]
 		else:
 			relations_dict[relation_id].append(rowdict)
+# 	
+# 	relations_check=list(set(relations_check))
+# 	for relcheckid in relations_check:
+# 		print("-->",relations_dict[relation_id])
 	
 	relation_types=[]
 	
 	for relation_id in relations_dict:
 		relation_connections=relations_dict[relation_id]
 		
+		
+		
+		
 		relation_type=relation_connections[0]['relation_type__name']
 		voyage_uuids=list(set([voyages_dict[rc['voyage__id']]['uuid'] for rc in relation_connections if rc['voyage__id'] is not None]))
 		enslaved_uuids=list(set([enslaved_dict[rc['enslaved_in_relation__enslaved__id']]['uuid'] for rc in relation_connections if rc['enslaved_in_relation__enslaved__id'] is not None]))
 		enslaver_uuids=list(set([enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid'] for rc in relation_connections if rc['relation_enslavers__enslaver_alias__identity__id'] is not None]))
+		
+# 		if relation_id in relations_check:
+# 			print(relation_connections)
 		
 		enslaved_ids=[rc['enslaved_in_relation__enslaved__id'] for rc in relation_connections]
 		printit=False
@@ -178,7 +192,7 @@ def load_graph():
 				G.add_edge(alice,bob)
 			else:
 				print("got more or fewer spouses than anticipated-->",enslaver_uuids,relation_connections)
-		elif relation_type=="Transportation":
+		elif relation_type in ["Transportation","Ownership"]:
 			if len(enslaved_uuids)==0:
 				#captain & shipowner/investor relations to voyages FOR WHICH THERE ARE NO NAMED ENSLAVED INDIVIDUALS
 				
@@ -210,11 +224,21 @@ def load_graph():
 					print(enslaver_roles)
 					print(enslaver_uuids)
 				
+# 				for rc in relation_connections:
+# 					if rc['voyage__id']==135509:
+# 						print(rc)				
+				
+				
 				if enslaver_uuids ==[]:
 					for rc in relation_connections:
+# 					
 						enslaved_uuid=enslaved_dict[rc['enslaved_in_relation__enslaved__id']]['uuid']
-						voyage_uuid=voyages_dict[rc['voyage__id']]['uuid']
-						G.add_edge(enslaved_uuid,voyage_uuid)
+						
+						if rc['voyage__id'] is not None:						
+							voyage_uuid=voyages_dict[rc['voyage__id']]['uuid']
+							G.add_edge(enslaved_uuid,voyage_uuid)
+# 						else:
+# 							print('NO VOYAGE??',rc)
 				else:
 					if len(voyage_uuids)>1:
 						print("more voyages than we counted on",rc)
@@ -228,6 +252,9 @@ def load_graph():
 						
 						enslaver_roles={}
 						for rc in relation_connections:
+# 							if rc['voyage__id']==135509:
+# 								print(rc)
+	
 							enslaver_identity_id=rc['relation_enslavers__enslaver_alias__identity__id']
 							enslaver_uuid=enslavers_dict[enslaver_identity_id]['uuid']
 							enslaver_role=rc['relation_enslavers__roles__name']
@@ -246,6 +273,7 @@ def load_graph():
 							for eduu in enslaved_uuids:
 								G.add_edge(eduu,voyage_uuid)	
 						else:
+							#B. DIRECT IS DIFFICULT
 
 							rel_uuid=str(uuid.uuid4())
 							reldata={
@@ -263,7 +291,8 @@ def load_graph():
 									enslaver_roles[enslaver_uuid]=[enslaver_role]
 								else:
 									enslaver_roles[enslaver_uuid].append(enslaver_role)
-			
+# 							if rc['voyage__id']==135509:
+# 								print(rc)
 							if len(voyage_uuids)==0:
 								for enslaver_uuid in enslaver_roles:
 									for eduu in enslaved_uuids:

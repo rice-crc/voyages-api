@@ -274,9 +274,10 @@ class VoyageSerializer(serializers.ModelSerializer):
 		ers=instance.voyage_enslavement_relations.all()
 		enslaved_dict={}
 		for er in ers:
-			er_enslaved_people=er.enslaved_in_relation.all()
-			for e in er_enslaved_people:
-				enslaved_dict[e.id]=e
+			eirs=er.enslaved_in_relation.all()
+			for eir in eirs:
+				enslaved_person=eir.enslaved
+				enslaved_dict[enslaved_person.id]=enslaved_person
 		return VoyageEnslavedSerializer([enslaved_dict[i] for i in enslaved_dict],many=True,read_only=True).data
 	def get_enslavers(self,instance) -> VoyageEnslaverRelationListResponseSerializer:
 		ers=instance.voyage_enslavement_relations.all()

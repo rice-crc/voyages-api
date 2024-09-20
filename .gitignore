@@ -1,12 +1,6 @@
 data/*
 !data/empty
 
-src/api/common/static/*
-!src/api/common/static/empty
-
-src/api/geo/staticfiles/*
-!src/api/geo/staticfiles/empty
-
 src/api/static/*
 !src/api/static/empty
 

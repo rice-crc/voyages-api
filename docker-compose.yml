@@ -64,6 +64,7 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - "./src/api:/srv/voyages-api"
+      - "${STATIC_SOURCE_DIR:-./src/api/static}:/srv/voyages-api/static"
     build:
       context: "./src/api"
       dockerfile: "../../docker/api/Dockerfile"

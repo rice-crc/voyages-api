@@ -19,7 +19,6 @@ import redis
 import hashlib
 from rest_framework import filters
 from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df
-# from common.serializers import autocompleterequestserializer, autocompleteresponseserializer,crosstabresponseserializer,crosstabrequestserializer
 from geo.common import GeoTreeFilter
 from geo.serializers_READONLY import LocationSerializerDeep
 import collections
@@ -34,7 +33,6 @@ from drf_spectacular.types import OpenApiTypes
 from common.static.Voyage_options import Voyage_options
 import pickle
 from voyage.cross_filter_fields import VoyageBasicFilterVarNames
-
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
@@ -674,30 +672,6 @@ class VoyageGET(generics.RetrieveAPIView):
 	queryset=Voyage.objects.all()
 	serializer_class=VoyageSerializer
 	lookup_field='voyage_id'
-	
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# class VoyageCreate(generics.CreateAPIView):
-# 	'''
-# 	Create a Voyage. You MUST supply a voyage_id
-# 	'''
-# 	queryset=Voyage.objects.all()
-# 	serializer_class=VoyageSerializerCRUD
-# 	lookup_field='voyage_id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
-# class VoyageRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-# 	'''
-# 	Retrieve, Update, or Delete a Voyage
-# 	'''
-# 	queryset=Voyage.objects.all()
-# 	serializer_class=VoyageSerializerCRUD
-# 	lookup_field='voyage_id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-
-######## READ-ONLY CONTROLLED VOCAB ENDPOINTS
 
 class RigOfVesselList(generics.ListAPIView):
 	'''

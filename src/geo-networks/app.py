@@ -13,67 +13,77 @@ import re
 import pickle
 import os
 import pandas as pd
-from flask_login import login_user,LoginManager,UserMixin,login_required
+from flask.cli import AppGroup
 
 app = Flask(__name__,template_folder='./templates/')
 app.config['JSON_SORT_KEYS'] = False
 app.config.from_object(__name__)
 app.secret_key = FLASK_SECRET_KEY
-login_manager = LoginManager()
 
-class User(UserMixin):
-    def __init__(self, name, id, active=True):
-        self.name = name
-        self.id = id
-        self.active = active
-    def is_active(self):
-        # Here you should write whatever the code is
-        # that checks the database if your user is active
-        return self.active
-    def is_anonymous(self):
-        return False
-    def is_authenticated(self):
-        return True
+app = Flask(__name__)
 
-@login_manager.user_loader
-def load_user(userid):
-	return USERS.get(int(userid))
+def kickoff():
+	print('LOADING GRAPHS')
+	for rcname in rcnames:
+		for graph_params in registered_caches[rcname]['graph_params']:
+			graphname=graph_params['name']
+			load_index(rcname,graphname)
 
-login_manager.setup_app(app)
+pickle_cli = AppGroup('pickle')
+@pickle_cli.command('rebuild')
+def rebuild_pickles():
+	for rcname in rcnames:
+		for graph_params in registered_caches[rcname]['graph_params']:
+			
+			graphname=graph_params['name']
+			
+			rc=registered_caches[rcname]
+			dataframe_endpoint=rc['endpoint']
+			if 'graphs' not in rc:
+				rc['graphs']={}
+			
+			picklefilepath=f'{TMP_PATH}/{rcname}__{graphname}.pickle'
+			
+			graph,oceanic_subgraph_view,graphname=load_graph(dataframe_endpoint,graph_params,rc)
+			linklabels=rc['indices']['linklabels']
+			nodelabels=rc['indices']['nodelabels']
+			graph_idx=rc['indices'][graphname]
+			pk_var=graph_idx['pk']
+			itinerary_vars=graph_idx['itinerary']
+			weight_vars=graph_idx['weight']
+			graph_index=build_index(
+				dataframe_endpoint,
+				graph,
+				oceanic_subgraph_view,
+				pk_var,
+				itinerary_vars,
+				weight_vars,
+				linklabels,
+				nodelabels
+			)
+			with open(picklefilepath, 'wb') as f:
+				pickle.dump(graph_index, f, pickle.HIGHEST_PROTOCOL)
+			print(f"PICKLE BUILT: {rcname} -- {graphname}")
+
+app.cli.add_command(pickle_cli)
 
 def load_index(rcname,graphname):
 	rc=registered_caches[rcname]
-	dataframe_endpoint=rc['endpoint']
 	if 'graphs' not in rc:
 		rc['graphs']={}
-	if not os.path.exists(TMP_PATH):
-		os.makedirs(TMP_PATH)
-
 	picklefilepath=f'{TMP_PATH}/{rcname}__{graphname}.pickle'
-	graph_params=[gp for gp in registered_caches[rcname]['graph_params'] if gp['name']==graphname][0]
 	if os.path.exists(picklefilepath):
 		with open(picklefilepath, 'rb') as f:
 			graph_index = pickle.load(f)
 	else:
-		graph,oceanic_subgraph_view,graphname=load_graph(dataframe_endpoint,graph_params,rc)
-		linklabels=rc['indices']['linklabels']
-		nodelabels=rc['indices']['nodelabels']
-		graph_idx=rc['indices'][graphname]
-		pk_var=graph_idx['pk']
-		itinerary_vars=graph_idx['itinerary']
-		weight_vars=graph_idx['weight']
-		graph_index=build_index(
-			dataframe_endpoint,
-			graph,
-			oceanic_subgraph_view,
-			pk_var,
-			itinerary_vars,
-			weight_vars,
-			linklabels,
-			nodelabels
-		)
-		with open(picklefilepath, 'wb') as f:
-			pickle.dump(graph_index, f, pickle.HIGHEST_PROTOCOL)
+		print(f"WARNING. MAP PICKLE DOES NOT EXIST: {rcname} -- {graphname}")
+		graph_index={
+			'nodes':pd.DataFrame.from_records({}),
+			'edges':pd.DataFrame.from_records({}),
+			'nodesdata':{},
+			'edgesdata':{}
+		}
+
 	if graphname not in rc['graphs']:
 		rc['graphs'][graphname]={'index':graph_index}
 	else:	
@@ -81,28 +91,7 @@ def load_index(rcname,graphname):
 # 	print("test node record-->",graph_index['nodes'].loc[[0,2]].to_dict())
 # 	print("test edge record-->",graph_index['edges'].loc[[0,2]].to_dict())
 
-def kickoff():
-	standoff_base=4
-	standoff_count=0
-	st=time.time()
-	while True:
-		failures_count=0
-		print('BUILDING GRAPHS')
-		for rcname in rcnames:
-			for graph_params in registered_caches[rcname]['graph_params']:
-				graphname=graph_params['name']
-				load_index(rcname,graphname)
-		print("failed on %d of %d caches" %(failures_count,len(rcnames)))
-		if failures_count>=len(rcnames):
-			standoff_time=standoff_base**standoff_count
-			print("retrying after %d seconds" %(standoff_time))
-			time.sleep(standoff_time)
-			standoff_count+=1
-		else:
-			break
-	print("finished building graphs in %d seconds" %int(time.time()-st))
-
-#on initialization, load every index as a graph, via a call to the django api
+#SEE INDEX_VARS.PY FOR THE MAPPINGS OF THE DJANGO API FIELDS TO THE DATA DICTIONARIES USED BY THIS APP
 registered_caches={
 	'ao_maps':ao_maps,
 	'voyage_maps':voyage_maps,
@@ -110,6 +99,10 @@ registered_caches={
 }
 
 rcnames=list(registered_caches.keys())
+
+if not os.path.exists(TMP_PATH):
+	os.makedirs(TMP_PATH)
+
 kickoff()
 
 @app.route('/network_maps/',methods=['POST'])
@@ -182,51 +175,3 @@ def network_maps():
 # 		print(node)
 	
 	return(jsonify({'nodes':finalnodes,'edges':finaledges}))
-
-@app.route('/rebuild_indices/<indexname>', methods=['GET'])
-@login_required
-def rebuild_index(indexname):
-	
-	if not os.path.exists(TMP_PATH):
-		os.makedirs(TMP_PATH)
-	
-	picklepath=f"{TMP_PATH}/{indexname}.pickle"
-# 	"tmp/"+indexname+".pickle"
-	if os.path.exists(picklepath):
-		os.remove(picklepath)
-	rcname,graphname=indexname.split("__")
-	load_index(rcname,graphname)
-	time.sleep(2)
-	return redirect('/displayindices')
-
-@app.route('/displayindices', methods=['GET'])
-@login_required
-def displayindices():
-	if not os.path.exists(TMP_PATH):
-		os.makedirs(TMP_PATH)
-
-	indices=[
-		[
-			'__'.join([rcname,graph_params['name']]),
-			os.path.exists(TMP_PATH+"/"+'__'.join([rcname,graph_params['name']])+".pickle")
-		] for rcname in rcnames
-		for graph_params in registered_caches[rcname]['graph_params']
-	]
-	return render_template(
-		'displayindices.html',
-		indices=indices
-	)
-    # Here we use a class of some kind to represent and validate our
-
-@app.route('/login', methods=['GET','POST'])
-def login():
-	if request.method == 'POST':
-		username = request.form['username']
-		pw = request.form['password']
-		if pw == PW and username in USER_NAMES:
-			# Login and validate the user.
-			# user should be an instance of your `User` class
-			login_user(USER_NAMES[username])
-			flash('Logged in successfully.')
-			return redirect('/displayindices')
-	return render_template('login.html')

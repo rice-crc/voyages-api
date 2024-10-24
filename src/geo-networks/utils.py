@@ -681,3 +681,4 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	print('EDGES',edgesdf)
 	
 	return {'nodes':nodesdf,'edges':edgesdf,'nodesdata':nodesdatadict,'edgesdata':edgesdatadict}
+

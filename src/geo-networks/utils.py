@@ -707,8 +707,8 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	
 	for pr in proc_results:
 		nodesdfrow,edgesdfrow,nodesdatadict_partial,edgesdatadict_partial=pr
-		nodesdfrows.append(nodesdfrow)
-		edgesdfrows.append(edgesdfrow)
+		nodesdfrows+=nodesdfrow
+		edgesdfrows+=edgesdfrow
 		for k in nodesdatadict_partial:
 			nodesdatadict[k]=nodesdatadict_partial[k]
 		for k in edgesdatadict_partial:

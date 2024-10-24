@@ -8,6 +8,8 @@ from networkx_query import search_nodes, search_edges
 from maps import rnconversion
 import multiprocessing
 import numpy as np
+import time
+
 
 def load_graph(endpoint,graph_params,rc):
 	graphname=graph_params['name']
@@ -41,8 +43,10 @@ def load_graph(endpoint,graph_params,rc):
 				return True
 			else:
 				return False
+
 		oceanic_subgraph_view=nx.subgraph_view(G,filter_edge=oceanic_edge_filter)
 	return G,oceanic_subgraph_view,graphname
+
 
 def geteuclideandistance(Ay,Ax,By,Bx):
 	distance=sqrt(
@@ -387,8 +391,8 @@ def spline_curves(nodes,edges,paths,G):
 			Control=[midx,midy]
 			edge_id=[A_id,B_id]
 			edges=add_edge_topathdict(edges,edge_id,Control,Control,pathweight)
-		else:
-			print("bad path -- only one node?",path)
+# 		else:
+# 			print("bad path -- only one node?",path)
 	
 	for s in edges:
 		for t in edges[s]:
@@ -421,9 +425,21 @@ def add_stripped_node_to_dict(graph,n_id,nodesdict):
 
 def get_map_data(payload):
 	
+# 	print(payload)
+	
 	work_item,pk_var,itinerary_vars,weight_var,graph,nodelabels,linklabels=payload
+	
+	def oceanic_edge_filter(s,t):
+		edgetags=graph[s][t].get("tags")
+		if "oceanic_leg" in edgetags or "embarkation_to_onramp" in edgetags or "offramp_to_disembarkation" in edgetags:
+			return True
+		else:
+			return False
+
+	oceanic_subgraph_view=nx.subgraph_view(graph,filter_edge=oceanic_edge_filter)
 	pk=work_item[pk_var]
 	itinerary=[work_item[iv] for iv in itinerary_vars]
+# 	print(itinerary,nodelabels,linklabels)
 	if weight_var is not None:
 		weight=work_item[weight_var]
 		if weight is None:
@@ -432,7 +448,11 @@ def get_map_data(payload):
 		weight=1
 	
 	uuids=itinerary
-	
+	nodesdfrows=[]
+	edgesdfrows=[]
+	nodesdatadict={}
+	edgesdatadict={}
+
 	nodes={uuid:{
 		"id":uuid,
 		"weights":{
@@ -486,6 +506,7 @@ def get_map_data(payload):
 				#but also handle transportation self-loops...
 				spfail=False
 				selfloop=False
+				
 				if a_id==b_id and linklabel=='transportation':
 					#transportation self-loop
 					selfloop=True
@@ -516,6 +537,7 @@ def get_map_data(payload):
 								sp=nx.shortest_path(graph,a_id,b_id,'distance')
 					except:
 						spfail=True
+
 			
 				## We need to do one last check here
 				## Because there are many routes that can be taken in the network
@@ -529,6 +551,7 @@ def get_map_data(payload):
 				for i in sp_export_preflight:
 					if type(i)==str and i not in uuids:
 						spfail=True
+
 			
 				#if all our shortest path work has failed, then return a straight line
 				## but log it!
@@ -640,13 +663,14 @@ def get_map_data(payload):
 			if edge['type'] is not None and edge['weight'] is not None:
 				edgesdatadict[edgesdatakey]={'type':edge['type'],'weight':edge['weight']}
 		
-	
+# 	print(nodesdfrows,edgesdfrows,nodesdatadict,edgesdatadict)
 	return nodesdfrows,edgesdfrows,nodesdatadict,edgesdatadict
 	
 
 
 def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weight_var,nodelabels,linklabels):
 	
+	st=time.time()
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
 	
 	if weight_var is not None:
@@ -666,25 +690,41 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	
 	print(f"ALL RESULTS: {len(results[pk_var])}")
 	
+# 	print(nodelabels,linklabels,itinerary_vars)
+	
 # 	range(len(results[pk_var]))
 	
-	print(nodelabels)
-	
-	results_pivoted=[[{k:results[k][i] for k in results},pk_var,itinerary_vars,weight_var,graph,nodelabels,linklabels] for i in range(len(results[pk_var]))]
+	results_pivoted=[[{k:results[k][i] for k in results},pk_var,itinerary_vars,weight_var,graph,linklabels,nodelabels] for i in range(len(results[pk_var]))]
 	
 	with multiprocessing.Pool(rebuilder_number_of_workers) as p:
-		all_procs_gathered=p.map(get_map_data, results_pivoted)
-		print(all_procs_gathered)
+		proc_results=p.map(get_map_data, results_pivoted)
+# 		print(all_procs_gathered)
 	
-# 	nodesdf=pd.DataFrame.from_records(nodesdfrows)
-# 	edgesdf=pd.DataFrame.from_records(edgesdfrows)
-	nodesdf=pd.DataFrame.from_records([])
-	edgesdf=pd.DataFrame.from_records([])
+	nodesdfrows=[]
+	edgesdfrows=[]
 	nodesdatadict={}
 	edgesdatadict={}
 	
+	for pr in proc_results:
+		nodesdfrow,edgesdfrow,nodesdatadict_partial,edgesdatadict_partial=pr
+		nodesdfrows.append(nodesdfrow)
+		edgesdfrows.append(edgesdfrow)
+		for k in nodesdatadict_partial:
+			nodesdatadict[k]=nodesdatadict_partial[k]
+		for k in edgesdatadict_partial:
+			edgesdatadict[k]=edgesdatadict_partial[k]
+	
+	nodesdf=pd.DataFrame.from_records(nodesdfrows)
+	edgesdf=pd.DataFrame.from_records(edgesdfrows)
+# 	nodesdf=pd.DataFrame.from_records([])
+# 	edgesdf=pd.DataFrame.from_records([])
+# 	nodesdatadict={}
+# 	edgesdatadict={}
+	
 	print('NODES',nodesdf)
 	print('EDGES',edgesdf)
+	
+	print(f"completed network graph in {time.time()-st}")
 	
 	return {'nodes':nodesdf,'edges':edgesdf,'nodesdata':nodesdatadict,'edgesdata':edgesdatadict}
 

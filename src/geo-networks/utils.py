@@ -696,6 +696,11 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	
 	results_pivoted=[[{k:results[k][i] for k in results},pk_var,itinerary_vars,weight_var,graph,linklabels,nodelabels] for i in range(len(results[pk_var]))]
 	
+	try:
+		rebuilder_number_of_workers
+	except:
+		rebuilder_number_of_workers=1
+	
 	with multiprocessing.Pool(rebuilder_number_of_workers) as p:
 		proc_results=p.map(get_map_data, results_pivoted)
 # 		print(all_procs_gathered)

@@ -33,3 +33,5 @@ PW="........."
 # DEBUG=True
 
 TMP_PATH="/mnt/geo_networks_tmp"
+
+rebuilder_number_of_workers=1

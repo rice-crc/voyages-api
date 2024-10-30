@@ -155,6 +155,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		"<class 'past.models.Enslaved'>":'enslaved',
 		"<class 'blog.models.Post'>":'blog'
 	}
+	dedupe=False
 	if 'global_search' in params:
 		core_name=solrcorenamedict[qsetclassstr]
 		if DEBUG:
@@ -251,7 +252,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		# Specifically, we noticed that
 		## when searching for voyage years simultaneously with other variables like ports of embarkation
 		## despite indexing, and only on staging, it kicked off a hugely inefficient db query
-		dedupe=False
+		
 		for item in filter_obj:
 # 			print("FILTER ITEM OBJECT--->",item)
 			if ids is not None:

@@ -238,14 +238,16 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
 		model=VoyageCargoConnection
 		fields='__all__'
 
+
+class LinkedVoyageSerializer(serializers.Serializer):
+	voyage_id=serializers.IntegerField()
+
 class VoyageSerializer(serializers.ModelSerializer):
 	sources=serializers.SerializerMethodField()
 	voyage_itinerary=VoyageItinerarySerializer(many=False,read_only=True)
 	voyage_dates=VoyageDatesSerializer(many=False,read_only=True)
 	enslavers=serializers.SerializerMethodField()
 	named_enslaved_people=serializers.SerializerMethodField()
-	
-	
 	voyage_crew=VoyageCrewSerializer(many=False,read_only=True)
 	voyage_ship=VoyageShipSerializer(many=False,read_only=True)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False,read_only=True)
@@ -253,6 +255,16 @@ class VoyageSerializer(serializers.ModelSerializer):
 	voyage_groupings=VoyageGroupingsSerializer(many=False,read_only=True)
 	cargo=VoyageCargoConnectionSerializer(many=True,read_only=True)
 	african_info=AfricanInfoSerializer(many=True,read_only=True)
+	linked_voyages=serializers.SerializerMethodField()
+	
+	def get_linked_voyages(self,instance) -> VoyageSourceSerializer(many=True):
+		incoming=instance.incoming_from_other_voyages.all()
+		outgoing=instance.outgoing_to_other_voyages.all()
+		incoming_ids=[i.voyage_id for i in incoming]
+		outgoing_ids=[o.voyage_id for o in outgoing]
+		linked_voyage_ids=list(set(incoming_ids+outgoing_ids))
+		return LinkedVoyageSerializer(linked_voyage_ids,many=True,read_only=True).data
+
 	##DIDN'T DO LINKED VOYAGES YET
 	def get_sources(self,instance) -> VoyageSourceSerializer(many=True):
 		vscs=instance.voyage_source_connections.all()

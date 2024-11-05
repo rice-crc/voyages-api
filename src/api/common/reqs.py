@@ -205,11 +205,12 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					# so we filter on each chunk of the name, serially, stripped of punctuation
 					qobjstrs=[]
 					for namesegment in namesegments:
-						qobjstr=f'Q(voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains="{namesegment}")'
+						qobjstr=f'Q(voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias__icontains="{namesegment}")|\
+								Q(voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__principal_alias__icontains="{namesegment}")'
 						qobjstrs.append(qobjstr)
 					qobjstr=' , '.join(qobjstrs)
 					execobjstr=f'filtered_queryset.filter({qobjstr})'
-# 					print("EXECOBJSTR",execobjstr)
+					print("EXECOBJSTR",execobjstr)
 					enslavernamehits=eval(execobjstr)
 # 					print("enslavernamehits",enslavernamehits)
 # 					print("enslavernamehitscount",enslavernamehits.count())
@@ -222,7 +223,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 							eirs_unfiltered=er.relation_enslavers.all()
 							qobjstrs=[]
 							for namesegment in namesegments:
-								qobjstr=f'Q(enslaver_alias__alias__icontains="{namesegment}")'
+								qobjstr=f'Q(enslaver_alias__alias__icontains="{namesegment}")|Q(enslaver_alias__identity__principal_alias__icontains="{namesegment}")'
 # 								print("--->",qobjstr)
 								qobjstrs.append(qobjstr)
 							qobjstr=' , '.join(qobjstrs)

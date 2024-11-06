@@ -242,6 +242,9 @@ def load_graph():
 				else:
 					if len(voyage_uuids)>1:
 						print("more voyages than we counted on",rc)
+					elif len(voyage_uuids)==0:
+						pass
+# 						print(relations_dict)
 					else:
 						voyage_uuid=voyage_uuids[0]
 						# if we have a single voyage, then we know that we're dealing with 

@@ -70,12 +70,14 @@ class Command(BaseCommand):
 						except:
 							pass
 			
-		EnslaverAlias.objects.all().filter(
+		texas_enslaver_aliases=EnslaverAlias.objects.all().filter(
 			manual_id__icontains='TEXAS_ENSLAVER'
-		).delete()
-				
-				
-							
+		)
+		
+		for tea in texas_enslaver_aliases:
+			tea.identity.delete()
+			tea.delete()
+			
 		# 1. Run through the two spreadsheets
 		# 	A. & create new enslaver identities off each unique name, keeping an alias id for each
 		# 		1. texas_voyage_enslavers:
@@ -122,18 +124,22 @@ class Command(BaseCommand):
 				
 				identity,identity_isnew=EnslaverIdentity.objects.get_or_create(
 					principal_alias=enslaver_name,
-# 					manual_id=texas_id
 				)
 				
 				
-# 				if vid=='135509':
-# 					print("AAA",enslaver_name)
-				
-				alias,alias_isnew=EnslaverAlias.objects.get_or_create(
+				aliases=EnslaverAlias.objects.filter(
 					alias=enslaver_name,
 					identity=identity
 				)
 				
+				if len(aliases)==0:
+					alias=EnslaverAlias.objects.create(
+						alias=enslaver_name,
+						identity=identity
+					)
+				else:
+					alias=aliases[0]
+								
 				alias.manual_id=texas_id
 				alias.save()
 				

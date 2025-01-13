@@ -64,6 +64,8 @@ class Command(BaseCommand):
 		
 		manifest_sources=Source.objects.all().filter(~Q(page_connections__page=None))
 		
+		manifest_sources=manifest_sources.filter(short_ref__name__icontains="docp")
+		
 		print(manifest_sources)
 		
 		#screen out sources that lack either pages  

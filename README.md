@@ -2,7 +2,7 @@
 
 The following notes provide an overview of how to install and run the SV API project, which is a restructuring of SlaveVoyages.org to bring it closer to a true microservices model.
 
-For notes on how to use the API, see the [Project Structure readme file](PROJECT_STRUCTURE.md)
+For notes on the project structure, see the [Project Structure readme file](PROJECT_STRUCTURE.md)
 
 For a Swagger UI presentation of the API documentation's generic public endpoints, go to the root url of the endpoint:
 
@@ -87,7 +87,7 @@ _Note: you can remove the `-d` option to run the process in the foreground. JCM 
 Allow a short bit of time for the mysql container to initialize. Then inject the sql dump.
 
 ```bash
-local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages_api <  data/voyages_prod.sql
+local:~/Projects/voyages-api$ docker exec -i voyages-mysql mysql -uroot -pvoyages voyages_api < data/voyages_prod.sql
 ```
 
 Verify the data import.
@@ -112,13 +112,18 @@ local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c au
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c autocomplete_enslaved_names -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c autocomplete_enslaver_aliases -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py rebuild_indices'
-local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py rebuild_autocomplete_indices'
 ```
 
 Build the API component containers.
 
 ```bash
 local:~/Projects/voyages-api$ docker compose up --build -d voyages-geo-networks voyages-people-networks voyages-stats
+```
+
+Rebuild the map routes (this can take some time).
+
+```bash
+local:~/Projects/voyages-api$ docker exec -i voyages-geo-networks bash -c 'flask pickle rebuild'
 ```
 
 ## Generating an API Key for the Flask Components

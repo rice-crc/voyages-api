@@ -67,6 +67,8 @@ class DocumentSearch(generics.GenericAPIView):
 			cached_response = redis_cache.get(hashed)
 		else:
 			cached_response=None
+			
+		
 
 		def solrfilter(queryset,core_name,search_string):
 			
@@ -99,18 +101,27 @@ class DocumentSearch(generics.GenericAPIView):
 			
 			source_title=srd.get('title')
 			
+			
 			if source_title is not None:
 				queryset=queryset.filter(title__icontains=source_title)
+			print("TITLE",source_title,queryset.count())
+			
 			
 			bib=srd.get('bib')
+			
 			
 			if bib is not None:
 				queryset=queryset.filter(bib__icontains=bib)
 			
+			print("BIB",bib,queryset.count())
+			
 			enslavers=srd.get('enslavers')
+			
 			
 			if enslavers is not None:
 				queryset=solrfilter(queryset,'enslavers',enslavers)
+			
+			print("ENSLAVERS",enslavers,queryset.count())
 			
 			if queryset.count()>0:
 			

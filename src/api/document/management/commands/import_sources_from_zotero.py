@@ -381,6 +381,7 @@ class Command(BaseCommand):
 						source.zotero_url = zotero_url
 				
 						source.bib=bib
+						print(bib)
 					
 						#get any existing attached date object
 						#and overwrite it or delete it as necessary

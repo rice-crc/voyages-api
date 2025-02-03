@@ -1,48 +1,86 @@
+import os
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-gfl=jfnj(+by72c%7v*ac=iix9u7azz$fpo2g*y3_b5)011ch7'
+SECRET_KEY = 'django-key-123'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+SOLR_ENDPOINT='http://voyages-solr:8983/solr'
 
-# STATIC_URL="http://voyages-django:8000/static/"
-FLASK_BASE_URL="http://voyages-stats:5000/"
-STATS_BASE_URL="http://voyages-stats:5000/"
+ALLOWED_HOSTS = ['*','http://127.0.0.1:8000','http://127.0.0.1:3000']
+
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000','http://127.0.0.1:3000']
+
+STATIC_URL="static/"
+
+VOYAGES_FRONTEND_BASE_URL="http://127.0.0.1:3000/"
+
+OPEN_API_BASE_API="http://127.0.0.1:8000/"
+
 GEO_NETWORKS_BASE_URL="http://voyages-geo-networks:5005/"
 PEOPLE_NETWORKS_BASE_URL="http://voyages-people-networks:5006/"
-VOYAGES_FRONTEND_BASE_URL="http://127.0.0.1:3000/"
-OPEN_API_BASE_API="http://127.0.0.1:8000/"
+STATS_BASE_URL="http://voyages-stats:5000/"
 
 REDIS_HOST="voyages-redis"
 REDIS_PORT=6379
-USE_REDIS_CACHE=True
+USE_REDIS_CACHE=False
+
 
 zotero_credentials={
 	"api_key":"abcdefg",
-	"library_id":"hijklmnop",
-	"library_type":"qrstuv"
+	"userid" :"4567890",
+	"import_from_library_ids":["1234567"],
+	"export_to_library_ids":["9876543"],
+	"library_type":"group"
 }
 
 michigan_collection_manifests=[
-	'ghi',
-	'jkl'
+	{
+		'url': 'manifests.json',
+		"short_ref":"AP Clement 43",
+		"full_ref":"Asiento Papers, v. 43, Clements"
+	}
 ]
 
-transkribus_collection_ids=['1234567']
+transkribus_credentials={
+	"user":"user@email.com",
+	"pw":"password!"
+}
+
+transkribus_collection_ids=['7654321']
 
 DATABASES = {
     'default': {
         'ENGINE':'django.db.backends.mysql',
-        'NAME':'123',
-        'USER':'456',
-        'PASSWORD':'789',
+        'NAME':'voyages_api',
+        'USER':'voyages',
+        'PASSWORD':'voyages',
         'HOST':'voyages-mysql',
         'PORT':'3306'
     }
 }
 
-transkribus_credentials={
-	"user":"dcba",
-	"pw":"zyxw"
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        #'level': 'WARNING',
+        'level': 'DEBUG'
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
 }
+
+# no_auth=True

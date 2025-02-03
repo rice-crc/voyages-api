@@ -89,8 +89,6 @@ SPECTACULAR_SETTINGS = {
 	 'POSTPROCESSING_HOOKS': []
 }
 
-
-
 MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',
 	'corsheaders.middleware.CorsMiddleware',
@@ -192,9 +190,8 @@ STATICFILES_DIRS = [
 
 # Default FileBrowser site
 site = FileBrowserSite(name='filebrowser')
-
 site.storage.location = "static"
-site.directory="static/uploads/"
+site.directory="uploads/"
 site.storage.base_url = "/static/uploads"
 
 TINYMCE_JS_URL="tinymce/tinymce.min.js"

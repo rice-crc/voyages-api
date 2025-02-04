@@ -190,6 +190,17 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]
 # 			print("------->enslavernameandrole")
+			if varName=="HasLinkedVoyages":
+				linkedvoyage=None
+				if searchTerm in [1,0,"1","0",True,False,"True","False","true","false","T","F"]:
+					linkedvoyage=True
+				elif searchTerm in [1,0,"1","0",True,False,"True","False","true","false","T","F"]:
+					linkedvoyage=False
+				
+				if linkedvoyage is not None:	
+					qobjstr=f'Q(outgoing_to_other_voyages__isnull={linkedvoyage})|Q(incoming_from_other_voyages__isnull={linkedvoyage})'
+					filtered_queryset=f'filtered_queryset.filter({qobjstr})'
+					
 			if varName=="EnslaverNameAndRole":
 				class_name=solrcorenamedict[qsetclassstr]
 				searchTerm=searchTerm[0]

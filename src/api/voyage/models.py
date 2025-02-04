@@ -1599,12 +1599,16 @@ class LinkedVoyages(models.Model):
 	first = models.ForeignKey(
 		'Voyage',
 		related_name="outgoing_to_other_voyages",
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		null=False,
+		blank=False
 	)
 	second = models.ForeignKey(
 		'Voyage',
 		related_name="incoming_from_other_voyages",
-		on_delete=models.CASCADE
+		on_delete=models.CASCADE,
+		null=False,
+		blank=False
 	)
 	mode = models.IntegerField()
 

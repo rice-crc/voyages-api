@@ -7,6 +7,7 @@ from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Voyage_options import Voyage_options
+from voyage.serializers_READONLY import VoyageFilterItemSerializer
 
 #################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR THE PAGINATED VOYAGE LIST ENDPOINT. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
 class AnyField(Field):
@@ -16,11 +17,6 @@ class AnyField(Field):
 		return data
 
 ############ VOYAGE REQUEST FIILTER OBJECTS
-class VoyageFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
-	varName=serializers.ChoiceField(choices=[k for k in Voyage_options] + ["EnslaverNameAndRole"])
-	searchTerm=AnyField()
-
 
 class VoyageAnimationGetNationsResponseNodeSerializer(serializers.Serializer):
 	name=serializers.CharField()

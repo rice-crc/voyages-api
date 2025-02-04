@@ -258,14 +258,14 @@ class VoyageSerializer(serializers.ModelSerializer):
 	linked_voyages=serializers.SerializerMethodField()
 	
 	def get_linked_voyages(self,instance) -> VoyageSourceSerializer(many=True):
+		self_id=instance.voyage_id
 		incoming=instance.incoming_from_other_voyages.all()
 		outgoing=instance.outgoing_to_other_voyages.all()
-		incoming_ids=[i.voyage_id for i in incoming]
-		outgoing_ids=[o.voyage_id for o in outgoing]
+		incoming_ids=[i.voyage_id for i in incoming if i.voyage_id != self_id]
+		outgoing_ids=[o.voyage_id for o in outgoing if o.voyage_id != self_id]
 		linked_voyage_ids=list(set(incoming_ids+outgoing_ids))
 		return LinkedVoyageSerializer(linked_voyage_ids,many=True,read_only=True).data
-
-	##DIDN'T DO LINKED VOYAGES YET
+	
 	def get_sources(self,instance) -> VoyageSourceSerializer(many=True):
 		vscs=instance.voyage_source_connections.all()
 		
@@ -330,7 +330,9 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[
 		k for k in Voyage_options
-	]+["EnslaverNameAndRole"])
+	] + ["EnslaverNameAndRole","HasLinkedVoyages"]
+	)
+	print("--------------------\nvarName\n-----------------------")
 	searchTerm=AnyField()
 
 ########### PAGINATED VOYAGE LISTS 

@@ -30,7 +30,6 @@ from drf_spectacular.types import OpenApiTypes
 import redis
 import hashlib
 
-
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 @extend_schema(exclude=True)

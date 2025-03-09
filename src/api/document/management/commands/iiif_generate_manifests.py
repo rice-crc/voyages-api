@@ -50,6 +50,7 @@ class Command(BaseCommand):
 							default=f"{STATIC_ROOT}/iiif_manifests/")
 		parser.add_argument("--skip-existing",default=True,
 							help="We are having timeout issues fetching remote manifests for repurposing. This serves as a basic checkpoint.")
+		parser.add_argument("--shortref", default=None,help="target only sources matching (icontains) this string.")
 
 	@staticmethod
 	def _extract_iiif_url(url):
@@ -61,12 +62,6 @@ class Command(BaseCommand):
 		return [m.group(i) for i in [2, 3]]
 
 	def handle(self, *args, **options):
-		
-		manifest_sources=Source.objects.all().filter(~Q(page_connections__page=None))
-		
-		manifest_sources=manifest_sources.filter(short_ref__name__icontains="docp")
-		
-		print(manifest_sources)
 		
 		#screen out sources that lack either pages  
 		sources = Source.objects \
@@ -80,6 +75,11 @@ class Command(BaseCommand):
 				~Q(page_connections__page=None)
 # 				and ~Q(manifest_content=None)
 			)
+		
+		shortref=options['shortref']
+		if shortref is not None:
+			sources=sources.filter(short_ref__name__icontains=shortref)
+		
 		print(f"Found {sources.count()} sources with page images.")
 		
 		if options['skip_existing'] in [True,'true','True']:
@@ -116,6 +116,7 @@ class Command(BaseCommand):
 				abort = False
 				for i, page in enumerate(pages_with_images, 1):
 					print(page)
+# 					time.sleep(2)
 # 					print(page.__dict__)
 					iiif_baseimage_url=page.iiif_baseimage_url
 					# A canvas page.
@@ -124,29 +125,39 @@ class Command(BaseCommand):
 					
 					error_count=0
 					max_errors=10
-					standoff=10
-					while True:
-						try:
-							req=requests.get(f"{img_url_base}/info.json", timeout=30)
-							req_succeeded=True
-						except:
-							print("Request timeout. Pausing...")
-							req_succeeded=False
-							
-						print(req)
-						if req.status_code!=200 or not req_succeeded:
-							if req_succeeded:
-								print(req.status_code)
-							print("error fetching",img_url_base)
-							error_count+=1
-							if error_count>50:
-								exit()
-							standoff=standoff**2
-							time.sleep(standoff)
-						else:
-							img_info=req.json()
-							break
-					
+					standoff=2
+# 					while True:
+# 						try:
+# 							req=requests.get(f"{img_url_base}/info.json", timeout=30)
+# 							status_code=req.status_code
+# 							req_succeeded=True
+# 							img_info=req.json()
+# 							print(req)
+# 						except:
+# 							print("Request timeout. Pausing...")
+# 							req_succeeded=False
+# 							status_code=None
+# 							
+# 						
+# 						if status_code!=200 or not req_succeeded:
+# 							if req_succeeded:
+# 								print(status_code)
+# 							print("error fetching",img_url_base)
+# 							error_count+=1
+# 							if error_count>50:
+# 								exit()
+# 							standoff=standoff**2
+# 							time.sleep(standoff)
+# 						else:
+# 							img_info=req.json()
+# 							break
+
+					req=requests.get(f"{img_url_base}/info.json", timeout=30)
+					status_code=req.status_code
+					if status_code==200:						
+						req_succeeded=True
+						img_info=req.json()
+
 					(api_version, profile_level) = get_api_and_profile(img_info)
 					use_img_service = not any(s in host_addr for s in _special_case_no_img_service)
 					if use_img_service and not (api_version and profile_level):
@@ -251,7 +262,7 @@ class Command(BaseCommand):
 						"label": { 'en': ["Linked Enslavers"] },
 						"value": { 'en': [] }
 					}
-					for enslaver in source_enslavers:
+					for source_enslaver in source_enslavers:
 						enslaver_id=source_enslaver.enslaver.id
 						enslaver_principal_alias=source_enslaver.enslaver.principal_alias
 						link=f"<span><a href='{VOYAGES_FRONTEND_BASE_URL}enslaver/{enslaver_id}'>{enslaver_principal_alias} #{enslaver_id}</a></span>"

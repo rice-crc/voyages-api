@@ -134,6 +134,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Post.objects.all()
+			
 			#RUN THE AUTOCOMPLETE ALGORITHM
 			final_vals=autocomplete_req(unfiltered_queryset,self,request,Post_options,'Post')
 			resp=dict(request.data)

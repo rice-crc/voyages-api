@@ -1610,19 +1610,12 @@ class LinkedVoyages(models.Model):
 		null=False,
 		blank=False
 	)
-	mode = models.IntegerField()
 
 	def __str__(self):
 		return self.__unicode__()
 
 	def __unicode__(self):
-		return str(self.first) + " => " + str(self.second)
-
-	UNSPECIFIED = 0
-
-	# In this mode the first voyage is the IntraAmerican voyage
-	# and the second is a transatlantic voyage.
-	INTRA_AMERICAN_LINK_MODE = 1
+		return str(self.first) + " <-> " + str(self.second)
 
 class Voyage(models.Model):
 	"""
@@ -1668,18 +1661,6 @@ class Voyage(models.Model):
 	)
 
 	comments = models.TextField(null=True, blank=True)
-
-	# generate natural key
-	def natural_key(self):
-		return (self.voyage_id,)
-
-	def save(self, *args, **kwargs):
-		if self.pk is None:
-			self.pk = self.voyage_id
-		super().save(*args, **kwargs)
-
-	class Admin:
-		manager = models.Manager()
 
 	class Meta:
 		ordering = [

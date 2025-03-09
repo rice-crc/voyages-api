@@ -257,7 +257,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 	african_info=AfricanInfoSerializer(many=True,read_only=True)
 	linked_voyages=serializers.SerializerMethodField()
 	
-	def get_linked_voyages(self,instance) -> VoyageSourceSerializer(many=True):
+	def get_linked_voyages(self,instance) -> LinkedVoyageSerializer(many=True):
 		self_id=instance.voyage_id
 		incoming=instance.incoming_from_other_voyages.all()
 		outgoing=instance.outgoing_to_other_voyages.all()

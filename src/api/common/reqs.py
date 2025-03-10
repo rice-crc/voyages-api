@@ -320,6 +320,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			else:
 				asc=True
 				k=ob
+
 			if k in all_fields:
 				if all_fields[k]['many']:
 					dedupe=True

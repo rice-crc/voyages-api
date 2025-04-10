@@ -26,7 +26,7 @@ import hashlib
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
-#list view. Only keeping it around for the model
+#list view. Only keeping it around for swagger to have access to the model
 class AssessmentList(generics.RetrieveAPIView):	
 	queryset=Estimate.objects.all()
 	lookup_field='id'
@@ -55,7 +55,7 @@ class EstimateDataFrames(generics.GenericAPIView):
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Estimate.objects.all()
 # 		print(queryset)
-		queryset,results_count,page,page_size=post_req(
+		results,results_count,page,page_size,error_messages=post_req(
 			queryset,
 			self,
 			request,
@@ -63,7 +63,7 @@ class EstimateDataFrames(generics.GenericAPIView):
 			auto_prefetch=True
 		)
 		
-		queryset=queryset.order_by('id')
+		results=results.order_by('id')
 		sf=request.data.get('selected_fields')
 		output_dicts={}
 		vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
@@ -95,13 +95,17 @@ class EstimateTimeline(generics.GenericAPIView):
 		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Estimate.objects.all()
-		results,results_count,page,page_size=post_req(
+		results,results_count,page,page_size,error_messages=post_req(
 			queryset,
 			self,
 			request,
 			Estimate_options,
 			auto_prefetch=True
 		)
+		
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
+
 		
 		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
 		ids=[i[0] for i in results.values_list('id')]
@@ -160,7 +164,7 @@ class EstimateCrossTabs(generics.GenericAPIView):
 		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Estimate.objects.all()
-		results,results_count,page,page_size=post_req(
+		results,results_count,page,page_size,error_messages=post_req(
 			queryset,
 			self,
 			request,
@@ -168,6 +172,9 @@ class EstimateCrossTabs(generics.GenericAPIView):
 			auto_prefetch=True,
 			paginate=False
 		)
+		
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
 		
 		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
 		ids=[i[0] for i in results.values_list('id')]
@@ -184,17 +191,12 @@ class EstimateCrossTabs(generics.GenericAPIView):
 			serialized_resp=EstimateCrossTabResponseSerializer(data=j)
 		print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
-		
-		
 		#WE NEED TO SEND BACK THE RESPONSE AS A CSV, PROBABLY USING THIS: django.http.response.FileResponse
-		
 		
 		if not serialized_resp.is_valid():
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
-
-
 
 class EstimateAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -232,13 +234,20 @@ class EstimateAggRoutes(generics.GenericAPIView):
 			params=dict(request.data)
 			queryset=Estimate.objects.all()
 			zoomlevel=params.get('zoomlevel','region')
-			results,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
 				Estimate_options,
 				auto_prefetch=True
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 		
 			#HAND OFF TO THE FLASK CONTAINER
 			results=results.order_by('id')

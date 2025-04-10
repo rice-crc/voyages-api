@@ -68,7 +68,7 @@ class PostList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Post.objects.all()
-			results,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
@@ -76,6 +76,10 @@ class PostList(generics.GenericAPIView):
 				auto_prefetch=True,
 				paginate=True
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			
 			resp=PostListResponseSerializer({
 				'count':results_count,
@@ -134,8 +138,10 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Post.objects.all()
+
 			#RUN THE AUTOCOMPLETE ALGORITHM
 			final_vals=autocomplete_req(unfiltered_queryset,self,request,Post_options,'Post')
+			
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
@@ -260,7 +266,7 @@ class InstitutionList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Institution.objects.all()
-			results,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
@@ -268,6 +274,10 @@ class InstitutionList(generics.GenericAPIView):
 				auto_prefetch=True,
 				paginate=True
 			)
+
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			resp=InstitutionListResponseSerializer({
 				'count':results_count,
 				'page':page,

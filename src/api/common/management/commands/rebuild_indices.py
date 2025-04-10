@@ -73,6 +73,13 @@ class Command(BaseCommand):
 					'subtitle',
 					'content'
 				]
+			},
+			{
+				"model":Document,
+				"core_name":"document",
+				"fields":[
+					'page_connections__page__transcriptions__text'
+				]
 			}
 			
 		]

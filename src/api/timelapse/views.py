@@ -71,7 +71,6 @@ class VoyageAnimationGetNations(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp, content_type='application/json')
 
-
 class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
@@ -163,13 +162,18 @@ class VoyageAnimation(generics.GenericAPIView):
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
 			print("BEFORE---->",queryset.count())
-			queryset,results_count,page,page_size=post_req(
+			
+			queryset,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
 			)
+						
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+			
 			print("AFTER---->",results_count,queryset.count())
 			#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
 			ids=[i[0] for i in queryset.values_list('id')]

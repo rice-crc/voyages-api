@@ -20,7 +20,7 @@ import hashlib
 from rest_framework import filters
 from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df
 from geo.common import GeoTreeFilter
-from geo.serializers_READONLY import LocationSerializerDeep
+from geo.serializers import LocationSerializerDeep
 import collections
 import gc
 from .serializers import *

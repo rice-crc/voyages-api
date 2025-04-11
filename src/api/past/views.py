@@ -22,7 +22,7 @@ import pprint
 from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df
 from collections import Counter
 from geo.common import GeoTreeFilter
-from geo.serializers_READONLY import LocationSerializer,LocationSerializerDeep
+from geo.serializers import LocationSerializer,LocationSerializerDeep
 from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,GEO_NETWORKS_BASE_URL,PEOPLE_NETWORKS_BASE_URL,USE_REDIS_CACHE
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -180,31 +180,34 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 		serialized_req = EnslaverAutoCompleteRequestSerializer(data=request.data)
 		elgs=LanguageGroup.objects.all()
 		elgt={
-			None: {
+			0: {
 				"name":"Multi-Country",
-				"id":None,
+				"id":0,
 				"children":[]
 			}
 		}
 		for elg in elgs:
+			
 			lg_dict={'id':elg.id,'name':elg.name}
 			mc_set=elg.moderncountry_set.all()
+			mc_id=None
 			if len(mc_set)>1:
 				mc_name="Multi-Country"
-				mc_id=None
-			else:
+				mc_id=0
+				elgt[0]['children'].append(lg_dict)
+			elif len(mc_set)==1:
 				mc_name=mc_set[0].name
 				mc_id=mc_set[0].id
 				
+				if mc_id in elgt:
+					elgt[mc_id]['children'].append(lg_dict)
+				else:
+					elgt[mc_id]={
+						"name":mc_name,
+						"id":mc_id,
+						"children": [lg_dict]
+					}
 				
-			if mc_id in elgt:
-				elgt[mc_id]['children'].append(lg_dict)
-			else:
-				elgt[mc_id]={
-					"name":mc_name,
-					"id":mc_id,
-					"children": [lg_dict]
-				}
 		resp=[elgt[v] for v in elgt]
 		return JsonResponse(resp,safe=False,status=200)
 

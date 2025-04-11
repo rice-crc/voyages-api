@@ -23,16 +23,18 @@ import os
 _special_case_no_img_service = ['catalog.archives.gov']
 
 def get_api_and_profile(img_info):
-	profile_source = img_info['profile'][0]
+
+	profile_source = img_info['profile']
+	if type(profile_source)==list:
+		#Michigan did something screwy...
+		profile_source=profile_source[0]
+	print(profile_source,type(profile_source))
 	level_match = re.match('.*(level[0-9]).*', profile_source)
-	img_profile = re.match(".*/api/image/([0-9]+)/(level[0-9]).json$", profile_source)
-	if img_profile:
-		api_version = img_profile.group(1)
-	else:
-		# Try to get the api version from the context
-		profile_source = img_info.get('@context', '')
-		api_match = re.match("/api/image/([0-9]+)", profile_source)
-		api_version = api_match.group(1) if api_match else None
+	context = img_info.get('@context', '')
+	print(context)
+	api_match = re.match(".*/api/image/([0-9]+).*", context)
+	print(api_match)
+	api_version = api_match.group(1) if api_match else None
 	return (api_version, level_match.group(1) if level_match else None)
 
 class Command(BaseCommand):
@@ -93,6 +95,7 @@ class Command(BaseCommand):
 			print("We will publish manifests for all of them.")
 		
 		generated_count=0
+		
 		for source in sources:
 			with transaction.atomic():
 				print("--->",source.title)
@@ -115,8 +118,6 @@ class Command(BaseCommand):
 				canvas = []
 				abort = False
 				for i, page in enumerate(pages_with_images, 1):
-					print(page)
-# 					time.sleep(2)
 # 					print(page.__dict__)
 					iiif_baseimage_url=page.iiif_baseimage_url
 					# A canvas page.
@@ -124,41 +125,35 @@ class Command(BaseCommand):
 					img_url_base = f"https://{host_addr}{iiif_suffix}"
 					
 					error_count=0
-					max_errors=10
+
+					max_errors=1
 					standoff=2
-# 					while True:
-# 						try:
-# 							req=requests.get(f"{img_url_base}/info.json", timeout=30)
-# 							status_code=req.status_code
-# 							req_succeeded=True
-# 							img_info=req.json()
-# 							print(req)
-# 						except:
-# 							print("Request timeout. Pausing...")
-# 							req_succeeded=False
-# 							status_code=None
-# 							
-# 						
-# 						if status_code!=200 or not req_succeeded:
-# 							if req_succeeded:
-# 								print(status_code)
-# 							print("error fetching",img_url_base)
-# 							error_count+=1
-# 							if error_count>50:
-# 								exit()
-# 							standoff=standoff**2
-# 							time.sleep(standoff)
-# 						else:
-# 							img_info=req.json()
-# 							break
-
-					req=requests.get(f"{img_url_base}/info.json", timeout=30)
-					status_code=req.status_code
-					if status_code==200:						
-						req_succeeded=True
-						img_info=req.json()
-
+					while True:
+						try:
+							req=requests.get(f"{img_url_base}/info.json", timeout=30)
+							print(req)
+							req_succeeded=True
+						except:
+							print("Request timeout. Pausing...")
+							req_succeeded=False
+						
+						
+						
+						if req.status_code!=200 or not req_succeeded:
+							if req_succeeded:
+								print(req.status_code)
+							print("error fetching",img_url_base)
+							error_count+=1
+							if error_count>max_errors:
+								break
+							standoff=standoff**2
+							time.sleep(standoff)
+						else:
+							img_info=req.json()
+							break
+					
 					(api_version, profile_level) = get_api_and_profile(img_info)
+					
 					use_img_service = not any(s in host_addr for s in _special_case_no_img_service)
 					if use_img_service and not (api_version and profile_level):
 						print("Failed to find API version and level for image service: " +

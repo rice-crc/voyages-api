@@ -24,7 +24,6 @@ import pysolr
 import collections
 import gc
 from .serializers import *
-from .serializers_READONLY import *
 from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,GEO_NETWORKS_BASE_URL,PEOPLE_NETWORKS_BASE_URL,USE_REDIS_CACHE
 import re
 import redis
@@ -136,7 +135,7 @@ class DocumentSearch(generics.GenericAPIView):
 					}
 				]
 				
-				results,results_count,page,page_size=post_req(	
+				results,results_count,page,page_size,error_messages=post_req(	
 					queryset,
 					self,
 					request,
@@ -144,6 +143,10 @@ class DocumentSearch(generics.GenericAPIView):
 					auto_prefetch=True,
 					paginate=True
 				)
+				
+				if error_messages:
+					return(JsonResponse(error_messages,safe=False,status=400))
+
 				
 			else:
 				results=[]
@@ -215,7 +218,7 @@ class SourceList(generics.GenericAPIView):
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Source.objects.all()
 			queryset=queryset.order_by('id')
-			results,results_count,page,page_size=post_req(	
+			results,results_count,page,page_size,error_messages=post_req(	
 				queryset,
 				self,
 				request,
@@ -223,6 +226,10 @@ class SourceList(generics.GenericAPIView):
 				auto_prefetch=True,
 				paginate=True
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			resp=SourceListResponseSerializer({
 				'count':results_count,
 				'page':page,
@@ -359,48 +366,7 @@ def source_page(request,source_id=1):
 	else:
 		return HttpResponseForbidden("Forbidden")
 
-######## CRUD ENDPOINTS
-
-class SourceCreate(generics.CreateAPIView):
-	'''
-	CREATE Source without a pk
-	
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class SourceDestroy(generics.DestroyAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializerCRUD
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class SourceUpdate(generics.UpdateAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializerCRUD
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class SourceRetrieve(generics.RetrieveAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	'''
-	serializer_class=SourceSerializer
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializerCRUD
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+#### CONTROLLED VOCABS
 	
 class SourceTypeList(generics.ListAPIView):
 	'''
@@ -413,6 +379,6 @@ class SourceTypeList(generics.ListAPIView):
 	queryset=SourceType.objects.all()
 	pagination_class=None
 	sort_by='id'
-	serializer_class=SourceTypeSerializerCRUD
+	serializer_class=SourceTypeSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

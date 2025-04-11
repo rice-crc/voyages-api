@@ -7,16 +7,14 @@ from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Voyage_options import Voyage_options
-from voyage.serializers_READONLY import VoyageFilterItemSerializer
+from voyage.serializers import VoyageFilterItemSerializer
 
-#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR THE PAGINATED VOYAGE LIST ENDPOINT. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
+#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST & RESPONSE VALIDATION.
 class AnyField(Field):
 	def to_representation(self, value):
 		return value
 	def to_internal_value(self, data):
 		return data
-
-############ VOYAGE REQUEST FIILTER OBJECTS
 
 class VoyageAnimationGetNationsResponseNodeSerializer(serializers.Serializer):
 	name=serializers.CharField()
@@ -44,7 +42,6 @@ class VoyageAnimationGetCompiledRoutesRequestSerializer(serializers.Serializer):
 		'intra',
 		'trans'
 	])
-
 
 ########### PAGINATED VOYAGE LISTS 
 @extend_schema_serializer(

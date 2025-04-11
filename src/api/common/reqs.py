@@ -7,6 +7,7 @@ from django.db.models.aggregates import StdDev
 from voyages3.localsettings import OPEN_API_BASE_API,DEBUG,SOLR_ENDPOINT,REDIS_HOST,REDIS_PORT,USE_REDIS_CACHE
 import requests
 from django.core.paginator import Paginator
+from django.core.exceptions import FieldError
 import html
 import re
 import pysolr
@@ -110,7 +111,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	
 	st=time.time()
 	
-	errormessages=[]
+	error_messages=[]
 	results_count=None
 	
 	all_fields={i:options_dict[i] for i in options_dict if options_dict[i]['type']!='table'}
@@ -119,13 +120,14 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	else:
 		params=dict(r.data)
 	
-	if DEBUG:
-		params_wo_ids=params
-		for f in params_wo_ids['filter']:
-			print(f.keys())
-# 		del(params_wo_ids['id'])
-# 		print("----\npost req params:",json.dumps(params,indent=1))
+# 	if DEBUG:
+# 		params_wo_ids=params
+# 		for f in params_wo_ids['filter']:
+# 			print(f.keys())
 	filter_obj=params.get('filter') or {}
+	
+	if DEBUG:
+		print(json.dumps(filter_obj,indent=2))
 	
 	if DEBUG:
 		print(f"REQ PREP TIME: {time.time()-st}")
@@ -142,7 +144,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		print(f'--prefetch: {len(prefetch_vars)} vars--')
 	for p in prefetch_vars:
 		orig_queryset=orig_queryset.prefetch_related(p)
-
 	
 	# GLOBAL SEARCH
 	## bypasses the normal filters. 
@@ -155,7 +156,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		"<class 'past.models.Enslaved'>":'enslaved',
 		"<class 'blog.models.Post'>":'blog'
 	}
-	dedupe=False
 	if 'global_search' in params:
 		core_name=solrcorenamedict[qsetclassstr]
 		if DEBUG:
@@ -174,22 +174,19 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		ids=[doc['id'] for doc in results.docs]
 		filtered_queryset=orig_queryset.filter(id__in=ids)
 		results_count=len(ids)
+	# SPECIAL CASE SEARCH/FILTER
 	else:
 		st=time.time()
 		kwargs={}
-		
 		ids=None
 		filtered_queryset=orig_queryset
 		c=0
 		
-		
-		
-		
+		# SPECIAL CASE 1: ENSLAVERS AND ASSOCIATED ROLES
 		for item in filter_obj:
 			op=item['op']
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]
-# 			print("------->enslavernameandrole")
 			if varName=="HasLinkedVoyages":
 				linkedvoyage=None
 				if searchTerm in [1,0,"1","0",True,False,"True","False","true","false","T","F"]:
@@ -200,19 +197,18 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				if linkedvoyage is not None:	
 					qobjstr=f'Q(outgoing_to_other_voyages__isnull={linkedvoyage})|Q(incoming_from_other_voyages__isnull={linkedvoyage})'
 					filtered_queryset=f'filtered_queryset.filter({qobjstr})'
-					
 			if varName=="EnslaverNameAndRole":
 				class_name=solrcorenamedict[qsetclassstr]
 				searchTerm=searchTerm[0]
 				name=searchTerm['name']
 				roles=searchTerm['roles']
-# 				print("ROLES",roles)
 				if class_name=='voyages':
-					# we need to get hits for both these formats:
+					# we need to get hits for the below formats
+					# because the data has not always been added inconsistently
+					# and the users don't know the difference
 					## lastname, firstname
 					## firstname lastname
 					namesegments=[re.sub('[,|.| ]','',n) for n in name.split(" ") if re.sub('[,|.| ]','',n)!='']
-# 					print("NAMESEGMENTS",namesegments)
 					# so we filter on each chunk of the name, serially, stripped of punctuation
 					qobjstrs=[]
 					for namesegment in namesegments:
@@ -223,25 +219,19 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					execobjstr=f'filtered_queryset.filter({qobjstr})'
 					print("EXECOBJSTR",execobjstr)
 					enslavernamehits=eval(execobjstr)
-# 					print("enslavernamehits",enslavernamehits)
-# 					print("enslavernamehitscount",enslavernamehits.count())
 					ids=[]
 					enslaverinrelationnamehits=[]
 					for enslavernamehit in enslavernamehits:
-# 						print("ENSLAVERNAMEHIT",enslavernamehit)
 						ers=enslavernamehit.voyage_enslavement_relations.all()
 						for er in ers:
 							eirs_unfiltered=er.relation_enslavers.all()
 							qobjstrs=[]
 							for namesegment in namesegments:
 								qobjstr=f'Q(enslaver_alias__alias__icontains="{namesegment}")|Q(enslaver_alias__identity__principal_alias__icontains="{namesegment}")'
-# 								print("--->",qobjstr)
 								qobjstrs.append(qobjstr)
 							qobjstr=' , '.join(qobjstrs)
 							execobjstr=f'eirs_unfiltered.filter({qobjstr})'
-# 							print("EXECOBJSTR",execobjstr)
 							eirs=eval(execobjstr)
-# 							print("EIRS",eirs)
 							for eir in eirs:
 								enslavernamehitroles=[v[0] for v in eir.roles.all().values_list("name")]
 								hit=False
@@ -254,29 +244,22 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 									if len(set(enslavernamehitroles)&set(roles))>0:
 										ids.append(enslavernamehit.id)
 										hit=True
-# 								print(hit,enslavernamehitroles,roles)
 					ids=list(set(ids))
 					filtered_queryset=filtered_queryset.filter(id__in=ids)
 					filter_obj.remove(item)
-# 		print("FILTER OBJ",filter_obj)
-# 		print("IDS",ids)
-		# I had to run this as a series of individual lookups because the ORM was acting odd
-		# Specifically, we noticed that
-		## when searching for voyage years simultaneously with other variables like ports of embarkation
-		## despite indexing, and only on staging, it kicked off a hugely inefficient db query
-		
+			# SPECIAL CASE 2: DOCUMENTARY SOURCES
+			if varName.endswith("__source__ALL"):
+				varNameStem=re.sub("__source__ALL","",varName)
+				qobjstr=f'Q({varNameStem}__source__bib__{op}="{searchTerm}")|\
+					Q({varNameStem}__source__short_ref__name__{op}="{searchTerm}")'
+				execobjstr=f'filtered_queryset.filter({qobjstr})'
+				filter_obj.remove(item)
+				filtered_queryset=eval(execobjstr)
+		# TYPICAL ORM-BASED SEARCH/FILTER
 		for item in filter_obj:
-# 			print("FILTER ITEM OBJECT--->",item)
 			if ids is not None:
 				filtered_queryset=filtered_queryset.filter(id__in=ids)
-
-			if varName in all_fields:
-				if all_fields[varName]['many']:
-					dedupe=True
-
-
-
-
+			#construct the django-style search on any related field
 			op=item['op']
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]
@@ -289,18 +272,23 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			elif op == ['andlist']:
 				for st in searchTerm:
 					filtered_queryset=eval(f'filtered_queryset.filter({searchTerm}={varName})')
-			elif op =='btw' and type(searchTerm)==list and len(searchTerm)==2:
-				searchTerm.sort()
-				min,max=searchTerm
-				kwargs['{0}__{1}'.format(varName, 'lte')]=max
-				kwargs['{0}__{1}'.format(varName, 'gte')]=min		
+			elif op =='btw':
+				if type(searchTerm)==list and len(searchTerm)==2:
+					searchTerm.sort()
+					min,max=searchTerm
+					kwargs['{0}__{1}'.format(varName, 'lte')]=max
+					kwargs['{0}__{1}'.format(varName, 'gte')]=min		
+				else:
+					error_messages.append(f"Invalid Filter Item: {item} -> btw operations require that the searchterm a list of 2 numbers")
 			else:
-				errormessages.append(f"{op} is not a valid django search operation")
-			filtered_queryset=filtered_queryset.filter(**kwargs)
+				error_messages.append(f"Invalid Filter Item Operation: {item}")
 			
-# 			print("COUNT-->",filtered_queryset.count())
-			
-			
+			try:
+				filtered_queryset=filtered_queryset.filter(**kwargs)
+			except Exception as e:
+				badfielderrormessage=f"Invalid Filter Item: {item} -> {e}"
+				error_messages.append(badfielderrormessage)
+				
 			if c<len(filter_obj):
 				ids=[i[0] for i in filtered_queryset.values_list('id')]
 			c+=1
@@ -309,6 +297,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	
 	# ORDER RESULTS
 	st=time.time()
+	pre_order_by_count=filtered_queryset.count()
 	order_by=params.get('order_by')
 	if order_by is not None:
 		if DEBUG:
@@ -322,8 +311,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				k=ob
 
 			if k in all_fields:
-				if all_fields[k]['many']:
-					dedupe=True
 				if asc:
 					filtered_queryset=filtered_queryset.order_by(F(k).asc(nulls_last=True))
 				else:
@@ -336,21 +323,23 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	if DEBUG:
 		print(f"ORDER BY TIME: {time.time()-st}")
 	
+	post_order_by_count=filtered_queryset.count()
 	
-	if DEBUG:
-		print("COUNT W DUPLICATES:",filtered_queryset.count())
-	st2=time.time()
-	#dedupe ordered results
-	#https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
+	st=time.time()
+	# n.b. ordering on a many related field can create duplicates. we handle this later.
+	## dedupe ordered results (while retaining the order)
+	## https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
+	
+	if post_order_by_count>pre_order_by_count:
+		dedupe=True
+	else:
+		dedupe=False
+		
 	if dedupe:
-		def f7(seq):
-			seen = set()
-			seen_add = seen.add
-			return [x for x in seq if not (x in seen or seen_add(x))]
 		ids=[v[0] for v in filtered_queryset.values_list('id')]
-		ids=f7(ids)
+		ids=list(dict.fromkeys(ids))
 		if DEBUG:
-			print(f"DEDUPE TIME: {time.time()-st2}")
+			print(f"DEDUPE TIME: {time.time()-st}")
 	
 	if dedupe:
 		results_count=len(ids)
@@ -393,8 +382,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		print(f"FILTER ON IDS TIME: {time.time()-st}")
 		print(f"FINAL RESULTS COUNT: {results_count}")
 
-	
-	return results,results_count,page,page_size
+	return results,results_count,page,page_size,error_messages
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	'''
@@ -477,13 +465,13 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 	
 	return output
 
-def autocomplete_req(queryset,self,r,options,sourcemodelname):
+def autocomplete_req(queryset,self,request,options,sourcemodelname):
 	
 	#first, get the reqdata
-	if type(r)==dict:
-		rdata=r
+	if type(request)==dict:
+		rdata=request
 	else:
-		rdata=dict(r.data)
+		rdata=dict(request.data)
 		
 	varName=str(rdata.get('varName'))
 	querystr=str(rdata.get('querystr'))
@@ -495,14 +483,13 @@ def autocomplete_req(queryset,self,r,options,sourcemodelname):
 	inverted_autocomplete_basic_index_field_endings=get_inverted_autocomplete_basic_index_field_endings()
 	
 	##USE SOLR
-	
-# 	print("INVERTED AUTOCOMPLETE INDICES",inverted_autocomplete_indices,(sourcemodelname,varName) in inverted_autocomplete_indices)
-	
 	if (sourcemodelname,varName) in inverted_autocomplete_indices:
 		inverted_autocomplete_index=inverted_autocomplete_indices[(sourcemodelname,varName)]
 		core_name=inverted_autocomplete_index['core_name']
 		ac_field_model=inverted_autocomplete_index['model']
 		model_searchfield=inverted_autocomplete_index['fields']
+
+		#now get the pk's of the object from solr
 		#if we do have some text to work with, then run the solr search
 		solr = pysolr.Solr(
 			f'{SOLR_ENDPOINT}/{core_name}/',
@@ -513,6 +500,7 @@ def autocomplete_req(queryset,self,r,options,sourcemodelname):
 		querystr=querystr.strip()
 		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in querystr.split(' ')]
 		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+
 		if finalsearchstring=="()":
 			results=solr.search('text:*',**{'rows':10000000,'fl':'id'})
 		else:
@@ -526,14 +514,18 @@ def autocomplete_req(queryset,self,r,options,sourcemodelname):
 			varName_pkfield='__'.join(decomposed_varname[:-1])+"__id"
 		else:
 			varName_pkfield='id'
-
-		filtered_queryset,results_count=post_req(
+		
+		filtered_queryset,results_count,page,page_size,error_messages=post_req(
 			queryset,
 			self,
-			rdata,
+			request,
 			options,
 			auto_prefetch=False
 		)
+		
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
+		
 		varName_pks=[i[0] for i in filtered_queryset.values_list(varName_pkfield)]
 
 		varName_pks=set(varName_pks)
@@ -545,7 +537,6 @@ def autocomplete_req(queryset,self,r,options,sourcemodelname):
 		####and now i want to see where the overlap is
 		results_ids=list(solr_ids & varName_pks)
 		print(len(solr_ids),len(varName_pks),len(results_ids))
-		
 		ac_suggestions=[v[0] for v in ac_field_model.objects.all().filter(id__in=results_ids).order_by(model_searchfield).values_list(model_searchfield) if v[0] is not None]
 		paginated_ac_suggestions=ac_suggestions[offset:(offset+limit)]
 		
@@ -553,21 +544,20 @@ def autocomplete_req(queryset,self,r,options,sourcemodelname):
 	else:
 		targetmodelname=inverted_autocomplete_basic_index_field_endings[sourcemodelname][varName]
 		fieldtail=re.sub('.*?__','',varName)
-		
-		filtered_queryset,results_count,page,page_size=post_req(
+		queryset=eval(f'{targetmodelname}.objects.all()')
+		filtered_queryset,results_count,page,page_size,error_messages=post_req(
 			queryset,
 			self,
-			r,
+			request,
 			options,
-			auto_prefetch=False,
-			paginate=False
+			auto_prefetch=False
 		)
 		
-		
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
 		evalstr=f'filtered_queryset.values_list("{fieldtail}")'
 		acvals=eval(evalstr)
 		listacvals=[v[0] for v in list(acvals)]
 		listacvals.sort()
 		response=[{"value":str(v)} for v in listacvals]
-# 	print(response)
 	return response

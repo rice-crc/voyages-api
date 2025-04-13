@@ -82,6 +82,8 @@ class Command(BaseCommand):
 		if shortref is not None:
 			sources=sources.filter(short_ref__name__icontains=shortref)
 		
+		
+# 		sources=sources.filter(id=5137)
 		print(f"Found {sources.count()} sources with page images.")
 		
 		if options['skip_existing'] in [True,'true','True']:

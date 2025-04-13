@@ -41,6 +41,7 @@ def load_long_df(endpoint,variables):
 	
 	for v in listval_vars:
 		df[v]=np.nan
+		df[v]=df[v].astype(str)
 		fields=["id"]+listval_vars[v]
 		r=requests.post(
 			url=DJANGO_BASE_URL+endpoint,
@@ -48,7 +49,7 @@ def load_long_df(endpoint,variables):
 			data=json.dumps({'selected_fields':[v for v in fields],'filter':[]})
 		)
 		j=json.loads(r.text)
-		print("*************",j.keys())
+# 		print("*************",j.keys())
 		rollup={}
 		jkeys=list(j.keys())
 		for i in range(len(j[jkeys[0]])):

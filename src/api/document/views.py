@@ -98,8 +98,15 @@ class DocumentSearch(generics.GenericAPIView):
 			queryset=Source.objects.all()
 			queryset=queryset.filter(has_published_manifest=True)
 			
-			source_title=srd.get('title')
+			voyage_ids=srd.get('voyageIds')
 			
+			if voyage_ids is not None:
+				voyage_ids_clean=[int(i) for i in re.findall("[0-9]+",str(voyage_ids))]
+				if voyage_ids_clean:
+					for voyage_id in voyage_ids_clean:
+						queryset=queryset.filter(source_voyage_connections__voyage_id=voyage_id)
+			
+			source_title=srd.get('title')
 			
 			if source_title is not None:
 				queryset=queryset.filter(title__icontains=source_title)

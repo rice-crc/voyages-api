@@ -126,8 +126,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 # 			print(f.keys())
 	filter_obj=params.get('filter') or {}
 	
-	if DEBUG:
-		print(json.dumps(filter_obj,indent=2))
+# 	if DEBUG:
+# 		print(json.dumps(filter_obj,indent=2))
 	
 	if DEBUG:
 		print(f"REQ PREP TIME: {time.time()-st}")

@@ -554,7 +554,8 @@ def autocomplete_req(queryset,self,request,options,sourcemodelname):
 		)
 		
 		if error_messages:
-			return({"errors":error_messages})
+			# return({"errors":error_messages})
+			filtered_queryset=queryset
 		evalstr=f'filtered_queryset.values_list("{fieldtail}")'
 		acvals=eval(evalstr)
 		listacvals=[v[0] for v in list(acvals)]

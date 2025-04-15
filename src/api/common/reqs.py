@@ -524,7 +524,7 @@ def autocomplete_req(queryset,self,request,options,sourcemodelname):
 		)
 		
 		if error_messages:
-			return(JsonResponse(error_messages,safe=False,status=400))
+			return({"errors":error_messages})
 		
 		varName_pks=[i[0] for i in filtered_queryset.values_list(varName_pkfield)]
 
@@ -554,7 +554,7 @@ def autocomplete_req(queryset,self,request,options,sourcemodelname):
 		)
 		
 		if error_messages:
-			return(JsonResponse(error_messages,safe=False,status=400))
+			return({"errors":error_messages})
 		evalstr=f'filtered_queryset.values_list("{fieldtail}")'
 		acvals=eval(evalstr)
 		listacvals=[v[0] for v in list(acvals)]

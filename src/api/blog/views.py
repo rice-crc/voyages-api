@@ -139,6 +139,9 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 			#RUN THE AUTOCOMPLETE ALGORITHM (WHICH ITSELF RUNS THE DJANGO FILTER)
 			final_vals=autocomplete_req(unfiltered_queryset,self,request,Post_options,'Post')
 			
+			if "errors" in final_vals:
+				return JsonResponse(final_vals['errors'],safe=False,status=400)
+			
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE

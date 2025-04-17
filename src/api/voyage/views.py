@@ -20,11 +20,10 @@ import hashlib
 from rest_framework import filters
 from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df
 from geo.common import GeoTreeFilter
-from geo.serializers_READONLY import LocationSerializerDeep
+from geo.serializers import LocationSerializerDeep
 import collections
 import gc
 from .serializers import *
-from .serializers_READONLY import *
 from rest_framework import serializers
 from voyages3.localsettings import REDIS_HOST,REDIS_PORT,GEO_NETWORKS_BASE_URL,STATS_BASE_URL,DEBUG,USE_REDIS_CACHE
 import re
@@ -79,7 +78,7 @@ class VoyageList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			results,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
@@ -87,6 +86,10 @@ class VoyageList(generics.GenericAPIView):
 				auto_prefetch=True,
 				paginate=True
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			resp=VoyageListResponseSerializer({
 				'count':results_count,
 				'page':page,
@@ -158,13 +161,17 @@ class VoyageAggregations(generics.GenericAPIView):
 						cleanedfilteritems.append(filteritem)
 			reqdict['filter']=cleanedfilteritems
 			
-			results,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				reqdict,
 				Voyage_options,
 				auto_prefetch=False
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			#RUN THE AGGREGATIONS
 			aggregation_field=request.data.get('varName')
 			output_dict,errormessages=get_fieldstats(results,aggregation_field,Voyage_options)
@@ -221,16 +228,20 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 		
 			#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
-			ids=[i[0] for i in queryset.values_list('id')]
+			ids=[i[0] for i in results.values_list('id')]
 			u2=STATS_BASE_URL+'crosstabs/'
 			params=dict(request.data)
 			stats_req_data=params
@@ -301,16 +312,19 @@ class VoyageGroupBy(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
 				Voyage_options,
 				auto_prefetch=False
 			)
-		
+
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
-			ids=[i[0] for i in queryset.values_list('id')]
+			ids=[i[0] for i in results.values_list('id')]
 			u2=STATS_BASE_URL+'groupby/'
 			d2=dict(request.data)
 			d2['ids']=ids
@@ -352,16 +366,19 @@ class VoyageSummaryStats(generics.GenericAPIView):
 		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
-		queryset,results_count,page,page_size=post_req(
+		results,results_count,page,page_size,error_messages=post_req(
 			queryset,
 			self,
 			request,
 			Voyage_options,
 			auto_prefetch=True
 		)
-		
+
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
+
 		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
-		ids=[i[0] for i in queryset.values_list('id')]
+		ids=[i[0] for i in results.values_list('id')]
 		u2=STATS_BASE_URL+'voyage_summary_stats/'
 		params=dict(request.data)
 		stats_req_data=params
@@ -415,7 +432,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
@@ -423,10 +440,13 @@ class VoyageDataFrames(generics.GenericAPIView):
 				auto_prefetch=True,
 				paginate=False
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
 		
-			queryset=queryset.order_by('id')
+			results=results.order_by('id')
 			sf=request.data.get('selected_fields')
-			vals=list(eval('queryset.values_list("'+'","'.join(sf)+'")'))
+			vals=list(eval('results.values_list("'+'","'.join(sf)+'")'))
 			resp=clean_long_df(vals,sf)		
 			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
@@ -488,22 +508,25 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Voyage.objects.all()
-			queryset,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				reqdict,
 				Voyage_options
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
 		
 			#THEN GET THE CORRESPONDING GEO VALUES
 			for geotree_valuefield in geotree_valuefields:
 				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
-				queryset=queryset.select_related(geotree_valuefield_stub)
+				results=results.select_related(geotree_valuefield_stub)
 			
 			vls=[]
 			
 			for geotree_valuefield in geotree_valuefields:		
-				vls+=[i[0] for i in list(set(queryset.values_list(geotree_valuefield))) if i[0] is not None]
+				vls+=[i[0] for i in list(set(results.values_list(geotree_valuefield))) if i[0] is not None]
 			vls=list(set(vls))
 		
 			#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
@@ -521,68 +544,6 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
-		return JsonResponse(resp,safe=False,status=200)
-
-class VoyageCharFieldAutoComplete(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	@extend_schema(
-		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the voyage). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the voyages list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
-		request=VoyageAutoCompleteRequestSerializer,
-		responses=VoyageAutoCompleteResponseSerializer,
-	)
-	def post(self,request):
-		st=time.time()
-		print("VOYAGE CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-		#CLEAN THE REQUEST'S FILTER (IF ANY)
-		reqdict=dict(request.data)
-		if 'filter' in reqdict:		
-			for filteritem in list(reqdict['filter']):
-				if filteritem['varName'] not in VoyageBasicFilterVarNames:
-					reqdict['filter'].remove(filteritem)
-
-		
-		#VALIDATE THE REQUEST
-		serialized_req = VoyageAutoCompleteRequestSerializer(data=reqdict)
-		if not serialized_req.is_valid():
-			return JsonResponse(serialized_req.errors,status=400)
-
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		
-		srd=serialized_req.data
-		if USE_REDIS_CACHE:
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed_full_req)
-		else:
-			cached_response=None
-
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#But first let's see if this autocomplete request has been run before (other than the exact letters typed in...)
-						
-			unfiltered_queryset=Voyage.objects.all()
-			
-			final_vals=autocomplete_req(unfiltered_queryset,self,reqdict,Voyage_options,'Voyage')
-			
-			#RUN THE AUTOCOMPLETE ALGORITHM
-			
-			resp=reqdict
-			resp['suggested_values']=final_vals
-			#VALIDATE THE RESPONSE
-			serialized_resp=VoyageAutoCompleteResponseSerializer(data=resp)
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed_full_req,json.dumps(resp))
-		else:
-			if DEBUG:
-				print("cached:",hashed_full_req)
-			resp=json.loads(cached_response)
-		if DEBUG:
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp,safe=False,status=200)
 
 class VoyageAggRoutes(generics.GenericAPIView):
@@ -620,18 +581,21 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			params=dict(request.data)
 			queryset=Voyage.objects.all()
-			queryset,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
 				Voyage_options,
 				auto_prefetch=True
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
 		
 			#HAND OFF TO THE FLASK CONTAINER
-			queryset=queryset.order_by('id')
+			results=results.order_by('id')
 			zoomlevel=params.get('zoomlevel','region')
-			values_list=queryset.values_list('id')
+			values_list=results.values_list('id')
 			pks=[v[0] for v in values_list]
 			django_query_time=time.time()
 			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
@@ -684,7 +648,7 @@ class RigOfVesselList(generics.ListAPIView):
 	queryset=RigOfVessel.objects.all()
 	pagination_class=None
 	sort_by='value'
-	serializer_class=RigOfVesselSerializerCRUD
+	serializer_class=RigOfVesselSerializer
 
 class NationalityList(generics.ListAPIView):
 	'''
@@ -697,7 +661,7 @@ class NationalityList(generics.ListAPIView):
 	queryset=Nationality.objects.all()
 	pagination_class=None
 	sort_by='value'
-	serializer_class=NationalitySerializerCRUD
+	serializer_class=NationalitySerializer
 
 class TonTypeList(generics.ListAPIView):
 	'''
@@ -710,7 +674,7 @@ class TonTypeList(generics.ListAPIView):
 	queryset=TonType.objects.all()
 	pagination_class=None
 	sort_by='value'
-	serializer_class=TonTypeSerializerCRUD
+	serializer_class=TonTypeSerializer
 	
 class ParticularOutcomeList(generics.ListAPIView):
 	'''
@@ -723,7 +687,7 @@ class ParticularOutcomeList(generics.ListAPIView):
 	queryset=ParticularOutcome.objects.all()
 	pagination_class=None
 	sort_by='value'
-	serializer_class=ParticularOutcomeSerializerCRUD
+	serializer_class=ParticularOutcomeSerializer
 
 class SlavesOutcomeList(generics.ListAPIView):
 	'''
@@ -736,7 +700,7 @@ class SlavesOutcomeList(generics.ListAPIView):
 	queryset=SlavesOutcome.objects.all()
 	pagination_class=None
 	sort_by='value'
-	serializer_class=SlavesOutcomeSerializerCRUD
+	serializer_class=SlavesOutcomeSerializer
 
 class ResistanceList(generics.ListAPIView):
 	'''
@@ -749,7 +713,7 @@ class ResistanceList(generics.ListAPIView):
 	queryset=Resistance.objects.all()
 	pagination_class=None
 	sort_by='value'
-	serializer_class=ResistanceSerializerCRUD
+	serializer_class=ResistanceSerializer
 	
 class OwnerOutcomeList(generics.ListAPIView):
 	'''
@@ -762,7 +726,7 @@ class OwnerOutcomeList(generics.ListAPIView):
 	queryset=OwnerOutcome.objects.all()
 	pagination_class=None
 	sort_by='value'
-	serializer_class=OwnerOutcomeSerializerCRUD
+	serializer_class=OwnerOutcomeSerializer
 
 class VesselCapturedOutcomeList(generics.ListAPIView):
 	'''
@@ -775,4 +739,4 @@ class VesselCapturedOutcomeList(generics.ListAPIView):
 	queryset=VesselCapturedOutcome.objects.all()
 	pagination_class=None
 	sort_by='value'
-	serializer_class=VesselCapturedOutcomeSerializerCRUD
+	serializer_class=VesselCapturedOutcomeSerializer

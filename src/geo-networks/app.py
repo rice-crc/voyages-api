@@ -18,7 +18,6 @@ from flask.cli import AppGroup
 app = Flask(__name__,template_folder='./templates/')
 app.config['JSON_SORT_KEYS'] = False
 app.config.from_object(__name__)
-app.secret_key = FLASK_SECRET_KEY
 
 app = Flask(__name__)
 
@@ -59,7 +58,8 @@ def rebuild_pickles():
 				itinerary_vars,
 				weight_vars,
 				linklabels,
-				nodelabels
+				nodelabels,
+				rebuilder_number_of_workers=rebuilder_number_of_workers
 			)
 			with open(picklefilepath, 'wb') as f:
 				pickle.dump(graph_index, f, pickle.HIGHEST_PROTOCOL)

@@ -24,7 +24,6 @@ import pysolr
 import collections
 import gc
 from .serializers import *
-from .serializers_READONLY import *
 from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,GEO_NETWORKS_BASE_URL,PEOPLE_NETWORKS_BASE_URL,USE_REDIS_CACHE
 import re
 import redis
@@ -67,6 +66,8 @@ class DocumentSearch(generics.GenericAPIView):
 			cached_response = redis_cache.get(hashed)
 		else:
 			cached_response=None
+			
+		
 
 		def solrfilter(queryset,core_name,search_string):
 			
@@ -97,20 +98,36 @@ class DocumentSearch(generics.GenericAPIView):
 			queryset=Source.objects.all()
 			queryset=queryset.filter(has_published_manifest=True)
 			
+			voyage_ids=srd.get('voyageIds')
+			
+			if voyage_ids is not None:
+				voyage_ids_clean=[int(i) for i in re.findall("[0-9]+",str(voyage_ids))]
+				if voyage_ids_clean:
+					for voyage_id in voyage_ids_clean:
+						queryset=queryset.filter(source_voyage_connections__voyage_id=voyage_id)
+			
 			source_title=srd.get('title')
 			
 			if source_title is not None:
 				queryset=queryset.filter(title__icontains=source_title)
+			print("TITLE",source_title,queryset.count())
+			
 			
 			bib=srd.get('bib')
+			
 			
 			if bib is not None:
 				queryset=queryset.filter(bib__icontains=bib)
 			
+			print("BIB",bib,queryset.count())
+			
 			enslavers=srd.get('enslavers')
+			
 			
 			if enslavers is not None:
 				queryset=solrfilter(queryset,'enslavers',enslavers)
+			
+			print("ENSLAVERS",enslavers,queryset.count())
 			
 			if queryset.count()>0:
 			
@@ -125,7 +142,7 @@ class DocumentSearch(generics.GenericAPIView):
 					}
 				]
 				
-				results,results_count,page,page_size=post_req(	
+				results,results_count,page,page_size,error_messages=post_req(	
 					queryset,
 					self,
 					request,
@@ -133,6 +150,10 @@ class DocumentSearch(generics.GenericAPIView):
 					auto_prefetch=True,
 					paginate=True
 				)
+				
+				if error_messages:
+					return(JsonResponse(error_messages,safe=False,status=400))
+
 				
 			else:
 				results=[]
@@ -204,7 +225,7 @@ class SourceList(generics.GenericAPIView):
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Source.objects.all()
 			queryset=queryset.order_by('id')
-			results,results_count,page,page_size=post_req(	
+			results,results_count,page,page_size,error_messages=post_req(	
 				queryset,
 				self,
 				request,
@@ -212,6 +233,10 @@ class SourceList(generics.GenericAPIView):
 				auto_prefetch=True,
 				paginate=True
 			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			resp=SourceListResponseSerializer({
 				'count':results_count,
 				'page':page,
@@ -348,48 +373,7 @@ def source_page(request,source_id=1):
 	else:
 		return HttpResponseForbidden("Forbidden")
 
-######## CRUD ENDPOINTS
-
-class SourceCreate(generics.CreateAPIView):
-	'''
-	CREATE Source without a pk
-	
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializerCRUD
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class SourceDestroy(generics.DestroyAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializerCRUD
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class SourceUpdate(generics.UpdateAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	'''
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializerCRUD
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAdminUser]
-
-class SourceRetrieve(generics.RetrieveAPIView):
-	'''
-	The lookup field for sources is the pk (id)
-	'''
-	serializer_class=SourceSerializer
-	queryset=Source.objects.all()
-	serializer_class=SourceSerializerCRUD
-	lookup_field='id'
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
+#### CONTROLLED VOCABS
 	
 class SourceTypeList(generics.ListAPIView):
 	'''
@@ -402,6 +386,6 @@ class SourceTypeList(generics.ListAPIView):
 	queryset=SourceType.objects.all()
 	pagination_class=None
 	sort_by='id'
-	serializer_class=SourceTypeSerializerCRUD
+	serializer_class=SourceTypeSerializer
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

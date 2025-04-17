@@ -181,8 +181,11 @@ class CaptiveStatus(NamedModelAbstractBase):
 		verbose_name = "Captive status"
 		verbose_name_plural = "Captive statuses"
 
+class Gender(NamedModelAbstractBase):
+	
+	class Meta:
+		verbose_name = "Gender"
 
-# TODO: this model will replace resources.AfricanName
 class Enslaved(models.Model):
 	"""
 	Enslaved person.
@@ -202,7 +205,8 @@ class Enslaved(models.Model):
 													 blank=True)
 	# Personal data
 	age = models.IntegerField(null=True, db_index=True,blank=True)
-	gender = models.IntegerField(null=True, db_index=True,blank=True)
+	gender_int = models.IntegerField(null=True, db_index=True,blank=True)
+	gender = models.ForeignKey(Gender,on_delete=models.SET_NULL,blank=True,null=True)
 	height = models.FloatField(null=True, verbose_name="Height in inches", db_index=True,blank=True)
 	skin_color = models.CharField(max_length=100, null=True, db_index=True,blank=True)
 	language_group = models.ForeignKey(

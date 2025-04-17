@@ -14,6 +14,14 @@ app.config['JSON_SORT_KEYS'] = False
 
 def load_long_df(endpoint,variables):
 	headers={'Authorization':DJANGO_AUTH_KEY,'Content-Type': 'application/json'}
+	listval_vars={}
+	for v in list(variables):
+		listval=[]
+		if variables[v]['type']=="obj":
+			for f in variables[v]['fields']:
+				listval.append(f)
+			del(variables[v])
+			listval_vars[v]=listval
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
@@ -24,20 +32,63 @@ def load_long_df(endpoint,variables):
 	#coerce datatypes based on options call
 	for varName in variables:
 		vartype=variables[varName]['type']	
-		if vartype in [
-			"int",
-			"pct"
-		]:
+		if vartype in ["int","pct"]:
 			df[varName]=pd.to_numeric(df[varName])
+		
+	#handle m2m fields that
+	##1. produce duplicates w a values_list call
+	##2. need to be stuffed into an object field in pandas
+	
+	for v in listval_vars:
+		df[v]=np.nan
+		df[v]=df[v].astype(str)
+		fields=["id"]+listval_vars[v]
+		r=requests.post(
+			url=DJANGO_BASE_URL+endpoint,
+			headers=headers,
+			data=json.dumps({'selected_fields':[v for v in fields],'filter':[]})
+		)
+		j=json.loads(r.text)
+# 		print("*************",j.keys())
+		rollup={}
+		jkeys=list(j.keys())
+		for i in range(len(j[jkeys[0]])):
+			idnum=j[jkeys[0]][i]
+			itemvals=[]
+			for k in jkeys[1:]:
+				val=j[k][i]
+				if val is not None:
+					itemvals.append(str(val))
+			if itemvals:
+				item=': '.join(itemvals)
+				if idnum in rollup:
+					rollup[idnum].append(item)
+				else:
+					rollup[idnum]=[item]
+		
+		for i in rollup:
+			row=df[df['id']==i]
+			idx=row.index[0]
+			obj='|'.join(rollup[i])
+			df.iloc[idx,df.columns.get_loc(v)]=obj
+			
 	return(df)
 
 registered_caches=[
-	voyage_bar_and_donut_charts,
-	voyage_summary_statistics,
-	voyage_pivot_tables,
-	voyage_xyscatter,
+# 	voyage_bar_and_donut_charts,
+# 	voyage_summary_statistics,
+# 	voyage_pivot_tables,
+# 	voyage_xyscatter,
+	big_df,
 	estimate_pivot_tables,
 	timelapse
+]
+
+replaced_dfs=[
+	"voyage_bar_and_donut_charts",
+	"voyage_summary_statistics",
+	"voyage_pivot_tables",
+	"voyage_xyscatter"
 ]
 
 #on initialization, load every index as a dataframe, via a call to the django api
@@ -132,6 +183,8 @@ def groupby():
 	groupby_by=rdata['groupby_by']
 	groupby_cols=rdata['groupby_cols']
 	agg_fn=rdata['agg_fn']
+	if dfname in replaced_dfs:
+		dfname='big_df'
 	df=eval(dfname)['df']
 	df2=df[df['id'].isin(ids)]
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
@@ -178,7 +231,8 @@ def voyage_summary_stats():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
-	df=eval('voyage_summary_statistics')['df']
+# 	df=eval('voyage_summary_statistics')['df']
+	df=big_df['df']
 	
 	imputed_rows={
 		'voyage_slaves_numbers__imp_total_num_slaves_embarked':'Captives embarked (Imputed)',
@@ -315,7 +369,8 @@ def estimates_pivot():
 	binsize=rdata.get('binsize')
 	mode=rdata['mode']
 	
-	df=eval('estimate_pivot_tables')['df']
+# 	df=eval('estimate_pivot_tables')['df']
+	df=big_df['df']
 	
 	#filter down on the pk's
 	pv=df[df['id'].isin(ids)]
@@ -480,7 +535,8 @@ def estimates_timeline():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
-	df=eval('estimate_pivot_tables')['df']
+# 	df=eval('estimate_pivot_tables')['df']
+	df=big_df['df']
 	cols=['disembarked_slaves','embarked_slaves']
 	df2=df[df['id'].isin(ids)]
 	ct=df2.groupby('year',group_keys=True)[cols].agg('sum')
@@ -511,6 +567,8 @@ def crosstabs():
 	st=time.time()
 	rdata=request.json
 	dfname=rdata.get('cachename')
+	if dfname in replaced_dfs:
+		dfname='big_df'
 # 	dfname='voyage_pivot_tables'
 	#it must have a list of ids (even if it's all of the ids)
 	ids=rdata['ids']
@@ -848,11 +906,9 @@ def dataframes():
 	
 	try:
 		st=time.time()
-	
 		rdata=request.json
-	
-		dfname=rdata['cachename'][0]
-		df=eval(dfname)
+		dfname='big_df'
+		df=eval(dfname)['df']
 		ids=rdata['ids']
 		df2=df[df['id'].isin(ids)]
 		columns=list(set(rdata['selected_fields']+['id']))

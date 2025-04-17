@@ -23,16 +23,18 @@ import os
 _special_case_no_img_service = ['catalog.archives.gov']
 
 def get_api_and_profile(img_info):
-	profile_source = img_info['profile'][0]
+
+	profile_source = img_info['profile']
+	if type(profile_source)==list:
+		#Michigan did something screwy...
+		profile_source=profile_source[0]
+	print(profile_source,type(profile_source))
 	level_match = re.match('.*(level[0-9]).*', profile_source)
-	img_profile = re.match(".*/api/image/([0-9]+)/(level[0-9]).json$", profile_source)
-	if img_profile:
-		api_version = img_profile.group(1)
-	else:
-		# Try to get the api version from the context
-		profile_source = img_info.get('@context', '')
-		api_match = re.match("/api/image/([0-9]+)", profile_source)
-		api_version = api_match.group(1) if api_match else None
+	context = img_info.get('@context', '')
+	print(context)
+	api_match = re.match(".*/api/image/([0-9]+).*", context)
+	print(api_match)
+	api_version = api_match.group(1) if api_match else None
 	return (api_version, level_match.group(1) if level_match else None)
 
 class Command(BaseCommand):
@@ -50,6 +52,7 @@ class Command(BaseCommand):
 							default=f"{STATIC_ROOT}/iiif_manifests/")
 		parser.add_argument("--skip-existing",default=True,
 							help="We are having timeout issues fetching remote manifests for repurposing. This serves as a basic checkpoint.")
+		parser.add_argument("--shortref", default=None,help="target only sources matching (icontains) this string.")
 
 	@staticmethod
 	def _extract_iiif_url(url):
@@ -61,12 +64,6 @@ class Command(BaseCommand):
 		return [m.group(i) for i in [2, 3]]
 
 	def handle(self, *args, **options):
-		
-		manifest_sources=Source.objects.all().filter(~Q(page_connections__page=None))
-		
-		manifest_sources=manifest_sources.filter(short_ref__name__icontains="docp")
-		
-		print(manifest_sources)
 		
 		#screen out sources that lack either pages  
 		sources = Source.objects \
@@ -80,6 +77,13 @@ class Command(BaseCommand):
 				~Q(page_connections__page=None)
 # 				and ~Q(manifest_content=None)
 			)
+		
+		shortref=options['shortref']
+		if shortref is not None:
+			sources=sources.filter(short_ref__name__icontains=shortref)
+		
+		
+# 		sources=sources.filter(id=5137)
 		print(f"Found {sources.count()} sources with page images.")
 		
 		if options['skip_existing'] in [True,'true','True']:
@@ -93,6 +97,7 @@ class Command(BaseCommand):
 			print("We will publish manifests for all of them.")
 		
 		generated_count=0
+		
 		for source in sources:
 			with transaction.atomic():
 				print("--->",source.title)
@@ -115,7 +120,6 @@ class Command(BaseCommand):
 				canvas = []
 				abort = False
 				for i, page in enumerate(pages_with_images, 1):
-					print(page)
 # 					print(page.__dict__)
 					iiif_baseimage_url=page.iiif_baseimage_url
 					# A canvas page.
@@ -123,24 +127,27 @@ class Command(BaseCommand):
 					img_url_base = f"https://{host_addr}{iiif_suffix}"
 					
 					error_count=0
-					max_errors=10
-					standoff=10
+
+					max_errors=1
+					standoff=2
 					while True:
 						try:
 							req=requests.get(f"{img_url_base}/info.json", timeout=30)
+							print(req)
 							req_succeeded=True
 						except:
 							print("Request timeout. Pausing...")
 							req_succeeded=False
-							
-						print(req)
+						
+						
+						
 						if req.status_code!=200 or not req_succeeded:
 							if req_succeeded:
 								print(req.status_code)
 							print("error fetching",img_url_base)
 							error_count+=1
-							if error_count>50:
-								exit()
+							if error_count>max_errors:
+								break
 							standoff=standoff**2
 							time.sleep(standoff)
 						else:
@@ -148,6 +155,7 @@ class Command(BaseCommand):
 							break
 					
 					(api_version, profile_level) = get_api_and_profile(img_info)
+					
 					use_img_service = not any(s in host_addr for s in _special_case_no_img_service)
 					if use_img_service and not (api_version and profile_level):
 						print("Failed to find API version and level for image service: " +
@@ -251,7 +259,7 @@ class Command(BaseCommand):
 						"label": { 'en': ["Linked Enslavers"] },
 						"value": { 'en': [] }
 					}
-					for enslaver in source_enslavers:
+					for source_enslaver in source_enslavers:
 						enslaver_id=source_enslaver.enslaver.id
 						enslaver_principal_alias=source_enslaver.enslaver.principal_alias
 						link=f"<span><a href='{VOYAGES_FRONTEND_BASE_URL}enslaver/{enslaver_id}'>{enslaver_principal_alias} #{enslaver_id}</a></span>"

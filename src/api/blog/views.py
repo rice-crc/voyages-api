@@ -66,9 +66,9 @@ class PostList(generics.GenericAPIView):
 
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Post.objects.all()
-			results,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
@@ -77,6 +77,9 @@ class PostList(generics.GenericAPIView):
 				paginate=True
 			)
 			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			resp=PostListResponseSerializer({
 				'count':results_count,
 				'page':page,
@@ -132,10 +135,13 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 			cached_response=None
 		
 		if cached_response is None:
-			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
 			unfiltered_queryset=Post.objects.all()
-			#RUN THE AUTOCOMPLETE ALGORITHM
+			#RUN THE AUTOCOMPLETE ALGORITHM (WHICH ITSELF RUNS THE DJANGO FILTER)
 			final_vals=autocomplete_req(unfiltered_queryset,self,request,Post_options,'Post')
+			
+			if "errors" in final_vals:
+				return JsonResponse(final_vals['errors'],safe=False,status=400)
+			
 			resp=dict(request.data)
 			resp['suggested_values']=final_vals
 			#VALIDATE THE RESPONSE
@@ -193,7 +199,7 @@ class AuthorList(generics.GenericAPIView):
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			#FILTER THE AUTHORS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Author.objects.all()
 			queryset,results_count=post_req(
 				queryset,
@@ -260,7 +266,7 @@ class InstitutionList(generics.GenericAPIView):
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=Institution.objects.all()
-			results,results_count,page,page_size=post_req(
+			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
 				request,
@@ -268,6 +274,10 @@ class InstitutionList(generics.GenericAPIView):
 				auto_prefetch=True,
 				paginate=True
 			)
+
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
 			resp=InstitutionListResponseSerializer({
 				'count':results_count,
 				'page':page,

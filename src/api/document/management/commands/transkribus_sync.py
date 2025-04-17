@@ -63,6 +63,8 @@ class Command(BaseCommand):
 		
 		transkribus_collection_id=transkribus_collection_ids[0]
 		
+		
+		
 		page_pks=transkribus_shortrefs.values_list('transkribus_docId','short_ref_sources__page_connections__page__id')
 		print(page_pks)
 		pd={}
@@ -75,7 +77,9 @@ class Command(BaseCommand):
 					pd[a]=[b]
 		
 		for docId in pd:
-			print('DOCIDS',docId)
+			if docId not in ['25566', '25565', '25564', '25563', '25562', '25561', '25560', '25555', '25552', '25554', '25553', '25551', '25550', '25575', '25557', '25567', '25556', '25510', '25509', '25508', '25506', '25507', '25505', '25504', '25503', '25502', '25501', '25500', '25582', '25576', '25577','1437762','1470747','1470827','1470863','1470876','1487718','1487721','1492986','1493090','1493096','1494915','1494931','1496973','1497235']:
+				break
+			print('DOCID',docId)
 			pages=pd[docId]
 			pages.sort()
 			print('PAGES',pages)

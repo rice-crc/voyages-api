@@ -30,7 +30,6 @@ from drf_spectacular.types import OpenApiTypes
 import redis
 import hashlib
 
-
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 @extend_schema(exclude=True)
@@ -172,17 +171,6 @@ class MakeSavedSearch(generics.GenericAPIView):
 			id=sq.id
 		
 		return JsonResponse({'id':id})
-# 		
-# 		
-# class VoyageGET(generics.RetrieveAPIView):
-# 	'''
-# 	GET one voyage by its ID (for card view)
-# 	'''
-# 	queryset=Voyage.objects.all()
-# 	serializer_class=VoyageSerializer
-# 	lookup_field='voyage_id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
 
 
 class UseSavedSearch(generics.RetrieveAPIView):	
@@ -194,35 +182,3 @@ class UseSavedSearch(generics.RetrieveAPIView):
 	lookup_field="id"
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-	
-# 	
-# 	lookup_field="id"
-# 	@extend_schema(
-# 		description="This endpoint takes a string and passes it on to Solr, which searches across all indexed text fields (currently all text fields) in our core models (Voyages, Enslaved People, Enslavers, and Blog Posts [documents next...]). It returns counts and the first 10 primary keys for each",
-# # 		request=UseSavedSearchRequestSerializer,
-# 		responses=UseSavedSearchResponseSerializer,
-# # 		lookup_url_kwarg="id"
-# 	)
-# 	def get(self):
-# 		#VALIDATE THE REQUEST
-# 		id=self.kwargs.get(self.lookup_url_kwarg)
-# 		
-# # 		serialized_req = MakeSavedSearchRequestSerializer(data=request.data)
-# # 		if not serialized_req.is_valid():
-# # 			return JsonResponse(serialized_req.errors,status=400)
-# # 		
-# # 		id=serialized_req.data['id']
-# # 		
-# 		try:
-# 			sq=SavedQuery.objects.get(id=id)
-# 		except ObjectDoesNotExist:
-# 			return JsonResponse({'error':'saved search not found'},status=404)
-# 		
-# 		resp={
-# 			'endpoint':sq.endpoint,
-# 			'query':json.loads(sq.query)
-# 		}
-# 		return JSONResponse(resp)
-# 
-# 	
-# 	

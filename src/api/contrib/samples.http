@@ -101,3 +101,8 @@ Accept-Language: en-US,en;q=0.5
 }
 
 ###
+
+# @name location_tree
+GET {{CurrentHost}}/contrib/location_tree
+
+###

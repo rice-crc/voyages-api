@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Model
 from django.apps import apps
 
+from geo.common import GeoTreeFilter
+
 # Type definitions to match the TypeScript interface
 NonNullFieldValue = Union[str, int, float, bool]
 BaseFieldValue = Optional[NonNullFieldValue]
@@ -125,3 +127,7 @@ def batch_data_api(request):
         return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+def location_tree(_):
+    return JsonResponse(GeoTreeFilter(select_all=True), safe=False)

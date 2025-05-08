@@ -740,3 +740,27 @@ class VoyageSummaryStatsRequestSerializer(serializers.Serializer):
 	
 class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
 	data=serializers.CharField()
+
+
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Download CSV',
+			summary='Download CSV',
+			description='Users like to download excel. I think they should learn to make api calls or just use the website :p',
+			value={
+				"mode": "csv",
+				"filter": [
+					{
+						"op": "exact",
+						"varName": "dataset",
+						"searchTerm": 0
+					}
+				]
+			}
+		)
+	]
+)
+class VoyageDownloadRequestSerializer(serializers.Serializer):
+	mode=serializers.ChoiceField(choices=["csv","excel"])
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)

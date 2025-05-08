@@ -8,6 +8,7 @@ import requests
 from localsettings import *
 from index_vars import *
 import re
+from io import BytesIO
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -18,10 +19,8 @@ def load_long_df(endpoint,variables):
 	for v in list(variables):
 		listval=[]
 		if variables[v]['type']=="obj":
-			for f in variables[v]['fields']:
-				listval.append(f)
+			listval_vars[v]=variables[v]
 			del(variables[v])
-			listval_vars[v]=listval
 	r=requests.post(
 		url=DJANGO_BASE_URL+endpoint,
 		headers=headers,
@@ -40,25 +39,42 @@ def load_long_df(endpoint,variables):
 	##2. need to be stuffed into an object field in pandas
 	
 	for v in listval_vars:
+		print(v,listval_vars[v])
 		df[v]=np.nan
 		df[v]=df[v].astype(str)
-		fields=["id"]+listval_vars[v]
+		fields=["id"]+listval_vars[v]['fields']
 		r=requests.post(
 			url=DJANGO_BASE_URL+endpoint,
 			headers=headers,
 			data=json.dumps({'selected_fields':[v for v in fields],'filter':[]})
 		)
 		j=json.loads(r.text)
-# 		print("*************",j.keys())
+		# pull out m2m fields and join them (as strings)
 		rollup={}
+		if "re_cleanup" in listval_vars[v]:
+			cleanup=listval_vars[v]['re_cleanup']
+		else:
+			cleanup=None
+			
 		jkeys=list(j.keys())
 		for i in range(len(j[jkeys[0]])):
+
 			idnum=j[jkeys[0]][i]
 			itemvals=[]
 			for k in jkeys[1:]:
 				val=j[k][i]
 				if val is not None:
-					itemvals.append(str(val))
+					
+					
+					if cleanup:
+						val=re.sub(
+							cleanup['find'],
+							cleanup['replace'],
+							val,
+							flags=eval(cleanup['flags'])
+						)
+					
+					itemvals.append(val)
 			if itemvals:
 				item=': '.join(itemvals)
 				if idnum in rollup:
@@ -71,7 +87,9 @@ def load_long_df(endpoint,variables):
 			idx=row.index[0]
 			obj='|'.join(rollup[i])
 			df.iloc[idx,df.columns.get_loc(v)]=obj
-			
+		
+		print(df[v])
+	
 	return(df)
 
 registered_caches=[
@@ -183,6 +201,7 @@ def groupby():
 	groupby_by=rdata['groupby_by']
 	groupby_cols=rdata['groupby_cols']
 	agg_fn=rdata['agg_fn']
+	
 	if dfname in replaced_dfs:
 		dfname='big_df'
 	df=eval(dfname)['df']
@@ -232,7 +251,7 @@ def voyage_summary_stats():
 	rdata=request.json
 	ids=rdata['ids']
 # 	df=eval('voyage_summary_statistics')['df']
-	df=big_df['df']
+	df=eval('big_df')['df']
 	
 	imputed_rows={
 		'voyage_slaves_numbers__imp_total_num_slaves_embarked':'Captives embarked (Imputed)',
@@ -368,9 +387,7 @@ def estimates_pivot():
 	vals=rdata['vals']
 	binsize=rdata.get('binsize')
 	mode=rdata['mode']
-	
-# 	df=eval('estimate_pivot_tables')['df']
-	df=big_df['df']
+	df=eval('estimate_pivot_tables')['df']
 	
 	#filter down on the pk's
 	pv=df[df['id'].isin(ids)]
@@ -535,8 +552,7 @@ def estimates_timeline():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
-# 	df=eval('estimate_pivot_tables')['df']
-	df=big_df['df']
+	df=eval('estimate_pivot_tables')['df']
 	cols=['disembarked_slaves','embarked_slaves']
 	df2=df[df['id'].isin(ids)]
 	ct=df2.groupby('year',group_keys=True)[cols].agg('sum')
@@ -896,6 +912,37 @@ def crosstabs():
 # 	except:
 # 		abort(400)
 
+@app.route('/csv_download/',methods=['POST'])
+def csv_download():
+	
+	'''
+	Downloads CSV
+	'''
+	
+	st=time.time()
+	rdata=request.json
+	if dfname in replaced_dfs:
+		dfname='big_df'
+	df=eval(dfname)['df']
+	ids=rdata['ids']
+	df2=df[df['id'].isin(ids)]
+	df3=df2.set_index('id')
+	df3=df3.reindex(ids)
+	df3=df3.fillna(0)
+	
+	# so excel does not properly interpret the unicode characters in a csv, ugh
+	# but the excel option takes 15 seconds!!! shit!!!
+	#csv it is.
+# 	output = BytesIO()
+# 	writer = pd.ExcelWriter(output)
+# 	df3.to_excel(writer)  # plus any **kwargs
+# 	writer.close()
+# 	excel_resp = output.getvalue()
+
+	return df3.to_csv(encoding='utf-8')
+
+	
+
 @app.route('/dataframes/',methods=['POST'])
 def dataframes():
 	
@@ -907,7 +954,8 @@ def dataframes():
 	try:
 		st=time.time()
 		rdata=request.json
-		dfname='big_df'
+		if dfname in replaced_dfs:
+			dfname='big_df'
 		df=eval(dfname)['df']
 		ids=rdata['ids']
 		df2=df[df['id'].isin(ids)]

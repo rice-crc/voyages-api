@@ -330,10 +330,10 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	## dedupe ordered results (while retaining the order)
 	## https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
 	
-	if post_order_by_count>pre_order_by_count:
-		dedupe=True
-	else:
-		dedupe=False
+# 	if post_order_by_count>pre_order_by_count:
+	dedupe=True
+# 	else:
+# 		dedupe=False
 		
 	if dedupe:
 		ids=[v[0] for v in filtered_queryset.values_list('id')]
@@ -562,3 +562,18 @@ def autocomplete_req(queryset,self,request,options,sourcemodelname):
 		listacvals.sort()
 		response=[{"value":str(v)} for v in listacvals]
 	return response
+
+def use_redis(serialized_req,self):
+		
+	if USE_REDIS_CACHE:
+		srd=serialized_req.data
+		hashdict={
+			'req_name':str(self.request),
+			'req_data':srd
+		}
+		hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+		cached_response = redis_cache.get(hashed)
+	else:
+		cached_response=None
+		hashed=None
+	return hashed,cached_response

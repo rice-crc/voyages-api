@@ -154,7 +154,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		"<class 'voyage.models.Voyage'>":'voyages',
 		"<class 'past.models.EnslaverIdentity'>":'enslavers',
 		"<class 'past.models.Enslaved'>":'enslaved',
-		"<class 'blog.models.Post'>":'blog'
+		"<class 'blog.models.Post'>":'blog',
+		"<class 'document.models.Source'>":'sources'
 	}
 	if 'global_search' in params:
 		core_name=solrcorenamedict[qsetclassstr]

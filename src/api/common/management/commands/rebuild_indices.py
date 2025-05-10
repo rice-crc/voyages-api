@@ -73,8 +73,17 @@ class Command(BaseCommand):
 					'subtitle',
 					'content'
 				]
+			},
+			{
+				"model":Source,
+				"core_name":"sources",
+				"fields":[
+					'id',
+					'title',
+					'short_ref__name',
+					'page_connections__page__transcriptions__text'
+				]
 			}
-			
 		]
 		
 		results_per_page=1000

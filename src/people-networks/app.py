@@ -62,9 +62,9 @@ def network_maps():
 			for n in querynodes:
 				nodeclass=G.nodes[n]['node_class']
 				if nodeclass=='enslaved':
-					levels=2
+					levels=3
 				else:
-					levels=1
+					levels=2
 # 				print("getting node",n)
 				nodes_dict,edges_list=add_neighbors(G,nodes_dict,n,edges_list,levels=levels)
 # 				nodes_dict,edges=add_predecessors(G,nodes_dict,n,edges)

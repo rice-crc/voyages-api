@@ -25,5 +25,6 @@ urlpatterns = [
 	path('ResistanceList/',views.ResistanceList.as_view()),
 	path('SummaryStats/',views.VoyageSummaryStats.as_view()),
 	path('OwnerOutcomeList/',views.OwnerOutcomeList.as_view()),
-	path('VesselCapturedOutcomeList/',views.VesselCapturedOutcomeList.as_view())
+	path('VesselCapturedOutcomeList/',views.VesselCapturedOutcomeList.as_view()),
+	path('VoyageDownload/',views.VoyageDownload.as_view())
 ]

@@ -93,6 +93,39 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 			}
 	return res,errormessages
 
+def global_search(orig_queryset,search_string):
+	# GLOBAL SEARCH
+	## bypasses the normal filters. 
+	## hits solr with a search string (which currently is applied across all text fields on a model)
+	## and then creates its filtered queryset on the basis of the pk's returned by solr
+	qsetclassstr=str(orig_queryset[0].__class__)
+	solrcorenamedict={
+		"<class 'voyage.models.Voyage'>":'voyages',
+		"<class 'past.models.EnslaverIdentity'>":'enslavers',
+		"<class 'past.models.Enslaved'>":'enslaved',
+		"<class 'blog.models.Post'>":'blog',
+		"<class 'document.models.Source'>":'sources'
+	}
+	core_name=solrcorenamedict[qsetclassstr]
+	if DEBUG:
+		print("CLASS",qsetclassstr,core_name)
+	solr = pysolr.Solr(
+		f'{SOLR_ENDPOINT}/{core_name}/',
+		always_commit=True,
+		timeout=10
+	)
+	search_string=re.sub("\s+"," ",search_string)
+	search_string=search_string.strip()
+	searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
+	finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+	results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
+	ids=[doc['id'] for doc in results.docs]
+	filtered_queryset=orig_queryset.filter(id__in=ids)
+	results_count=len(ids)
+	return filtered_queryset,results_count
+
+
+
 def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	'''
 		This function handles:
@@ -120,14 +153,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	else:
 		params=dict(r.data)
 	
-# 	if DEBUG:
-# 		params_wo_ids=params
-# 		for f in params_wo_ids['filter']:
-# 			print(f.keys())
 	filter_obj=params.get('filter') or {}
-	
-# 	if DEBUG:
-# 		print(json.dumps(filter_obj,indent=2))
 	
 	if DEBUG:
 		print(f"REQ PREP TIME: {time.time()-st}")
@@ -150,31 +176,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	## hits solr with a search string (which currently is applied across all text fields on a model)
 	## and then creates its filtered queryset on the basis of the pk's returned by solr
 	qsetclassstr=str(orig_queryset[0].__class__)
-	solrcorenamedict={
-		"<class 'voyage.models.Voyage'>":'voyages',
-		"<class 'past.models.EnslaverIdentity'>":'enslavers',
-		"<class 'past.models.Enslaved'>":'enslaved',
-		"<class 'blog.models.Post'>":'blog',
-		"<class 'document.models.Source'>":'sources'
-	}
 	if 'global_search' in params:
-		core_name=solrcorenamedict[qsetclassstr]
-		if DEBUG:
-			print("CLASS",qsetclassstr,core_name)
-		solr = pysolr.Solr(
-			f'{SOLR_ENDPOINT}/{core_name}/',
-			always_commit=True,
-			timeout=10
-		)
-		search_string=params['global_search']
-		search_string=re.sub("\s+"," ",search_string)
-		search_string=search_string.strip()
-		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
-		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
-		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
-		ids=[doc['id'] for doc in results.docs]
-		filtered_queryset=orig_queryset.filter(id__in=ids)
-		results_count=len(ids)
+		filtered_queryset,results_count=global_search(orig_queryset,params['global_search'])
 	# SPECIAL CASE SEARCH/FILTER
 	else:
 		st=time.time()

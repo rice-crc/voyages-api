@@ -181,11 +181,20 @@ class VoyageSourceShortRefSerializer(serializers.ModelSerializer):
 
 
 class VoyageSourceSerializer(serializers.ModelSerializer):
-	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+# 	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
 	short_ref=VoyageSourceShortRefSerializer(many=False)
+	bib=serializers.SerializerMethodField()
 	class Meta:
 		model=Source
-		fields='__all__'
+		fields=['short_ref','title','bib','has_published_manifest','zotero_group_id','zotero_item_id']
+	def get_bib(self,instance) -> CharField():
+		raw_bib=instance.bib
+		text_refs=[t for t in instance.page_ranges if t is not None]
+		if len(text_refs)>0:
+			return f"{raw_bib}: {', '.join(text_refs)}"
+		else:
+			return raw_bib
+
 
 class VoyageEnslaverRoleSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -747,9 +756,8 @@ class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
 		OpenApiExample(
 			'Download CSV',
 			summary='Download CSV',
-			description='Users like to download excel. I think they should learn to make api calls or just use the website :p',
+			description='Allows users to download the filtered dataset in csv format.',
 			value={
-				"mode": "csv",
 				"filter": [
 					{
 						"op": "exact",
@@ -762,5 +770,5 @@ class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
 	]
 )
 class VoyageDownloadRequestSerializer(serializers.Serializer):
-	mode=serializers.ChoiceField(choices=["csv","excel"])
+# 	mode=serializers.ChoiceField(choices=["csv","excel"])
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)

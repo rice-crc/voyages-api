@@ -921,8 +921,7 @@ def csv_download():
 	
 	st=time.time()
 	rdata=request.json
-	if dfname in replaced_dfs:
-		dfname='big_df'
+	dfname='big_df'
 	df=eval(dfname)['df']
 	ids=rdata['ids']
 	df2=df[df['id'].isin(ids)]

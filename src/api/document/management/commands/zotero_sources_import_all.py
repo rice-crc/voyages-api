@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from document.models import Source, Transcription, SourceType,DocSparseDate
+from document.models import Source, Transcription, SourceType,DocSparseDate,ShortRef
 from xml.etree import ElementTree
 import json
 import re
@@ -9,6 +9,8 @@ import requests
 #adding in authorization and urls from localsettings
 from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,zotero_credentials
 from voyages3.settings import STATIC_ROOT
+from pyzotero import zotero
+
 
 _dublin_core_labels = {
 	"abstract": "Abstract",
@@ -290,6 +292,10 @@ class Command(BaseCommand):
 			timeout=30,
 			headers=zotero_headers
 		)
+		
+		#we need to use pyzotero if we're creating items from scratch based on shortrefs
+		#this needs a refurbish
+		
 		# Retrieve the group ids from the Zotero API.
 		# Specifically, those that the logged-in user has access to
 		##
@@ -312,14 +318,22 @@ class Command(BaseCommand):
 		####Or god forbid somehow deleted from Zotero
 		##But my thinking here is that the contribute form should have a zotero widget
 		##So that people can create sources to go with their contributions
+		library_id=zotero_credentials['import_from_library_ids']
+		library_type=zotero_credentials['library_type']
+		api_key=zotero_credentials['api_key']
+		
 		
 		imported_count=0
 		with transaction.atomic():
 			for zotero_group_id in zotero_data:
+				print(zotero_group_id)
+				zot = zotero.Zotero(zotero_group_id, library_type, api_key)
 				for zotero_item_id in zotero_data[zotero_group_id]:
+					print(zotero_item_id)
 				
 					#get the core archival metadata (jcm)
-					rdf = zotero_data[zotero_group_id][zotero_item_id]				
+					rdf = zotero_data[zotero_group_id][zotero_item_id]		
+							
 					zotero_url = rdf.pop('zotero_doc_url',None)
 					bib = rdf.pop('bib', None)
 					source_title = rdf.pop('Title','No title')
@@ -355,14 +369,13 @@ class Command(BaseCommand):
 				
 					#proceed if we have a match in the database for that source (jcm)
 					if source is not None:
-				
 						#AS FAR AS I CAN TELL, TYPE IS EITHER NONE OR 1 ENTRY LONG
 						#But for some reason Zotero encodes them as arrays? (jcm)
 						if source_type_name is not None:
 							source_type_name=source_type_name[0]
 							#zotero's types are all lowercase. we're going to capitalize them
 							#and use them as a controlled vocabulary
-							source_type,source_type_isnes=SourceType.objects.get_or_create(
+							source_type,source_type_isnew=SourceType.objects.get_or_create(
 								name=source_type_name.capitalize()
 							)
 							source.source_type=source_type
@@ -381,7 +394,6 @@ class Command(BaseCommand):
 						source.zotero_url = zotero_url
 				
 						source.bib=bib
-						print(bib)
 					
 						#get any existing attached date object
 						#and overwrite it or delete it as necessary
@@ -419,7 +431,50 @@ class Command(BaseCommand):
 					else:
 						#I think we should actually go ahead and create the source if it doesn't exist
 						#But until we make that call, I'm leaving this alone! (jcm)
-						pass
+						zot = zotero.Zotero(zotero_group_id, library_type, api_key)
+						i=zot.item(zotero_item_id)
+						short_ref=i['data']['shortTitle']
+						
+						short_ref_obj,short_ref_obj_isnew=ShortRef.objects.get_or_create(
+							name=short_ref
+						)
+						
+						if source_type_name is not None:
+							source_type_name=source_type_name[0]
+							#zotero's types are all lowercase. we're going to capitalize them
+							#and use them as a controlled vocabulary
+							source_type,source_type_isnew=SourceType.objects.get_or_create(
+								name=source_type_name.capitalize()
+							)
+						else:
+							source_type=None
+					
+						#SIMILARLY, TITLE IS EITHER NONE OR A 1-ENTRY ARRAY
+						if source_title is not None:
+							source_title=source_title[0]
+					
+						#get any existing attached date object
+						#and overwrite it or delete it as necessary
+						#or create a new one if it does not (as necessary)
+						if not (yyyy is None and mm is None and dd is None):
+							source_date_obj=DocSparseDate.objects.create(
+								year=yyyy,
+								month=mm,
+								day=dd
+							)
+						
+						source=Source.objects.create(
+							title=source_title,
+							date=source_date_obj,
+							source_type=source_type,
+							zotero_url=zotero_url,
+							zotero_group_id=zotero_group_id,
+							zotero_item_id=zotero_item_id,
+							zotero_grouplibrary_name="",
+							short_ref=short_ref_obj
+						)
+						source.save()
+
 					
 					imported_count += 1
 					if imported_count % 100 == 0:

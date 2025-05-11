@@ -103,7 +103,7 @@ class VoyageList(generics.GenericAPIView):
 		return JsonResponse(resp,safe=False,status=200)
 
 #You don't want to see this thing on swagger -- it'll crash the browser.
-@extend_schema(exclude=True)
+# @extend_schema(exclude=True)
 class VoyageDownload(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

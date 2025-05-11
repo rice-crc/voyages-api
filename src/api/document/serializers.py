@@ -140,6 +140,9 @@ class SourceResponseSerializer(serializers.ModelSerializer):
 	short_ref=SourceShortRefSerializer(many=False,allow_null=False,read_only=True)
 	date=DocSparseDateSerializer(many=False,allow_null=True,read_only=True)
 	iiif_manifest_url=SerializerMethodField()
+	text_snippet=SerializerMethodField()
+	enslavers_count=SerializerMethodField()
+	named_enslaved_count=SerializerMethodField()
 	class Meta:
 		model=Source
 		fields='__all__'
@@ -148,6 +151,24 @@ class SourceResponseSerializer(serializers.ModelSerializer):
 			return(f'{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
 		else:
 			return None
+	def get_text_snippet(self,obj) -> serializers.CharField:
+		first_transcription=obj.page_connections.all().first().page.transcriptions.all().first()
+		if first_transcription is not None:
+			text=first_transcription.text
+			if len(text)>500:
+				snippet=text[:497]+'...'
+				return snippet
+			else:
+				return text
+		else:
+			return first_transcription
+	def get_enslavers_count(self,obj) -> serializers.IntegerField:
+		enslavers_count=obj.source_enslaver_connections.all().count()
+		return enslavers_count
+	def get_named_enslaved_count(self,obj) -> serializers.IntegerField:
+		named_enslaved_count=obj.source_enslaved_connections.all().count()
+		return named_enslaved_count
+
 
 ############ REQUEST FIILTER OBJECTS
 class AnyField(Field):

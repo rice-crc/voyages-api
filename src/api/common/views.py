@@ -21,8 +21,9 @@ import pysolr
 import hashlib
 from .serializers import *
 from voyage.models import Voyage
-from past.models import *
+from past.models import Enslaved,EnslaverIdentity
 from blog.models import Post
+from document.models import Source
 from common.reqs import getJSONschema
 import uuid
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
@@ -69,7 +70,8 @@ class GlobalSearch(generics.GenericAPIView):
 			['voyages',Voyage.objects.all()],
 			['enslaved',Enslaved.objects.all()],
 			['enslavers',EnslaverIdentity.objects.all()],
-			['blog',Post.objects.all()]
+			['blog',Post.objects.all()],
+			['sources',Source.objects.all()]
 		]
 		
 		if search_string is None:
@@ -107,10 +109,6 @@ class GlobalSearch(generics.GenericAPIView):
 					'results_count':results_count,
 					'ids':ids
 				})
-				if core_name=='voyages':
-					print("-----------------")
-					print(finalsearchstring,results,results_count)
-					print(output_dict)
 
 		#VALIDATE THE RESPONSE
 		serialized_resp=GlobalSearchResponseItemSerializer(data=output_dict,many=True)

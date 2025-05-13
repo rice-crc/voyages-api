@@ -75,15 +75,12 @@ class Command(BaseCommand):
 			.prefetch_related('source_enslaved_connections__enslaved') \
 			.filter(
 				~Q(page_connections__page=None)
-# 				and ~Q(manifest_content=None)
 			)
 		
 		shortref=options['shortref']
 		if shortref is not None:
 			sources=sources.filter(short_ref__name__icontains=shortref)
 		
-		
-# 		sources=sources.filter(id=5137)
 		print(f"Found {sources.count()} sources with page images.")
 		
 		if options['skip_existing'] in [True,'true','True']:
@@ -94,7 +91,16 @@ class Command(BaseCommand):
 			else:
 				print("We will publish manifests for all of them.")
 		else:
-			print("We will publish manifests for all of them.")
+			print("We will clear all manifests and re-publish all of them.")
+			
+			cleared_sources=list(sources)
+			for s in cleared_sources:
+				s.has_published_manifest = False
+			
+			Source.objects.bulk_update(cleared_sources, ["has_published_manifest"])
+
+# 			sources.update(has_published_manifest=False)
+# 			sources.save()
 		
 		generated_count=0
 		

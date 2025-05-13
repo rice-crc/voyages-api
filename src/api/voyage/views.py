@@ -18,7 +18,7 @@ import pprint
 import redis
 import hashlib
 from rest_framework import filters
-from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df
+from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df,use_redis
 from geo.common import GeoTreeFilter
 from geo.serializers import LocationSerializerDeep
 import collections
@@ -63,16 +63,7 @@ class VoyageList(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 		
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
+		hashed,cached_response=use_redis(serialized_req,self)
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
@@ -111,6 +102,73 @@ class VoyageList(generics.GenericAPIView):
 			
 		return JsonResponse(resp,safe=False,status=200)
 
+#You don't want to see this thing on swagger -- it'll crash the browser.
+# @extend_schema(exclude=True)
+class VoyageDownload(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="Users like downloading csv's. We have to have split fields in here for things like enslaver names/roles",
+		request=VoyageDownloadRequestSerializer
+	)
+	def post(self,request):
+		print("VOYAGE FLAT DOWNLOADS+++++++\nusername:",request.auth.user)
+		st=time.time()
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyageDownloadRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		
+		hashed,cached_response=use_redis(serialized_req,self)
+				
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			results,results_count,page,page_size,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=True,
+				paginate=False
+			)
+			
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+			
+			ids=[i[0] for i in results.values_list('id')]
+			
+			u2=STATS_BASE_URL+'csv_download/'
+			params=dict(request.data)
+			stats_req_data=params
+			stats_req_data['ids']=ids
+			stats_req_data['cachename']='big_df'
+			r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
+			
+			#VALIDATE THE RESPONSE
+			if r.ok:
+				resp=r.content
+			else:
+				return JsonResponse({"message":"unknown error"},status=400)
+			
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
+
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=cached_response
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return HttpResponse(resp, content_type='application/octet-stream',status=200)
+
 class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -134,16 +192,7 @@ class VoyageAggregations(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
+		hashed,cached_response=use_redis(serialized_req,self)
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
@@ -213,16 +262,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
+		hashed,cached_response=use_redis(serialized_req,self)
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
@@ -297,16 +337,8 @@ class VoyageGroupBy(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
+		hashed,cached_response=use_redis(serialized_req,self)
+
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
@@ -417,16 +449,8 @@ class VoyageDataFrames(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
+		hashed,cached_response=use_redis(serialized_req,self)
+
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
@@ -488,17 +512,8 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 		
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			print(self.request,srd)
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
+		hashed,cached_response=use_redis(serialized_req,self)
+
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:		
@@ -565,16 +580,8 @@ class VoyageAggRoutes(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 		
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
+		hashed,cached_response=use_redis(serialized_req,self)
+
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:

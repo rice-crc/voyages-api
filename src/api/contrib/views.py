@@ -32,6 +32,14 @@ class DataFilter:
         # Default to equals
         return Q(**{self.field: self.value})
 
+def remap(r: dict[str, any], remapped: list[str]):
+    for f in remapped:
+        key = f.replace("_id", "")
+        if key in r:
+            r[f] = r[key]
+            del r[key]
+    return r
+
 
 class DataQuery:
     """Represents a query on a specific model with filters."""
@@ -57,24 +65,22 @@ class DataQuery:
             query &= filter_obj.to_q()
         
         # Execute the query and return the results
-        queryset = model_class.objects.filter(query)
-        # Convert to list of dictionaries with only the requested fields
-        result = []
-        for instance in queryset:
-            entity_data = {}
-            for field in fields:
-                try:
-                    value = getattr(instance, field)
-                    # Ensure the value is of a compatible type
-                    if value is not None and not isinstance(value, (str, int, float, bool)):
-                        value = str(value)
-                    entity_data[field] = value
-                except AttributeError:
-                    entity_data[field] = None
-            result.append(entity_data)
-        
+        # Get all valid field names for the model
+        valid_field_names = {f.name for f in model_class._meta.fields}
+        # Filter out invalid field names.
+        # First detect fields with _id suffix that should be remapped.
+        remapped = [f for f in fields if "_id" in f and f not in valid_field_names]
+        fields = [f.replace("_id", "") if f in remapped else f for f in fields]
+        valid_fields = [f for f in fields if f in valid_field_names]
+        if len(valid_fields) < len(fields):
+            print("Invalid fields found in query: ")
+            print([f for f in fields if f not in valid_fields])
+            print("Expected:")
+            print(valid_field_names)
+        result = list(model_class.objects.filter(query).values(*valid_fields))
+        if len(remapped) > 0:
+            result = [remap(r, remapped) for r in result]
         return result
-
 
 class DataResolver:
     """Resolver for a single data query."""

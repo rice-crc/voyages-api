@@ -303,4 +303,5 @@ class DocumentSearchSerializer(serializers.Serializer):
 	bib=serializers.CharField(required=False,allow_null=True)
 	enslavers=serializers.ListField(child=serializers.CharField(),required=False,allow_null=True)
 	voyageIds=serializers.ListField(child=serializers.IntegerField(),required=False,allow_null=True)
+	global_search=serializers.CharField(required=False,allow_null=True)
 

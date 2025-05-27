@@ -157,7 +157,7 @@ class VoyageDownload(generics.GenericAPIView):
 			
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))			
+				redis_cache.set(hashed,resp)
 
 		else:
 			if DEBUG:

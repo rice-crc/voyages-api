@@ -65,6 +65,8 @@ services:
     volumes:
       - "./src/api:/srv/voyages-api"
       - "${STATIC_SOURCE_DIR:-./src/api/static}:/srv/voyages-api/static"
+      - "${UPLOADS_SOURCE_DIR:-./src/api/static/uploads}:/srv/voyages-api/static/uploads"
+      - "${MANIFESTS_SOURCE_DIR:-./src/api/static/iiif_manifests}:/srv/voyages-api/static/iiif_manifests"
     build:
       context: "./src/api"
       dockerfile: "../../docker/api/Dockerfile"

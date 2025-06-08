@@ -4,7 +4,7 @@ import re
 from .models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from django.core.exceptions import ObjectDoesNotExist
-from voyages3.localsettings import STATIC_URL,OPEN_API_BASE_API
+from voyages3.localsettings import STATIC_URL,OPEN_API_BASE_URL
 from common.static.Source_options import Source_options
 from voyage.models import VoyageShip
 from common.autocomplete_indices import get_all_model_autocomplete_fields
@@ -111,32 +111,13 @@ class SourceShortRefSerializer(serializers.ModelSerializer):
 		model=ShortRef
 		fields=['id','name']
 
-class SourceSerializer(serializers.ModelSerializer):
-	source_type=SourceTypeSerializer(many=False)
-	page_connections=SourcePageConnectionSerializer(many=True)
-	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True)
-	source_voyage_connections=SourceVoyageConnectionSerializer(many=True)
-	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True)
-	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True)
-	short_ref=SourceShortRefSerializer(many=False,allow_null=False)
-	date=DocSparseDateSerializer(many=False,allow_null=True)
-	iiif_manifest_url=SerializerMethodField()
-	class Meta:
-		model=Source
-		fields='__all__'
-	def get_iiif_manifest_url(self,obj) -> serializers.URLField:
-		if obj.has_published_manifest and obj.zotero_group_id and obj.zotero_item_id is not None:
-			return(f'{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
-		else:
-			return None
-
 class SourceResponseSerializer(serializers.ModelSerializer):
 	source_type=SourceTypeSerializer(many=False,read_only=True)
-	page_connections=SourcePageConnectionSerializer(many=True,read_only=True)
-	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True,read_only=True)
-	source_voyage_connections=SourceVoyageConnectionSerializer(many=True,read_only=True)
-	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True,read_only=True)
-	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True,read_only=True)
+# 	page_connections=SourcePageConnectionSerializer(many=True,read_only=True)
+# 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True,read_only=True)
+# 	source_voyage_connections=SourceVoyageConnectionSerializer(many=True,read_only=True)
+# 	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True,read_only=True)
+# 	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True,read_only=True)
 	short_ref=SourceShortRefSerializer(many=False,allow_null=False,read_only=True)
 	date=DocSparseDateSerializer(many=False,allow_null=True,read_only=True)
 	iiif_manifest_url=SerializerMethodField()
@@ -145,10 +126,11 @@ class SourceResponseSerializer(serializers.ModelSerializer):
 	named_enslaved_count=SerializerMethodField()
 	class Meta:
 		model=Source
-		fields='__all__'
+		fields=['zotero_group_id','zotero_item_id','bib','thumbnail','source_type','short_ref','date','iiif_manifest_url','text_snippet','enslavers_count','named_enslaved_count']
 	def get_iiif_manifest_url(self,obj) -> serializers.URLField:
+		from voyages3.localsettings import OPEN_API_BASE_URL
 		if obj.has_published_manifest and obj.zotero_group_id and obj.zotero_item_id is not None:
-			return(f'{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
+			return(f'{OPEN_API_BASE_URL}common/iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
 		else:
 			return None
 	def get_text_snippet(self,obj) -> serializers.CharField:

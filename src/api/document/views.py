@@ -185,7 +185,7 @@ class SourceList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		request=SourceRequestSerializer,
-		responses=SourceSerializer
+		responses=SourceResponseSerializer
 	)
 	
 	def post(self,request):

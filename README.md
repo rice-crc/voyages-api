@@ -6,7 +6,7 @@ For notes on the project structure, see the [Project Structure readme file](PROJ
 
 For a Swagger UI presentation of the API documentation's generic public endpoints, go to the root url of the endpoint:
 
-* Running locally: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+* Running locally: [{OPEN_API_BASE_URL}/]({OPEN_API_BASE_URL}/)
 * Current public location (subject to change): [https://voyages-api-staging.crc.rice.edu/](https://voyages-api-staging.crc.rice.edu/)
 
 ## System Requirements
@@ -138,7 +138,7 @@ local:~/Projects/voyages-api$ docker exec -it voyages-api bash -c 'python3 manag
 ```
 
 Use those credentials to log in to the Django admin interface at
-[http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) and create an API
+[{OPEN_API_BASE_URL}/admin/]({OPEN_API_BASE_URL}/admin/) and create an API
 token for the account.
 
 Update the `src/stats/localsettings.py` and `src/networks/localsettings.py` files with
@@ -166,7 +166,7 @@ local:~/Projects/voyagesapi$ docker network prune -f
 
 Note the following project resources:
 
-* Voyages API: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+* Voyages API: [{OPEN_API_BASE_URL}/]({OPEN_API_BASE_URL}/)
 * API Stats Component: [http://127.0.0.1:5000](http://127.0.0.1:5000/)
 * API Geo Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5005/)
 * API People Networks Component: [http://127.0.0.1:5006](http://127.0.0.1:5006/)

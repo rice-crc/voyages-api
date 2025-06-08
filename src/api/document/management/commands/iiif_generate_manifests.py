@@ -13,7 +13,8 @@ from django.db import transaction
 from django.db.models import Prefetch
 from document.models import Source
 from voyages3.settings import STATIC_ROOT
-from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_API,STATIC_URL
+from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_URL,STATIC_URL,IIIF_MANIFESTS_BASE_PATH
+
 import os
 
 # We special case these sources as they have issues with their IIIF Image
@@ -46,7 +47,7 @@ class Command(BaseCommand):
 		in the database that have page images attached to them."""
 
 	def add_arguments(self, parser):
-		parser.add_argument("--base-url",default=f"{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/")
+		parser.add_argument("--base-url",default=f"{OPEN_API_BASE_URL}{IIIF_MANIFESTS_BASE_PATH}")
 		parser.add_argument("--out-dir", type=pathlib.Path,
 							help="The output directory where the manifests should be placed",
 							default=f"{STATIC_ROOT}/iiif_manifests/")

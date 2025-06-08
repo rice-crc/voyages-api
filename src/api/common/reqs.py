@@ -4,7 +4,7 @@ import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
-from voyages3.localsettings import OPEN_API_BASE_API,DEBUG,SOLR_ENDPOINT,REDIS_HOST,REDIS_PORT,USE_REDIS_CACHE
+from voyages3.localsettings import OPEN_API_BASE_URL,DEBUG,SOLR_ENDPOINT,REDIS_HOST,REDIS_PORT,USE_REDIS_CACHE
 import requests
 from django.core.paginator import Paginator
 from django.core.exceptions import FieldError
@@ -93,19 +93,20 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 			}
 	return res,errormessages
 
+solrcorenamedict={
+	"<class 'voyage.models.Voyage'>":'voyages',
+	"<class 'past.models.EnslaverIdentity'>":'enslavers',
+	"<class 'past.models.Enslaved'>":'enslaved',
+	"<class 'blog.models.Post'>":'blog',
+	"<class 'document.models.Source'>":'sources'
+}
+
 def global_search(orig_queryset,search_string):
 	# GLOBAL SEARCH
 	## bypasses the normal filters. 
 	## hits solr with a search string (which currently is applied across all text fields on a model)
 	## and then creates its filtered queryset on the basis of the pk's returned by solr
 	qsetclassstr=str(orig_queryset[0].__class__)
-	solrcorenamedict={
-		"<class 'voyage.models.Voyage'>":'voyages',
-		"<class 'past.models.EnslaverIdentity'>":'enslavers',
-		"<class 'past.models.Enslaved'>":'enslaved',
-		"<class 'blog.models.Post'>":'blog',
-		"<class 'document.models.Source'>":'sources'
-	}
 	core_name=solrcorenamedict[qsetclassstr]
 	if DEBUG:
 		print("CLASS",qsetclassstr,core_name)
@@ -398,7 +399,7 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 		hierarchical=True
 	else:
 		hierarchical=False
-	r=requests.get(url=OPEN_API_BASE_API+"schema/?format=json")
+	r=requests.get(url=OPEN_API_BASE_URL+"schema/?format=json")
 	j=json.loads(r.text)
 	schemas=j['components']['schemas']
 	base_obj_name=base_obj_name

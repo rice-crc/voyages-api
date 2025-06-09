@@ -120,19 +120,12 @@ class SourceResponseSerializer(serializers.ModelSerializer):
 # 	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True,read_only=True)
 	short_ref=SourceShortRefSerializer(many=False,allow_null=False,read_only=True)
 	date=DocSparseDateSerializer(many=False,allow_null=True,read_only=True)
-	iiif_manifest_url=SerializerMethodField()
 	text_snippet=SerializerMethodField()
 	enslavers_count=SerializerMethodField()
 	named_enslaved_count=SerializerMethodField()
 	class Meta:
 		model=Source
 		fields=['zotero_group_id','zotero_item_id','bib','thumbnail','source_type','short_ref','date','iiif_manifest_url','text_snippet','enslavers_count','named_enslaved_count']
-	def get_iiif_manifest_url(self,obj) -> serializers.URLField:
-		from voyages3.localsettings import OPEN_API_BASE_URL
-		if obj.has_published_manifest and obj.zotero_group_id and obj.zotero_item_id is not None:
-			return(f'{OPEN_API_BASE_URL}common/iiif_manifests/{obj.zotero_group_id}__{obj.zotero_item_id}.json')
-		else:
-			return None
 	def get_text_snippet(self,obj) -> serializers.CharField:
 		first_transcription=obj.page_connections.all().first().page.transcriptions.all().first()
 		if first_transcription is not None:

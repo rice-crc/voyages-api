@@ -6,7 +6,7 @@ For notes on the project structure, see the [Project Structure readme file](PROJ
 
 For a Swagger UI presentation of the API documentation's generic public endpoints, go to the root url of the endpoint:
 
-* Running locally: [{OPEN_API_BASE_URL}/]({OPEN_API_BASE_URL}/)
+* Running locally: [127.0.0.1:8000/](127.0.0.1:8000/)
 * Current public location (subject to change): [https://voyages-api-staging.crc.rice.edu/](https://voyages-api-staging.crc.rice.edu/)
 
 ## System Requirements
@@ -127,6 +127,40 @@ Rebuild the map routes (this can take some time).
 local:~/Projects/voyages-api$ docker exec -i voyages-geo-networks bash -c 'flask pickle rebuild'
 ```
 
+## A note on media files
+
+The API requires certain media/static files to be available for two use cases. These require the following definitions in the ```localsettings.py``` file:
+
+	STATIC_URL="static/"
+	VOYAGES_FRONTEND_BASE_URL="http://127.0.0.1:3000/"
+	OPEN_API_BASE_URL="http://127.0.0.1:8000/"
+	IIIF_MANIFESTS_BASE_PATH='common/iiif_manifests/'
+
+And the following in the ```settings.py``` file:
+
+	STATIC_ROOT='static'
+	site = FileBrowserSite(name='filebrowser')
+	site.storage.location = STATIC_ROOT
+	site.directory="uploads/"
+	site.storage.base_url = "/static/uploads"
+	site_storage_base_url = site.storage.base_url
+
+If possible down the line, it might be better to start pushing all of these to an S3 bucket using boto3.
+
+### Media files use-case 1: the blog
+
+The blog uses the FileBrowserSite mixin to allow our team to upload content (thumbnail images, content-embedded images, and pdfs linked to from the blog) and use it in blog posts. The settings.py variables discussed above require that the following path exists for those assets to be stored to: ```static/uploads```. Be careful, it's easy to end up with extra or missing slashes.
+
+### Media files use-case 2: IIIF manifests
+
+The document viewer requires our own home-grown manifests to be stored in ```static/iiif_manifests``` in order to:
+
+1. Wrap (and sometimes correct) the remote image services
+1. Bake in transcriptions annotations
+1. Bake in links to enslavers, enslaved people, and voyages
+
+We're doing this with static files right now, which are generated with a manage.py command. These files have the base url's in their various URI's subbed when they are served in order to align with the deployment. Again, these rely on the localsettings.py variables being correctly defined. 
+
 ## Generating an API Key for the Flask Components
 
 The Flask components of the app require an API key.
@@ -138,7 +172,7 @@ local:~/Projects/voyages-api$ docker exec -it voyages-api bash -c 'python3 manag
 ```
 
 Use those credentials to log in to the Django admin interface at
-[{OPEN_API_BASE_URL}/admin/]({OPEN_API_BASE_URL}/admin/) and create an API
+[127.0.0.1:8000/admin/](127.0.0.1:8000/admin/) and create an API
 token for the account.
 
 Update the `src/stats/localsettings.py` and `src/networks/localsettings.py` files with
@@ -166,7 +200,7 @@ local:~/Projects/voyagesapi$ docker network prune -f
 
 Note the following project resources:
 
-* Voyages API: [{OPEN_API_BASE_URL}/]({OPEN_API_BASE_URL}/)
+* Voyages API: [127.0.0.1:8000/](127.0.0.1:8000/)
 * API Stats Component: [http://127.0.0.1:5000](http://127.0.0.1:5000/)
 * API Geo Networks Component: [http://127.0.0.1:5005](http://127.0.0.1:5005/)
 * API People Networks Component: [http://127.0.0.1:5006](http://127.0.0.1:5006/)

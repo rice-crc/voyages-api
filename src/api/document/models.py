@@ -3,7 +3,7 @@ import re
 from voyage.models import Voyage
 from past.models import Enslaved,EnslaverIdentity,EnslavementRelation
 from common.models import NamedModelAbstractBase,SparseDateAbstractBase
-from voyages3.localsettings import STATIC_URL,OPEN_API_BASE_URL
+from voyages3.localsettings import STATIC_URL,OPEN_API_BASE_URL,IIIF_MANIFESTS_BASE_PATH,OPEN_API_BASE_URL
 
 class DocSparseDate(SparseDateAbstractBase):
 	pass
@@ -349,6 +349,6 @@ class Source(models.Model):
 	@property
 	def iiif_manifest_url(self):
 		if self.has_published_manifest and self.zotero_group_id and self.zotero_item_id is not None:
-			return(f'{OPEN_API_BASE_URL}{STATIC_URL}iiif_manifests/{self.zotero_group_id}__{self.zotero_item_id}.json')
+			return(f'{OPEN_API_BASE_URL}{IIIF_MANIFESTS_BASE_PATH}{self.zotero_group_id}__{self.zotero_item_id}.json')
 		else:
 			return None

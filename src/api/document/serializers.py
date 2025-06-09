@@ -15,11 +15,6 @@ class SourceTypeSerializer(serializers.ModelSerializer):
 		model=SourceType
 		fields='__all__'
 
-# class TranscriptionSerializer(Serializers.ModelSerializer):
-# 	class Meta:
-# 		model=Transcription
-# 		fields='__all__'
-
 class DocSparseDateSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=DocSparseDate
@@ -113,11 +108,6 @@ class SourceShortRefSerializer(serializers.ModelSerializer):
 
 class SourceResponseSerializer(serializers.ModelSerializer):
 	source_type=SourceTypeSerializer(many=False,read_only=True)
-# 	page_connections=SourcePageConnectionSerializer(many=True,read_only=True)
-# 	source_enslaver_connections=SourceEnslaverConnectionSerializer(many=True,read_only=True)
-# 	source_voyage_connections=SourceVoyageConnectionSerializer(many=True,read_only=True)
-# 	source_enslaved_connections=SourceEnslavedConnectionSerializer(many=True,read_only=True)
-# 	source_enslavement_relation_connections=SourceEnslavementRelationConnectionSerializer(many=True,read_only=True)
 	short_ref=SourceShortRefSerializer(many=False,allow_null=False,read_only=True)
 	date=DocSparseDateSerializer(many=False,allow_null=True,read_only=True)
 	text_snippet=SerializerMethodField()
@@ -257,17 +247,12 @@ class SourceAutoCompleteRequestSerializer(serializers.Serializer):
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
 	filter=SourceFilterItemSerializer(many=True,allow_null=True,required=False)
-# 	global_search=serializers.CharField(allow_null=True,required=False)
 
 class SourceAutoCompletekvSerializer(serializers.Serializer):
 	value=serializers.CharField()
 
 class SourceAutoCompleteResponseSerializer(serializers.Serializer):
 	suggested_values=SourceAutoCompletekvSerializer(many=True)
-	
-	
-	
-
 
 class DocumentSearchSerializer(serializers.Serializer):
 	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)

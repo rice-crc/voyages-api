@@ -117,16 +117,19 @@ class SourceResponseSerializer(serializers.ModelSerializer):
 		model=Source
 		fields=['zotero_group_id','zotero_item_id','bib','thumbnail','source_type','short_ref','date','iiif_manifest_url','text_snippet','enslavers_count','named_enslaved_count']
 	def get_text_snippet(self,obj) -> serializers.CharField:
-		first_transcription=obj.page_connections.all().first().page.transcriptions.all().first()
-		if first_transcription is not None:
-			text=first_transcription.text
-			if len(text)>500:
-				snippet=text[:497]+'...'
-				return snippet
+		if obj.page_connections.all().first():
+			first_transcription=obj.page_connections.all().first().page.transcriptions.all().first()
+			if first_transcription is not None:
+				text=first_transcription.text
+				if len(text)>500:
+					snippet=text[:497]+'...'
+					return snippet
+				else:
+					return text
 			else:
-				return text
+				return first_transcription
 		else:
-			return first_transcription
+			return None
 	def get_enslavers_count(self,obj) -> serializers.IntegerField:
 		enslavers_count=obj.source_enslaver_connections.all().count()
 		return enslavers_count

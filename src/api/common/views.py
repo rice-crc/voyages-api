@@ -15,7 +15,7 @@ import requests
 import time
 import collections
 import gc
-from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,SOLR_ENDPOINT,VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_URL,IIIF_MANIFESTS_BASE_PATH
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,SOLR_ENDPOINT,VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_URL
 from voyages3.settings import STATIC_ROOT
 import re
 import pysolr
@@ -51,18 +51,6 @@ def RedisFlush(request):
 		
 	else:
 		return HttpResponseForbidden("Forbidden")
-
-@extend_schema(
-		exclude=True
-	)
-def iiif_manifests(request,manifest_id):
-	manifest_path=os.path.join(STATIC_ROOT,'iiif_manifests',manifest_id)
-	d=open(manifest_path,'r')
-	t=d.read()
-	t=re.sub("\{OPEN_API_BASE_URL\}",OPEN_API_BASE_URL,t)
-	t=re.sub("\{VOYAGES_FRONTEND_BASE_URL\}",VOYAGES_FRONTEND_BASE_URL,t)
-	t=re.sub("\{IIIF_MANIFESTS_BASE_PATH\}",IIIF_MANIFESTS_BASE_PATH,t)
-	return JsonResponse(json.loads(t),safe=False)
 
 @extend_schema(exclude=True)
 class Schemas(generics.GenericAPIView):

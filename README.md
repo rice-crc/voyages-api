@@ -129,12 +129,11 @@ local:~/Projects/voyages-api$ docker exec -i voyages-geo-networks bash -c 'flask
 
 ## A note on media files
 
-The API requires certain media/static files to be available for two use cases. These require the following definitions in the ```localsettings.py``` file:
+The API requires certain media or static files to be available, primarily for the blog endpoint. These require the following definitions in the ```localsettings.py``` file:
 
 	STATIC_URL="static/"
 	VOYAGES_FRONTEND_BASE_URL="http://127.0.0.1:3000/"
 	OPEN_API_BASE_URL="http://127.0.0.1:8000/"
-	IIIF_MANIFESTS_BASE_PATH='common/iiif_manifests/'
 
 And the following in the ```settings.py``` file:
 
@@ -145,21 +144,13 @@ And the following in the ```settings.py``` file:
 	site.storage.base_url = "/static/uploads"
 	site_storage_base_url = site.storage.base_url
 
-If possible down the line, it might be better to start pushing all of these to an S3 bucket using boto3.
-
 ### Media files use-case 1: the blog
 
 The blog uses the FileBrowserSite mixin to allow our team to upload content (thumbnail images, content-embedded images, and pdfs linked to from the blog) and use it in blog posts. The settings.py variables discussed above require that the following path exists for those assets to be stored to: ```static/uploads```. Be careful, it's easy to end up with extra or missing slashes.
 
 ### Media files use-case 2: IIIF manifests
 
-The document viewer requires our own home-grown manifests to be stored in ```static/iiif_manifests``` in order to:
-
-1. Wrap (and sometimes correct) the remote image services
-1. Bake in transcriptions annotations
-1. Bake in links to enslavers, enslaved people, and voyages
-
-We're doing this with static files right now, which are generated with a manage.py command. These files have the base url's in their various URI's subbed when they are served in order to align with the deployment. Again, these rely on the localsettings.py variables being correctly defined. 
+The document viewer requires our own home-grown manifests. These are uploaded to an S3 bucket, which the frontend then references. The backend therefore does not deal with these files except to point to them in the source model and to push those files up when they are being generated. _june 11 note: that generation script has to be tweaked to do that s3 push_
 
 ## Generating an API Key for the Flask Components
 

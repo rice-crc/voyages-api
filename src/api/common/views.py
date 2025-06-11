@@ -1,5 +1,5 @@
+from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render,get_object_or_404
-from django.http import HttpResponse, JsonResponse
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
 from django.core.exceptions import ObjectDoesNotExist
@@ -15,7 +15,8 @@ import requests
 import time
 import collections
 import gc
-from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,SOLR_ENDPOINT
+from voyages3.localsettings import REDIS_HOST,REDIS_PORT,DEBUG,SOLR_ENDPOINT,VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_URL
+from voyages3.settings import STATIC_ROOT
 import re
 import pysolr
 import hashlib
@@ -29,9 +30,27 @@ import uuid
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 import redis
+import os
 import hashlib
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
+@extend_schema(
+		exclude=True
+	)
+def RedisFlush(request):
+	
+	if request.user.is_authenticated:
+		
+		fa=redis_cache.flushdb()
+		
+		if fa:
+			return HttpResponse("flushed")
+		else:
+			return HttpResponse("failed")
+		
+	else:
+		return HttpResponseForbidden("Forbidden")
 
 @extend_schema(exclude=True)
 class Schemas(generics.GenericAPIView):

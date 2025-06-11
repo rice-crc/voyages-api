@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field,ListField
 import re
 from .models import *
 from document.models import Source,Page,ShortRef,SourcePageConnection,SourceVoyageConnection
@@ -181,7 +181,6 @@ class VoyageSourceShortRefSerializer(serializers.ModelSerializer):
 
 
 class VoyageSourceSerializer(serializers.ModelSerializer):
-# 	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
 	short_ref=VoyageSourceShortRefSerializer(many=False)
 	bib=serializers.SerializerMethodField()
 	class Meta:
@@ -194,24 +193,6 @@ class VoyageSourceSerializer(serializers.ModelSerializer):
 			return f"{raw_bib}: {', '.join(text_refs)}"
 		else:
 			return raw_bib
-
-
-class VoyageEnslaverRoleSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=EnslaverRole
-		fields='__all__'
-
-class VoyageEnslaverIdentitySerializer(serializers.ModelSerializer):
-	birth_place=VoyageLocationSerializer(many=False,read_only=True)
-	death_place=VoyageLocationSerializer(many=False,read_only=True)
-	principal_location=VoyageLocationSerializer(many=False,read_only=True)
-	class Meta:
-		model=EnslaverIdentity
-		fields='__all__'
-
-class VoyageEnslaverRelationListResponseSerializer(serializers.Serializer):
-	roles=serializers.CharField()
-	enslaver=VoyageEnslaverIdentitySerializer(many=False,read_only=True)
 
 class VoyageEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -300,7 +281,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 				enslaved_person=eir.enslaved
 				enslaved_dict[enslaved_person.id]=enslaved_person
 		return VoyageEnslavedSerializer([enslaved_dict[i] for i in enslaved_dict],many=True,read_only=True).data
-	def get_enslavers(self,instance) -> VoyageEnslaverRelationListResponseSerializer:
+	def get_enslavers(self,instance) -> ListField(child=serializers.CharField()):
 		ers=instance.voyage_enslavement_relations.all()
 		ers=ers.prefetch_related('relation_enslavers__roles','relation_enslavers__enslaver_alias__identity')
 		enslaver_roles_and_identity_pks=ers.values_list('relation_enslavers__roles__id','relation_enslavers__enslaver_alias__identity_id')
@@ -312,8 +293,16 @@ class VoyageSerializer(serializers.ModelSerializer):
 					enslavers_and_roles[enslaverpk]=[rolepk]
 				else:
 					enslavers_and_roles[enslaverpk].append(rolepk)
-		enslavers_and_roles_list=[{'roles':', '.join([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]),'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)} for enslaverpk in enslavers_and_roles]
-		enslavers_in_relation=VoyageEnslaverRelationListResponseSerializer(enslavers_and_roles_list,many=True,read_only=True).data		
+		enslavers_and_roles_list=[{'roles':', '.join([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]),'enslaver':EnslaverIdentity.objects.get(id=enslaverpk).principal_alias} for enslaverpk in enslavers_and_roles]
+		enslavers_in_relation=[]
+		for er in enslavers_and_roles_list:
+			roles=er['roles']
+			enslaver=er['enslaver']
+			if roles is not None:
+				eir=f"{enslaver} ({roles})"
+			else:
+				eir=enslaver
+			enslavers_in_relation.append(eir)	
 		return enslavers_in_relation
 	class Meta:
 		model=Voyage

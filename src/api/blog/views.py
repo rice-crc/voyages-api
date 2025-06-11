@@ -21,7 +21,9 @@ from common.static.Post_options import Post_options
 from common.static.Author_options import Author_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
 
+
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
 class PostList(generics.GenericAPIView):
 	'''
 	The Voyages team launched its new blog interface in 2022, in order to allow for richer humanities content to be integrated into the site, and to allow for more rapid publication of project-related news.

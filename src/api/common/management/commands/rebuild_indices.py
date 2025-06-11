@@ -106,6 +106,8 @@ class Command(BaseCommand):
 			)
 			
 			queryset=model.objects.all()
+			if core_name=="sources":
+				queryset=queryset.filter(has_published_manifest=True)
 			
 			ids=[i[0] for i in queryset.values_list('id')]
 			

@@ -150,7 +150,7 @@ The blog uses the FileBrowserSite mixin to allow our team to upload content (thu
 
 ### Media files use-case 2: IIIF manifests
 
-The document viewer requires our own home-grown manifests. These are uploaded to an S3 bucket, which the frontend then references. The backend therefore does not deal with these files except to point to them in the source model and to push those files up when they are being generated. _june 11 note: that generation script has to be tweaked to do that s3 push_
+The document viewer requires our own home-grown manifests. These are uploaded to an S3 bucket, which the frontend then references. The backend will generate these via a manage.py command, but as of june 11, that needs to be updated for this S3 approach.
 
 ## Generating an API Key for the Flask Components
 

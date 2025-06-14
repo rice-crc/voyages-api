@@ -14,6 +14,11 @@ from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFi
 
 ############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
 
+class EnslaverRoleSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=EnslaverRole
+		fields='__all__'
+
 class PastLocationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Location
@@ -72,6 +77,10 @@ class LanguageGroupSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=LanguageGroup
 		fields='__all__'
+
+class EnslavedEnslaverSerializer(serializers.Serializer):
+	id=serializers.IntegerField()
+	name_and_role=serializers.CharField()
 
 class EnslavedSerializer(serializers.ModelSerializer):
 	enslaved_id=serializers.IntegerField(read_only=True)
@@ -156,9 +165,9 @@ class EnslavedSerializer(serializers.ModelSerializer):
 					enslavers_and_roles[enslaverpk].append(rolepk)
 		enslavers_and_roles_list=[
 			{'roles':', '.join(
-				list(set([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]))
+				[EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]
 				),
-				'enslaver':EnslaverIdentity.objects.get(id=enslaverpk).principal_alias
+				'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)
 			} for enslaverpk in enslavers_and_roles
 		]
 		enslavers_in_relation=[]
@@ -166,11 +175,12 @@ class EnslavedSerializer(serializers.ModelSerializer):
 			roles=er['roles']
 			enslaver=er['enslaver']
 			if roles is not None:
-				eir=f"{enslaver} ({roles})"
+				name_and_role=f"{enslaver.principal_alias} ({roles})"
 			else:
-				eir=enslaver
-			enslavers_in_relation.append(eir)	
-		return enslavers_in_relation
+				name_and_role=enslaver
+			enslaver_dict={"id":enslaver.id,"name_and_role":name_and_role}
+			enslavers_in_relation.append(enslaver_dict)	
+		return EnslavedEnslaverSerializer(enslavers_in_relation,many=True,read_only=True).data
 
 	class Meta:
 		model=Enslaved

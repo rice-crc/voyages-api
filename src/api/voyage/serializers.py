@@ -228,6 +228,10 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
 		model=VoyageCargoConnection
 		fields='__all__'
 
+class VoyageEnslaverSerializer(serializers.Serializer):
+	id=serializers.IntegerField()
+	name_and_role=serializers.CharField()
+
 
 class LinkedVoyageSerializer(serializers.Serializer):
 	voyage_id=serializers.IntegerField()
@@ -297,7 +301,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 			{'roles':', '.join(
 				[EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]
 				),
-				'enslaver':EnslaverIdentity.objects.get(id=enslaverpk).principal_alias
+				'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)
 			} for enslaverpk in enslavers_and_roles
 		]
 		enslavers_in_relation=[]
@@ -305,11 +309,12 @@ class VoyageSerializer(serializers.ModelSerializer):
 			roles=er['roles']
 			enslaver=er['enslaver']
 			if roles is not None:
-				eir=f"{enslaver} ({roles})"
+				name_and_role=f"{enslaver.principal_alias} ({roles})"
 			else:
-				eir=enslaver
-			enslavers_in_relation.append(eir)	
-		return enslavers_in_relation
+				name_and_role=enslaver
+			enslaver_dict={"id":enslaver.id,"name_and_role":name_and_role}
+			enslavers_in_relation.append(enslaver_dict)	
+		return VoyageEnslaverSerializer(enslavers_in_relation,many=True,read_only=True).data
 	class Meta:
 		model=Voyage
 		fields='__all__'

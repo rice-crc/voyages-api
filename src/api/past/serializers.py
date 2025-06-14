@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field,ListField
 import re
 from .models import *
 from geo.models import Location
@@ -14,26 +14,6 @@ from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFi
 
 ############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
 
-class PASTSparseDateSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=PASTSparseDate
-		fields='__all__'
-		
-class RegisterCountrySerializer(serializers.ModelSerializer):
-	class Meta:
-		model=RegisterCountry
-		fields='__all__'
-
-class EnslaverRoleSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=EnslaverRole
-		fields='__all__'
-
-class EnslavementRelationTypeSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=EnslavementRelationType
-		fields='__all__'
-
 class PastLocationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=Location
@@ -44,7 +24,6 @@ class PastSourceShortRefSerializer(serializers.ModelSerializer):
 		model=ShortRef
 		fields=['id','name']
 
-
 class PastSourceSerializer(serializers.ModelSerializer):
 	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
 	short_ref=PastSourceShortRefSerializer(many=False)
@@ -54,98 +33,25 @@ class PastSourceSerializer(serializers.ModelSerializer):
  
 ############ VOYAGES
 
-class PastVoyageItinerarySerializer(serializers.ModelSerializer):
-# 	imp_port_voyage_begin=PastLocationSerializer(many=False)
-	imp_principal_place_of_slave_purchase=PastLocationSerializer(many=False)
-	imp_principal_port_slave_dis=PastLocationSerializer(many=False)
-# 	imp_principal_region_slave_dis=PastLocationSerializer(many=False)
-	imp_principal_region_of_slave_purchase=PastLocationSerializer(many=False)
-	int_first_port_dis=PastLocationSerializer(many=False)
-	class Meta:
-		model=VoyageItinerary
-		fields=[
-# 			'imp_port_voyage_begin',
-			'imp_principal_place_of_slave_purchase',
-			'imp_principal_port_slave_dis',
-			'imp_principal_region_of_slave_purchase',
-# 			'imp_principal_region_slave_dis',
-			'int_first_port_dis'
-		]
-
-
-class PastVoyageSourceSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=Source
-		fields='__all__'
-
-class PastVoyageSourceConnectionSerializer(serializers.ModelSerializer):
-	source=PastVoyageSourceSerializer(many=False,read_only=True)
-	class Meta:
-		model=SourceVoyageConnection
-		fields='__all__'
-
-class PastVoyageDatesSerializer(serializers.ModelSerializer):
-	imp_arrival_at_port_of_dis_sparsedate=PASTSparseDateSerializer(many=False)
-	class Meta:
-		model=VoyageDates
-		fields=['imp_arrival_at_port_of_dis_sparsedate',]
-
-class PastVoyageShipSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=VoyageShip
-		fields=['ship_name',]
-
-class PastVoyageParticularOutcomeSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=ParticularOutcome
-		fields='__all__'
-
-class PastVoyageOutcomeSerializer(serializers.ModelSerializer):
-	particular_outcome=PastVoyageParticularOutcomeSerializer(many=False)
-	class Meta:
-		model=VoyageOutcome
-		fields=['particular_outcome']
-
 class PastEnslavedVoyageSerializer(serializers.ModelSerializer):
-	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
-	voyage_dates=PastVoyageDatesSerializer(many=False)
-	voyage_ship=PastVoyageShipSerializer(many=False)
-	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
-# 	voyage_source_connections=PastVoyageSourceConnectionSerializer(many=True,read_only=True)
+	id=serializers.IntegerField()
+	embarkation=serializers.CharField()
+	disembarkation=serializers.CharField()
+	year=serializers.IntegerField()
+	month=serializers.IntegerField()
+	day=serializers.IntegerField()
+	ship_name=serializers.CharField()
 	class Meta:
 		model=Voyage
 		fields=[
-			'voyage_id',
 			'id',
-			'dataset',
-			'voyage_itinerary',
-			'voyage_dates',
-			'voyage_ship',
-			'voyage_outcome',
-# 			'voyage_source_connections'
+			'embarkation',
+			'disembarkation',
+			'year',
+			'month',
+			'day',
+			'ship_name'
 		]
-
-class PastEnslaverVoyageSerializer(serializers.ModelSerializer):
-	voyage_itinerary=PastVoyageItinerarySerializer(many=False)
-	voyage_dates=PastVoyageDatesSerializer(many=False)
-	voyage_ship=PastVoyageShipSerializer(many=False)
-# 	voyage_outcome=PastVoyageOutcomeSerializer(many=False)
-# 	voyage_source_connections=PastVoyageSourceConnectionSerializer(many=True,read_only=True)
-	enslaver_roles=EnslaverRoleSerializer(many=True,read_only=True)
-	class Meta:
-		model=Voyage
-		fields=[
-			'voyage_id',
-			'id',
-			'dataset',
-			'voyage_itinerary',
-			'voyage_dates',
-			'voyage_ship',
-# 			'voyage_outcome',
-# 			'voyage_source_connections',
-			'enslaver_roles'
-		]
-
 
 
 #######################
@@ -167,37 +73,23 @@ class LanguageGroupSerializer(serializers.ModelSerializer):
 		model=LanguageGroup
 		fields='__all__'
 
-class RegisterCountrySerializer(serializers.ModelSerializer):
-	class Meta:
-		model=RegisterCountry
-		fields='__all__'
-
-class EnslavedEnslaverIdentitySerializer(serializers.ModelSerializer):
-	class Meta:
-		model=EnslaverIdentity
-		fields='__all__'
-
-class EnslavedEnslaversInRelationListResponseSerializer(serializers.Serializer):
-	enslaver=EnslavedEnslaverIdentitySerializer(many=False,read_only=True)
-	roles=serializers.CharField()
-
 class EnslavedSerializer(serializers.ModelSerializer):
 	enslaved_id=serializers.IntegerField(read_only=True)
 	post_disembark_location=PastLocationSerializer(many=False,read_only=True)
 	captive_fate=CaptiveFateSerializer(many=False,read_only=True)
+	#currently handling a single voyage per enslaved person
 	voyages=serializers.SerializerMethodField()
 	enslavers=serializers.SerializerMethodField()
 	captive_status=CaptiveStatusSerializer(many=False,read_only=True)
 	language_group=LanguageGroupSerializer(many=False,read_only=True)
 	sources=serializers.SerializerMethodField()
 	gender=serializers.SerializerMethodField()
-	def get_gender(self,instance) -> str:
-		gender=instance.gender
-		if gender:
-			return str(gender.name)
-		else:
-			return None
-		
+	
+	def get_gender(self,instance) -> serializers.CharField():
+		gender=instance.gender.name
+		return gender
+
+	
 	def get_sources(self,instance) -> PastSourceSerializer(many=True):
 		escs=instance.enslaved_source_connections.all()
 		sources_dict={}
@@ -212,11 +104,45 @@ class EnslavedSerializer(serializers.ModelSerializer):
 				sources_dict[s_id].page_ranges.append(page_range)
 		return PastSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True).data
 
-	def get_voyages(self,instance) -> PastEnslavedVoyageSerializer(many=True):
-		eirs=instance.enslaved_relations.all().exclude(relation__voyage__isnull=True)
-		voyages=list(set([eir.relation.voyage for eir in eirs]))
-		return PastEnslavedVoyageSerializer(voyages,many=True,read_only=True).data
-	def get_enslavers(self,instance) -> EnslavedEnslaversInRelationListResponseSerializer:
+	def get_voyages(self,instance) -> PastEnslavedVoyageSerializer(many=False):
+		#right now, the table layouts, basically everything assume a single voyage per enslaved person
+		v=Voyage.objects.filter(voyage_enslavement_relations__enslaved_in_relation__enslaved__id=instance.id).first()
+		embark=v.voyage_itinerary.imp_principal_place_of_slave_purchase
+		if embark:
+			embark=embark.name
+			embark=fuzzyplacenamestrip(embark)
+		else:
+			embark="place unknown"
+		disembark=v.voyage_itinerary.imp_principal_port_slave_dis
+		if disembark:
+			disembark=disembark.name
+			disembark=fuzzyplacenamestrip(disembark)
+		else:
+			disembark="place unknown"
+		date=v.voyage_dates.imp_arrival_at_port_of_dis_sparsedate
+		if date:
+			year=date.year
+			month=date.month
+			day=date.day
+		else:
+			yearam="year unknown"
+		ship_name=v.voyage_ship.ship_name
+		if not ship_name:
+			ship_name="ship unknown"
+		
+		voyagedict={
+			'id':v.id,
+			'embarkation':embark,
+			'disembarkation':disembark,
+			'year':year,
+			'month':month,
+			'day':day,
+			'ship_name':ship_name
+		}
+					
+		return PastEnslavedVoyageSerializer(voyagedict,many=False,read_only=True).data
+
+	def get_enslavers(self,instance) -> ListField(child=serializers.CharField()):
 		edrs=instance.enslaved_relations.all()
 		edrs=edrs.prefetch_related('relation__relation_enslavers__roles','relation__relation_enslavers__enslaver_alias__identity')
 		enslaver_roles_and_identity_pks=edrs.values_list('relation__relation_enslavers__roles__id','relation__relation_enslavers__enslaver_alias__identity_id')
@@ -228,10 +154,23 @@ class EnslavedSerializer(serializers.ModelSerializer):
 					enslavers_and_roles[enslaverpk]=[rolepk]
 				else:
 					enslavers_and_roles[enslaverpk].append(rolepk)
-		enslavers_and_roles_list=[{'roles':", ".join([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]),'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)} for enslaverpk in enslavers_and_roles]
-		enslavers_in_relation=EnslavedEnslaversInRelationListResponseSerializer(enslavers_and_roles_list,many=True,read_only=True).data		
+		enslavers_and_roles_list=[
+			{'roles':', '.join(
+				list(set([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]))
+				),
+				'enslaver':EnslaverIdentity.objects.get(id=enslaverpk).principal_alias
+			} for enslaverpk in enslavers_and_roles
+		]
+		enslavers_in_relation=[]
+		for er in enslavers_and_roles_list:
+			roles=er['roles']
+			enslaver=er['enslaver']
+			if roles is not None:
+				eir=f"{enslaver} ({roles})"
+			else:
+				eir=enslaver
+			enslavers_in_relation.append(eir)	
 		return enslavers_in_relation
-				
 
 	class Meta:
 		model=Enslaved
@@ -245,34 +184,41 @@ class EnslavedSerializer(serializers.ModelSerializer):
 ####################### ENSLAVERS M2M CONNECTIONS
 
 #### FROM ENSLAVERS OUTWARDS
-
-class EnslaverEnslavedSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=Enslaved
-		fields=['documented_name','enslaved_id','id']
 	
-class EnslaverEnslavedInRelationSerializer(serializers.ModelSerializer):
-	enslaved=EnslaverEnslavedSerializer(many=False)
-	enslaver_roles=EnslaverRoleSerializer(many=True,read_only=True)
+class EnslaverEnslavedSerializer(serializers.Serializer):
+	id=serializers.IntegerField()
+	documented_name=serializers.CharField()
 	class Meta:
-		model=EnslavedInRelation
-		fields=('enslaved','enslaver_roles')
+		fields=('id','documented_name')
 
-class EnslaverAliasSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=EnslaverAlias
-		fields=('alias',)
+def fuzzyplacenamestrip(name):
+	name=re.sub("(,\s*port unspecified)|(,\s*unspecified)|(\(colony unspecified\))|(,\s*place unspecified)","",name,re.I)
+	return name
 
 class EnslaverIdentitySerializer(serializers.ModelSerializer):
-	birth_place=PastLocationSerializer(many=False)
-	death_place=PastLocationSerializer(many=False)
-	aliases=EnslaverAliasSerializer(many=True)
+	names=serializers.SerializerMethodField()
+	birth=serializers.SerializerMethodField()
+	death=serializers.SerializerMethodField()
 	principal_location=PastLocationSerializer(many=False)
 	named_enslaved_people=serializers.SerializerMethodField()
 	voyages=serializers.SerializerMethodField()
 	sources=serializers.SerializerMethodField()
+	def get_names(self,instance) -> ListField(child=serializers.CharField()):
+		aliases=instance.aliases.all()
+		principal_alias=instance.principal_alias
+		if aliases.count()>1:
+			aliases=[a.alias for a in aliases]
+			aliases=list(set(aliases))
+		else:
+			aliases=[principal_alias]
+		return aliases
+	
 	def get_sources(self,instance) -> PastSourceSerializer(many=True):
 		escs=instance.enslaver_source_connections.all()
+		escs=escs.prefetch_related(
+			'enslaver_source_connections',
+			'enslaver_source_connections__source'
+		)
 		sources_dict={}
 		for esc in escs:
 			page_range=esc.page_range
@@ -285,44 +231,71 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 				sources_dict[s_id].page_ranges.append(page_range)
 		return PastSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True).data
 
-	def get_named_enslaved_people(self,instance) -> EnslaverEnslavedInRelationSerializer(many=True):
+	def get_named_enslaved_people(self,instance) -> EnslaverEnslavedSerializer(many=True):
 		aliases=instance.aliases.all()
-		eirs=[]
-		for alias in aliases:
-			alias_eirs=alias.enslaver_relations.all()
-			for aeir in alias_eirs:
-				eirs.append(aeir)
-		eirs=list(set(eirs))
-		enslaver_enslaved_dict={}
-		for eir in eirs:
-			enslaved_people_in_relation=eir.relation.enslaved_in_relation.all()
-			for e in enslaved_people_in_relation:
-				print("e",e)
-				e.enslaver_roles=eir.roles.all()
-				enslaver_enslaved_dict[e.id]=e
-		return EnslaverEnslavedInRelationSerializer([enslaver_enslaved_dict[e] for e in enslaver_enslaved_dict],many=True,read_only=True).data
+		aliases=aliases.prefetch_related(
+			'alias__enslaver_relations__relation__enslaved_in_relation__enslaved'
+		)
+		enslaved_people_in_relation_tuples=aliases.values_list(
+			'enslaver_relations__relation__enslaved_in_relation__enslaved__documented_name',
+			'enslaver_relations__relation__enslaved_in_relation__enslaved__id'
+		)
+		enslaved_people_in_relation_dict={}
+		for epirt in enslaved_people_in_relation_tuples:
+			name,id=epirt
+			if id not in enslaved_people_in_relation_dict and id is not None:
+				enslaved_people_in_relation_dict[id]=name
+		enslaved_people_in_relation=[{"id":k,"documented_name":enslaved_people_in_relation_dict[k]} for k in enslaved_people_in_relation_dict]
+		return EnslaverEnslavedSerializer(enslaved_people_in_relation,many=True,read_only=True).data
 
-	def get_voyages(self,instance) -> PastEnslaverVoyageSerializer(many=True):
-		aliases=instance.aliases.all()
-		eirs=[]
-		for alias in aliases:
-			alias_eirs=alias.enslaver_relations.all()
-			for aeir in alias_eirs:
-				eirs.append(aeir)
-		eirs=list(set(eirs))
-		
-		enslaver_voyages_dict={}
-		for eir in eirs:
-			voyage=eir.relation.voyage
-			if voyage is not None:
-				voyage.enslaver_roles=eir.roles.all()
-				enslaver_voyages_dict[voyage.id]=voyage
+	def get_voyages(self,instance) -> ListField(child=serializers.CharField()):
+		voyages=Voyage.objects.filter(voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__id=instance.id)
+		#dedupe
+		voyage_ids=list(set([v.id for v in voyages]))
+		voyages=Voyage.objects.filter(id__in=voyage_ids)
+		#prefetch
+		voyages=voyages.prefetch_related(
+			'voyage_itinerary__imp_principal_place_of_slave_purchase',
+			'voyage_itinerary__imp_principal_port_slave_dis',
+			'voyage_dates__imp_arrival_at_port_of_dis_sparsedate'
+		)
+		voyagestrings=[]
+		for v in voyages:
+			embark=v.voyage_itinerary.imp_principal_place_of_slave_purchase
+			if embark:
+				embark=embark.name
+				embark=fuzzyplacenamestrip(embark)
+			else:
+				embark="place unknown"
+			disembark=v.voyage_itinerary.imp_principal_port_slave_dis
+			if disembark:
+				disembark=disembark.name
+				disembark=fuzzyplacenamestrip(disembark)
+			else:
+				disembark="place unknown"
+			yearam=v.voyage_dates.imp_arrival_at_port_of_dis_sparsedate
+			if yearam:
+				yearam=yearam.year
+			else:
+				yearam="year unknown"
+			voyagestring=f"#{v.id}, {embark} to {disembark}, {yearam}"
+			voyagestrings.append(voyagestring)
+					
+		return voyagestrings
 
-		return PastEnslaverVoyageSerializer([enslaver_voyages_dict[v] for v in enslaver_voyages_dict],many=True,read_only=True).data
+	def get_birth(self,instance) -> serializers.CharField():
+		birth_place=instance.birth_place
+		birth_year=instance.birth_year
+		return ", ".join([str(i) for i in [birth_place,birth_year] if i is not None])
+	
+	def get_death(self,instance) -> serializers.CharField():
+		death_place=instance.death_place
+		death_year=instance.death_year
+		return ", ".join([str(i) for i in [death_place,death_year] if i is not None])
 
 	class Meta:
 		model=EnslaverIdentity
-		fields='__all__'
+		fields=['id','birth','death','principal_location','named_enslaved_people','voyages','sources','names']
 
 
 #################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR PAGINATED LISTS. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.

@@ -293,7 +293,13 @@ class VoyageSerializer(serializers.ModelSerializer):
 					enslavers_and_roles[enslaverpk]=[rolepk]
 				else:
 					enslavers_and_roles[enslaverpk].append(rolepk)
-		enslavers_and_roles_list=[{'roles':', '.join([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]),'enslaver':EnslaverIdentity.objects.get(id=enslaverpk).principal_alias} for enslaverpk in enslavers_and_roles]
+		enslavers_and_roles_list=[
+			{'roles':', '.join(
+				[EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]
+				),
+				'enslaver':EnslaverIdentity.objects.get(id=enslaverpk).principal_alias
+			} for enslaverpk in enslavers_and_roles
+		]
 		enslavers_in_relation=[]
 		for er in enslavers_and_roles_list:
 			roles=er['roles']

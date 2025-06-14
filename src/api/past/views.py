@@ -656,10 +656,13 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		
 		#CLEAN THE REQUEST'S FILTER (IF ANY)
 		reqdict=dict(request.data)
+		
 		if 'filter' in reqdict:		
 			for filteritem in list(reqdict['filter']):
 				if filteritem['varName'] not in EnslaverBasicFilterVarNames:
 					reqdict['filter'].remove(filteritem)
+		
+		print("REQDICT",reqdict)
 		
 		#VALIDATE THE REQUEST
 		serialized_req = EnslaverGeoTreeFilterRequestSerializer(data=reqdict)
@@ -686,6 +689,9 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
+			
+			print("RESULTS-->",queryset.count())
+			
 			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
@@ -694,6 +700,8 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 				auto_prefetch=False,
 				paginate=False
 			)
+			
+			print("RESULTS-->",results.count())
 
 			if error_messages:
 				return(JsonResponse(error_messages,safe=False,status=400))
@@ -704,14 +712,19 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 				results=results.prefetch_related(geotree_valuefield_stub)
 			vls=[]
 			for geotree_valuefield in geotree_valuefields:		
+				print("VF",geotree_valuefield)
 				vls+=[i[0] for i in list(set(results.values_list(geotree_valuefield))) if i[0] is not None]
 			vls=list(set(vls))
+			print(vls)
 		
 			#THEN GET THE GEO OBJECTS BASED ON THAT OPERATION
 			resp=GeoTreeFilter(spss_vals=vls)
 		
 			### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			
+			print("----->",resp)
+			
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))			
 		else:

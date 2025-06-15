@@ -14,6 +14,11 @@ from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFi
 
 ############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
 
+class GenderSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=Gender
+		fields='__all__'
+
 class EnslaverRoleSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverRole
@@ -95,7 +100,11 @@ class EnslavedSerializer(serializers.ModelSerializer):
 	gender=serializers.SerializerMethodField()
 	
 	def get_gender(self,instance) -> serializers.CharField():
-		gender=instance.gender.name
+		gender=instance.gender
+		if gender:
+			gender=gender.name
+		else:
+			gender=None
 		return gender
 
 	
@@ -225,10 +234,6 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 	
 	def get_sources(self,instance) -> PastSourceSerializer(many=True):
 		escs=instance.enslaver_source_connections.all()
-		escs=escs.prefetch_related(
-			'enslaver_source_connections',
-			'enslaver_source_connections__source'
-		)
 		sources_dict={}
 		for esc in escs:
 			page_range=esc.page_range

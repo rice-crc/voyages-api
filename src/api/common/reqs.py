@@ -255,16 +255,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					filter_obj.remove(item)
 			# SPECIAL CASE 2: DOCUMENTARY SOURCES
 			if varName.endswith("__source__ALL"):
-				filtered_queryset,results_count=global_search(orig_queryset,search_string,core_name='voyagesources')
-				# 
-# 				
-# 				
-# 				varNameStem=re.sub("__source__ALL","",varName)
-# 				qobjstr=f'Q({varNameStem}__source__bib__{op}="{searchTerm}")|\
-# 					Q({varNameStem}__source__short_ref__name__{op}="{searchTerm}")'
-# 				execobjstr=f'filtered_queryset.filter({qobjstr})'
+				filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='voyagesources')
 				filter_obj.remove(item)
-# 				filtered_queryset=eval(execobjstr)
 		# TYPICAL ORM-BASED SEARCH/FILTER
 		for item in filter_obj:
 			if ids is not None:

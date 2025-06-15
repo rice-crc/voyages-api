@@ -644,6 +644,33 @@ class VoyageGET(generics.RetrieveAPIView):
 	serializer_class=VoyageSerializer
 	lookup_field='voyage_id'
 
+class CargoTypeList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=CargoType
+	queryset=CargoType.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=CargoTypeSerializer
+
+class AfricanInfoList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	+++ Need a write-up from the team on the meaning of this variable.
+	'''
+	model=AfricanInfo
+	queryset=AfricanInfo.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=AfricanInfoSerializer
+
+
 class RigOfVesselList(generics.ListAPIView):
 	'''
 	Controlled vocabulary, read-only.

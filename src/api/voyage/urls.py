@@ -7,15 +7,12 @@ urlpatterns = [
     path('', views.VoyageList.as_view()),
     path('dataframes/',views.VoyageDataFrames.as_view()),
     path('aggregations/',views.VoyageAggregations.as_view()),
-# 	path('autocomplete/',views.VoyageCharFieldAutoComplete.as_view()),
 	path('groupby/',views.VoyageGroupBy.as_view()),
 	path('crosstabs/',views.VoyageCrossTabs.as_view()),
 	path('aggroutes/',views.VoyageAggRoutes.as_view()),
 	path('geotree/',views.VoyageGeoTreeFilter.as_view()),
 	#CRUD ENDPOINTS (FOR CONTRIBUTE CLIENTS)
 	path('<int:voyage_id>',views.VoyageGET.as_view()),
-# 	path('CREATE/<int:voyage_id>',views.VoyageCreate.as_view()),
-# 	path('RUD/<int:voyage_id>',views.VoyageRetrieveUpdateDestroy.as_view()),
 	#READ-ONLY CONTROLLED VOCAB ENDPOINTS (FOR CONTRIBUTE CLIENTS)
 	path('NationalityList/',views.NationalityList.as_view()),
 	path('RigOfVesselList/',views.RigOfVesselList.as_view()),
@@ -26,5 +23,7 @@ urlpatterns = [
 	path('SummaryStats/',views.VoyageSummaryStats.as_view()),
 	path('OwnerOutcomeList/',views.OwnerOutcomeList.as_view()),
 	path('VesselCapturedOutcomeList/',views.VesselCapturedOutcomeList.as_view()),
+	path('CargoTypeList/',views.CargoTypeList.as_view()),
+	path('AfricanInfoList/',views.AfricanInfoList.as_view()),
 	path('VoyageDownload/',views.VoyageDownload.as_view())
 ]

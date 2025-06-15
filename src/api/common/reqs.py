@@ -101,13 +101,14 @@ solrcorenamedict={
 	"<class 'document.models.Source'>":'sources'
 }
 
-def global_search(orig_queryset,search_string):
+def global_search(orig_queryset,search_string,core_name=None):
 	# GLOBAL SEARCH
 	## bypasses the normal filters. 
 	## hits solr with a search string (which currently is applied across all text fields on a model)
 	## and then creates its filtered queryset on the basis of the pk's returned by solr
 	qsetclassstr=str(orig_queryset[0].__class__)
-	core_name=solrcorenamedict[qsetclassstr]
+	if not core_name:
+		core_name=solrcorenamedict[qsetclassstr]
 	if DEBUG:
 		print("CLASS",qsetclassstr,core_name)
 	solr = pysolr.Solr(
@@ -254,12 +255,16 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					filter_obj.remove(item)
 			# SPECIAL CASE 2: DOCUMENTARY SOURCES
 			if varName.endswith("__source__ALL"):
-				varNameStem=re.sub("__source__ALL","",varName)
-				qobjstr=f'Q({varNameStem}__source__bib__{op}="{searchTerm}")|\
-					Q({varNameStem}__source__short_ref__name__{op}="{searchTerm}")'
-				execobjstr=f'filtered_queryset.filter({qobjstr})'
+				filtered_queryset,results_count=global_search(orig_queryset,search_string,core_name='voyagesources')
+				# 
+# 				
+# 				
+# 				varNameStem=re.sub("__source__ALL","",varName)
+# 				qobjstr=f'Q({varNameStem}__source__bib__{op}="{searchTerm}")|\
+# 					Q({varNameStem}__source__short_ref__name__{op}="{searchTerm}")'
+# 				execobjstr=f'filtered_queryset.filter({qobjstr})'
 				filter_obj.remove(item)
-				filtered_queryset=eval(execobjstr)
+# 				filtered_queryset=eval(execobjstr)
 		# TYPICAL ORM-BASED SEARCH/FILTER
 		for item in filter_obj:
 			if ids is not None:

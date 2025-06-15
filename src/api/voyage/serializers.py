@@ -56,6 +56,20 @@ class VoyageSlavesNumbersSerializer(serializers.ModelSerializer):
 		model=VoyageSlavesNumbers
 		fields='__all__'
 
+	sort_by='value'
+
+##### SPECIAL VARS ##### 
+
+class AfricanInfoSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=AfricanInfo
+		fields='__all__'
+
+class CargoTypeSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=CargoType
+		fields='__all__'
+
 ##### CREW NUMBERS ##### 
 
 class VoyageCrewSerializer(serializers.ModelSerializer):

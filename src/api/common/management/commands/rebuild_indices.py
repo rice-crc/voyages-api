@@ -83,6 +83,15 @@ class Command(BaseCommand):
 					'short_ref__name',
 					'page_connections__page__transcriptions__text'
 				]
+			},
+			{
+				"model":Voyage,
+				"core_name":"voyagesources",
+				"fields":[
+					'id',
+					'voyage_source_connections__source__bib',
+					'voyage_source_connections__source__short_ref__name'
+				]
 			}
 		]
 		

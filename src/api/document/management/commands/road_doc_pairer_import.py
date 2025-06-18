@@ -209,9 +209,6 @@ class Command(BaseCommand):
 				
 				enslaver_ids=[i[0] for i in list(set(enslavementrelations.values_list('relation_enslavers__enslaver_alias__identity__id'))) if i[0] is not None]
 				
-# 				print(enslaved_ids)
-# 				print(enslaver_ids)
-				
 				for enslaved_id in enslaved_ids:
 					enslaved=Enslaved.objects.get(id=enslaved_id)
 					secs=SourceEnslavedConnection.objects.filter(
@@ -250,41 +247,4 @@ class Command(BaseCommand):
 					)
 				
 				
-					
-					
-## if it's one of our new (ssc & texas so far) docs, the legacy source will be split out into its component parts. Log that and move on.
-# 					if mzsc > 1:
-# 						print("multiple hits --> ",mzsc,"zotero sources matching",ls.short_ref)
-# 					elif mzsc==0:
-# 						print("---\nlegacy source does not exist in zotero sources. creating",shortref)
-# 						template = zot.item_template(zotero_template_name)
-# 						template['title']=zotero_title
-# 						template['shortTitle']=shortref
-# 						template['abstractNote']=full_ref
-# 		# 				print(template)
-# 						resp = zot.create_items([template])
-# 		# 				print(resp)
-# 						zotero_url=resp['successful']['0']['links']['self']['href']
-# 						
-# 						newzs=ZoteroSource.objects.create(
-# 							short_ref=shortref,
-# 							legacy_source=ls,
-# 							zotero_url=zotero_url,
-# 							zotero_title=zotero_title,
-# 							is_legacy_source=True
-# 						)
-					
-					
-# 					print(catalogue_data)
-						
-# 						
-# 						voyage_image_pairings={}
-# 
-# 				
-# 					c+=1	
-# 					try:
-# 						print(vd.year,vd.month,vd.day)
-# 					except:
-# 						print(voyage_dates.__dict__)
-# 						exit()
 		print(c)

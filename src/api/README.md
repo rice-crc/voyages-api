@@ -11,23 +11,23 @@ A core principle of the rearchitecture was that the ORM should be exposed so tha
 	* This allows us to create & edit the highly-relational data
 	* But it also necessitates READONLY serializers because it is not performant at scale
 	* and that package does not support unique-together constraints
-* The more generic api endpoints are documented with Swagger at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+* The more generic api endpoints are documented with Swagger at [{OPEN_API_BASE_URL}/]({OPEN_API_BASE_URL}/)
 	* on the basis of the [drf serializes](https://www.django-rest-framework.org/api-guide/serializers/)
 	* using the [drf-spectacular package](https://drf-spectacular.readthedocs.io/en/latest/)
 
-If your main concern is to pull a paginated list view of items or a single item by its primary key, read the Django Swagger docs: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+If your main concern is to pull a paginated list view of items or a single item by its primary key, read the Django Swagger docs: [{OPEN_API_BASE_URL}/]({OPEN_API_BASE_URL}/)
 
 ## Main routes
 
 Each of the project's main object classes has its own route and related endpoints:
 
-* Voyages: [voyage/](http://127.0.0.1:8000/voyage/)
-* Enslaved People: [past/enslaved/](http://127.0.0.1:8000/past/enslaved/)
-* Enslavers: [past/enslaver/](http://127.0.0.1:8000/past/enslaver/)
-* Geographic Locations (presented as a tree): [geo/](http://127.0.0.1:8000/geo/)
-* Documents: [docs/](http://127.0.0.1:8000/docs/)
-* Blog Posts: [blog/](http://127.0.0.1:8000/blog/)
-* Common: [common/](http://127.0.0.1:8000/common/)
+* Voyages: [voyage/]({OPEN_API_BASE_URL}/voyage/)
+* Enslaved People: [past/enslaved/]({OPEN_API_BASE_URL}/past/enslaved/)
+* Enslavers: [past/enslaver/]({OPEN_API_BASE_URL}/past/enslaver/)
+* Geographic Locations (presented as a tree): [geo/]({OPEN_API_BASE_URL}/geo/)
+* Documents: [docs/]({OPEN_API_BASE_URL}/docs/)
+* Blog Posts: [blog/]({OPEN_API_BASE_URL}/blog/)
+* Common: [common/]({OPEN_API_BASE_URL}/common/)
 
 The frontend application uses some customized endpoints, which we are still iterating on, in order to provide some highly useful search capabilities. To the extent possible, the methods of using these customized endpoints is kept consistent.
 
@@ -35,7 +35,7 @@ The frontend application uses some customized endpoints, which we are still iter
 
 Because we are exposing as much of the ORM as is practicable, it is crucial to be able to inspect what variables are available to us for searching, and what their data types are so that we will know how to search them.
 
-The app uses the Serializers to record in json format the schema for these main object classes, e.g., [http://127.0.0.1:8000/common/schemas/?hierarchical=False&schema_name=Voyage](http://127.0.0.1:8000/common/schemas/?hierarchical=False&schema_name=Voyage) will return a double-underscore-notation representation of the schema for Voyages:
+The app uses the Serializers to record in json format the schema for these main object classes, e.g., [{OPEN_API_BASE_URL}/common/schemas/?hierarchical=False&schema_name=Voyage]({OPEN_API_BASE_URL}/common/schemas/?hierarchical=False&schema_name=Voyage) will return a double-underscore-notation representation of the schema for Voyages:
 
 	{
 	  "id": {
@@ -58,7 +58,7 @@ The app uses the Serializers to record in json format the schema for these main 
 	  },
 	}
   
-... and [http://127.0.0.1:8000/common/schemas/?hierarchical=False&schema_name=Voyage](http://127.0.0.1:8000/common/schemas/?hierarchical=False&schema_name=Voyage) will return a nested representation of the schema for Enslaved People:
+... and [{OPEN_API_BASE_URL}/common/schemas/?hierarchical=False&schema_name=Voyage]({OPEN_API_BASE_URL}/common/schemas/?hierarchical=False&schema_name=Voyage) will return a nested representation of the schema for Enslaved People:
 
 	{
 	  "id": {
@@ -90,7 +90,7 @@ The app uses the Serializers to record in json format the schema for these main 
 Requests for data are made via POST calls. In any call, if a django-style double-underscore-notation variable for that endpoint is present as a key in the request body, then its value will be used as a filter.
 
 For instance, if 
-```voyage_itinerary__imp_principal_region_slave_dis__name``` is a key in the payload of a call to [http://127.0.0.1:8000/voyage/](http://127.0.0.1:8000/voyage/), then the associated value would be used to filter voyages by the name of their imputed principal region of disembarkation.
+```voyage_itinerary__imp_principal_region_slave_dis__name``` is a key in the payload of a call to [{OPEN_API_BASE_URL}/voyage/]({OPEN_API_BASE_URL}/voyage/), then the associated value would be used to filter voyages by the name of their imputed principal region of disembarkation.
 
 Right now, we have 2 basic types of variable, each of which is always handled in the same way -- this will have to change eventually. I don't want to push this too far just yet, because I'm trying to keep *django* in-memory caches out of the picture -- so, for instance, if we wanted to do fuzzy matches on strings, we'd either have to cache those in django or use a solr index *for every text field* or move to a postgresql db which can handle levenstein natively.
 
@@ -131,7 +131,7 @@ Will return all the voyages for whom the imputed principal region of disembarkat
 
 Use these with autocomplete views to make responsive autocomplete multi-select filter components. This allows for an efficient searching of the text fields with inexact text matches, in order to then subsequently filter on them with an exact OR match.
 
-For instance, a search on [http://127.0.0.1:8000/voyage/autocomplete/](http://127.0.0.1:8000/voyage/autocomplete/) like so:
+For instance, a search on [{OPEN_API_BASE_URL}/voyage/autocomplete/]({OPEN_API_BASE_URL}/voyage/autocomplete/) like so:
 
 	{
 		voyage_itinerary__imp_principal_region_slave_dis__name : ['jam']
@@ -173,7 +173,7 @@ The typical workflow for these ancillary services is:
 	* Runs several dataframe queries against voyages-api
 	* Transforms that data and stores it in a networkx or pandas in-memory database
 	* Waits for requests from voyages-api
-* The supported endpoint (like [voyage/groupby](http://127.0.0.1:8000/voyage/groupby/)) receives
+* The supported endpoint (like [voyage/groupby]({OPEN_API_BASE_URL}/voyage/groupby/)) receives
 	* A normal filter object
 	* One or more extra arguments particular to that endpoint
 * The query is run by django, which
@@ -214,12 +214,12 @@ We currently have several more-and-less customized view types which have been, t
 
 Available for:
 
-* Voyages: http://127.0.0.1:8000/voyage/
+* Voyages: {OPEN_API_BASE_URL}/voyage/
 * People
-	* Enslavers: http://127.0.0.1:8000/past/enslaver/
-	* Enslaved People: http://127.0.0.1:8000/past/enslaved/
-* Documents: http://127.0.0.1:8000/docs/
-* Blog posts: http://127.0.0.1:8000/blog/
+	* Enslavers: {OPEN_API_BASE_URL}/past/enslaver/
+	* Enslaved People: {OPEN_API_BASE_URL}/past/enslaved/
+* Documents: {OPEN_API_BASE_URL}/docs/
+* Blog posts: {OPEN_API_BASE_URL}/blog/
 
 These are more or less use generic DRF views. Pagination and ordering are handled like so:
 
@@ -234,8 +234,8 @@ Yes, I know, I need to get rid of the brackets.
 
 Available for:
 
-* Voyages: http://127.0.0.1:8000/voyage/dataframes/
-* Enslaved People: http://127.0.0.1:8000/past/enslaved/dataframes/
+* Voyages: {OPEN_API_BASE_URL}/voyage/dataframes/
+* Enslaved People: {OPEN_API_BASE_URL}/past/enslaved/dataframes/
 
 
 #### Dataframe required args
@@ -267,8 +267,8 @@ This backend is a supporting Flask container whose principal dependency is Panda
 Available for:
 
 * Voyages:
-	* groupby for all standard data visualizations: http://127.0.0.1:8000/voyage/groupby/
-	* crosstabs: http://127.0.0.1:8000/voyage/crosstabs/
+	* groupby for all standard data visualizations: {OPEN_API_BASE_URL}/voyage/groupby/
+	* crosstabs: {OPEN_API_BASE_URL}/voyage/crosstabs/
 	
 *Note on crosstabs*: it's is in need of some tweaking to enable pagination. Right now it returns the full [ag-grid crosstab table](https://www.ag-grid.com/javascript-data-grid/column-groups/) (up to 10MB)
 
@@ -350,8 +350,8 @@ This backend is a supporting Flask container whose principal dependencies are Ne
 
 Available for:
 
-* Voyages: http://127.0.0.1:8000/voyage/aggroutes/
-* Enslaved people: http://127.0.0.1:8000/enslaved/aggroutes/
+* Voyages: {OPEN_API_BASE_URL}/voyage/aggroutes/
+* Enslaved people: {OPEN_API_BASE_URL}/enslaved/aggroutes/
 
 These requests are handed off to the voyages-geo-networks container.
 
@@ -448,8 +448,8 @@ This backend is a supporting Flask container whose principal dependency is Netwo
 
 Available for:
 
-* Voyages: http://127.0.0.1:8000/voyage/networks/
-* Enslaved People and Enslavers: http://127.0.0.1:8000/past/networks/
+* Voyages: {OPEN_API_BASE_URL}/voyage/networks/
+* Enslaved People and Enslavers: {OPEN_API_BASE_URL}/past/networks/
 
 These requests are handed off to the voyages-people-networks container.
 

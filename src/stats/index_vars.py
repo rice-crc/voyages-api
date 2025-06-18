@@ -139,7 +139,13 @@ big_df={
 			"type": "obj",
 			"fields": [
 				"voyage_source_connections__source__bib"
-			]
+			],
+			"re_cleanup":{
+				"type":"sub",
+				"find":"<.*?>|\t|\n",
+				"replace":"",
+				"flags":"re.DOTALL"
+			}
 		},
 		"enslavers":{
 			"type": "obj",

@@ -187,10 +187,11 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 			}
 		}
 		for elg in elgs:
-			
 			lg_dict={'id':elg.id,'name':elg.name}
+			print(lg_dict)
 			mc_set=elg.moderncountry_set.all()
 			mc_id=None
+			print(mc_set)
 			if len(mc_set)>1:
 				mc_name="Multi-Country"
 				mc_id=0
@@ -207,7 +208,7 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 						"id":mc_id,
 						"children": [lg_dict]
 					}
-				
+		print(elgt)
 		resp=[elgt[v] for v in elgt]
 		return JsonResponse(resp,safe=False,status=200)
 
@@ -656,6 +657,7 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		
 		#CLEAN THE REQUEST'S FILTER (IF ANY)
 		reqdict=dict(request.data)
+		
 		if 'filter' in reqdict:		
 			for filteritem in list(reqdict['filter']):
 				if filteritem['varName'] not in EnslaverBasicFilterVarNames:
@@ -686,6 +688,7 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		
 			#FILTER THE ENSLAVERS BASED ON THE REQUEST'S FILTER OBJECT
 			queryset=EnslaverIdentity.objects.all()
+			
 			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,
@@ -702,8 +705,11 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 			for geotree_valuefield in geotree_valuefields:
 				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 				results=results.prefetch_related(geotree_valuefield_stub)
+			print("RESULTS",results)
+			print("GTVFs",geotree_valuefields)
 			vls=[]
 			for geotree_valuefield in geotree_valuefields:		
+				print("VF",geotree_valuefield)
 				vls+=[i[0] for i in list(set(results.values_list(geotree_valuefield))) if i[0] is not None]
 			vls=list(set(vls))
 		
@@ -712,6 +718,9 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		
 			### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			
+			print("----->",resp)
+			
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))			
 		else:
@@ -956,7 +965,6 @@ class EnslaverRoleList(generics.ListAPIView):
 	'''
 	Controlled vocabulary, read-only.
 	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
-	
 	'''
 	model=EnslaverRole
 	queryset=EnslaverRole.objects.all()
@@ -964,6 +972,17 @@ class EnslaverRoleList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=EnslaverRoleSerializer
 
+class GenderList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	'''
+	model=Gender
+	queryset=Gender.objects.all()
+	pagination_class=None
+	sort_by='value'
+	serializer_class=GenderSerializer
 
 
 # @extend_schema(

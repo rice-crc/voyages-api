@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField,Field,ListField
 import re
 from .models import *
 from document.models import Source,Page,ShortRef,SourcePageConnection,SourceVoyageConnection
@@ -54,6 +54,20 @@ class VoyageShipSerializer(serializers.ModelSerializer):
 class VoyageSlavesNumbersSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=VoyageSlavesNumbers
+		fields='__all__'
+
+	sort_by='value'
+
+##### SPECIAL VARS ##### 
+
+class AfricanInfoSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=AfricanInfo
+		fields='__all__'
+
+class CargoTypeSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=CargoType
 		fields='__all__'
 
 ##### CREW NUMBERS ##### 
@@ -153,23 +167,33 @@ class VoyageOutcomeSerializer(serializers.ModelSerializer):
 
 #### DATES #####
 class VoyageSparseDateSerializer(serializers.ModelSerializer):
+	date_str=serializers.SerializerMethodField()
 	class Meta:
 		model=VoyageSparseDate
-		fields='__all__'
+		fields=['date_str','year']
+	def get_date_str(self,instance) -> CharField():
+		date=instance
+		if date:
+			date_str=date.__str__()
+		else:
+			date_str=None
+		return date_str
 		
 class VoyageDatesSerializer(serializers.ModelSerializer):
 	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
 	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
+	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
+	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
+	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
+	voyage_completed_sparsedate_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
+	
 	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
 	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
 	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
 	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
 	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
 	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
 	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
@@ -181,28 +205,18 @@ class VoyageSourceShortRefSerializer(serializers.ModelSerializer):
 
 
 class VoyageSourceSerializer(serializers.ModelSerializer):
-	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
 	short_ref=VoyageSourceShortRefSerializer(many=False)
+	bib=serializers.SerializerMethodField()
 	class Meta:
 		model=Source
-		fields='__all__'
-
-class VoyageEnslaverRoleSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=EnslaverRole
-		fields='__all__'
-
-class VoyageEnslaverIdentitySerializer(serializers.ModelSerializer):
-	birth_place=VoyageLocationSerializer(many=False,read_only=True)
-	death_place=VoyageLocationSerializer(many=False,read_only=True)
-	principal_location=VoyageLocationSerializer(many=False,read_only=True)
-	class Meta:
-		model=EnslaverIdentity
-		fields='__all__'
-
-class VoyageEnslaverRelationListResponseSerializer(serializers.Serializer):
-	roles=serializers.CharField()
-	enslaver=VoyageEnslaverIdentitySerializer(many=False,read_only=True)
+		fields=['short_ref','title','bib','has_published_manifest','zotero_group_id','zotero_item_id']
+	def get_bib(self,instance) -> CharField():
+		raw_bib=instance.bib
+		text_refs=[t for t in instance.page_ranges if t is not None]
+		if len(text_refs)>0:
+			return f"{raw_bib}: {', '.join(text_refs)}"
+		else:
+			return raw_bib
 
 class VoyageEnslavedSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -238,6 +252,10 @@ class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
 		model=VoyageCargoConnection
 		fields='__all__'
 
+class VoyageEnslaverSerializer(serializers.Serializer):
+	id=serializers.IntegerField()
+	name_and_role=serializers.CharField()
+
 
 class LinkedVoyageSerializer(serializers.Serializer):
 	voyage_id=serializers.IntegerField()
@@ -253,9 +271,19 @@ class VoyageSerializer(serializers.ModelSerializer):
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False,read_only=True)
 	voyage_outcome=VoyageOutcomeSerializer(many=False,read_only=True)
 	voyage_groupings=VoyageGroupingsSerializer(many=False,read_only=True)
-	cargo=VoyageCargoConnectionSerializer(many=True,read_only=True)
+	cargo=serializers.SerializerMethodField()
 	african_info=AfricanInfoSerializer(many=True,read_only=True)
 	linked_voyages=serializers.SerializerMethodField()
+	
+	def get_cargo(self,instance) -> ListField(child=serializers.CharField()):
+		cargoconnections=instance.cargo.all()
+		cargo_return=[]
+		for cc in cargoconnections:
+			cargo=cc.cargo.name
+			unit=cc.cargo.unit
+			amount=cc.amount
+			cargo_return.append(f"{amount} {unit} {cargo}")
+		return cargo_return
 	
 	def get_linked_voyages(self,instance) -> VoyageSourceSerializer(many=True):
 		incoming=instance.incoming_from_other_voyages.all()
@@ -291,7 +319,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 				enslaved_person=eir.enslaved
 				enslaved_dict[enslaved_person.id]=enslaved_person
 		return VoyageEnslavedSerializer([enslaved_dict[i] for i in enslaved_dict],many=True,read_only=True).data
-	def get_enslavers(self,instance) -> VoyageEnslaverRelationListResponseSerializer:
+	def get_enslavers(self,instance) -> ListField(child=serializers.CharField()):
 		ers=instance.voyage_enslavement_relations.all()
 		ers=ers.prefetch_related('relation_enslavers__roles','relation_enslavers__enslaver_alias__identity')
 		enslaver_roles_and_identity_pks=ers.values_list('relation_enslavers__roles__id','relation_enslavers__enslaver_alias__identity_id')
@@ -303,9 +331,24 @@ class VoyageSerializer(serializers.ModelSerializer):
 					enslavers_and_roles[enslaverpk]=[rolepk]
 				else:
 					enslavers_and_roles[enslaverpk].append(rolepk)
-		enslavers_and_roles_list=[{'roles':', '.join([EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]),'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)} for enslaverpk in enslavers_and_roles]
-		enslavers_in_relation=VoyageEnslaverRelationListResponseSerializer(enslavers_and_roles_list,many=True,read_only=True).data		
-		return enslavers_in_relation
+		enslavers_and_roles_list=[
+			{'roles':', '.join(
+				[EnslaverRole.objects.get(id=rolepk).name for rolepk in enslavers_and_roles[enslaverpk]]
+				),
+				'enslaver':EnslaverIdentity.objects.get(id=enslaverpk)
+			} for enslaverpk in enslavers_and_roles
+		]
+		enslavers_in_relation=[]
+		for er in enslavers_and_roles_list:
+			roles=er['roles']
+			enslaver=er['enslaver']
+			if roles is not None:
+				name_and_role=f"{enslaver.principal_alias} ({roles})"
+			else:
+				name_and_role=enslaver
+			enslaver_dict={"id":enslaver.id,"name_and_role":name_and_role}
+			enslavers_in_relation.append(enslaver_dict)	
+		return VoyageEnslaverSerializer(enslavers_in_relation,many=True,read_only=True).data
 	class Meta:
 		model=Voyage
 		fields='__all__'
@@ -740,3 +783,26 @@ class VoyageSummaryStatsRequestSerializer(serializers.Serializer):
 	
 class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
 	data=serializers.CharField()
+
+
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Download CSV',
+			summary='Download CSV',
+			description='Allows users to download the filtered dataset in csv format.',
+			value={
+				"filter": [
+					{
+						"op": "exact",
+						"varName": "dataset",
+						"searchTerm": 0
+					}
+				]
+			}
+		)
+	]
+)
+class VoyageDownloadRequestSerializer(serializers.Serializer):
+# 	mode=serializers.ChoiceField(choices=["csv","excel"])
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)

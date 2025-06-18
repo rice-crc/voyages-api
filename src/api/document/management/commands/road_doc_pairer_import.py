@@ -37,7 +37,7 @@ class Command(BaseCommand):
 			exit()
 		shortref_obj=ShortRef.objects.get(name=shortref)
 		
-		library_id=5290782
+		library_id=5290782 #IMNO
 		library_type=zotero_credentials['library_type']
 		api_key=zotero_credentials['api_key']
 		zot = zotero.Zotero(library_id, library_type, api_key)
@@ -63,6 +63,7 @@ class Command(BaseCommand):
 			
 			if catalogue not in catalogue_ids:
 				catalogue_ids.append(catalogue)
+				print(catalogue)
 			
 			if voyage_id not in voyage_image_pairings:
 				voyage_image_pairings[voyage_id]={catalogue:[clean_image_url]}
@@ -80,6 +81,10 @@ class Command(BaseCommand):
 		print(f"This json file pairs {img_count} images to {len(voyage_image_pairings)} voyages across {len(catalogue_ids)} catalogues.")
 		print(f"catalogues: {catalogue_ids}")
 		
+		d=open("document/management/commands/data/catalogue_names.json","r") #need bibliographic info. for the zotero templated data push
+		t=d.read()
+		d.close()
+		catalogues_index=json.loads(t)
 		c=0
 		for voyage_id in voyage_image_pairings:
 			voyage=Voyage.objects.get(voyage_id=voyage_id)
@@ -90,46 +95,51 @@ class Command(BaseCommand):
 			print(voyage,f'has {len(sources)} sources')
 			
 			for catalogue in voyage_image_pairings[voyage_id]:
+				print("-->",catalogue)
 				
-				if len(sources)==0:
-					print("-->creating source")
-					d=open("document/management/commands/data/catalogue_names.json","r")
-					t=d.read()
-					d.close()
-					catalogues_index=json.loads(t)
-					catalogue_data=catalogues_index[catalogue]
+# 				print(json.dumps(catalogues_index,indent=2))
+				catalogue_data=catalogues_index[catalogue]
+				
+				template['archive']=catalogue_data['Archive']
+				template['archiveLocation']=catalogue_data['Loc. in Archive']
+				template['shortTitle']=catalogue_data['Short Title']
+				template['url']=catalogue_data['Collection URL']
+				
+				ship_name=voyage.voyage_ship.ship_name
+				if ship_name in ['',None]:
+					ship_name="[vessel name unspecified]"
+				
+				voyage_dates=voyage.voyage_dates
+				vd=voyage_dates.first_dis_of_slaves_sparsedate
+				if vd is None:
+					vd=voyage_dates.slave_purchase_began_sparsedate
+				if vd is None:
+					vd=voyage_dates.vessel_left_port_sparsedate
 					
-					template['archive']=catalogue_data['Archive']
-					template['archiveLocation']=catalogue_data['Loc. in Archive']
-					template['shortTitle']=catalogue_data['Short Title']
-					template['url']=catalogue_data['Collection URL']
-					
-					ship_name=voyage.voyage_ship.ship_name
-					if ship_name in ['',None]:
-						ship_name="[vessel name unspecified]"
-					
-					voyage_dates=voyage.voyage_dates
-					vd=voyage_dates.first_dis_of_slaves_sparsedate
-					if vd is None:
-						vd=voyage_dates.slave_purchase_began_sparsedate
-					if vd is None:
-						vd=voyage_dates.vessel_left_port_sparsedate
-						
-					y=vd.year
-					ystr=y or ''
-					m=vd.month
-					mstr=m or ''
-					d=vd.day
-					dstr=d or ''
-					
-					titledatestr=f'{mstr}-{dstr}-{ystr}'
-					
-					zoterodatestr=f'{ystr}-{mstr}-{dstr}'
-					
-					title=f'Manifest of the {ship_name}, {zoterodatestr}'
-					
+				y=vd.year
+				ystr=y or ''
+				m=vd.month
+				mstr=m or ''
+				d=vd.day
+				dstr=d or ''
+				
+				titledatestr=f'{mstr}-{dstr}-{ystr}'
+				
+				zoterodatestr=f'{ystr}-{mstr}-{dstr}'
+				
+				title=f'Manifest of the {ship_name}, {titledatestr}'
+				
+				
+				source,source_isnew=Source.objects.get_or_create(
+					title=title,
+					short_ref=shortref_obj
+				)
+				
+				print(shortref_obj)
+				
+				if source_isnew:
+					print(f"-->creating source {title}")
 					template['title']=title
-					
 					template['date']=zoterodatestr
 					
 					while True:
@@ -172,25 +182,26 @@ class Command(BaseCommand):
 						day=d
 					)
 					
-					source=Source.objects.create(
-						title=title,
-						zotero_group_id=library_id,
-						zotero_item_id=zotero_item_id,
-						short_ref=shortref_obj,
-						zotero_grouplibrary_name=shortref,
-						zotero_url=zotero_url,
-						date=source_date,
-						source_type=source_type,
-						bib=bib
-					)
+					source.title=title
+					source.zotero_group_id=library_id
+					source.zotero_item_id=zotero_item_id
+					source.short_ref=shortref_obj
+					source.zotero_grouplibrary_name=shortref
+					source.zotero_url=zotero_url
+					source.date=source_date
+					source.source_type=source_type
+					source.bib=bib
+					source.save()
 				
-				else:
-					source=sources[0]
-					
-				SourceVoyageConnection.objects.create(
+				svcs=SourceVoyageConnection.objects.filter(
 					source=source,
 					voyage=voyage
 				)
+				if svcs.count()==0:
+					SourceVoyageConnection.objects.create(
+						source=source,
+						voyage=voyage
+					)
 				
 				enslavementrelations=voyage.voyage_enslavement_relations.all()
 				
@@ -203,18 +214,29 @@ class Command(BaseCommand):
 				
 				for enslaved_id in enslaved_ids:
 					enslaved=Enslaved.objects.get(id=enslaved_id)
-					SourceEnslavedConnection.objects.create(
+					secs=SourceEnslavedConnection.objects.filter(
 						source=source,
 						enslaved=enslaved
 					)
+					if secs.count()==0:
+						SourceEnslavedConnection.objects.create(
+							source=source,
+							enslaved=enslaved
+						)
+
 					
 				
 				for enslaver_id in enslaver_ids:
 					enslaver=EnslaverIdentity.objects.get(id=enslaver_id)
-					SourceEnslaverConnection.objects.create(
+					secs=SourceEnslaverConnection.objects.filter(
 						source=source,
 						enslaver=enslaver
 					)
+					if secs.count()==0:
+						SourceEnslaverConnection.objects.create(
+							source=source,
+							enslaver=enslaver
+						)
 				
 				for page_image_url in voyage_image_pairings[voyage_id][catalogue]:
 					
@@ -222,7 +244,7 @@ class Command(BaseCommand):
 						iiif_baseimage_url=page_image_url
 					)
 					
-					SourcePageConnection.objects.create(
+					spc,spc_isnew=SourcePageConnection.objects.get_or_create(
 						page=page,
 						source=source
 					)
@@ -230,11 +252,7 @@ class Command(BaseCommand):
 				
 					
 					
-					
-# 					
-						
-					
-					## if it's one of our new (ssc & texas so far) docs, the legacy source will be split out into its component parts. Log that and move on.
+## if it's one of our new (ssc & texas so far) docs, the legacy source will be split out into its component parts. Log that and move on.
 # 					if mzsc > 1:
 # 						print("multiple hits --> ",mzsc,"zotero sources matching",ls.short_ref)
 # 					elif mzsc==0:
@@ -270,58 +288,3 @@ class Command(BaseCommand):
 # 						print(voyage_dates.__dict__)
 # 						exit()
 		print(c)
-
-				
-		
-		
-		
-		
-		
-		
-# 		
-# 		
-# 		
-# 		
-# 		
-# 		
-# 		
-# 		
-# 		
-# 		library_id=zotero_credentials['library_id']
-# 		library_type=zotero_credentials['library_type']
-# 		api_key=zotero_credentials['api_key']
-# 		zot = zotero.Zotero(library_id, library_type, api_key)
-# 		
-# 		shortref=options['shortref']
-# 		
-# 		sources=Source.objects.all()
-# 		if shortref is not None:
-# 			sources=sources.filter(short_ref__name__icontains=shortref)
-# 			c=1
-# 			errors=0
-# 			cutoff=5
-# 			for source in sources:
-# 				zotero_item_id=source.zotero_item_id
-# 				failure=False
-# 				while True:
-# 					res = requests.get( \
-# 					f"https://api.zotero.org/groups/{library_id}/items/{zotero_item_id}?format=json&include=bib&style=chicago-fullnote-bibliography", \
-# 					headers={ 'Authorization': f"Bearer {api_key}" }, \
-# 					timeout=60)
-# 					
-# 					if res.status_code==200:
-# 						break
-# 					else:
-# 						print("Error")
-# 						errors+=1
-# 						if errors>cutoff:
-# 							failure=True
-# 							print("SKIPPING",source.title)
-# 			
-# 				if not failure:
-# 					item = res.json()
-# 					
-# 					bib=item['bib']
-# 					
-# 					source.bib=bib
-# 					source.save()

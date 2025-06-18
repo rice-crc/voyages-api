@@ -13,7 +13,8 @@ from django.db import transaction
 from django.db.models import Prefetch
 from document.models import Source
 from voyages3.settings import STATIC_ROOT
-from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_API,STATIC_URL
+from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_URL,STATIC_URL,IIIF_MANIFESTS_BASE_PATH
+
 import os
 
 # We special case these sources as they have issues with their IIIF Image
@@ -46,7 +47,7 @@ class Command(BaseCommand):
 		in the database that have page images attached to them."""
 
 	def add_arguments(self, parser):
-		parser.add_argument("--base-url",default=f"{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/")
+		parser.add_argument("--base-url",default=f"{OPEN_API_BASE_URL}{IIIF_MANIFESTS_BASE_PATH}")
 		parser.add_argument("--out-dir", type=pathlib.Path,
 							help="The output directory where the manifests should be placed",
 							default=f"{STATIC_ROOT}/iiif_manifests/")
@@ -75,15 +76,12 @@ class Command(BaseCommand):
 			.prefetch_related('source_enslaved_connections__enslaved') \
 			.filter(
 				~Q(page_connections__page=None)
-# 				and ~Q(manifest_content=None)
 			)
 		
 		shortref=options['shortref']
 		if shortref is not None:
 			sources=sources.filter(short_ref__name__icontains=shortref)
 		
-		
-# 		sources=sources.filter(id=5137)
 		print(f"Found {sources.count()} sources with page images.")
 		
 		if options['skip_existing'] in [True,'true','True']:
@@ -94,7 +92,16 @@ class Command(BaseCommand):
 			else:
 				print("We will publish manifests for all of them.")
 		else:
-			print("We will publish manifests for all of them.")
+			print("We will clear all manifests and re-publish all of them.")
+			
+			cleared_sources=list(sources)
+			for s in cleared_sources:
+				s.has_published_manifest = False
+			
+			Source.objects.bulk_update(cleared_sources, ["has_published_manifest"])
+
+# 			sources.update(has_published_manifest=False)
+# 			sources.save()
 		
 		generated_count=0
 		

@@ -11,6 +11,9 @@ from common.static.Post_options import Post_options
 from common.static.Author_options import Author_options
 from common.static.Institution_options import Institution_options
 from common.autocomplete_indices import get_all_model_autocomplete_fields
+import re
+from voyages3.settings import site_storage_base_url
+from voyages3.localsettings import OPEN_API_BASE_URL
 
 class AuthorInstitutionSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -33,14 +36,31 @@ class TagSerializer(serializers.ModelSerializer):
 		model=Tag
 		fields='__all__'
 
+def media_uploads_sub(html):
+	'''
+		blog posts are composed in the tinymce editor and can use the filebrowser plugin
+		to upload assets, such as images. when these are embedded in the html, they are
+		recorded with relative paths. as a result, the front-end looks, for instance, for
+		an image in the blog post at the front-end site, naturally, rather than here. we
+		rewrite the html before returning it (until i can find a better system).
+	'''
+	site_storage_base_url_no_leading_slash=re.sub("^/","",site_storage_base_url)
+	media_uploads_baseurl=f"{OPEN_API_BASE_URL}{site_storage_base_url_no_leading_slash}"
+	clean_html=re.sub(f"(?<=src=\").*?{site_storage_base_url}",media_uploads_baseurl,html)
+	return clean_html
+
 class PostSerializer(serializers.ModelSerializer):
 	authors = PostAuthorSerializer(many=True,read_only=True)
 	tags = TagSerializer(many=True,read_only=True)
 	thumbnail = serializers.SerializerMethodField('get_thumbnail_url')
+	content = serializers.SerializerMethodField('get_content')
 	@extend_schema_field(serializers.CharField)
 	def get_thumbnail_url(self, obj) -> str:
 		if obj.thumbnail not in ["",None]:
 			return obj.thumbnail.url
+	def get_content(self, obj):
+		return media_uploads_sub(obj.content)
+	
 	class Meta:
 		model=Post
 		fields='__all__'

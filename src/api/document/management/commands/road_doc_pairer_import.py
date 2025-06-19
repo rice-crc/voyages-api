@@ -31,6 +31,9 @@ class Command(BaseCommand):
 		parser.add_argument("--shortref", default=None)
 
 	def handle(self, *args, **options):
+		#NOT RUNNING THIS ON PROD W/O DJK's APPROVAL
+		exit()
+		
 		shortref=options['shortref']
 		if not shortref:
 			print("you must specify a shortref.")

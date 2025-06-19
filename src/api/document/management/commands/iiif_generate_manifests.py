@@ -62,6 +62,8 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		
+		#NOT RUNNING THIS ON PROD W/O DJK's APPROVAL
+		exit()
 		#screen out sources that lack either pages  
 		sources = Source.objects \
 			.prefetch_related('page_connections') \

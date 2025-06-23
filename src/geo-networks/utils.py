@@ -9,6 +9,7 @@ from maps import rnconversion
 import multiprocessing
 import numpy as np
 import time
+import re
 
 def fuzzyplacenamestrip(name):
 	name=re.sub("(,\s*port unspecified)|(,\s*unspecified)|(\(colony unspecified\))|(,\s*place unspecified)","",name,re.I)
@@ -149,7 +150,7 @@ def add_non_oceanic_nodes(G,endpoint,graph_params,filter_obj,init_node_id=0):
 				### (E.G., DID WE FIND THIS AS AN EMBARKATION OR DISEMBARKATION?)
 				### (AND IF IT ALREADY EXISTS, THEN WE WANT TO LAYER THAT NEW TAG IN)
 				### RATHER THAN DUPLICATING
-				att_dict={att_name:fuzzyplacenamestrip(row[att_names.index(att_name)]) for att_name in att_names}
+				att_dict={att_name:row[att_names.index(att_name)] for att_name in att_names}
 				#WE'VE GOT TO SCREEN OUT AND PROPERLY FORMAT NULL LAT & LONGS...
 				#SO THIS IS A GEO-ONLY NETWORK FOR NOW...
 				if 'lat' in att_dict and 'lon' in att_dict:

@@ -62,7 +62,7 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		
-		#NOT RUNNING THIS ON PROD W/O DJK's APPROVAL
+		#NOT RUNNING THIS EXCEPT LOCALLY W/O DJK's APPROVAL
 		exit()
 		#screen out sources that lack either pages  
 		sources = Source.objects \

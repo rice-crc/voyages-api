@@ -3,7 +3,6 @@ from django.template import loader
 from django.shortcuts import redirect,render
 from django.core.paginator import Paginator
 from django.shortcuts import render,get_object_or_404
-from django.http import HttpResponse, JsonResponse
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata

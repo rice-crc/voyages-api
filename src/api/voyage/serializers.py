@@ -280,7 +280,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 		cargo_return=[]
 		for cc in cargoconnections:
 			cargo=cc.cargo.name
-			unit=cc.cargo.unit
+			unit=cc.unit
 			amount=cc.amount
 			cargo_return.append(f"{amount} {unit} {cargo}")
 		return cargo_return

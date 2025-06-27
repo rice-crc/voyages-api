@@ -92,6 +92,17 @@ class Command(BaseCommand):
 					'voyage_source_connections__source__bib',
 					'voyage_source_connections__source__short_ref__name'
 				]
+			},
+			{
+				"model":EnslaverIdentity,
+				"core_name":"enslaversources",
+				"fields":[
+					'id',
+					'enslaver_source_connections__source__bib',
+					'enslaver_source_connections__source__short_ref__name',
+					'aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__bib',
+					'aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__short_ref__name'
+				]
 			}
 		]
 		

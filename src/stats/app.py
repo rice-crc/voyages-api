@@ -196,15 +196,11 @@ def groupby():
 	'''
 	st=time.time()
 	rdata=request.json
-	dfname=rdata['cachename']
 	ids=rdata['ids']
-	groupby_by=rdata['groupby_by']
-	groupby_cols=rdata['groupby_cols']
+	groupby_by=rdata['by']
+	groupby_cols=rdata['cols']
 	agg_fn=rdata['agg_fn']
-	
-	if dfname in replaced_dfs:
-		dfname='big_df'
-	df=eval(dfname)['df']
+	df=eval('big_df')['df']
 	df2=df[df['id'].isin(ids)]
 	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
 	ct=ct.fillna(0)

@@ -167,7 +167,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	prefetch_fields=params.get('selected_fields') or []
 	if prefetch_fields==[] and auto_prefetch:
 		prefetch_fields=list(all_fields.keys())
-	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
+	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i and not i.endswith('__ALL')]))
 	if DEBUG:
 		print(f'--prefetch: {len(prefetch_vars)} vars--')
 	for p in prefetch_vars:
@@ -255,7 +255,15 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					filter_obj.remove(item)
 			# SPECIAL CASE 2: DOCUMENTARY SOURCES
 			if varName.endswith("__source__ALL"):
-				filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='voyagesources')
+				qsetclassstr=str(orig_queryset[0].__class__)
+				if solrcorenamedict[qsetclassstr]=='voyages':
+					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='voyagesources')
+				elif solrcorenamedict[qsetclassstr]=='enslavers':
+					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='enslaversources')
+				elif solrcorenamedict[qsetclassstr]=='enslaved':
+					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='enslavedsources')
+				
+				
 				filter_obj.remove(item)
 		# TYPICAL ORM-BASED SEARCH/FILTER
 		for item in filter_obj:

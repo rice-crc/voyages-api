@@ -32,6 +32,8 @@ class Transcription(models.Model):
 	def __str__(self):
 		if len(self.text)>20:
 			snippet=self.text[:19]+"..."
+		else:
+			snippet=self.text
 		return f"Transcription of page {self.page}: {snippet}"
 
 class Page(models.Model):

@@ -49,15 +49,7 @@ class Command(BaseCommand):
 		
 		j=json.loads(resp.text)
 		
-# 		print(resp,json.dumps(j,indent=2))
-		
 		transkribus_shortrefs=ShortRef.objects.all().exclude(transkribus_docId=None)
-		transkribus_shortrefs=transkribus_shortrefs.exclude(name__icontains="SSC Add Ms")
-# 		transkribus_shortrefs=transkribus_shortrefs.exclude(transkribus_docId__in=[1301052,1594526])
-		
-# 		transkribus_shortrefs=transkribus_shortrefs.filter(transkribus_docId=1296568)
-		
-		# transkribus_shortrefs=transkribus_shortrefs.exclude(transkribus_docId__in=[1301052,1594526])
 		
 		print(transkribus_shortrefs)
 		
@@ -77,7 +69,8 @@ class Command(BaseCommand):
 					pd[a]=[b]
 		
 		for docId in pd:
-			if docId not in ['25566', '25565', '25564', '25563', '25562', '25561', '25560', '25555', '25552', '25554', '25553', '25551', '25550', '25575', '25557', '25567', '25556', '25510', '25509', '25508', '25506', '25507', '25505', '25504', '25503', '25502', '25501', '25500', '25582', '25576', '25577','1437762','1470747','1470827','1470863','1470876','1487718','1487721','1492986','1493090','1493096','1494915','1494931','1496973','1497235']:
+# 			if docId not in ['25566', '25565', '25564', '25563', '25562', '25561', '25560', '25555', '25552', '25554', '25553', '25551', '25550', '25575', '25557', '25567', '25556', '25510', '25509', '25508', '25506', '25507', '25505', '25504', '25503', '25502', '25501', '25500', '25582', '25576', '25577','1437762','1470747','1470827','1470863','1470876','1487718','1487721','1492986','1493090','1493096','1494915','1494931','1496973','1497235']:
+			if docId not in ['1437762', '1439396', '1438141']:
 				break
 			print('DOCID',docId)
 			pages=pd[docId]
@@ -86,6 +79,7 @@ class Command(BaseCommand):
 			
 			for pagepk in pages:
 				page=Page.objects.get(id=pagepk)
+				print(page)
 				page.transkribus_pageid=None
 				page.transcription=None
 				page.save()
@@ -96,14 +90,13 @@ class Command(BaseCommand):
 			
 			c=1
 			for transkribus_page in doc['pageList']['pages']:
-# 				print("PAGES",pages,'COUNT',len(pages))
-# 				print("C=",c)
 				pagetexturls=[]
 				sp=Page.objects.get(id=pages[c-1])
 				print(sp.source_connections.first().source)
 				
 				
-				if sp.transcriptions.all() != []:
+				if sp.transcriptions.all().count() != 0:
+					print(sp.transcriptions.all())
 					print("transcription already exists")
 				else:
 					imgFileName=transkribus_page['imgFileName']
@@ -111,25 +104,21 @@ class Command(BaseCommand):
 					## and then bump them as necessary and re-pull (i don't want to do this!!!!)
 					transkribus_pageId=transkribus_page['pageId']
 					transcripts=transkribus_page['tsList']['transcripts']
-# 					if c==8:
-# 						print(json.dumps(transkribus_page,indent=2))
 					
 					pagetext=''
 					for transcript in transcripts:
 						wordcount=transcript['nrOfCharsInLines']
 						if wordcount>0:
 							transcript_url=transcript['url']
-	# 							print(transcript_url)
 							connection_pool = urllib3.PoolManager()
 							resp = connection_pool.request('GET',transcript_url,headers=auth_headers)
-							tmpfilename="tmp/%s.xml" %docId
+							tmpfilename="document/management/commands/data/%s.xml" %docId
 							f = open(tmpfilename, 'wb')
 							f.write(resp.data)
 							f.close()
 							resp.release_conn()
 							d=open(tmpfilename,"r")
 							t=d.read()
-							
 							d.close()
 							pagetree=ET.fromstring(t)
 							textlines_trees=[e for e in pagetree.iter() if e.tag=="{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}TextLine"]
@@ -141,22 +130,16 @@ class Command(BaseCommand):
 								linetext=[e.text for e in textline_tree.iter() if e.tag=='{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}Unicode' and e.text is not None]
 								textlines.append(' '.join(linetext))
 							pagetext+='\n'.join(textlines)
-# 					print(pagetext)
+					print(pagetext)
 					if re.match('\s+',pagetext,re.S):
 						pagetext=None
 					
-# 					sp.transkribus_pageid=transkribus_pageId
 					Transcription.objects.create(
 						page=sp,
 						language_code='en',
 						text=pagetext,
 						is_translation=False
 					)
-					
-# 					sp.transcriptions.add=pagetext
-# 					sp.save()
-					
-					
 					
 
 				c+=1

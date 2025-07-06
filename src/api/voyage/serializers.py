@@ -280,9 +280,9 @@ class VoyageSerializer(serializers.ModelSerializer):
 		cargo_return=[]
 		for cc in cargoconnections:
 			cargo=cc.cargo.name
-			unit=cc.cargo.unit
+			unit=cc.unit
 			amount=cc.amount
-			cargo_return.append(f"{amount} {unit} {cargo}")
+			cargo_return.append(" ".join([i for i in [amount,unit,cargo] if i is not None]))
 		return cargo_return
 	
 	def get_linked_voyages(self,instance) -> VoyageSourceSerializer(many=True):

@@ -43,7 +43,13 @@ class PastSourceSerializer(serializers.ModelSerializer):
  
 ############ VOYAGES
 
-class PastEnslavedVoyageSerializer(serializers.ModelSerializer):
+
+class PastVoyageOutcomesSerializer(serializers.Serializer):
+	particular_outcome=serializers.CharField()
+	class Meta:
+		fields=['particular_outcome']
+
+class PastEnslavedVoyageSerializer(serializers.Serializer):
 	id=serializers.IntegerField()
 	embarkation=serializers.CharField()
 	disembarkation=serializers.CharField()
@@ -51,8 +57,8 @@ class PastEnslavedVoyageSerializer(serializers.ModelSerializer):
 	month=serializers.IntegerField()
 	day=serializers.IntegerField()
 	ship_name=serializers.CharField()
+	outcomes=PastVoyageOutcomesSerializer(many=False)
 	class Meta:
-		model=Voyage
 		fields=[
 			'id',
 			'embarkation',
@@ -60,7 +66,8 @@ class PastEnslavedVoyageSerializer(serializers.ModelSerializer):
 			'year',
 			'month',
 			'day',
-			'ship_name'
+			'ship_name',
+			'outcomes'
 		]
 
 
@@ -106,21 +113,11 @@ class EnslavedSerializer(serializers.ModelSerializer):
 		else:
 			gender=None
 		return gender
-
 	
 	def get_sources(self,instance) -> PastSourceSerializer(many=True):
-		escs=instance.enslaved_source_connections.all()
-		sources_dict={}
-		for esc in escs:
-			page_range=esc.page_range
-			s=esc.source
-			s_id=s.id
-			s.page_ranges=[page_range]
-			if s_id not in sources_dict:
-				sources_dict[s_id]=s
-			else:
-				sources_dict[s_id].page_ranges.append(page_range)
-		return PastSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True).data
+		source_ids=list(set([i[0] for i in Enslaved.objects.all().filter(id=instance.id).values_list('enslaved_relations__relation__voyage__voyage_source_connections__source')]))
+		sources=Source.objects.all().filter(id__in=source_ids)
+		return PastSourceSerializer(sources,many=True,read_only=True).data
 
 	def get_voyages(self,instance) -> PastEnslavedVoyageSerializer(many=False):
 		#right now, the table layouts, basically everything assume a single voyage per enslaved person
@@ -148,6 +145,13 @@ class EnslavedSerializer(serializers.ModelSerializer):
 		if not ship_name:
 			ship_name="ship unknown"
 		
+		particular_outcome=v.voyage_outcome.particular_outcome
+		if not particular_outcome:
+			particular_outcome="outcome unknown"
+		else:
+			particular_outcome=particular_outcome.name
+		
+		
 		voyagedict={
 			'id':v.id,
 			'embarkation':embark,
@@ -155,7 +159,10 @@ class EnslavedSerializer(serializers.ModelSerializer):
 			'year':year,
 			'month':month,
 			'day':day,
-			'ship_name':ship_name
+			'ship_name':ship_name,
+			'outcomes':{
+				'particular_outcome':particular_outcome
+			}
 		}
 					
 		return PastEnslavedVoyageSerializer(voyagedict,many=False,read_only=True).data
@@ -233,6 +240,12 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 		return aliases
 	
 	def get_sources(self,instance) -> PastSourceSerializer(many=True):
+		source_ids=list(set([i[0] for i in EnslaverIdentity.objects.all().filter(id=instance.id).values_list('aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__id')]))
+		sources=Source.objects.all().filter(id__in=source_ids)
+		return PastSourceSerializer(sources,many=True,read_only=True).data
+
+
+
 		escs=instance.enslaver_source_connections.all()
 		sources_dict={}
 		for esc in escs:

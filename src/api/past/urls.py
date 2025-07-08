@@ -20,8 +20,7 @@ urlpatterns = [
 	path('enslaver/geotree/',views.EnslaverGeoTreeFilter.as_view()),
 	path('enslaved/languagegrouptree/',views.EnslavedLanguageGroupTree.as_view()),
 	path('enslaver/EnslaverRoleList/',views.EnslaverRoleList.as_view()),
-	path('GenderList/',views.GenderList.as_view()),	
-	
+	path('GenderList/',views.GenderList.as_view())
 	
 # 	path('enslavementrelation/CREATE/',views.EnslavementRelationCREATE.as_view()),
 # 	path('enslavementrelation/<int:id>',views.EnslavementRelationRETRIEVE.as_view()),

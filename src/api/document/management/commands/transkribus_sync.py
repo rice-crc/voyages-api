@@ -81,7 +81,6 @@ class Command(BaseCommand):
 				page=Page.objects.get(id=pagepk)
 				print(page)
 				page.transkribus_pageid=None
-				page.transcription=None
 				page.save()
 			
 			doc_url="https://transkribus.eu/TrpServer/rest/collections/%s/%s/fulldoc" %(transkribus_collection_id,docId)
@@ -91,55 +90,68 @@ class Command(BaseCommand):
 			c=1
 			for transkribus_page in doc['pageList']['pages']:
 				pagetexturls=[]
-				sp=Page.objects.get(id=pages[c-1])
-				print(sp.source_connections.first().source)
 				
+				imgFileName=transkribus_page['imgFileName']
 				
-				if sp.transcriptions.all().count() != 0:
-					print(sp.transcriptions.all())
-					print("transcription already exists")
-				else:
-					imgFileName=transkribus_page['imgFileName']
-					## but as a backstop we can capture the pageid on the transkribus side as well
-					## and then bump them as necessary and re-pull (i don't want to do this!!!!)
-					transkribus_pageId=transkribus_page['pageId']
-					transcripts=transkribus_page['tsList']['transcripts']
-					
-					pagetext=''
-					for transcript in transcripts:
-						wordcount=transcript['nrOfCharsInLines']
-						if wordcount>0:
-							transcript_url=transcript['url']
-							connection_pool = urllib3.PoolManager()
-							resp = connection_pool.request('GET',transcript_url,headers=auth_headers)
-							tmpfilename="document/management/commands/data/%s.xml" %docId
-							f = open(tmpfilename, 'wb')
-							f.write(resp.data)
-							f.close()
-							resp.release_conn()
-							d=open(tmpfilename,"r")
-							t=d.read()
-							d.close()
-							pagetree=ET.fromstring(t)
-							textlines_trees=[e for e in pagetree.iter() if e.tag=="{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}TextLine"]
-							textlines=[]
-							
-							os.remove(tmpfilename)
-							
-							for textline_tree in textlines_trees:
-								linetext=[e.text for e in textline_tree.iter() if e.tag=='{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}Unicode' and e.text is not None]
-								textlines.append(' '.join(linetext))
-							pagetext+='\n'.join(textlines)
-					print(pagetext)
-					if re.match('\s+',pagetext,re.S):
-						pagetext=None
-					
-					Transcription.objects.create(
-						page=sp,
-						language_code='en',
-						text=pagetext,
-						is_translation=False
-					)
+				imgFileName_stripped=re.sub('(\.jpg|\.tif|\.tiff)','',imgFileName)
+				
+				skip=False
+				try:
+					sp=Page.objects.get(image_filename__icontains=imgFileName_stripped)
+					print(sp.source_connections.first().source)
+				except:
+					print(f"IMAGE MATCHING FILENAME DOES NOT EXIST:{imgFileName_stripped}")
+					skip=True
+				if not skip:
+					if sp.transcriptions.all().count() != 0:
+						print(sp.transcriptions.all())
+						print("transcription already exists")
+					else:
+						imgFileName=transkribus_page['imgFileName']
+						
+						## but as a backstop we can capture the pageid on the transkribus side as well
+						## and then bump them as necessary and re-pull (i don't want to do this!!!!)
+						transkribus_pageId=transkribus_page['pageId']
+						transcripts=transkribus_page['tsList']['transcripts']
+						pagetext=''
+						max_ts=0
+						transcript=transcripts[0]
+						
+						if transcript is not None:
+						
+							wordcount=transcript['nrOfCharsInLines']
+							if wordcount>0:
+								transcript_url=transcript['url']
+								connection_pool = urllib3.PoolManager()
+								resp = connection_pool.request('GET',transcript_url,headers=auth_headers)
+								tmpfilename="document/management/commands/data/%s.xml" %docId
+								f = open(tmpfilename, 'wb')
+								f.write(resp.data)
+								f.close()
+								resp.release_conn()
+								d=open(tmpfilename,"r")
+								t=d.read()
+								d.close()
+								pagetree=ET.fromstring(t)
+								textlines_trees=[e for e in pagetree.iter() if e.tag=="{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}TextLine"]
+								textlines=[]
+								
+								os.remove(tmpfilename)
+								
+								for textline_tree in textlines_trees:
+									linetext=[e.text for e in textline_tree.iter() if e.tag=='{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}Unicode' and e.text is not None]
+									textlines.append(' '.join(linetext))
+								pagetext+='\n'.join(textlines)
+						print(pagetext)
+						if re.match('\s+',pagetext,re.S):
+							pagetext=""
+						
+						Transcription.objects.create(
+							page=sp,
+							language_code='en',
+							text=pagetext,
+							is_translation=False
+						)
 					
 
 				c+=1

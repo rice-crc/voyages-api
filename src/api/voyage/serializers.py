@@ -282,7 +282,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 			cargo=cc.cargo.name
 			unit=cc.unit
 			amount=cc.amount
-			cargo_return.append(f"{amount} {unit} {cargo}")
+			cargo_return.append(" ".join([i for i in [amount,unit,cargo] if i is not None]))
 		return cargo_return
 	
 	def get_linked_voyages(self,instance) -> VoyageSourceSerializer(many=True):
@@ -425,6 +425,20 @@ class VoyageListResponseSerializer(serializers.Serializer):
 	results=VoyageSerializer(many=True,read_only=True)
 	
 
+class VoyageGroupByParamsRequestSerializer(serializers.Serializer):
+	by=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	cols=serializers.ListField(
+		child=serializers.ChoiceField(choices=[
+			k for k in Voyage_options if Voyage_options[k]['type'] in [
+				'integer',
+				'number'
+			]
+		])
+	)
+	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min'])
+
+
+
 ############ BAR, SCATTER, AND PIE CHARTS
 @extend_schema_serializer(
 	examples=[
@@ -433,13 +447,14 @@ class VoyageListResponseSerializer(serializers.Serializer):
 			summary="Filtered scatter plot req",
 			description="Here, we are looking for bar charts of how many people embarked, and how many people disembarked, by the region of embarkation, on voyages that landed in Barbados.",
 			value={
-				"groupby_by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
-				"groupby_cols":[
-					"voyage_slaves_numbers__imp_total_num_slaves_embarked",
-					"voyage_slaves_numbers__imp_total_num_slaves_disembarked"
-				],
-				"agg_fn":"sum",
-				"cachename":"voyage_bar_and_donut_charts",
+				"groupby":{
+					"groupby_by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+					"groupby_cols":[
+						"voyage_slaves_numbers__imp_total_num_slaves_embarked",
+						"voyage_slaves_numbers__imp_total_num_slaves_disembarked"
+					],
+					"agg_fn":"sum"
+				},
 				"filter":[
 					{
 						"varName": "voyage_itinerary__imp_principal_region_slave_dis__name",
@@ -452,20 +467,7 @@ class VoyageListResponseSerializer(serializers.Serializer):
 	]
 )
 class VoyageGroupByRequestSerializer(serializers.Serializer):
-	groupby_by=serializers.ChoiceField(choices=[k for k in Voyage_options])
-	groupby_cols=serializers.ListField(
-		child=serializers.ChoiceField(choices=[
-			k for k in Voyage_options if Voyage_options[k]['type'] in [
-				'integer',
-				'number'
-			]
-		])
-	)
-	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min'])
-	cachename=[
-		'voyage_xyscatter',
-		'voyage_bar_and_donut_charts'
-	]
+	groupby=VoyageGroupByParamsRequestSerializer(many=False,allow_null=False,required=True)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 

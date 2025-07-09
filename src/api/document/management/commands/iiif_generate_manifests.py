@@ -63,7 +63,7 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		
 		#NOT RUNNING THIS EXCEPT LOCALLY W/O DJK's APPROVAL
-		exit()
+# 		exit()
 		#screen out sources that lack either pages  
 		sources = Source.objects \
 			.prefetch_related('page_connections') \
@@ -97,10 +97,7 @@ class Command(BaseCommand):
 				s.has_published_manifest = False
 			
 			Source.objects.bulk_update(cleared_sources, ["has_published_manifest"])
-
-# 			sources.update(has_published_manifest=False)
-# 			sources.save()
-		
+			
 		generated_count=0
 		
 		for source in sources:
@@ -125,7 +122,7 @@ class Command(BaseCommand):
 				canvas = []
 				abort = False
 				for i, page in enumerate(pages_with_images, 1):
-# 					print(page.__dict__)
+					print(page.__dict__)
 					iiif_baseimage_url=page.iiif_baseimage_url
 					# A canvas page.
 					host_addr,iiif_suffix = Command._extract_iiif_url(iiif_baseimage_url)

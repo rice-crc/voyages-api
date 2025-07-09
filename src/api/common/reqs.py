@@ -258,10 +258,13 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			# SPECIAL CASE 2: DOCUMENTARY SOURCES
 			if varName.endswith("__source__ALL"):
 				qsetclassstr=str(orig_queryset[0].__class__)
-				if qsetclassstr=="<class 'voyage.models.Voyage'>":
+				if solrcorenamedict[qsetclassstr]=='voyages':
 					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='voyagesources')
-				elif qsetclassstr=="<class 'past.models.EnslaverIdentity'>":
+				elif solrcorenamedict[qsetclassstr]=='enslavers':
 					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='enslaversources')
+				elif solrcorenamedict[qsetclassstr]=='enslaved':
+					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='enslavedsources')
+				
 				filter_obj.remove(item)
 		# TYPICAL ORM-BASED SEARCH/FILTER
 		for item in filter_obj:

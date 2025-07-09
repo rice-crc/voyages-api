@@ -44,9 +44,12 @@ def media_uploads_sub(html):
 		an image in the blog post at the front-end site, naturally, rather than here. we
 		rewrite the html before returning it (until i can find a better system).
 	'''
+	print(html)
 	site_storage_base_url_no_leading_slash=re.sub("^/","",site_storage_base_url)
 	media_uploads_baseurl=f"{OPEN_API_BASE_URL}{site_storage_base_url_no_leading_slash}"
 	clean_html=re.sub(f"(?<=src=\").*?{site_storage_base_url}",media_uploads_baseurl,html)
+	clean_html=re.sub(f"(?<=href=\").*?{site_storage_base_url}",media_uploads_baseurl,clean_html)
+	print(clean_html)
 	return clean_html
 
 class PostSerializer(serializers.ModelSerializer):

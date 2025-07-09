@@ -358,7 +358,9 @@ class VoyageGroupBy(generics.GenericAPIView):
 			#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
 			ids=[i[0] for i in results.values_list('id')]
 			u2=STATS_BASE_URL+'groupby/'
-			d2=dict(request.data)
+			rdata=dict(request.data)
+			groupby=rdata.get('groupby')
+			d2=groupby
 			d2['ids']=ids
 		
 			#NOT QUITE SURE HOW TO VALIDATE THE RESPONSE OF THIS VIA A SERIALIZER

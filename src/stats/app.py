@@ -200,13 +200,58 @@ def groupby():
 	by=rdata['by']
 	vals=[rdata['vals']]
 	agg_fn=rdata['agg_fn']
+	binsize=None
+	if re.match("[a-z]+__bins__[0-9]+",agg_fn):
+		binsize=int(re.search("[0-9]+",agg_fn).group(0))
+		agg_fn=re.search("[a-z]+(?=__)",agg_fn).group(0)
 	df=eval('big_df')['df']
 	df2=df[df['id'].isin(ids)]
-	ct=df2.groupby(by,group_keys=True)[vals].agg(agg_fn)
-	ct=ct.fillna(0)
-	resp={by:list(ct.index)}
-	for v in vals:
-		resp[v]=list(ct[v])
+	
+	##TBD --> NEED TO VALIDATE THAT THE ROWS VARIABLE IS
+	####1) NUMERIC TO WORK IN THE FIRST PLACE
+	####2) A YEAR VAR IN ORDER TO MAKE SENSE TO A HUMAN END-USER
+	if binsize is not None:
+		val=vals[0]
+		binrows=by
+		binsize=int(binsize)
+		
+		df2[binrows]=df2[binrows].astype('int')
+		binvar_min=df2[binrows].min()
+		binvar_max=df2[binrows].max()
+		binvar_ints=list(range(int(binvar_min),int(binvar_max)+1))
+		if binvar_max-binvar_min <=binsize:
+			nbins=1
+		else:
+			nbins=int((binvar_max-binvar_min)/binsize)+1
+		
+		bin_tuples=[]
+		for nbin in range(nbins):
+			nbinmin=binvar_min+(binsize*nbin)
+			nbinmax=binvar_min+(binsize*(nbin+1))-1
+			if nbinmax>=binvar_max:
+				nbinmax=binvar_max
+			thisbin=(nbinmin,nbinmax)
+			bin_tuples.append(thisbin)
+		bins=pd.IntervalIndex.from_tuples(bin_tuples,closed='both')
+		
+		df2=df2.assign(row_bins=pd.cut(df2[by],bins,include_lowest=True))
+		df2=df2[[val]+['row_bins']]
+		df2=df2.rename(columns={"row_bins": by})
+		gb=df2.groupby(by,group_keys=True).agg(agg_fn)
+		gb=gb.fillna(0)
+		
+		idx=[re.sub(", ","-",re.sub(r"[\[|\]]","",str(i))) for i in gb.index]
+		vs=list(gb[val])
+		resp={
+			by:idx,
+			val:vs
+		}
+	else:
+		gb=df2.groupby(by,group_keys=True)[vals].agg(agg_fn)
+		gb=gb.fillna(0)
+		resp={by:list(gb.index)}
+		for v in vals:
+			resp[v]=list(gb[v])
 	return json.dumps(resp)
 
 #https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna
@@ -574,18 +619,15 @@ def crosstabs():
 	Unfortunately, I haven't figured out how to do this for less than 10MB and 5 seconds if I style the html dump at all
 	--> so for now at least it'll have to be on-page jquery indexing?
 	'''
-
-# 	try:
+	
 	st=time.time()
 	rdata=request.json
 	dfname=rdata.get('cachename')
 	if dfname in replaced_dfs:
 		dfname='big_df'
-# 	dfname='voyage_pivot_tables'
-	#it must have a list of ids (even if it's all of the ids)
 	ids=rdata['ids']
 
-	#and a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
+	#a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
 	columns=rdata.get('columns')
 	rows=rdata.get('rows')
 	val=rdata.get('value_field')
@@ -604,7 +646,6 @@ def crosstabs():
 		order_by_list=order_by.split('__')
 		order_by_list=tuple(order_by_list)
 	else:
-# 		print('ORDERBYISSTR',type(order_by)==list,type(order_by))
 		if type(order_by)==list:
 			if order_by[0].startswith("-"):
 				ascending=False
@@ -616,10 +657,6 @@ def crosstabs():
 	
 	if len(order_by_list)==1:
 		order_by_list=order_by_list[0]
-	
-# 	print("FIRST ORDER BY--->",order_by)
-# 	print("ASCENDING",ascending)
-# 	print("FIRST OBL--->",order_by_list)
 	
 	normalize=rdata.get('normalize')
 	if normalize is not None:
@@ -682,21 +719,7 @@ def crosstabs():
 			bin_tuples.append(thisbin)
 		
 		bins=pd.IntervalIndex.from_tuples(bin_tuples,closed='both')
-# 		binsize=int(binsize)
-# 		yeargroupmode=True
-# 		df=df.dropna(subset=[rows,val])
-# 		df[rows]=df[rows].astype('int')
-# 		year_min=df[rows].min()
-# 		year_max=df[rows].max()
-# 		year_ints=list(range(int(year_min),int(year_max+1)))
-# 		if year_max-year_min <= binsize:
-# 			nbins=1
-# 		else:
-# 			nbins=int((year_max-year_min)/binsize)
-# 		bin_arrays=np.array_split(year_ints,nbins)
-# 		bins=pd.IntervalIndex.from_tuples([(i[0],i[-1]) for i in bin_arrays],closed='both')
-
-
+		
 		df=df.assign(row_bins=pd.cut(df[rows],bins,include_lowest=True))
 		df=df[columns+[val]+['row_bins']]
 		df.rename(columns={"row_bins": rows})
@@ -714,8 +737,6 @@ def crosstabs():
 		
 		if order_by_list in [rows,"-"+rows]:
 			order_by_list='row_bins'
-# 		print("ROWS---->",rows)
-# 		print("OBL---->",order_by_list)
 		
 	else:
 		ct=pd.crosstab(

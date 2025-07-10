@@ -435,14 +435,14 @@ class VoyagePieChartParamsRequestSerializer(serializers.Serializer):
 			'number'
 		]
 	])
-	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min','count'])
-
+	agg_fn=serializers.RegexField("((mean|sum|max|min|count)__bins__[0-9]+)|(mean|sum|max|min|count)")
+	
 @extend_schema_serializer(
 	examples=[
 		OpenApiExample(
-			'Filtered Scatter Plot Request',
-			summary="Filtered scatter plot req",
-			description="Here, we are looking for bar charts of how many people embarked, and how many people disembarked, by the region of embarkation, on voyages that landed in Barbados.",
+			'Filtered Pie Chart Request',
+			summary="Filtered Pie Chart Request",
+			description="Here, we are requesting a long df of the number of people who were embarked in different regions on voyages that landed in Barbados.",
 			value={
 				"groupby":{
 					"by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
@@ -454,6 +454,27 @@ class VoyagePieChartParamsRequestSerializer(serializers.Serializer):
 						"varName": "voyage_itinerary__imp_principal_region_slave_dis__name",
 						"op": "in",
 						"searchTerm": ["Barbados"]
+					}
+				]
+			}
+		),
+		OpenApiExample(
+			'Filtered Pie Chart Request with Year Bins/Intervals',
+			summary="Filtered Pie Chart Request with Year Bins/Intervals",
+			description="Here, we are requesting a long df of how many people were embarked in 20-year periods on voyages that landed in Barbados.",
+			value={
+				"groupby": {
+					"by": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+					"vals": "voyage_slaves_numbers__imp_total_num_slaves_embarked",
+					"agg_fn": "sum__bins__20"
+				},
+				"filter": [
+					{
+						"varName": "voyage_itinerary__imp_principal_region_slave_dis__name",
+						"op": "in",
+						"searchTerm": [
+							"Barbados"
+						]
 					}
 				]
 			}
@@ -474,7 +495,7 @@ class VoyageAggSeriesSerializer(serializers.Serializer):
 			]
 		]
 	)
-	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min','count'])
+	agg_fn=serializers.RegexField("((mean|sum|max|min|count)__bins__[0-9]+)|(mean|sum|max|min|count)")
 
 class VoyageLineAndBarChartParamsRequestSerializer(serializers.Serializer):
 	by=serializers.ChoiceField(choices=[k for k in Voyage_options])
@@ -513,9 +534,6 @@ class VoyageLineAndBarChartsRequestSerializer(serializers.Serializer):
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 
-
-
-
 ############ DATAFRAMES ENDPOINT
 @extend_schema_serializer(
 	examples=[
@@ -548,9 +566,6 @@ class VoyageDataframesRequestSerializer(serializers.Serializer):
 	)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
-
-# class VoyageDataframesResponseSerializer(serializers.Serializer):
-# 	data=serializers.JSONField()
 
 ############ VOYAGE GEOTREE REQUESTS
 @extend_schema_serializer(
@@ -761,46 +776,6 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()
 	data=serializers.JSONField()
 	metadata=VoyageOffsetPaginationSerializer()
-
-############ AUTOCOMPLETE SERIALIZERS
-@extend_schema_serializer(
-	examples = [
-         OpenApiExample(
-			'Paginated autocomplete on enslaver names',
-			summary='Paginated autocomplete on enslaver names',
-			description='Here, we are requesting 5 suggested values, starting with the 10th item, of enslaver aliases (names) associated with voyages that disembarked enslaved people in Baltimore',
-			value={
-				"varName": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias",
-				"querystr": "george",
-				"offset": 10,
-				"limit": 5,
-				"filter": [
-					{
-						"varName": "voyage__voyage_itinerary__imp_principal_port_slave_dis__value",
-						"op": "in",
-						"searchTerm": ['Baltimore']
-					}
-				]
-			},
-			request_only=True
-		)
-    ]
-)
-class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=get_all_model_autocomplete_fields('Voyage'))
-	querystr=serializers.CharField(allow_null=True,allow_blank=True)
-	offset=serializers.IntegerField()
-	limit=serializers.IntegerField()
-	filter=VoyageBasicFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
-
-class VoyageAutoCompletekvSerializer(serializers.Serializer):
-	value=serializers.CharField()
-
-class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
-	suggested_values=VoyageAutoCompletekvSerializer(many=True)
-
-
 
 @extend_schema_serializer(
 	examples=[

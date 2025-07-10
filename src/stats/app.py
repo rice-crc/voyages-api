@@ -192,21 +192,21 @@ def timelapse_animation():
 def groupby():
 	'''
 	Implements the pandas groupby function and returns the sparse summary.
-	Excellent for bar & pie charts.
+	Excellent for bar, pie, and scatter charts.
 	'''
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
-	groupby_by=rdata['by']
-	groupby_cols=rdata['cols']
+	by=rdata['by']
+	vals=[rdata['vals']]
 	agg_fn=rdata['agg_fn']
 	df=eval('big_df')['df']
 	df2=df[df['id'].isin(ids)]
-	ct=df2.groupby(groupby_by,group_keys=True)[groupby_cols].agg(agg_fn)
+	ct=df2.groupby(by,group_keys=True)[vals].agg(agg_fn)
 	ct=ct.fillna(0)
-	resp={groupby_by:list(ct.index)}
-	for gbc in groupby_cols:
-		resp[gbc]=list(ct[gbc])
+	resp={by:list(ct.index)}
+	for v in vals:
+		resp[v]=list(ct[v])
 	return json.dumps(resp)
 
 #https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna

@@ -423,23 +423,20 @@ class VoyageListResponseSerializer(serializers.Serializer):
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
 	results=VoyageSerializer(many=True,read_only=True)
-	
 
-class VoyageGroupByParamsRequestSerializer(serializers.Serializer):
+
+############ LINE, BAR, AND PIE CHARTS
+### I would like to roll these together, but pie charts can only accept one value field, whereas line and bar charts can accept one or more
+class VoyagePieChartParamsRequestSerializer(serializers.Serializer):
 	by=serializers.ChoiceField(choices=[k for k in Voyage_options])
-	cols=serializers.ListField(
-		child=serializers.ChoiceField(choices=[
-			k for k in Voyage_options if Voyage_options[k]['type'] in [
-				'integer',
-				'number'
-			]
-		])
-	)
-	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min'])
+	vals=serializers.ChoiceField(choices=[
+		k for k in Voyage_options if Voyage_options[k]['type'] in [
+			'integer',
+			'number'
+		]
+	])
+	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min','count'])
 
-
-
-############ BAR, SCATTER, AND PIE CHARTS
 @extend_schema_serializer(
 	examples=[
 		OpenApiExample(
@@ -448,11 +445,8 @@ class VoyageGroupByParamsRequestSerializer(serializers.Serializer):
 			description="Here, we are looking for bar charts of how many people embarked, and how many people disembarked, by the region of embarkation, on voyages that landed in Barbados.",
 			value={
 				"groupby":{
-					"groupby_by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
-					"groupby_cols":[
-						"voyage_slaves_numbers__imp_total_num_slaves_embarked",
-						"voyage_slaves_numbers__imp_total_num_slaves_disembarked"
-					],
+					"by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+					"vals":"voyage_slaves_numbers__imp_total_num_slaves_embarked",
 					"agg_fn":"sum"
 				},
 				"filter":[
@@ -466,13 +460,61 @@ class VoyageGroupByParamsRequestSerializer(serializers.Serializer):
 		)
 	]
 )
-class VoyageGroupByRequestSerializer(serializers.Serializer):
-	groupby=VoyageGroupByParamsRequestSerializer(many=False,allow_null=False,required=True)
+class VoyagePieChartRequestSerializer(serializers.Serializer):
+	groupby=VoyagePieChartParamsRequestSerializer(many=False,allow_null=False,required=True)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
 
-# class VoyageGroupByResponseSerializer(serializers.Serializer):
-# 	data=serializers.JSONField()
+
+class VoyageAggSeriesSerializer(serializers.Serializer):
+	vals=serializers.ChoiceField(choices=[
+			k for k in Voyage_options if Voyage_options[k]['type'] in [
+				'integer',
+				'number'
+			]
+		]
+	)
+	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min','count'])
+
+class VoyageLineAndBarChartParamsRequestSerializer(serializers.Serializer):
+	by=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	agg_series=VoyageAggSeriesSerializer(many=True)
+
+############ BAR AND LINE CHARTS
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered Pie Chart Request',
+			summary="Filtered scatter plot req",
+			description="Here, we consider voyages that landed in Barbados, and request a long dataframe showing how many people in total embarked from each region.",
+			value={
+				"groupby":{
+					"by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+					"agg_series":[
+						{
+							"vals":"voyage_slaves_numbers__imp_total_num_slaves_embarked",
+							"agg_fn":"sum"
+						}
+					]
+				},
+				"filter":[
+					{
+						"varName": "voyage_itinerary__imp_principal_region_slave_dis__name",
+						"op": "in",
+						"searchTerm": ["Barbados"]
+					}
+				]
+			}
+		)
+	]
+)
+class VoyageLineAndBarChartsRequestSerializer(serializers.Serializer):
+	groupby=VoyageLineAndBarChartParamsRequestSerializer(many=False,allow_null=False,required=True)
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
+
+
+
 
 ############ DATAFRAMES ENDPOINT
 @extend_schema_serializer(

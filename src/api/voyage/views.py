@@ -310,35 +310,34 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
-class VoyageGroupBy(generics.GenericAPIView):
+
+
+
+class VoyageLineAndBarCharts(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="This endpoint is intended for use building line/scatter, bar, and pie charts. It requires a few arguments, which it basically inherits from <a href=\"https://github.com/rice-crc/voyages-api/tree/main/stats\">the back-end flask/pandas service</a> that runs these stats.\n\
-		    1. A variable to group on: 'groupby_by'\n\
-		        1a. For a scatter plot, you would want this would be a numeric variable\n\
-		        1b. For a bar chart, you would want this to be a categorical variable\n\
-		    2. An array of variables to aggregate on: 'groupby_cols'\n\. This is always a numeric variable.\n\
-		    3. An aggregation function: sum, mean, min, max\n\
-		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a small, serialized dataframe taken from the pandas back-end.\n\
+		description="This endpoint is for building line and bar charts. It requires a few arguments, which it basically inherits from pandas.\n\
+		    1. A variable to group on: 'by'\n\
+		    2. A numeric variable to aggregate: 'vals'\n\
+		    3. An aggregation function: sum, mean, min, max, count\n\
+		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a long dataframe.\n\
 		",
-		request=VoyageGroupByRequestSerializer,
-# 		responses=VoyageGroupByResponseSerializer
+		request=VoyageLineAndBarChartsRequestSerializer,
 	)
 
 	def post(self,request):
 		st=time.time()
 		if DEBUG:
-			print("VOYAGE GROUPBY+++++++\nusername:",request.auth.user)
+			print("VOYAGE LINEANDBARCHART+++++++\nusername:",request.auth.user)
 		
 		#VALIDATE THE REQUEST
-		serialized_req = VoyageGroupByRequestSerializer(data=request.data)
+		serialized_req = VoyageLineAndBarChartsRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
 		hashed,cached_response=use_redis(serialized_req,self)
-
 		
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
@@ -360,12 +359,86 @@ class VoyageGroupBy(generics.GenericAPIView):
 			u2=STATS_BASE_URL+'groupby/'
 			rdata=dict(request.data)
 			groupby=rdata.get('groupby')
-			d2=groupby
+			by=groupby['by']
+			
+			resp={}
+			for a_s in groupby['agg_series']:
+				agg_fn=a_s['agg_fn']
+				vals=a_s['vals']
+				d2={
+					'by':groupby['by'],
+					'vals':[a_s['vals']], #the stats engine needs this string to be an array
+					'ids':ids,
+					'agg_fn':a_s['agg_fn']
+				}
+				json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+				pandas_resp=json.loads(json_resp.text)
+				resp[by]=pandas_resp[by]
+				resp[f'{vals}__{agg_fn}']=pandas_resp[vals]
+			
+			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)
+
+class VoyagePieCharts(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+	@extend_schema(
+		description="This endpoint is for building pie charts. It requires a few arguments, which it basically inherits from pandas.\n\
+		    1. A categorical variable to group on: 'by'\n\
+		    2. A numeric variable to aggregate: 'vals'\n\
+		    3. An aggregation function: sum, mean, min, max, count\n\
+		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a long dataframe.\n\
+		",
+		request=VoyagePieChartRequestSerializer,
+	)
+
+	def post(self,request):
+		st=time.time()
+		if DEBUG:
+			print("VOYAGE PIECHART+++++++\nusername:",request.auth.user)
+		
+		#VALIDATE THE REQUEST
+		serialized_req = VoyagePieChartRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		hashed,cached_response=use_redis(serialized_req,self)
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+			queryset=Voyage.objects.all()
+			results,results_count,page,page_size,error_messages=post_req(
+				queryset,
+				self,
+				request,
+				Voyage_options,
+				auto_prefetch=False
+			)
+
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
+
+			#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
+			ids=[i[0] for i in results.values_list('id')]
+			u2=STATS_BASE_URL+'groupby/'
+			rdata=dict(request.data)
+			groupby=rdata.get('groupby')
+			d2=dict(groupby)
 			d2['ids']=ids
 		
 			#NOT QUITE SURE HOW TO VALIDATE THE RESPONSE OF THIS VIA A SERIALIZER
-			#BECAUSE YOU HAVE A DICTIONARY WITH > 2 KEYS COMING BACK AT YOU
-			#AND ANOTHER GOOD RULE WOULD BE THAT THE ARRAYS ARE ALL EQUAL IN LENGTH
 			json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 			resp=json.loads(json_resp.text)
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE

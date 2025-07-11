@@ -427,15 +427,24 @@ class VoyageListResponseSerializer(serializers.Serializer):
 
 ############ LINE, BAR, AND PIE CHARTS
 ### I would like to roll these together, but pie charts can only accept one value field, whereas line and bar charts can accept one or more
+
+yearbinoptions=[f'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__bins__{n}'
+	for n in [5,10,25]
+]
+
 class VoyagePieChartParamsRequestSerializer(serializers.Serializer):
-	by=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	by=serializers.ChoiceField(choices=[
+		k for k in Voyage_options if Voyage_options[k]['type'] in [
+			'string'
+		]
+	] + yearbinoptions)
 	vals=serializers.ChoiceField(choices=[
 		k for k in Voyage_options if Voyage_options[k]['type'] in [
 			'integer',
 			'number'
 		]
 	])
-	agg_fn=serializers.RegexField("((mean|sum|max|min|count)__bins__[0-9]+)|(mean|sum|max|min|count)")
+	agg_fn=serializers.ChoiceField(choices=["mean","sum","max","min","count"])
 	
 @extend_schema_serializer(
 	examples=[
@@ -464,9 +473,9 @@ class VoyagePieChartParamsRequestSerializer(serializers.Serializer):
 			description="Here, we are requesting a long df of how many people were embarked in 20-year periods on voyages that landed in Barbados.",
 			value={
 				"groupby": {
-					"by": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+					"by": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__bins__25",
 					"vals": "voyage_slaves_numbers__imp_total_num_slaves_embarked",
-					"agg_fn": "sum__bins__20"
+					"agg_fn": "sum"
 				},
 				"filter": [
 					{
@@ -495,10 +504,10 @@ class VoyageAggSeriesSerializer(serializers.Serializer):
 			]
 		]
 	)
-	agg_fn=serializers.RegexField("((mean|sum|max|min|count)__bins__[0-9]+)|(mean|sum|max|min|count)")
+	agg_fn=serializers.ChoiceField(choices=["mean","sum","max","min","count"])
 
 class VoyageLineAndBarChartParamsRequestSerializer(serializers.Serializer):
-	by=serializers.ChoiceField(choices=[k for k in Voyage_options])
+	by=serializers.ChoiceField(choices=[k for k in Voyage_options] + yearbinoptions)
 	agg_series=VoyageAggSeriesSerializer(many=True)
 
 ############ BAR AND LINE CHARTS

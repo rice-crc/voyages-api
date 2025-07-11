@@ -201,9 +201,9 @@ def groupby():
 	vals=[rdata['vals']]
 	agg_fn=rdata['agg_fn']
 	binsize=None
-	if re.match("[a-z]+__bins__[0-9]+",agg_fn):
-		binsize=int(re.search("[0-9]+",agg_fn).group(0))
-		agg_fn=re.search("[a-z]+(?=__)",agg_fn).group(0)
+	if re.match("[a-z|_]+__bins__[0-9]+",by):
+		binsize=int(re.search("[0-9]+",by).group(0))
+		by=re.search("[a-z|_]+(?=__bins__)",by).group(0)
 	df=eval('big_df')['df']
 	df2=df[df['id'].isin(ids)]
 	

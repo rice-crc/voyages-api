@@ -198,7 +198,7 @@ def groupby():
 	rdata=request.json
 	ids=rdata['ids']
 	by=rdata['by']
-	vals=[rdata['vals']]
+	val=rdata['vals']
 	agg_fn=rdata['agg_fn']
 	binsize=None
 	if re.match("[a-z|_]+__bins__[0-9]+",by):
@@ -211,7 +211,6 @@ def groupby():
 	####1) NUMERIC TO WORK IN THE FIRST PLACE
 	####2) A YEAR VAR IN ORDER TO MAKE SENSE TO A HUMAN END-USER
 	if binsize is not None:
-		val=vals[0]
 		binrows=by
 		binsize=int(binsize)
 		
@@ -247,11 +246,11 @@ def groupby():
 			val:vs
 		}
 	else:
-		gb=df2.groupby(by,group_keys=True)[vals].agg(agg_fn)
+		gb=df2.groupby(by,group_keys=True)[[val]].agg(agg_fn)
 		gb=gb.fillna(0)
 		resp={by:list(gb.index)}
-		for v in vals:
-			resp[v]=list(gb[v])
+		resp[val]=list(gb[val])
+			
 	return json.dumps(resp)
 
 #https://stackoverflow.com/questions/26033301/make-pandas-dataframe-to-a-dict-and-dropna

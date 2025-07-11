@@ -367,7 +367,7 @@ class VoyageLineAndBarCharts(generics.GenericAPIView):
 				vals=a_s['vals']
 				d2={
 					'by':groupby['by'],
-					'vals':[a_s['vals']], #the stats engine needs this string to be an array
+					'vals':vals, #the stats engine needs this string to be an array
 					'ids':ids,
 					'agg_fn':a_s['agg_fn']
 				}

@@ -423,37 +423,109 @@ class VoyageListResponseSerializer(serializers.Serializer):
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
 	results=VoyageSerializer(many=True,read_only=True)
-	
 
-class VoyageGroupByParamsRequestSerializer(serializers.Serializer):
-	by=serializers.ChoiceField(choices=[k for k in Voyage_options])
-	cols=serializers.ListField(
-		child=serializers.ChoiceField(choices=[
+
+############ LINE, BAR, AND PIE CHARTS
+### I would like to roll these together, but pie charts can only accept one value field, whereas line and bar charts can accept one or more
+
+yearbinoptions=[f'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__bins__{n}'
+	for n in [5,10,25]
+]
+
+class VoyagePieChartParamsRequestSerializer(serializers.Serializer):
+	by=serializers.ChoiceField(choices=[
+		k for k in Voyage_options if Voyage_options[k]['type'] in [
+			'string'
+		]
+	] + yearbinoptions)
+	vals=serializers.ChoiceField(choices=[
+		k for k in Voyage_options if Voyage_options[k]['type'] in [
+			'integer',
+			'number'
+		]
+	])
+	agg_fn=serializers.ChoiceField(choices=["mean","sum","max","min","count"])
+	
+@extend_schema_serializer(
+	examples=[
+		OpenApiExample(
+			'Filtered Pie Chart Request',
+			summary="Filtered Pie Chart Request",
+			description="Here, we are requesting a long df of the number of people who were embarked in different regions on voyages that landed in Barbados.",
+			value={
+				"groupby":{
+					"by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+					"vals":"voyage_slaves_numbers__imp_total_num_slaves_embarked",
+					"agg_fn":"sum"
+				},
+				"filter":[
+					{
+						"varName": "voyage_itinerary__imp_principal_region_slave_dis__name",
+						"op": "in",
+						"searchTerm": ["Barbados"]
+					}
+				]
+			}
+		),
+		OpenApiExample(
+			'Filtered Pie Chart Request with Year Bins/Intervals',
+			summary="Filtered Pie Chart Request with Year Bins/Intervals",
+			description="Here, we are requesting a long df of how many people were embarked in 20-year periods on voyages that landed in Barbados.",
+			value={
+				"groupby": {
+					"by": "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__bins__25",
+					"vals": "voyage_slaves_numbers__imp_total_num_slaves_embarked",
+					"agg_fn": "sum"
+				},
+				"filter": [
+					{
+						"varName": "voyage_itinerary__imp_principal_region_slave_dis__name",
+						"op": "in",
+						"searchTerm": [
+							"Barbados"
+						]
+					}
+				]
+			}
+		)
+	]
+)
+class VoyagePieChartRequestSerializer(serializers.Serializer):
+	groupby=VoyagePieChartParamsRequestSerializer(many=False,allow_null=False,required=True)
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	global_search=serializers.CharField(allow_null=True,required=False)
+
+
+class VoyageAggSeriesSerializer(serializers.Serializer):
+	vals=serializers.ChoiceField(choices=[
 			k for k in Voyage_options if Voyage_options[k]['type'] in [
 				'integer',
 				'number'
 			]
-		])
+		]
 	)
-	agg_fn=serializers.ChoiceField(choices=['mean','sum','max','min'])
+	agg_fn=serializers.ChoiceField(choices=["mean","sum","max","min","count"])
 
+class VoyageLineAndBarChartParamsRequestSerializer(serializers.Serializer):
+	by=serializers.ChoiceField(choices=[k for k in Voyage_options] + yearbinoptions)
+	agg_series=VoyageAggSeriesSerializer(many=True)
 
-
-############ BAR, SCATTER, AND PIE CHARTS
+############ BAR AND LINE CHARTS
 @extend_schema_serializer(
 	examples=[
 		OpenApiExample(
-			'Filtered Scatter Plot Request',
+			'Filtered Pie Chart Request',
 			summary="Filtered scatter plot req",
-			description="Here, we are looking for bar charts of how many people embarked, and how many people disembarked, by the region of embarkation, on voyages that landed in Barbados.",
+			description="Here, we consider voyages that landed in Barbados, and request a long dataframe showing how many people in total embarked from each region.",
 			value={
 				"groupby":{
-					"groupby_by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
-					"groupby_cols":[
-						"voyage_slaves_numbers__imp_total_num_slaves_embarked",
-						"voyage_slaves_numbers__imp_total_num_slaves_disembarked"
-					],
-					"agg_fn":"sum"
+					"by": "voyage_itinerary__imp_principal_region_of_slave_purchase__name",
+					"agg_series":[
+						{
+							"vals":"voyage_slaves_numbers__imp_total_num_slaves_embarked",
+							"agg_fn":"sum"
+						}
+					]
 				},
 				"filter":[
 					{
@@ -466,13 +538,10 @@ class VoyageGroupByParamsRequestSerializer(serializers.Serializer):
 		)
 	]
 )
-class VoyageGroupByRequestSerializer(serializers.Serializer):
-	groupby=VoyageGroupByParamsRequestSerializer(many=False,allow_null=False,required=True)
+class VoyageLineAndBarChartsRequestSerializer(serializers.Serializer):
+	groupby=VoyageLineAndBarChartParamsRequestSerializer(many=False,allow_null=False,required=True)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
-
-# class VoyageGroupByResponseSerializer(serializers.Serializer):
-# 	data=serializers.JSONField()
 
 ############ DATAFRAMES ENDPOINT
 @extend_schema_serializer(
@@ -506,9 +575,6 @@ class VoyageDataframesRequestSerializer(serializers.Serializer):
 	)
 	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
-
-# class VoyageDataframesResponseSerializer(serializers.Serializer):
-# 	data=serializers.JSONField()
 
 ############ VOYAGE GEOTREE REQUESTS
 @extend_schema_serializer(
@@ -719,46 +785,6 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()
 	data=serializers.JSONField()
 	metadata=VoyageOffsetPaginationSerializer()
-
-############ AUTOCOMPLETE SERIALIZERS
-@extend_schema_serializer(
-	examples = [
-         OpenApiExample(
-			'Paginated autocomplete on enslaver names',
-			summary='Paginated autocomplete on enslaver names',
-			description='Here, we are requesting 5 suggested values, starting with the 10th item, of enslaver aliases (names) associated with voyages that disembarked enslaved people in Baltimore',
-			value={
-				"varName": "voyage_enslavement_relations__relation_enslavers__enslaver_alias__alias",
-				"querystr": "george",
-				"offset": 10,
-				"limit": 5,
-				"filter": [
-					{
-						"varName": "voyage__voyage_itinerary__imp_principal_port_slave_dis__value",
-						"op": "in",
-						"searchTerm": ['Baltimore']
-					}
-				]
-			},
-			request_only=True
-		)
-    ]
-)
-class VoyageAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.ChoiceField(choices=get_all_model_autocomplete_fields('Voyage'))
-	querystr=serializers.CharField(allow_null=True,allow_blank=True)
-	offset=serializers.IntegerField()
-	limit=serializers.IntegerField()
-	filter=VoyageBasicFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
-
-class VoyageAutoCompletekvSerializer(serializers.Serializer):
-	value=serializers.CharField()
-
-class VoyageAutoCompleteResponseSerializer(serializers.Serializer):
-	suggested_values=VoyageAutoCompletekvSerializer(many=True)
-
-
 
 @extend_schema_serializer(
 	examples=[

@@ -7,11 +7,11 @@ urlpatterns = [
     path('', views.VoyageList.as_view()),
     path('dataframes/',views.VoyageDataFrames.as_view()),
     path('aggregations/',views.VoyageAggregations.as_view()),
-	path('groupby/',views.VoyageGroupBy.as_view()),
+	path('piecharts/',views.VoyagePieCharts.as_view()),
+	path('lineandbarcharts/',views.VoyageLineAndBarCharts.as_view()),
 	path('crosstabs/',views.VoyageCrossTabs.as_view()),
 	path('aggroutes/',views.VoyageAggRoutes.as_view()),
 	path('geotree/',views.VoyageGeoTreeFilter.as_view()),
-	#CRUD ENDPOINTS (FOR CONTRIBUTE CLIENTS)
 	path('<int:voyage_id>',views.VoyageGET.as_view()),
 	#READ-ONLY CONTROLLED VOCAB ENDPOINTS (FOR CONTRIBUTE CLIENTS)
 	path('NationalityList/',views.NationalityList.as_view()),

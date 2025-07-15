@@ -12,6 +12,16 @@ from common.static.EnslavementRelation_options import EnslavementRelation_option
 from common.autocomplete_indices import get_all_model_autocomplete_fields
 from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
 
+
+#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR PAGINATED LISTS. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
+
+class AnyField(Field):
+	def to_representation(self, value):
+		return value
+
+	def to_internal_value(self, data):
+		return data
+		
 ############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
 
 class GenderSerializer(serializers.ModelSerializer):
@@ -53,7 +63,7 @@ class PastEnslavedVoyageSerializer(serializers.Serializer):
 	id=serializers.IntegerField()
 	embarkation=serializers.CharField()
 	disembarkation=serializers.CharField()
-	year=serializers.IntegerField()
+	year=AnyField()
 	month=serializers.IntegerField()
 	day=serializers.IntegerField()
 	ship_name=serializers.CharField()
@@ -136,14 +146,18 @@ class EnslavedSerializer(serializers.ModelSerializer):
 			disembark="place unknown"
 		date=v.voyage_dates.imp_arrival_at_port_of_dis_sparsedate
 		if date:
-			year=date.year
+			yearam=date.year
 			month=date.month
 			day=date.day
 		else:
 			yearam="year unknown"
-		ship_name=v.voyage_ship.ship_name
-		if not ship_name:
+			month=None
+			day=None
+		ship=v.voyage_ship
+		if not ship:
 			ship_name="ship unknown"
+		else:
+			ship_name=ship.ship_name
 		
 		particular_outcome=v.voyage_outcome.particular_outcome
 		if not particular_outcome:
@@ -156,7 +170,7 @@ class EnslavedSerializer(serializers.ModelSerializer):
 			'id':v.id,
 			'embarkation':embark,
 			'disembarkation':disembark,
-			'year':year,
+			'year':yearam,
 			'month':month,
 			'day':day,
 			'ship_name':ship_name,
@@ -324,16 +338,6 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 	class Meta:
 		model=EnslaverIdentity
 		fields=['id','birth','death','principal_location','named_enslaved_people','voyages','sources','names']
-
-
-#################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR PAGINATED LISTS. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
-
-class AnyField(Field):
-	def to_representation(self, value):
-		return value
-
-	def to_internal_value(self, data):
-		return data
 
 ############ REQUEST FIILTER OBJECTS
 class EnslaverBasicFilterItemSerializer(serializers.Serializer):

@@ -4,19 +4,19 @@ import os
 SECRET_KEY = 'django-key-123'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 SOLR_ENDPOINT='http://voyages-solr:8983/solr'
 
-ALLOWED_HOSTS = ['*','http://127.0.0.1:8000','http://127.0.0.1:3000']
+ALLOWED_HOSTS = ['*','127.0.0.1:8000','127.0.0.1:3000']
 
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000','http://127.0.0.1:3000']
+CSRF_TRUSTED_ORIGINS = ['127.0.0.1:8000','127.0.0.1:3000']
 
 STATIC_URL="static/"
 
-VOYAGES_FRONTEND_BASE_URL="http://127.0.0.1:3000/"
+VOYAGES_FRONTEND_BASE_URL="127.0.0.1:3000/"
 
-OPEN_API_BASE_API="http://127.0.0.1:8000/"
+OPEN_API_BASE_URL="127.0.0.1:8000/"
 
 GEO_NETWORKS_BASE_URL="http://voyages-geo-networks:5005/"
 PEOPLE_NETWORKS_BASE_URL="http://voyages-people-networks:5006/"
@@ -26,6 +26,10 @@ REDIS_HOST="voyages-redis"
 REDIS_PORT=6379
 USE_REDIS_CACHE=False
 
+aws_access_key_id = 'abcdefg'
+aws_secret_access_key = 'hijklmnop'
+aws_region='us-east-1'
+aws_bucket_name='manifest-bucket-name'
 
 zotero_credentials={
 	"api_key":"abcdefg",
@@ -34,14 +38,6 @@ zotero_credentials={
 	"export_to_library_ids":["9876543"],
 	"library_type":"group"
 }
-
-michigan_collection_manifests=[
-	{
-		'url': 'manifests.json',
-		"short_ref":"AP Clement 43",
-		"full_ref":"Asiento Papers, v. 43, Clements"
-	}
-]
 
 transkribus_credentials={
 	"user":"user@email.com",
@@ -82,5 +78,3 @@ LOGGING = {
         },
     },
 }
-
-# no_auth=True

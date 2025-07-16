@@ -73,8 +73,46 @@ class Command(BaseCommand):
 					'subtitle',
 					'content'
 				]
+			},
+			{
+				"model":Source,
+				"core_name":"sources",
+				"fields":[
+					'id',
+					'title',
+					'short_ref__name',
+					'page_connections__page__transcriptions__text'
+				]
+			},
+			{
+				"model":Voyage,
+				"core_name":"voyagesources",
+				"fields":[
+					'id',
+					'voyage_source_connections__source__bib',
+					'voyage_source_connections__source__short_ref__name'
+				]
+			},
+			{
+				"model":Enslaved,
+				"core_name":"enslavedsources",
+				"fields":[
+					'id',
+					'enslaved_relations__relation__voyage__voyage_source_connections__source__bib',
+					'enslaved_relations__relation__voyage__voyage_source_connections__source__short_ref__name'
+				]
+			},
+			{
+				"model":EnslaverIdentity,
+				"core_name":"enslaversources",
+				"fields":[
+					'id',
+					'enslaver_source_connections__source__bib',
+					'enslaver_source_connections__source__short_ref__name',
+					'aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__bib',
+					'aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__short_ref__name'
+				]
 			}
-			
 		]
 		
 		results_per_page=1000
@@ -97,6 +135,8 @@ class Command(BaseCommand):
 			)
 			
 			queryset=model.objects.all()
+			if core_name=="sources":
+				queryset=queryset.filter(has_published_manifest=True)
 			
 			ids=[i[0] for i in queryset.values_list('id')]
 			

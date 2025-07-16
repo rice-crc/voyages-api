@@ -178,26 +178,24 @@ APPEND_SLASH=False
 
 STATIC_ROOT='static'
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
-# STATIC_URL = 'static/'
-
 STATICFILES_DIRS = [
     "geo/staticfiles"
 ]
 
 # Default FileBrowser site
 site = FileBrowserSite(name='filebrowser')
-site.storage.location = "static"
+site.storage.location = STATIC_ROOT
 site.directory="uploads/"
 site.storage.base_url = "/static/uploads"
+site_storage_base_url = site.storage.base_url
 
 TINYMCE_JS_URL="tinymce/tinymce.min.js"
 TINYMCE_DEFAULT_CONFIG = {
     "menubar": "file edit view insert format tools table help",
-    "plugins": "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code "
+    "plugins": "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code ",
+    'width': '100%',
+    'height': 600
+
 }
 
 # Default primary key field type

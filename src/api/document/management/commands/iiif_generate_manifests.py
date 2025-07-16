@@ -12,8 +12,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models import Prefetch
 from document.models import Source
-from voyages3.settings import STATIC_ROOT
-from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL,OPEN_API_BASE_API,STATIC_URL
+from common.s3_utils import *
+from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL
 import os
 
 # We special case these sources as they have issues with their IIIF Image
@@ -46,10 +46,7 @@ class Command(BaseCommand):
 		in the database that have page images attached to them."""
 
 	def add_arguments(self, parser):
-		parser.add_argument("--base-url",default=f"{OPEN_API_BASE_API}{STATIC_URL}iiif_manifests/")
-		parser.add_argument("--out-dir", type=pathlib.Path,
-							help="The output directory where the manifests should be placed",
-							default=f"{STATIC_ROOT}/iiif_manifests/")
+		parser.add_argument("--iiif-manifests-baseurl",default=iiif_manifests_baseurl)
 		parser.add_argument("--skip-existing",default=True,
 							help="We are having timeout issues fetching remote manifests for repurposing. This serves as a basic checkpoint.")
 		parser.add_argument("--shortref", default=None,help="target only sources matching (icontains) this string.")
@@ -65,6 +62,8 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		
+		#NOT RUNNING THIS EXCEPT LOCALLY W/O DJK's APPROVAL
+# 		exit()
 		#screen out sources that lack either pages  
 		sources = Source.objects \
 			.prefetch_related('page_connections') \
@@ -75,15 +74,12 @@ class Command(BaseCommand):
 			.prefetch_related('source_enslaved_connections__enslaved') \
 			.filter(
 				~Q(page_connections__page=None)
-# 				and ~Q(manifest_content=None)
 			)
 		
 		shortref=options['shortref']
 		if shortref is not None:
 			sources=sources.filter(short_ref__name__icontains=shortref)
 		
-		
-# 		sources=sources.filter(id=5137)
 		print(f"Found {sources.count()} sources with page images.")
 		
 		if options['skip_existing'] in [True,'true','True']:
@@ -94,8 +90,14 @@ class Command(BaseCommand):
 			else:
 				print("We will publish manifests for all of them.")
 		else:
-			print("We will publish manifests for all of them.")
-		
+			print("We will clear all manifests and re-publish all of them.")
+			
+			cleared_sources=list(sources)
+			for s in cleared_sources:
+				s.has_published_manifest = False
+			
+			Source.objects.bulk_update(cleared_sources, ["has_published_manifest"])
+			
 		generated_count=0
 		
 		for source in sources:
@@ -115,12 +117,12 @@ class Command(BaseCommand):
 				
 				# Generate manifest for this revision.
 				## THIS SHOULD BE UPDATED TO A COMPOSITE KEY: zotero_group_id + zotero_item_id
-				base_id = f"{options['base_url']}{source.zotero_group_id}__{source.zotero_item_id}.json"
+				base_id = f"{iiif_manifests_baseurl}{source.zotero_group_id}__{source.zotero_item_id}.json"
 				first_thumb = None
 				canvas = []
 				abort = False
 				for i, page in enumerate(pages_with_images, 1):
-# 					print(page.__dict__)
+					print(page.__dict__)
 					iiif_baseimage_url=page.iiif_baseimage_url
 					# A canvas page.
 					host_addr,iiif_suffix = Command._extract_iiif_url(iiif_baseimage_url)
@@ -298,14 +300,8 @@ class Command(BaseCommand):
 				
 				
 				filename = f"{source.zotero_group_id}__{source.zotero_item_id}.json"
-				out_dir: pathlib.Path = options['out_dir']
 				
-				if not os.path.exists(out_dir):
-					os.makedirs(out_dir)
-				
-				
-				with open(out_dir.joinpath(filename), 'w', encoding='utf-8') as f:
-					json.dump(manifest, f)
+				push_item_to_s3(filename,bytes(json.dumps(manifest).encode('UTF-8')))
 				source.thumbnail = first_thumb[0]['id']
 				source.has_published_manifest=True
 				source.save()

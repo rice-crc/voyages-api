@@ -9,7 +9,11 @@ from maps import rnconversion
 import multiprocessing
 import numpy as np
 import time
+import re
 
+def fuzzyplacenamestrip(name):
+	name=re.sub("(,\s*port unspecified)|(,\s*unspecified)|(\(colony unspecified\))|(,\s*place unspecified)","",name,re.I)
+	return name
 
 def load_graph(endpoint,graph_params,rc):
 	graphname=graph_params['name']

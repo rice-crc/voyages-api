@@ -43,7 +43,22 @@ class SparseDateAbstractBase(models.Model):
 	)
 
 	def __str__(self):
-		return ",".join([str(i) if i is not None else "" for i in [self.month,self.day,self.year]])
+		m=self.month
+		d=self.day
+		y=self.year
+		mdy=[m,d,y]
+		monthindex=[
+			"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
+		]
+		if None not in mdy:
+			return ",".join([str(i) for i in mdy])
+		elif m is not None:
+			if y is not None:
+				return f"{monthindex[m-1]} {y}"
+			else:
+				return monthindex[m-1]
+		elif y is not None:
+			return str(y)
 		
 	class Meta:
 		abstract = True

@@ -32,7 +32,7 @@ class Command(BaseCommand):
 		parser.add_argument("--shortref", default=None)
 
 	def handle(self, *args, **options):
-		library_id=zotero_credentials['library_id']
+		library_id=zotero_credentials['import_from_library_ids']
 		library_type=zotero_credentials['library_type']
 		api_key=zotero_credentials['api_key']
 		zot = zotero.Zotero(library_id, library_type, api_key)
@@ -42,30 +42,37 @@ class Command(BaseCommand):
 		sources=Source.objects.all()
 		if shortref is not None:
 			sources=sources.filter(short_ref__name__icontains=shortref)
-	
+			
+		print(sources)
+		
 		c=1
 		errors=0
 		cutoff=5
 		for source in sources:
+			print(source)
 			zotero_item_id=source.zotero_item_id
-			failure=False
-			while True:
-				res = requests.get( \
-				f"https://api.zotero.org/groups/{library_id}/items/{zotero_item_id}?format=json&include=bib&style=chicago-fullnote-bibliography", \
-				headers={ 'Authorization': f"Bearer {api_key}" }, \
-				timeout=60)
+			print(zotero_item_id)
+# 			while True:
+# 				res = requests.get( \
+# 				f"https://api.zotero.org/groups/{library_id}/items/{zotero_item_id}?format=json&include=bib&style=chicago-fullnote-bibliography", \
+# 				headers={ 'Authorization': f"Bearer {api_key}" }, \
+# 				timeout=60)
 				
-				if res.status_code==200:
-					break
-				else:
-					print("Error")
-					errors+=1
-					if errors>cutoff:
-						failure=True
-						print("SKIPPING",source.title)
+			item=zot.item(zotero_item_id)
+				
+# 				if res.status_code==200:
+# 					break
+# 				else:
+# 					print("Error",res)
+# 					errors+=1
+# 					if errors>cutoff:
+# 						failure=True
+# 						print("SKIPPING",source.title)
 		
 			if not failure:
-				item = res.json()
+				print(item)
+				
+				exit()
 				
 				bib=item['bib']
 				

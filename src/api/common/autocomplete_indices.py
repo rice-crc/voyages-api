@@ -95,7 +95,17 @@ autocomplete_indices=[
 			('Enslaved','enslaved_source_connections__source__title'),
 			('EnslaverIdentity','enslaver_source_connections__source__title'),
 			('EnslaverIdentity','aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__title'),
-			('Voyage','voyage_source_connections__source__title')
+			('Voyage','voyage_source_connections__source__title'),
+			
+			('Enslaved','enslaved_source_connections__source__short_ref__name'),
+			('EnslaverIdentity','enslaver_source_connections__source__short_ref__name'),
+			('EnslaverIdentity','aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__short_ref__name'),
+			('Voyage','voyage_source_connections__source__short_ref__name'),
+			
+			('Enslaved','enslaved_source_connections__source__page_connections__page__transcriptions__text'),
+			('EnslaverIdentity','enslaver_source_connections__source__page_connections__page__transcriptions__text'),
+			('EnslaverIdentity','aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__page_connections__page__transcriptions__text'),
+			('Voyage','voyage_source_connections__source__page_connections__page__transcriptions__text')
 		]
 	},
 	{

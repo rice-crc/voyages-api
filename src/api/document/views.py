@@ -3,7 +3,6 @@ from django.template import loader
 from django.shortcuts import redirect,render
 from django.core.paginator import Paginator
 from django.shortcuts import render,get_object_or_404
-from django.http import HttpResponse, JsonResponse
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
@@ -99,7 +98,6 @@ class DocumentSearch(generics.GenericAPIView):
 			queryset=queryset.filter(has_published_manifest=True)
 			
 			voyage_ids=srd.get('voyageIds')
-			
 			if voyage_ids is not None:
 				voyage_ids_clean=[int(i) for i in re.findall("[0-9]+",str(voyage_ids))]
 				if voyage_ids_clean:
@@ -107,27 +105,24 @@ class DocumentSearch(generics.GenericAPIView):
 						queryset=queryset.filter(source_voyage_connections__voyage_id=voyage_id)
 			
 			source_title=srd.get('title')
-			
 			if source_title is not None:
 				queryset=queryset.filter(title__icontains=source_title)
-			print("TITLE",source_title,queryset.count())
-			
+				print("TITLE",source_title,queryset.count())
 			
 			bib=srd.get('bib')
-			
-			
 			if bib is not None:
 				queryset=queryset.filter(bib__icontains=bib)
-			
-			print("BIB",bib,queryset.count())
+				print("BIB",bib,queryset.count())
 			
 			enslavers=srd.get('enslavers')
-			
-			
 			if enslavers is not None:
+				print("ENSLAVERS",enslavers,queryset.count())
 				queryset=solrfilter(queryset,'enslavers',enslavers)
 			
-			print("ENSLAVERS",enslavers,queryset.count())
+			fulltext=srd.get("fullText")
+			if fulltext is not None:
+				print("FULLTEXT",fulltext,queryset.count())
+				queryset=solrfilter(queryset,'sources',fulltext)
 			
 			if queryset.count()>0:
 			
@@ -189,7 +184,7 @@ class SourceList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		request=SourceRequestSerializer,
-		responses=SourceSerializer
+		responses=SourceResponseSerializer
 	)
 	
 	def post(self,request):

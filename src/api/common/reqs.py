@@ -4,7 +4,7 @@ import pprint
 import urllib
 from django.db.models import Avg,Sum,Min,Max,Count,Q,F
 from django.db.models.aggregates import StdDev
-from voyages3.localsettings import OPEN_API_BASE_API,DEBUG,SOLR_ENDPOINT,REDIS_HOST,REDIS_PORT,USE_REDIS_CACHE
+from voyages3.localsettings import OPEN_API_BASE_URL,DEBUG,SOLR_ENDPOINT,REDIS_HOST,REDIS_PORT,USE_REDIS_CACHE
 import requests
 from django.core.paginator import Paginator
 from django.core.exceptions import FieldError
@@ -93,6 +93,41 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 			}
 	return res,errormessages
 
+solrcorenamedict={
+	"<class 'voyage.models.Voyage'>":'voyages',
+	"<class 'past.models.EnslaverIdentity'>":'enslavers',
+	"<class 'past.models.Enslaved'>":'enslaved',
+	"<class 'blog.models.Post'>":'blog',
+	"<class 'document.models.Source'>":'sources'
+}
+
+def global_search(orig_queryset,search_string,core_name=None):
+	# GLOBAL SEARCH
+	## bypasses the normal filters. 
+	## hits solr with a search string (which currently is applied across all text fields on a model)
+	## and then creates its filtered queryset on the basis of the pk's returned by solr
+	qsetclassstr=str(orig_queryset[0].__class__)
+	if not core_name:
+		core_name=solrcorenamedict[qsetclassstr]
+	if DEBUG:
+		print("CLASS",qsetclassstr,core_name)
+	solr = pysolr.Solr(
+		f'{SOLR_ENDPOINT}/{core_name}/',
+		always_commit=True,
+		timeout=10
+	)
+	search_string=re.sub("\s+"," ",search_string)
+	search_string=search_string.strip()
+	searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
+	finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
+	results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
+	ids=[doc['id'] for doc in results.docs]
+	filtered_queryset=orig_queryset.filter(id__in=ids)
+	results_count=len(ids)
+	return filtered_queryset,results_count
+
+
+
 def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	'''
 		This function handles:
@@ -120,14 +155,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	else:
 		params=dict(r.data)
 	
-# 	if DEBUG:
-# 		params_wo_ids=params
-# 		for f in params_wo_ids['filter']:
-# 			print(f.keys())
 	filter_obj=params.get('filter') or {}
-	
-# 	if DEBUG:
-# 		print(json.dumps(filter_obj,indent=2))
 	
 	if DEBUG:
 		print(f"REQ PREP TIME: {time.time()-st}")
@@ -139,10 +167,12 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	prefetch_fields=params.get('selected_fields') or []
 	if prefetch_fields==[] and auto_prefetch:
 		prefetch_fields=list(all_fields.keys())
-	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i]))
+	#endswith field excludes solr fields
+	prefetch_vars=list(set(['__'.join(i.split('__')[:-1]) for i in prefetch_fields if '__' in i and not i.endswith("__ALL")]))
 	if DEBUG:
 		print(f'--prefetch: {len(prefetch_vars)} vars--')
 	for p in prefetch_vars:
+		
 		orig_queryset=orig_queryset.prefetch_related(p)
 	
 	# GLOBAL SEARCH
@@ -150,30 +180,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	## hits solr with a search string (which currently is applied across all text fields on a model)
 	## and then creates its filtered queryset on the basis of the pk's returned by solr
 	qsetclassstr=str(orig_queryset[0].__class__)
-	solrcorenamedict={
-		"<class 'voyage.models.Voyage'>":'voyages',
-		"<class 'past.models.EnslaverIdentity'>":'enslavers',
-		"<class 'past.models.Enslaved'>":'enslaved',
-		"<class 'blog.models.Post'>":'blog'
-	}
 	if 'global_search' in params:
-		core_name=solrcorenamedict[qsetclassstr]
-		if DEBUG:
-			print("CLASS",qsetclassstr,core_name)
-		solr = pysolr.Solr(
-			f'{SOLR_ENDPOINT}/{core_name}/',
-			always_commit=True,
-			timeout=10
-		)
-		search_string=params['global_search']
-		search_string=re.sub("\s+"," ",search_string)
-		search_string=search_string.strip()
-		searchstringcomponents=[''.join(filter(str.isalnum,s)) for s in search_string.split(' ')]
-		finalsearchstring="(%s)" %(" ").join(searchstringcomponents)
-		results=solr.search('text:%s' %finalsearchstring,**{'rows':10000000,'fl':'id'})
-		ids=[doc['id'] for doc in results.docs]
-		filtered_queryset=orig_queryset.filter(id__in=ids)
-		results_count=len(ids)
+		filtered_queryset,results_count=global_search(orig_queryset,params['global_search'])
 	# SPECIAL CASE SEARCH/FILTER
 	else:
 		st=time.time()
@@ -249,12 +257,15 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 					filter_obj.remove(item)
 			# SPECIAL CASE 2: DOCUMENTARY SOURCES
 			if varName.endswith("__source__ALL"):
-				varNameStem=re.sub("__source__ALL","",varName)
-				qobjstr=f'Q({varNameStem}__source__bib__{op}="{searchTerm}")|\
-					Q({varNameStem}__source__short_ref__name__{op}="{searchTerm}")'
-				execobjstr=f'filtered_queryset.filter({qobjstr})'
+				qsetclassstr=str(orig_queryset[0].__class__)
+				if solrcorenamedict[qsetclassstr]=='voyages':
+					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='voyagesources')
+				elif solrcorenamedict[qsetclassstr]=='enslavers':
+					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='enslaversources')
+				elif solrcorenamedict[qsetclassstr]=='enslaved':
+					filtered_queryset,results_count=global_search(orig_queryset,searchTerm,core_name='enslavedsources')
+				
 				filter_obj.remove(item)
-				filtered_queryset=eval(execobjstr)
 		# TYPICAL ORM-BASED SEARCH/FILTER
 		for item in filter_obj:
 			if ids is not None:
@@ -330,10 +341,10 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	## dedupe ordered results (while retaining the order)
 	## https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
 	
-	if post_order_by_count>pre_order_by_count:
-		dedupe=True
-	else:
-		dedupe=False
+# 	if post_order_by_count>pre_order_by_count:
+	dedupe=True
+# 	else:
+# 		dedupe=False
 		
 	if dedupe:
 		ids=[v[0] for v in filtered_queryset.values_list('id')]
@@ -394,7 +405,7 @@ def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):
 		hierarchical=True
 	else:
 		hierarchical=False
-	r=requests.get(url=OPEN_API_BASE_API+"schema/?format=json")
+	r=requests.get(url=OPEN_API_BASE_URL+"schema/?format=json")
 	j=json.loads(r.text)
 	schemas=j['components']['schemas']
 	base_obj_name=base_obj_name
@@ -562,3 +573,18 @@ def autocomplete_req(queryset,self,request,options,sourcemodelname):
 		listacvals.sort()
 		response=[{"value":str(v)} for v in listacvals]
 	return response
+
+def use_redis(serialized_req,self):
+		
+	if USE_REDIS_CACHE:
+		srd=serialized_req.data
+		hashdict={
+			'req_name':str(self.request),
+			'req_data':srd
+		}
+		hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+		cached_response = redis_cache.get(hashed)
+	else:
+		cached_response=None
+		hashed=None
+	return hashed,cached_response

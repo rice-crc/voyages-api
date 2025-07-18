@@ -551,10 +551,11 @@ def get_map_data(payload):
 				## important geographic nodes that aren't actually in the itinerary
 				## Yikes. We need to flag that as an error and draw a straight line
 				## So that the editors know to update the map network
-				sp_export_preflight=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
-				for i in sp_export_preflight:
-					if type(i)==str and i not in uuids:
-						spfail=True
+				if not spfail:
+					sp_export_preflight=[graph.nodes[x]['uuid'] if 'uuid' in graph.nodes[x] else x for x in list(sp)]
+					for i in sp_export_preflight:
+						if type(i)==str and i not in uuids:
+							spfail=True
 
 			
 				#if all our shortest path work has failed, then return a straight line

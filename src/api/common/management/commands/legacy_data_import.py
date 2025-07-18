@@ -24,7 +24,7 @@ class Command(BaseCommand):
 			except:
 				return None
 
-# 		#connect to legacy db
+
 		cnx = mysql.connector.connect(
 			host="voyages-mysql",
 			port=3306,
@@ -56,6 +56,10 @@ class Command(BaseCommand):
 			vg.name=label
 			voyage_grouping_pk_map[id]=vg.id
 			vg.save()
+		
+		d=open('voyage_grouping_pk_map.json','w')
+		d.write(json.dumps(voyage_grouping_pk_map))
+		d.close
 		
 		# CRUCIAL SPSS TABLES
 		
@@ -102,6 +106,10 @@ class Command(BaseCommand):
 			location.save()
 			broad_region_id_map[id]=location.id
 			
+		d=open('broad_region_id_map.json','w')
+		d.write(json.dumps(broad_region_id_map))
+		d.close
+		
 		### voyage_region
 		
 		result=cur.execute("SELECT \
@@ -122,7 +130,11 @@ class Command(BaseCommand):
 			location.location_type=loc_type
 			location.save()
 			region_id_map[id]=location.id
-			
+
+		d=open('region_id_map.json','w')
+		d.write(json.dumps(region_id_map))
+		d.close
+
 		### voyage_place
 		
 		result=cur.execute("SELECT \
@@ -144,6 +156,9 @@ class Command(BaseCommand):
 			location.save()
 			place_id_map[id]=location.id
 		
+		d=open('place_id_map.json','w')
+		d.write(json.dumps(place_id_map))
+		d.close
 		
 		def spss_controlled_vocab(
 			model,
@@ -287,13 +302,23 @@ class Command(BaseCommand):
 		)		
 		
 		#PURGE
-		print("purge")
+		print("purging:---")
+		print('VoyageSlavesNumbers')
 		VoyageSlavesNumbers.objects.all().delete()
+		print('VoyageSparseDate')
 		VoyageSparseDate.objects.all().delete()
+		print('LinkedVoyages')
 		LinkedVoyages.objects.all().delete()
+		print('VoyageItinerary')
 		VoyageItinerary.objects.all().delete()
+		print('VoyageDates')
 		VoyageDates.objects.all().delete()
-		
+		print('VoyageOutcome')
+		VoyageOutcome.objects.all().delete()
+		print('VoyageShip')
+		VoyageShip.objects.all().delete()
+		print('Crew Numbers')
+		VoyageCrew.objects.all().delete()
 		
 		# VOYAGES
 		
@@ -305,7 +330,7 @@ class Command(BaseCommand):
 			dataset,\
 			comments,\
 			voyage_groupings_id\
-		from voyage_voyage where id=136189;")
+		from voyage_voyage;")
 		
 		# VALUE field is the spss permanent key
 		# overwrite api data
@@ -313,10 +338,8 @@ class Command(BaseCommand):
 		utc=pytz.UTC
 		
 		vrs=[r for r in cur.fetchall()]
-		
 		for row in vrs:
-			id,voyage_id,voyage_in_cd_rom,last_update,dataset,comments,voyage_groupings_id=row
-			print(f'--> voyage {voyage_id}')
+			voyage_id_pk,voyage_id,voyage_in_cd_rom,last_update,dataset,comments,voyage_groupings_id=row
 			if voyage_groupings_id is not None:
 				voyage_groupings_id=voyage_grouping_pk_map[voyage_groupings_id]
 				voyage_grouping=VoyageGroupings.objects.get(id=voyage_groupings_id)
@@ -331,26 +354,46 @@ class Command(BaseCommand):
 				v=None
 			
 			if not v:
+				voyage_isnew=True
 				#we should be able to keep pk & voyage_id aligned, as I was pretty careful about that...
 				v=Voyage.objects.create(
-					id=id,
+					id=voyage_id,
 					voyage_id=voyage_id,
 					voyage_in_cd_rom=voyage_in_cd_rom,
 					dataset=dataset,
 					comments=comments,
 					voyage_groupings=voyage_grouping
 				)
-				print(voyage.__dict__)
-				exit()
 			else:
-				v.id=id
-				v.voyage_id=voyage_id
 				v.voyage_in_cd_rom=voyage_in_cd_rom
 				v.dataset=dataset
 				v.comments=comments
 				v.voyage_groupings=voyage_grouping
 				v.save()
-# 			
+				voyage_isnew=False
+			
+			print(v,v.id,v.voyage_id)
+			
+			# connect new voyages to existing sources
+			
+			if voyage_isnew:
+				result=cur.execute(f"select * from voyage_voyagesourcesconnection left join voyage_voyagesources on voyage_voyagesources.id=voyage_voyagesourcesconnection.source_id where voyage_voyagesourcesconnection.group_id={v.id};")
+				
+				rows=[r for r in cur.fetchall()]
+				
+				for row in cur.fetchall():
+					id, source_order,text_ref,group_id,source_id,short_ref,full_ref,source_type_id=row
+					
+					##### now fetch the source by the short ref in the api, and create a sourcevoyageconnection object. That's it!
+					
+			
+			
+			
+			
+			
+			
+			
+			
 # 			### VOYAGE DATES
 			
 			result=cur.execute(f"SELECT\
@@ -370,40 +413,28 @@ class Command(BaseCommand):
 				imp_length_home_to_disembark,\
 				imp_length_leaving_africa_to_disembark,\
 				voyage_id\
-			from voyage_voyagedates where voyage_id={id};")
+			from voyage_voyagedates where voyage_id={voyage_id_pk};")
 			
-
-
-			try:
-				vd=VoyageDates.objects.get(voyage=v)
-			except:
-				vd=None
 			
-			if vd:
-				vd.delete()
-				
-			
+			row=cur.fetchone()
+			voyage_began, slave_purchase_began, vessel_left_port, first_dis_of_slaves, date_departed_africa, arrival_at_second_place_landing, third_dis_of_slaves, departure_last_place_of_landing, voyage_completed, length_middle_passage_days, imp_voyage_began, imp_departed_africa, imp_arrival_at_port_of_dis, imp_length_home_to_disembark, imp_length_leaving_africa_to_disembark,voyage_id=row
 			vd=VoyageDates.objects.create(
-				voyage=v
+				voyage=v,
+				length_middle_passage_days=length_middle_passage_days,
+				imp_length_home_to_disembark=imp_length_home_to_disembark,
+				imp_length_leaving_africa_to_disembark=imp_length_leaving_africa_to_disembark
 			)
-
-			for row in cur.fetchall():
-				voyage_began, slave_purchase_began, vessel_left_port, first_dis_of_slaves, date_departed_africa, arrival_at_second_place_landing, third_dis_of_slaves, departure_last_place_of_landing, voyage_completed, length_middle_passage_days, imp_voyage_began, imp_departed_africa, imp_arrival_at_port_of_dis, imp_length_home_to_disembark, imp_length_leaving_africa_to_disembark,voyage_id=row
-				
-				vd.length_middle_passage_days=length_middle_passage_days
-				vd.imp_length_home_to_disembark=imp_length_home_to_disembark
-				vd.imp_length_leaving_africa_to_disembark=imp_length_leaving_africa_to_disembark
+			
+			for vf in ['voyage_began', 'slave_purchase_began', 'vessel_left_port', 'first_dis_of_slaves', 'date_departed_africa', 'arrival_at_second_place_landing', 'third_dis_of_slaves', 'departure_last_place_of_landing', 'voyage_completed', 'imp_voyage_began', 'imp_departed_africa', 'imp_arrival_at_port_of_dis']:
+				val=eval(vf)
+				if val is not None:
+					if len(val.split(','))==3:
+						m,d,y=[intornone(i) for i in val.split(',')]
+						sd=VoyageSparseDate.objects.create(month=m,day=d,year=y)
+						sd.save()
+						fstr=f"vd.{vf}_sparsedate=sd"
+						exec(fstr)
 				vd.save()
-				
-				for vf in ['voyage_began', 'slave_purchase_began', 'vessel_left_port', 'first_dis_of_slaves', 'date_departed_africa', 'arrival_at_second_place_landing', 'third_dis_of_slaves', 'departure_last_place_of_landing', 'voyage_completed', 'imp_voyage_began', 'imp_departed_africa', 'imp_arrival_at_port_of_dis']:
-					val=eval(vf)
-					if val is not None:
-						if len(val.split(','))==3:
-							m,d,y=[intornone(i) for i in val.split(',')]
-							sd=VoyageSparseDate.objects.create(month=m,day=d,year=y)
-							sd.save()
-							fstr=f"vd.{vf}_sparsedate=sd"
-					vd.save()
 			
 			### VOYAGE ITINERARIES
 
@@ -452,46 +483,34 @@ class Command(BaseCommand):
 			}
 			
 			fstr=f"SELECT {','.join([k for k in itinerary_var_types])}\
-				from voyage_voyageitinerary where voyage_id={id};"
+				from voyage_voyageitinerary where voyage_id={voyage_id_pk};"
 			result=cur.execute(fstr)
 			
-			try:
-				VoyageItinerary.objects.get(voyage=v).delete()
-			except:
-				pass
+			row=cur.fetchone()
 			
 			vi=VoyageItinerary.objects.create(voyage=v)
-			
-			for row in cur.fetchall():
-				rowdict={list(itinerary_var_types)[i]:row[i] for i in range(len(itinerary_var_types))}
-				for vit in itinerary_var_types:
+		
+			rowdict={list(itinerary_var_types)[i]:row[i] for i in range(len(itinerary_var_types))}
+			for vit in itinerary_var_types:
+				if vit!='voyage_id':
+					vtype=itinerary_var_types[vit]
+					vname=vit[:-3]
+					loc_map={
+						'Place':place_id_map,
+						'Region':region_id_map,
+						'BroadRegion':broad_region_id_map
+					}[vtype]
+					
 					if vit!='voyage_id':
-						vtype=itinerary_var_types[vit]
-						vname=vit[:-3]
-						loc_map={
-							'Place':place_id_map,
-							'Region':region_id_map,
-							'BroadRegion':broad_region_id_map
-						}[vtype]
-						
-						if vit!='voyage_id':
-							loc_id=rowdict[vit]
-							if loc_id is not None:
-								loc_id=loc_map[loc_id]
-							if loc_id is not None:
-								location=Location.objects.get(id=loc_id)
-								exec(f"vi.{vname}=location")
+						loc_id=rowdict[vit]
+						if loc_id is not None:
+							loc_id=loc_map[loc_id]
+							location=Location.objects.get(id=loc_id)
+							exec(f"vi.{vname}=location")
 				vi.save()
-# 				print(vi.__dict__)
-					
-					
 			
 			### VOYAGE OUTCOMES
 			
-			try:
-				v.voyage_outcome.delete()
-			except:
-				pass
 			
 			vo=VoyageOutcome.objects.create(
 				voyage=v
@@ -504,33 +523,29 @@ class Command(BaseCommand):
 				resistance_id,\
 				vessel_captured_outcome_id,\
 				voyage_id\
-			from voyage_voyageoutcome where voyage_id={id};")
+			from voyage_voyageoutcome where voyage_id={voyage_id_pk};")
 
-			for row in cur.fetchall():
-				owner_outcome_id,outcome_slaves_id,particular_outcome_id,resistance_id,vessel_captured_outcome_id,voyage_id=row
+			row = cur.fetchone()
+			owner_outcome_id, outcome_slaves_id,particular_outcome_id,resistance_id,vessel_captured_outcome_id,voyage_id=row
 				
-				if owner_outcome_id is not None:
-					oo=OwnerOutcome.objects.get(id=owner_outcome_id)
-					vo.owner_outcome=oo
-				if outcome_slaves_id is not None:
-					os=SlavesOutcome.objects.get(id=outcome_slaves_id)
-					vo.outcome_slaves=os
-				if particular_outcome_id is not None:	
-					po=ParticularOutcome.objects.get(id=particular_outcome_id)
-					vo.particular_outcome=po
-				if resistance_id is not None:
-					ro=Resistance.objects.get(id=resistance_id)
-					vo.resistance=ro
-				if vessel_captured_outcome_id is not None:
-					vco=VesselCapturedOutcome.objects.get(id=vessel_captured_outcome_id)
-					vo.vessel_captured_outcome=vco
-				vo.save()
+			if owner_outcome_id is not None:
+				oo=OwnerOutcome.objects.get(id=owner_outcome_id)
+				vo.owner_outcome=oo
+			if outcome_slaves_id is not None:
+				os=SlavesOutcome.objects.get(id=outcome_slaves_id)
+				vo.outcome_slaves=os
+			if particular_outcome_id is not None:	
+				po=ParticularOutcome.objects.get(id=particular_outcome_id)
+				vo.particular_outcome=po
+			if resistance_id is not None:
+				ro=Resistance.objects.get(id=resistance_id)
+				vo.resistance=ro
+			if vessel_captured_outcome_id is not None:
+				vco=VesselCapturedOutcome.objects.get(id=vessel_captured_outcome_id)
+				vo.vessel_captured_outcome=vco
+			vo.save()
 
 			### VOYAGE SHIPS
-			try:
-				v.voyage_ship.delete()
-			except:
-				pass
 			
 			ship=VoyageShip.objects.create(
 				voyage=v
@@ -552,7 +567,7 @@ class Command(BaseCommand):
 				vessel_construction_place_id,\
 				vessel_construction_region_id,\
 				voyage_id\
-			from voyage_voyageship where voyage_id={id};")
+			from voyage_voyageship where voyage_id={voyage_id_pk};")
 			
 			for row in cur.fetchall():
 				ship_name,tonnage,guns_mounted,year_of_construction,registered_year,tonnage_mod,imputed_nationality_id,nationality_ship_id,registered_place_id,registered_region_id,rig_of_vessel_id,ton_type_id,vessel_construction_place_id,vessel_construction_region_id,voyage_id=row
@@ -604,16 +619,16 @@ class Command(BaseCommand):
 				ship.save()
 			
 			
-			### LINKED VOYAGES
+# 			### LINKED VOYAGES
 			
 			
 			
 			result=cur.execute(f"SELECT second_id \
-			from voyage_linkedvoyages where first_id={id};")
+			from voyage_linkedvoyages where first_id={voyage_id_pk};")
 			
 			for row in cur.fetchall():
 				linked_id=row[0]
-				LinkedVoyages.objects.create(first_id=id,second_id=linked_id)
+				LinkedVoyages.objects.create(first_id=voyage_id_pk,second_id=linked_id)
 			
 			
 			## CAPTIVE NUMBERS
@@ -747,13 +762,13 @@ class Command(BaseCommand):
 			
 			fstr=f"SELECT \
 				{','.join([f for f in numbers_fields])} \
-				from voyage_voyageslavesnumbers where voyage_id={id};"
+				from voyage_voyageslavesnumbers where voyage_id={voyage_id_pk};"
 			result=cur.execute(fstr)
 			
 			for row in cur.fetchall():
 				exec(f"{','.join([f for f in numbers_fields])}=row")
 				
-				vn=VoyageSlavesNumbers.objects.create(voyage_id=id)
+				vn=VoyageSlavesNumbers.objects.create(voyage=v)
 				
 				for i in range(len(numbers_fields)):
 					vnf=numbers_fields[i]
@@ -761,17 +776,63 @@ class Command(BaseCommand):
 					if vnf!='voyage_id':
 						exec(f"vn.{vnf}={val}")
 				vn.save()
+			
+			
+			#VOYAGE CREW NUMBERS
+			numbers_fields=[
+				'crew_voyage_outset',
+				'crew_departure_last_port',
+				'crew_first_landing',
+				'crew_return_begin',
+				'crew_end_voyage',
+				'unspecified_crew',
+				'crew_died_before_first_trade',
+				'crew_died_while_ship_african',
+				'crew_died_middle_passage',
+				'crew_died_in_americas',
+				'crew_died_on_return_voyage',
+				'crew_died_complete_voyage',
+				'crew_deserted',
+				'voyage_id'
+			]
+			
+			fstr=f"SELECT \
+				{','.join([f for f in numbers_fields])} \
+				from voyage_voyagecrew where voyage_id={voyage_id_pk};"
+			result=cur.execute(fstr)
+			
+			for row in cur.fetchall():
+				exec(f"{','.join([f for f in numbers_fields])}=row")
+				
+				vcn=VoyageCrew.objects.create(voyage=v)
+				
+				for i in range(len(numbers_fields)):
+					vnf=numbers_fields[i]
+					val=eval("vnf")
+					if vnf!='voyage_id':
+						exec(f"vcn.{vnf}={val}")
+				vcn.save()
+			v=Voyage.objects.get(id=voyage_id_pk)
+			if v.id!=v.voyage_id:
+				print("pk and voyage id don't match",v,v.id,v.voyage_id)
+				exit()
 		
 		#PAST
 		
+		print("purging past entities")
+		print("purging enslaveridentities")
 		EnslaverIdentity.objects.all().delete()
+		print("purging enslaveraliases")
 		EnslaverAlias.objects.all().delete()
+		print("purging enslaved")
 		Enslaved.objects.all().delete()
+		print("purging enslavementrelations")
 		EnslavementRelation.objects.all().delete()
+		print("purging pastsparsedates")
 		PASTSparseDate.objects.all().delete()
 		
 		#ENSLAVERS
-		
+		print("creating enslaver records")
 		enslaver_fields=[
 			'id',
 			'principal_alias',
@@ -838,7 +899,7 @@ class Command(BaseCommand):
 			
 			enslaver_identity.save()
 			
-			print(enslaver_identity)
+# 			print(enslaver_identity)
 
 			
 		enslaver_fields=[
@@ -864,11 +925,11 @@ class Command(BaseCommand):
 				alias=alias,
 				identity=enslaver_identity
 			)	
-			print(enslaver_alias)
+# 			print(enslaver_alias)
 		
 		
 		
-		## ENSLAVED
+# 		## ENSLAVED
 		
 		fstr=f"select id,name,longitude,latitude from past_languagegroup"
 		result=cur.execute(fstr)
@@ -972,6 +1033,7 @@ class Command(BaseCommand):
 			id,name=pg
 			Gender.objects.create(id=id,name=name)
 		
+		print("creating enslaved people records")
 		for row in cur.fetchall():
 			enslaved_id, documented_name, name_first, name_second, name_third, modern_name, editor_modern_names_certainty, age, height, skin_color, dataset, notes, captive_fate_id, captive_status_id, language_group_id, last_known_date, post_disembark_location_id, register_country_id, gender=row
 			
@@ -1038,12 +1100,8 @@ class Command(BaseCommand):
 				enslaved.gender=gender_obj
 			
 			enslaved.save()
-			print(enslaved)
 
 		## SOURCES
-		
-		print(Source.objects.all().count())
-		
 		
 		fstr="SELECT id,group_id,group_name from voyage_voyagesourcestype;"
 		result=cur.execute(fstr)
@@ -1062,7 +1120,7 @@ class Command(BaseCommand):
 		new_sources=0
 		existing_sources=0
 		
-		print(Source.objects.all().count())
+		print(f"creating sources. currently {Source.objects.all().count()} records")
 		
 		new_source_id_map={}
 		for row in cur.fetchall():
@@ -1076,12 +1134,11 @@ class Command(BaseCommand):
 					title=full_ref,
 					zotero_item_id="JULY2025IMPORT"
 				)
-				print(source)
 				new_sources+=1
 				new_source_id_map[id]=source.id
 			else:
 				existing_sources+=1
-		print(new_source_id_map)
+		print(f"sources finished. now {Source.objects.all().count()} records")
 		
 		new_source_id_map={13759: 19565, 13886: 19566, 14011: 19567, 14699: 19568, 15290: 19569, 15291: 19570, 15292: 19571, 15293: 19572, 15294: 19573, 15295: 19574, 15296: 19575, 15297: 19576, 15298: 19577, 15299: 19578, 15300: 19579, 15301: 19580, 15304: 19581, 15305: 19582, 15306: 19583, 15307: 19584, 15308: 19585, 15309: 19586, 15310: 19587, 15311: 19588, 15312: 19589, 15313: 19590, 15314: 19591, 15315: 19592, 15316: 19593, 15317: 19594, 15318: 19595, 15319: 19596, 15320: 19597, 15321: 19598, 15322: 19599, 15323: 19600, 15324: 19601, 15325: 19602, 15326: 19603, 15327: 19604, 15328: 19605, 15329: 19606, 15330: 19607, 15331: 19608, 15332: 19609, 15333: 19610, 15334: 19611, 15335: 19612, 15336: 19613, 15337: 19614, 15338: 19615, 15339: 19616, 15340: 19617, 15341: 19618, 15342: 19619, 15343: 19620, 15344: 19621, 15345: 19622, 15346: 19623, 15347: 19624, 15348: 19625, 15349: 19626, 15350: 19627, 15351: 19628, 15352: 19629, 15353: 19630, 15354: 19631, 15355: 19632, 15356: 19633, 15357: 19634, 15358: 19635, 15359: 19636, 15360: 19637, 15361: 19638, 15363: 19639, 15364: 19640, 15365: 19641, 15366: 19642, 15367: 19643, 15369: 19644, 15370: 19645, 15371: 19646, 15372: 19647, 15373: 19648, 15374: 19649, 15375: 19650, 15376: 19651, 15378: 19652, 15380: 19653, 15381: 19654, 15382: 19655, 15383: 19656, 15384: 19657, 15385: 19658, 15386: 19659, 15387: 19660, 15388: 19661, 15389: 19662, 15390: 19663, 15391: 19664, 15392: 19665, 15393: 19666, 15394: 19667, 15395: 19668, 15396: 19669, 15397: 19670, 15398: 19671}
 
@@ -1089,7 +1146,7 @@ class Command(BaseCommand):
 		
 		## Enslavers to Sources
 		
-		print("enslavers to sources")
+		print("linking enslavers to sources")
 		
 		fstr=f"SELECT id,\
 			text_ref,\
@@ -1113,38 +1170,47 @@ class Command(BaseCommand):
 					page_range=text_ref[:249]
 				)
 		
-
-			
-
 		## Voyages to Sources
 		
-		SourceVoyageConnection.objects.all().delete()
+		#Fill in all missing source connections (but note, this treats short_ref as a unique field -- which is not true in 3 outlier cases and with all our new iiif docs)
 		
-		fstr=f"SELECT id,\
-		text_ref,group_id,source_id from voyage_voyagesourcesconnection;"
-		result=cur.execute(fstr)
-		new_sources=0
-		existing_sources=0
+		print('filling in voyage source connections')
+		result=cur.execute(f"select * from voyage_voyagesourcesconnection\
+			left join voyage_voyagesources on \
+			voyage_voyagesources.id = \
+			voyage_voyagesourcesconnection.source_id;"
+		)
 		
-		failures=0
 		for row in cur.fetchall():
-			id,text_ref,voyage_id,source_id=row
-			if source_id in new_source_id_map:
-				source_id=new_source_id_map[source_id]
-				source=Source.objects.get(id=source_id)
-
-				voyage=Voyage.objects.get(id=voyage_id)
-				SourceVoyageConnection.objects.create(
-					source=source,
-					voyage=voyage,
-					page_range=text_ref[:249]
+			st=time.time()
+			id, source_order,text_ref,voyage_id,source_id,source_id2,short_ref,full_ref,source_type_id=row
+			
+			st=time.time()
+			v=Voyage.objects.get(voyage_id=voyage_id)
+			sources=Source.objects.all().filter(short_ref__name=short_ref)
+			if short_ref in short_refs_with_multiple_sources or sources.count()>1:
+				print(f"short ref {short_ref} has more than one source: {sources}")
+				#now get the api source corresponding to that short ref
+			elif len(sources)>0:
+				source=sources[0]
+				
+				source_voyage_connections=source.source_voyage_connections.all().filter(
+					voyage=v
 				)
+				
+				if source_voyage_connections.count()==0:
+					print(f"{v} new to {short_ref}")
+					SourceVoyageConnection.objects.create(
+						page_range=text_ref,
+						source=source,
+						voyage=v
+					)
 		
 		## EnslavementRelations
 		EnslavementRelation.objects.all().delete()
 		EnslavementRelationType.objects.all().delete()
 		
-		print("enslavement relations")
+		print("creating enslavement relations")
 		fstr=f"SELECT id,name from past_enslavementrelationtype;"
 		result=cur.execute(fstr)
 		
@@ -1169,18 +1235,16 @@ class Command(BaseCommand):
 			try:
 				voyage=Voyage.objects.get(id=voyage_id)
 			except:
-				fail=True
-				print("Failed on voyage",voyage)
-			if not fail:
-				enslavement_relation=EnslavementRelation.objects.create(
-					id=id,
-					relation_type=relation_type,
-					voyage=voyage
-				)
+				voyage=None
+			enslavement_relation=EnslavementRelation.objects.create(
+				id=id,
+				relation_type=relation_type,
+				voyage=voyage
+			)
 		
 		## EnslavedInRelation
 		
-		print("ENSLAVED IN RELATION")
+		print("linking: ENSLAVED IN RELATION")
 		EnslavedInRelation.objects.all().delete()
 		
 		fstr=f"SELECT \
@@ -1199,7 +1263,7 @@ class Command(BaseCommand):
 			except:
 				print("failed on",row)
 		
-		print("ENSLAVERS IN RELATION")
+		print("linking: ENSLAVERS IN RELATION")
 		EnslaverRole.objects.all().delete()
 		enslaver_roles={
 			1:'Captain',
@@ -1234,7 +1298,7 @@ class Command(BaseCommand):
 				if role_id in enslaver_roles:
 					roles=[EnslaverRole.objects.get(id=role_id)]
 				else:
-					roles=EnslaverRole.objects.get(name__in=['Investor','Captain'])
+					roles=EnslaverRole.objects.filter(name__in=['Investor','Captain'])
 				
 				
 				enslaver_in_relation=EnslaverInRelation.objects.create(
@@ -1249,12 +1313,86 @@ class Command(BaseCommand):
 				print("failed on",row)
 
 
-
-
-
-
-
-
+		## PEOPLE VOYAGE CONNECTIONS
+		
+		
+		### OWNERS AND CAPTAINS
+		
+		print("TRANSPORTATION ENSLAVEMENT RELATIONS")
+		
+		fstr=f"SELECT \
+			distinct voyage_id\
+			from past_enslavervoyageconnection;"
+		result=cur.execute(fstr)
+		
+		voyage_ids=list(set([i[0] for i in cur.fetchall()]))
+		
+		voyage_transportation_relations={}
+		transportation_type=EnslavementRelationType.objects.get(name="Transportation")
+		for v_id in voyage_ids:
+			voyage=Voyage.objects.get(id=v_id)
+			transportation_relation=EnslavementRelation.objects.create(
+				relation_type=transportation_type,
+				voyage=voyage
+			)
+			voyage_transportation_relations[voyage.id]=transportation_relation
+		print("CONNECTING INVESTORS/CAPTAINS TO VOYAGES")
+		fstr=f"SELECT \
+			role_id,\
+			enslaver_alias_id,\
+			voyage_id\
+			from past_enslavervoyageconnection;"
+		result=cur.execute(fstr)
+		
+		for row in cur.fetchall():
+			print(row)
+			role_id,enslaver_alias_id,voyage_id=row
+			transportation_relation=voyage_transportation_relations[voyage_id]
+			if role_id in enslaver_roles:
+				roles=[EnslaverRole.objects.get(id=role_id)]
+			else:
+				roles=EnslaverRole.objects.filter(name__in=['Investor','Captain'])
+			enslaver_alias=EnslaverAlias.objects.get(id=enslaver_alias_id)
+			enslaver_in_relation=EnslaverInRelation.objects.create(
+				enslaver_alias=enslaver_alias,
+				relation=transportation_relation
+			)
+			
+			for role in roles:
+				enslaver_in_relation.roles.add(role)
+			enslaver_in_relation.save()
+			
+			
+		### ENSLAVED
+		
+		print("CONNECTING ENSLAVED PEOPLE TO VOYAGES")
+			
+		fstr=f"SELECT \
+			enslaved_id,\
+			voyage_id\
+			from past_enslaved;"
+		result=cur.execute(fstr)
+		print("CONNECTING ENSLAVED TO VOYAGES")
+		for row in cur.fetchall():
+			print(row)
+			enslaved_id,voyage_id=row
+			
+			if voyage_id in voyage_transportation_relations:
+				transportation_relation=voyage_transportation_relations[voyage_id]
+			else:
+				transportation_relation=EnslavementRelation.objects.create(
+					relation_type=transportation_type,
+					voyage=voyage
+				)
+				voyage_transportation_relations[voyage.id]=transportation_relation
+			
+			enslaved=Enslaved.objects.get(enslaved_id=enslaved_id)
+			
+			EnslavedInRelation.objects.create(
+				enslaved=enslaved,
+				relation=transportation_relation
+			)
+			
 
 
 

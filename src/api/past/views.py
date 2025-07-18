@@ -1019,7 +1019,8 @@ class EnslavedVoyageOutcome(generics.GenericAPIView):
 		EnslavedVoyageOutcomeFilterVarNames=['enslaved_relations__relation__voyage__dataset']
 		
 		if 'filter' in reqdict:		
-			for filterItem in list([reqdict['filter']]):
+			for filterItem in reqdict['filter']:
+				print(filterItem)
 				if filterItem['varName'] not in EnslavedVoyageOutcomeFilterVarNames:
 					reqdict['filter'].remove(filterItem)
 		
@@ -1050,8 +1051,11 @@ class EnslavedVoyageOutcome(generics.GenericAPIView):
 						varName=filterItem['varName']
 						searchTerm=filterItem['searchTerm']
 						vlist=eval(f"Enslaved.objects.all().filter({varName}={searchTerm}).values_list('enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__value','enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__name')")
-						outcomesNamesLists.append(vlist)
-					final_outcomesNamesList=list(eval(f"' & '.join([set(i) for i in outcomesNamesLists])"))
+						outcomesNamesLists.append(list(vlist))
+					fstrlist=[str(set(i)) for i in outcomesNamesLists]
+					fstr=" & ".join(fstrlist)
+					print(fstr)
+					final_outcomesNamesList=list(eval(fstr))
 			
 			flattened={}
 			for i in final_outcomesNamesList:

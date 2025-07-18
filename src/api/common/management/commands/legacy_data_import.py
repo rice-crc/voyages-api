@@ -33,7 +33,7 @@ class Command(BaseCommand):
 			database="voyages_legacy")
 			
 		cur = cnx.cursor()
-# 		
+
 		#validate connection
 		result = cur.execute("SELECT * FROM voyage_voyage LIMIT 1")
 		row = cur.fetchone()
@@ -1169,6 +1169,61 @@ class Command(BaseCommand):
 					enslaver=enslaver,
 					page_range=text_ref[:249]
 				)
+
+
+
+		#Fill in all missing source connections (but note, this treats short_ref as a unique field -- which is not true in 3 outlier cases and with all our new iiif docs)
+		
+		print('filling in voyage enslaver connections')
+		result=cur.execute(f"select * from past_enslaveridentitysourceconnection\
+			left join voyage_voyagesources on \
+			voyage_voyagesources.id = \
+			past_enslaveridentitysourceconnection.source_id ;"
+		)
+		
+		for row in cur.fetchall():
+			id, source_order,text_ref,enslaver_identity_id,source_id,source_id2,short_ref,full_ref,source_type_id=row
+			print(row)
+			ei=EnslaverIdentity.objects.get(id=enslaver_identity_id)
+			sources=Source.objects.all().filter(short_ref__name=short_ref)
+			if sources.count()>1:
+				print(f"short ref {short_ref} has more than one source: {sources}")
+				#now get the api source corresponding to that short ref
+			elif sources.count()>0:
+				source=sources[0]
+				source_enslaver_connections=\
+				source.source_enslaver_connections.all().filter(
+					enslaver=ei
+				)
+				if source_enslaver_connections.count()==0:
+					print(f"{ei} new to {short_ref}")
+					SourceEnslaverConnection.objects.create(
+						source=source,
+						enslaver=ei,
+						page_range=text_ref[:249]
+					)
+			else:
+				short_ref,short_ref_isnew=ShortRef.objects.get_or_create(
+					name=short_ref
+				)
+				source_type=SourceType.objects.get(id=source_type_id)
+				source=Source.objects.create(
+					title=full_ref,
+					short_ref=short_ref,
+					zotero_item_id="JULY2025IMPORT",
+					source_type=source_type
+				)
+				sec=SourceEnslaverConnection.objects.create(
+					page_range=text_ref,
+					source=source,
+					enslaver=ei
+				)
+				if short_ref_isnew:
+					print("created short ref {short_ref}; source {source}; source enslaver connection {sec}")
+				else:
+					print("created source {source}; source enslaver connection {sec}; -- on short ref {short_ref}")
+
+
 		
 		## Voyages to Sources
 		
@@ -1178,20 +1233,18 @@ class Command(BaseCommand):
 		result=cur.execute(f"select * from voyage_voyagesourcesconnection\
 			left join voyage_voyagesources on \
 			voyage_voyagesources.id = \
-			voyage_voyagesourcesconnection.source_id;"
+			voyage_voyagesourcesconnection.source_id ;"
 		)
 		
 		for row in cur.fetchall():
-			st=time.time()
 			id, source_order,text_ref,voyage_id,source_id,source_id2,short_ref,full_ref,source_type_id=row
-			
-			st=time.time()
+			print(short_ref)
 			v=Voyage.objects.get(voyage_id=voyage_id)
 			sources=Source.objects.all().filter(short_ref__name=short_ref)
-			if short_ref in short_refs_with_multiple_sources or sources.count()>1:
+			if sources.count()>1:
 				print(f"short ref {short_ref} has more than one source: {sources}")
 				#now get the api source corresponding to that short ref
-			elif len(sources)>0:
+			elif sources.count()>0:
 				source=sources[0]
 				
 				source_voyage_connections=source.source_voyage_connections.all().filter(
@@ -1205,6 +1258,28 @@ class Command(BaseCommand):
 						source=source,
 						voyage=v
 					)
+			else:
+				short_ref,short_ref_isnew=ShortRef.objects.get_or_create(
+					name=short_ref
+				)
+				source_type=SourceType.objects.get(id=source_type_id)
+				source=Source.objects.create(
+					title=full_ref,
+					short_ref=short_ref,
+					zotero_item_id="JULY2025IMPORT",
+					source_type=source_type
+				)
+				
+				svc=SourceVoyageConnection.objects.create(
+					page_range=text_ref,
+					source=source,
+					voyage=v
+				)
+				if short_ref_isnew:
+					print("created short ref {short_ref}; source {source}; source voyage connection {svc}")
+				else:
+					print("created source {source}; source voyage connection {svc}; -- on short ref {short_ref}")
+				
 		
 		## EnslavementRelations
 		EnslavementRelation.objects.all().delete()
@@ -1392,50 +1467,3 @@ class Command(BaseCommand):
 				enslaved=enslaved,
 				relation=transportation_relation
 			)
-			
-
-
-
-
-
-
-
-
-
-
-# 		## Enslaved to Sources
-# 		
-# 		print("enslaved to sources")
-# 		SourceEnslavedConnection.objects.all().delete()
-# 		
-# 		fstr=f"SELECT id,\
-# 		text_ref,enslaved_id,source_id from past_enslavedsourceconnection;"
-# 		result=cur.execute(fstr)
-# 		new_sources=0
-# 		existing_sources=0
-# 		
-# 		failures=0
-# 		for row in cur.fetchall():
-# 			id,text_ref,enslaved_id,source_id=row
-# 			if source_id in new_source_id_map:
-# 				source_id=new_source_id_map[source_id]
-# 			
-# 			try:
-# 				source=Source.objects.get(id=source_id)
-# 			except:
-# 				fail=True
-# 				print(f"could not match source {source_id}")
-# 			try:
-# 				enslaved=Enslaved.objects.get(id=enslaved_id)
-# 			except:
-# 				fail=True
-# 				print("could not match enslaved {enslaved_id}")
-# 			if not fail:
-# 				SourceEnslavedConnection.objects.create(
-# 					source=source,
-# 					enslaved=enslaved,
-# 					page_range=text_ref
-# 				)
-# 			else:
-# 				failures+=1
-# 		print(f"{failures} enslaved source failures")

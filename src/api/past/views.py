@@ -1016,7 +1016,7 @@ class EnslavedVoyageOutcome(generics.GenericAPIView):
 		#CLEAN THE REQUEST'S FILTER (IF ANY)
 		reqdict=dict(request.data)
 		
-		EnslavedVoyageOutcomeFilterVarNames=['enslaved_relations__relation__voyage__dataset']
+		EnslavedVoyageOutcomeFilterVarNames=['dataset','enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__name']
 		
 		if 'filter' in reqdict:		
 			for filterItem in reqdict['filter']:
@@ -1050,7 +1050,8 @@ class EnslavedVoyageOutcome(generics.GenericAPIView):
 					for filterItem in reqdict['filter']:
 						varName=filterItem['varName']
 						searchTerm=filterItem['searchTerm']
-						vlist=eval(f"Enslaved.objects.all().filter({varName}={searchTerm}).values_list('enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__value','enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__name')")
+						op=filterItem['op']
+						vlist=eval(f"Enslaved.objects.all().filter({varName}__{op}={searchTerm}).values_list('enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__value','enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__name')")
 						outcomesNamesLists.append(list(vlist))
 					fstrlist=[str(set(i)) for i in outcomesNamesLists]
 					fstr=" & ".join(fstrlist)

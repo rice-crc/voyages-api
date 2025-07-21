@@ -310,6 +310,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	st=time.time()
 	pre_order_by_count=filtered_queryset.count()
 	order_by=params.get('order_by')
+	dedupe=False
 	if order_by is not None:
 		if DEBUG:
 			print(f"------>ORDER BY: {order_by}")
@@ -327,7 +328,10 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				else:
 					filtered_queryset=filtered_queryset.order_by(F(k).desc(nulls_last=True))
 			else:
+				print(f"key is invalid to sort on: {k}")
 				filtered_queryset=filtered_queryset.order_by('id')
+			if "__" in ob:
+				dedupe=True
 	else:
 		filtered_queryset=filtered_queryset.order_by('id')
 	
@@ -342,7 +346,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	## https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
 	
 # 	if post_order_by_count>pre_order_by_count:
-	dedupe=True
+# 	dedupe=True
 # 	else:
 # 		dedupe=False
 		

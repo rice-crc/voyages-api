@@ -288,8 +288,8 @@ class VoyageSerializer(serializers.ModelSerializer):
 	def get_linked_voyages(self,instance) -> VoyageSourceSerializer(many=True):
 		incoming=instance.incoming_from_other_voyages.all()
 		outgoing=instance.outgoing_to_other_voyages.all()
-		incoming_ids=[i.voyage_id for i in incoming]
-		outgoing_ids=[o.voyage_id for o in outgoing]
+		incoming_ids=[i.first for i in incoming]
+		outgoing_ids=[o.second for o in outgoing]
 		linked_voyage_ids=list(set(incoming_ids+outgoing_ids))
 		return LinkedVoyageSerializer(linked_voyage_ids,many=True,read_only=True).data
 

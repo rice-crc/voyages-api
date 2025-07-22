@@ -213,7 +213,7 @@ def groupby():
 	if binsize is not None:
 		binrows=by
 		binsize=int(binsize)
-		
+		df2=df2.dropna(subset=[binrows])
 		df2[binrows]=df2[binrows].astype('int')
 		binvar_min=df2[binrows].min()
 		binvar_max=df2[binrows].max()

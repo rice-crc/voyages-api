@@ -11,7 +11,7 @@ from common.static.Enslaved_options import Enslaved_options
 from common.static.EnslavementRelation_options import EnslavementRelation_options
 from common.autocomplete_indices import get_all_model_autocomplete_fields
 from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
-
+from django.core.exceptions import ObjectDoesNotExist
 
 #################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR PAGINATED LISTS. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
 
@@ -22,7 +22,12 @@ class AnyField(Field):
 	def to_internal_value(self, data):
 		return data
 		
-############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
+############ CONTROLLED VOCAB SERIALIZERS
+
+class CaptiveFateSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=CaptiveFate
+		fields='__all__'
 
 class GenderSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -132,42 +137,52 @@ class EnslavedSerializer(serializers.ModelSerializer):
 	def get_voyages(self,instance) -> PastEnslavedVoyageSerializer(many=False):
 		#right now, the table layouts, basically everything assume a single voyage per enslaved person
 		v=Voyage.objects.filter(voyage_enslavement_relations__enslaved_in_relation__enslaved__id=instance.id).first()
-		embark=v.voyage_itinerary.imp_principal_place_of_slave_purchase
-		if embark:
-			embark=embark.name
-			embark=fuzzyplacenamestrip(embark)
+		if v is not None:
+			embark=v.voyage_itinerary.imp_principal_place_of_slave_purchase
+			if embark:
+				embark=embark.name
+				embark=fuzzyplacenamestrip(embark)
+			else:
+				embark="place unknown"
+			disembark=v.voyage_itinerary.imp_principal_port_slave_dis
+			if disembark:
+				disembark=disembark.name
+				disembark=fuzzyplacenamestrip(disembark)
+			else:
+				disembark="place unknown"
+			date=v.voyage_dates.imp_arrival_at_port_of_dis_sparsedate
+			if date:
+				yearam=date.year
+				month=date.month
+				day=date.day
+			else:
+				yearam="year unknown"
+				month=None
+				day=None
+			try:
+				ship=v.voyage_ship
+				ship_name=ship.ship_name
+			except VoyageShip.DoesNotExist:
+				ship_name="ship unknown"
+			
+			particular_outcome=v.voyage_outcome.particular_outcome
+			if not particular_outcome:
+				particular_outcome="outcome unknown"
+			else:
+				particular_outcome=particular_outcome.name
+			v_id=v.id
 		else:
-			embark="place unknown"
-		disembark=v.voyage_itinerary.imp_principal_port_slave_dis
-		if disembark:
-			disembark=disembark.name
-			disembark=fuzzyplacenamestrip(disembark)
-		else:
-			disembark="place unknown"
-		date=v.voyage_dates.imp_arrival_at_port_of_dis_sparsedate
-		if date:
-			yearam=date.year
-			month=date.month
-			day=date.day
-		else:
-			yearam="year unknown"
+			v_id=None
+			embark=None
+			disembark=None
+			yearam=None
 			month=None
 			day=None
-		ship=v.voyage_ship
-		if not ship:
-			ship_name="ship unknown"
-		else:
-			ship_name=ship.ship_name
-		
-		particular_outcome=v.voyage_outcome.particular_outcome
-		if not particular_outcome:
-			particular_outcome="outcome unknown"
-		else:
-			particular_outcome=particular_outcome.name
-		
+			ship_name=None
+			particular_outcome=None
 		
 		voyagedict={
-			'id':v.id,
+			'id':v_id,
 			'embarkation':embark,
 			'disembarkation':disembark,
 			'year':yearam,

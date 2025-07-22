@@ -956,9 +956,6 @@ class PASTNetworks(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
-
-#CONTRIBUTIONS
-
 ######## READ-ONLY CONTROLLED VOCAB ENDPOINTS
 
 class EnslaverRoleList(generics.ListAPIView):
@@ -984,69 +981,18 @@ class GenderList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=GenderSerializer
 
+class CaptiveFateList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	'''
+	model=CaptiveFate
+	queryset=CaptiveFate.objects.all()
+	pagination_class=None
+	sort_by='name'
+	serializer_class=CaptiveFateSerializer
 
-# @extend_schema(
-# 		exclude=True
-# 	)
-# class EnslavementRelationCREATE(generics.CreateAPIView):
-# 	'''
-# 	Create an enslavement relation without a pk
-# 	'''
-# 	queryset=EnslavementRelation.objects.all()
-# 	serializer_class=EnslavementRelationCRUDSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
-# class EnslavementRelationRETRIEVE(generics.RetrieveAPIView):
-# 	'''
-# 	Retrieve an enslavement relation record with their pk
-# 	'''
-# 	queryset=EnslavementRelation.objects.all()
-# 	serializer_class=EnslavementRelationSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAuthenticated]
-# 
-# @extend_schema(
-# 		exclude=True
-# 	)
-# class EnslavementRelationUPDATE(generics.UpdateAPIView):
-# 	'''
-# 	Update an enslavement relation record with their pk
-# 	'''
-# 	queryset=EnslavementRelation.objects.all()
-# 	serializer_class=EnslavementRelationCRUDSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
-# @extend_schema(
-# 		exclude=True
-# 	)
-# class EnslavementRelationDESTROY(generics.DestroyAPIView):
-# 	'''
-# 	Delete an enslavement relation record with their pk
-# 	'''
-# 	queryset=EnslavementRelation.objects.all()
-# 	serializer_class=EnslavementRelationCRUDSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
-# @extend_schema(
-# 		exclude=True
-# 	)
-# class EnslaverCREATE(generics.CreateAPIView):
-# 	'''
-# 	Create enslaver without a pk
-# 	'''
-# 	queryset=EnslaverIdentity.objects.all()
-# 	serializer_class=EnslaverCRUDSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
 class EnslaverGET(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
@@ -1056,46 +1002,7 @@ class EnslaverGET(generics.RetrieveAPIView):
 	lookup_field='id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-# 
-# @extend_schema(
-# 		exclude=True
-# 	)
-# class EnslaverUPDATE(generics.UpdateAPIView):
-# 	'''
-# 	Update an enslaver record with their pk
-# 	'''
-# 	queryset=EnslaverIdentity.objects.all()
-# 	serializer_class=EnslaverCRUDSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
-# @extend_schema(
-# 		exclude=True
-# 	)
-# class EnslaverDESTROY(generics.DestroyAPIView):
-# 	'''
-# 	Delete an enslaver record with their pk
-# 	'''
-# 	queryset=EnslaverIdentity.objects.all()
-# 	serializer_class=EnslaverCRUDSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
-# @extend_schema(
-# 		exclude=True
-# 	)
-# class EnslavedCREATE(generics.CreateAPIView):
-# 	'''
-# 	Create enslaver without a pk
-# 	'''
-# 	queryset=Enslaved.objects.all()
-# 	serializer_class=EnslavedCRUDSerializer
-# 	lookup_field='id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
+
 class EnslavedGET(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk
@@ -1105,29 +1012,85 @@ class EnslavedGET(generics.RetrieveAPIView):
 	lookup_field='enslaved_id'
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
-# 
-# @extend_schema(
-# 		exclude=True
+	
+class EnslavedVoyageOutcome(generics.GenericAPIView):
+	authentication_classes=[TokenAuthentication]
+	permission_classes=[IsAuthenticated]
+# 	@extend_schema(
+# 		description="Controlled vocabulary of voyage outcomes by enslaved individuals. Filterable only (for now) on voyage dataset.",
+# 		request=EnslavedVoyageOutcomeRequestSerializer,
+# 		responses=EnslavedVoyageOutcomeResponseSerializer
 # 	)
-# class EnslavedUPDATE(generics.UpdateAPIView):
-# 	'''
-# 	Update an enslaver record with their pk
-# 	'''
-# 	queryset=Enslaved.objects.all()
-# 	serializer_class=EnslavedCRUDSerializer
-# 	lookup_field='enslaved_id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
-# 
-# @extend_schema(
-# 		exclude=True
-# 	)
-# class EnslavedDESTROY(generics.DestroyAPIView):
-# 	'''
-# 	Delete an enslaver record with their pk
-# 	'''
-# 	queryset=Enslaved.objects.all()
-# 	serializer_class=EnslavedCRUDSerializer
-# 	lookup_field='enslaved_id'
-# 	authentication_classes=[TokenAuthentication]
-# 	permission_classes=[IsAdminUser]
+	def post(self,request):
+		st=time.time()
+		print("ENSLAVED VOYAGE OUTCOME+++++++\nusername:",request.auth.user)
+		
+		#CLEAN THE REQUEST'S FILTER (IF ANY)
+		reqdict=dict(request.data)
+		
+		EnslavedVoyageOutcomeFilterVarNames=['dataset','enslaved_relations__relation__voyage__voyage_itinerary__imp_principal_region_slave_dis__name']
+		
+		if 'filter' in reqdict:		
+			for filterItem in reqdict['filter']:
+				print(filterItem)
+				if filterItem['varName'] not in EnslavedVoyageOutcomeFilterVarNames:
+					reqdict['filter'].remove(filterItem)
+		
+		#VALIDATE THE REQUEST
+# 		serialized_req = EnslavedVoyageOutcomeRequestSerializer(data=reqdict)
+# 		if not serialized_req.is_valid():
+# 			return JsonResponse(serialized_req.errors,status=400)
+
+		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		if USE_REDIS_CACHE:
+			srd=serialized_req.data
+			hashdict={
+				'req_name':str(self.request),
+				'req_data':srd
+			}
+			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
+			cached_response = redis_cache.get(hashed)
+		else:
+			cached_response=None
+		
+		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
+		if cached_response is None:
+			final_outcomesNamesList=list(eval(f"Enslaved.objects.all().values_list('enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__value','enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__name')"))
+			if 'filter' in reqdict:
+				if len(reqdict['filter'])>0:
+					outcomesNamesLists=[]
+					for filterItem in reqdict['filter']:
+						varName=filterItem['varName']
+						searchTerm=filterItem['searchTerm']
+						op=filterItem['op']
+						vlist=eval(f"Enslaved.objects.all().filter({varName}__{op}={searchTerm}).values_list('enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__value','enslaved_relations__relation__voyage__voyage_outcome__particular_outcome__name')")
+						outcomesNamesLists.append(list(vlist))
+					fstrlist=[str(set(i)) for i in outcomesNamesLists]
+					fstr=" & ".join(fstrlist)
+					print(fstr)
+					final_outcomesNamesList=list(eval(fstr))
+			
+			flattened={}
+			for i in final_outcomesNamesList:
+				flattened[i[0]]=i[1]
+
+			resp=[
+				{
+					"value":i,
+					"name":flattened[i]
+				}
+				for i in flattened
+				if i is not None
+			]
+			
+			if USE_REDIS_CACHE:
+				redis_cache.set(hashed,json.dumps(resp))			
+		else:
+			if DEBUG:
+				print("cached:",hashed)
+			resp=json.loads(cached_response)
+		
+		if DEBUG:
+			print("Internal Response Time:",time.time()-st,"\n+++++++")
+		
+		return JsonResponse(resp,safe=False,status=200)

@@ -371,6 +371,7 @@ class VoyageLineAndBarCharts(generics.GenericAPIView):
 					'ids':ids,
 					'agg_fn':a_s['agg_fn']
 				}
+				by=re.sub("__bins__[0-9]+","",by)
 				json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 				pandas_resp=json.loads(json_resp.text)
 				resp[by]=pandas_resp[by]
@@ -744,7 +745,6 @@ class AfricanInfoList(generics.ListAPIView):
 	pagination_class=None
 	sort_by='value'
 	serializer_class=AfricanInfoSerializer
-
 
 class RigOfVesselList(generics.ListAPIView):
 	'''

@@ -322,11 +322,14 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				k=ob
 
 			if k in all_fields:
+				
 				if asc:
 					filtered_queryset=filtered_queryset.order_by(F(k).asc(nulls_last=True))
 				else:
 					filtered_queryset=filtered_queryset.order_by(F(k).desc(nulls_last=True))
+				
 			else:
+				print(f"key is invalid to sort on: {k}")
 				filtered_queryset=filtered_queryset.order_by('id')
 	else:
 		filtered_queryset=filtered_queryset.order_by('id')

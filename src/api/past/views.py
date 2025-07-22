@@ -981,6 +981,18 @@ class GenderList(generics.ListAPIView):
 	sort_by='value'
 	serializer_class=GenderSerializer
 
+class CaptiveFateList(generics.ListAPIView):
+	'''
+	Controlled vocabulary, read-only.
+	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	
+	'''
+	model=CaptiveFate
+	queryset=CaptiveFate.objects.all()
+	pagination_class=None
+	sort_by='name'
+	serializer_class=CaptiveFateSerializer
+
 class EnslaverGET(generics.RetrieveAPIView):
 	'''
 	Retrieve an enslaver record with their pk

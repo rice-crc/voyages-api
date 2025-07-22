@@ -22,7 +22,12 @@ class AnyField(Field):
 	def to_internal_value(self, data):
 		return data
 		
-############ SERIALIZERS COMMON TO ENSLAVERS, ENSLAVED, & RELATIONS
+############ CONTROLLED VOCAB SERIALIZERS
+
+class CaptiveFateSerializer(serializers.ModelSerializer):
+	class Meta:
+		model=CaptiveFate
+		fields='__all__'
 
 class GenderSerializer(serializers.ModelSerializer):
 	class Meta:

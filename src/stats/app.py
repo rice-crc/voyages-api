@@ -213,7 +213,7 @@ def groupby():
 	if binsize is not None:
 		binrows=by
 		binsize=int(binsize)
-		
+		df2=df2.dropna(subset=[binrows])
 		df2[binrows]=df2[binrows].astype('int')
 		binvar_min=df2[binrows].min()
 		binvar_max=df2[binrows].max()
@@ -332,9 +332,22 @@ def voyage_summary_stats():
 		record={'index':v}
 		record['Total captives']=f'{int(df[k].sum()):,}'
 		record['Total voyages with this datapoint']=f'{int(df[k].dropna().shape[0]):,}'
-		record['Average']=str(round(df[k].mean(),1))
-		record['Median']=str(round(df[k].median(),1))
-		record['Standard deviation']=str(round(df[k].std(),1))
+		
+		average=str(round(df[k].mean(),1))
+		if average=="nan":
+			average=""
+		
+		median=str(round(df[k].median(),1))
+		if median=="nan":
+			median=""
+		
+		std=str(round(df[k].std(),1))
+		if std=="nan":
+			std=""
+		
+		record['Average']=average
+		record['Median']=median
+		record['Standard deviation']=std
 		outputrecords.append(record)
 	
 	for k in non_imputed_rows:
@@ -352,20 +365,34 @@ def voyage_summary_stats():
 			median=str(round(median*100,1))
 			
 			if str(std)=="nan":
-				std="nan"
+				std=""
 			else:
 				std=str(round(std*100,1))
 				std=f'{std}%'
 			
-			average=f'{average}%'
-			median=f'{median}%'
+			if str(average)=="nan":
+				average=""
+			else:
+				average=f'{average}%'
+			
+			if str(median)=="nan":
+				median=""
+			else:
+				median=f'{median}%'
 			
 		else:
-			average=str(round(average,1))
-			median=str(round(median,1))
+			if str(average)=="nan":
+				average=""
+			else:
+				average=str(round(average,1))
+			
+			if str(median)=="nan":
+				median=""
+			else:
+				median=str(round(median,1))
 			
 			if str(std)=="nan":
-				std="nan"
+				std=""
 			else:
 				std=str(round(std))
 			

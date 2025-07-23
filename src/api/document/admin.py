@@ -73,7 +73,7 @@ class SourceAdmin(admin.ModelAdmin):
 	]
 	search_fields=['title','zotero_item_id','short_ref__name']
 	autocomplete_fields=['short_ref','date']
-	readonly_fields=['item_url','zotero_item_id','zotero_group_id']
+# 	readonly_fields=['item_url','zotero_item_id','zotero_group_id']
 	list_display=('title','short_ref','zotero_item_id','human_reviewed')
 
 admin.site.register(Source, SourceAdmin)

@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'blog',
     'geo',
     'document',
-# 	'contribute',
     'tinymce',
     'rest_framework',
     'rest_framework.authtoken',

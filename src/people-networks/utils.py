@@ -203,6 +203,9 @@ def load_graph():
 					if enslaver_identity_id is not None:
 						enslaver_uuid=enslavers_dict[enslaver_identity_id]['uuid']
 						enslaver_role=rc['relation_enslavers__roles__name']
+						if enslaver_role is None:
+							enslaver_role="Undefined"
+
 						if enslaver_uuid not in enslaver_roles:
 							enslaver_roles[enslaver_uuid]=[enslaver_role]
 						else:
@@ -263,6 +266,10 @@ def load_graph():
 							enslaver_role=rc['relation_enslavers__roles__name']
 							if enslaver_role in ['Captain','Investor']:
 								captain_or_investor=True
+							
+							if enslaver_role is None:
+								enslaver_role="Undefined"
+								
 							if enslaver_uuid not in enslaver_roles:
 								enslaver_roles[enslaver_uuid]=[enslaver_role]
 							else:
@@ -290,6 +297,9 @@ def load_graph():
 							for rc in relation_connections:
 								enslaver_uuid=enslavers_dict[rc['relation_enslavers__enslaver_alias__identity__id']]['uuid']
 								enslaver_role=rc['relation_enslavers__roles__name']
+								if enslaver_role is None:
+									enslaver_role="Undefined"
+
 								if enslaver_uuid not in enslaver_roles:
 									enslaver_roles[enslaver_uuid]=[enslaver_role]
 								else:

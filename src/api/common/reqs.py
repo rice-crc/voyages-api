@@ -313,24 +313,24 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	if order_by is not None:
 		if DEBUG:
 			print(f"------>ORDER BY: {order_by}")
+		obl=[]
 		for ob in order_by:
 			if ob.startswith('-'):
 				k=ob[1:]
-				asc=False
+				ascdesc='asc'
 			else:
-				asc=True
+				ascdesc='desc'
 				k=ob
-
 			if k in all_fields:
-				
-				if asc:
-					filtered_queryset=filtered_queryset.order_by(F(k).asc(nulls_last=True))
-				else:
-					filtered_queryset=filtered_queryset.order_by(F(k).desc(nulls_last=True))
-				
+				obl.append(k)
 			else:
 				print(f"key is invalid to sort on: {k}")
-				filtered_queryset=filtered_queryset.order_by('id')
+			
+			oblstr=','.join([f"F('{k}').{ascdesc}(nulls_last=True)" for k in obl])
+			
+			qfilterstr=f"filtered_queryset.order_by({oblstr})"
+			filtered_queryset=eval(qfilterstr)
+			
 	else:
 		filtered_queryset=filtered_queryset.order_by('id')
 	

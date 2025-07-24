@@ -86,7 +86,8 @@ SPECTACULAR_SETTINGS = {
         "persistAuthorization": True,
         "displayOperationId": False
     },
-	 'POSTPROCESSING_HOOKS': []
+	 'POSTPROCESSING_HOOKS': [],
+	 "DISABLE_ERRORS_AND_WARNINGS":True
 }
 
 MIDDLEWARE = [

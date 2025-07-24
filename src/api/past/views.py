@@ -1043,7 +1043,7 @@ class EnslavedVoyageOutcome(generics.GenericAPIView):
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
 		if USE_REDIS_CACHE:
-			srd=serialized_req.data
+			srd=reqdict
 			hashdict={
 				'req_name':str(self.request),
 				'req_data':srd

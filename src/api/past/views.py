@@ -188,10 +188,8 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 		}
 		for elg in elgs:
 			lg_dict={'id':elg.id,'name':elg.name}
-			print(lg_dict)
 			mc_set=elg.moderncountry_set.all()
 			mc_id=None
-			print(mc_set)
 			if len(mc_set)>1:
 				mc_name="Multi-Country"
 				mc_id=0
@@ -208,7 +206,6 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 						"id":mc_id,
 						"children": [lg_dict]
 					}
-		print(elgt)
 		resp=[elgt[v] for v in elgt]
 		return JsonResponse(resp,safe=False,status=200)
 
@@ -705,11 +702,8 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 			for geotree_valuefield in geotree_valuefields:
 				geotree_valuefield_stub='__'.join(geotree_valuefield.split('__')[:-1])
 				results=results.prefetch_related(geotree_valuefield_stub)
-			print("RESULTS",results)
-			print("GTVFs",geotree_valuefields)
 			vls=[]
 			for geotree_valuefield in geotree_valuefields:		
-				print("VF",geotree_valuefield)
 				vls+=[i[0] for i in list(set(results.values_list(geotree_valuefield))) if i[0] is not None]
 			vls=list(set(vls))
 		
@@ -719,7 +713,6 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 			### CAN'T FIGURE OUT HOW TO SERIALIZE THIS...
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
 			
-			print("----->",resp)
 			
 			if USE_REDIS_CACHE:
 				redis_cache.set(hashed,json.dumps(resp))			
@@ -1043,7 +1036,7 @@ class EnslavedVoyageOutcome(generics.GenericAPIView):
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
 		if USE_REDIS_CACHE:
-			srd=serialized_req.data
+			srd=reqdict
 			hashdict={
 				'req_name':str(self.request),
 				'req_data':srd
@@ -1067,7 +1060,7 @@ class EnslavedVoyageOutcome(generics.GenericAPIView):
 						outcomesNamesLists.append(list(vlist))
 					fstrlist=[str(set(i)) for i in outcomesNamesLists]
 					fstr=" & ".join(fstrlist)
-					print(fstr)
+# 					print(fstr)
 					final_outcomesNamesList=list(eval(fstr))
 			
 			flattened={}

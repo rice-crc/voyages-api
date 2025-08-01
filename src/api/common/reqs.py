@@ -163,6 +163,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	if DEBUG:
 		print("PRE FILTER COUNT",orig_queryset.count())
 	
+	
 	#PREFETCH REQUISITE FIELDS
 	prefetch_fields=params.get('selected_fields') or []
 	if prefetch_fields==[] and auto_prefetch:
@@ -270,6 +271,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		for item in filter_obj:
 			if ids is not None:
 				filtered_queryset=filtered_queryset.filter(id__in=ids)
+				
+			print("--->",item)
 			#construct the django-style search on any related field
 			op=item['op']
 			searchTerm=item["searchTerm"]
@@ -559,6 +562,7 @@ def autocomplete_req(queryset,self,request,options,sourcemodelname):
 		targetmodelname=inverted_autocomplete_basic_index_field_endings[sourcemodelname][varName]
 		fieldtail=re.sub('.*?__','',varName)
 		queryset=eval(f'{targetmodelname}.objects.all()')
+		
 		filtered_queryset,results_count,page,page_size,error_messages=post_req(
 			queryset,
 			self,

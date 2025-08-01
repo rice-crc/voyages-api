@@ -1,6 +1,8 @@
 data/*
 !data/empty
 
+src/api/voyages3/google_auth.json
+
 src/api/static/*
 !src/api/static/empty
 src/api/common/static/

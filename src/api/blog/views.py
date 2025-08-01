@@ -49,50 +49,50 @@ class PostList(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			srd=serialized_req.data
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(
-				json.dumps(
-					hashdict,
-					sort_keys=True,
-					indent=1
-				).encode('utf-8')
-			).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
+# 		if USE_REDIS_CACHE:
+# 			srd=serialized_req.data
+# 			hashdict={
+# 				'req_name':str(self.request),
+# 				'req_data':srd
+# 			}
+# 			hashed=hashlib.sha256(
+# 				json.dumps(
+# 					hashdict,
+# 					sort_keys=True,
+# 					indent=1
+# 				).encode('utf-8')
+# 			).hexdigest()
+# 			cached_response = redis_cache.get(hashed)
+# 		else:
+# 			cached_response=None
 
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
+# 		if cached_response is None:
 			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Post.objects.all()
-			results,results_count,page,page_size,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Post_options,
-				auto_prefetch=True,
-				paginate=True
-			)
-			
-			if error_messages:
-				return(JsonResponse(error_messages,safe=False,status=400))
+		queryset=Post.objects.all()
+		results,results_count,page,page_size,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			Post_options,
+			auto_prefetch=True,
+			paginate=True
+		)
+		
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
 
-			resp=PostListResponseSerializer({
-				'count':results_count,
-				'page':page,
-				'page_size':page_size,
-				'results':results
-			}).data
+		resp=PostListResponseSerializer({
+			'count':results_count,
+			'page':page,
+			'page_size':page_size,
+			'results':results
+		}).data
 			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))
-		else:
-			resp=json.loads(cached_response)
+# 			if USE_REDIS_CACHE:
+# 				redis_cache.set(hashed,json.dumps(resp))
+# 		else:
+# 			resp=json.loads(cached_response)
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")

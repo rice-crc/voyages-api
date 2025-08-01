@@ -2,7 +2,7 @@
 
 The following notes provide an overview of how to install and run the SV API project, which is a restructuring of SlaveVoyages.org to bring it closer to a true microservices model.
 
-For notes on the project structure, see the [Project Structure readme file](PROJECT_STRUCTURE.md)
+For notes on the project structure, see the [Project Structure readme file](src/api/README.md)
 
 For a Swagger UI presentation of the API documentation's generic public endpoints, go to the root url of the endpoint:
 
@@ -68,6 +68,7 @@ Copy the default config files for each app component.
 
 ```bash
 local:~/Projects/voyages-api$ cp src/api/voyages3/localsettings.py{-default,}
+local:~/Projects/voyages-api$ cp src/api/voyages3/google_auth.json{-example,}
 local:~/Projects/voyages-api$ cp src/geo-networks/localsettings.py{-default,}
 local:~/Projects/voyages-api$ cp src/people-networks/localsettings.py{-default,}
 local:~/Projects/voyages-api$ cp src/stats/localsettings.py{-default,}
@@ -75,6 +76,8 @@ local:~/Projects/voyages-api$ cp src/stats/localsettings.py{-default,}
 
 Download the latest database dump from the Google Drive project share and
 expand into the `data/` directory. Rename the expanded file to `data/voyages_prod.sql`.
+
+*Optional*: Add the correct credentials to the `src/api/voyages3/google_auth.json` file in order to enable automatic blog translations.
 
 Build the API containers. The component containers must be built separately.
 

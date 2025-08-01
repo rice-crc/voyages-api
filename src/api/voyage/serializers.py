@@ -216,7 +216,7 @@ class VoyageSourceSerializer(serializers.ModelSerializer):
 		if raw_bib is not None:
 			raw_bib=re.sub("</*p.*?>","",raw_bib)
 			raw_bib=re.sub("</*div.*?>","",raw_bib)
-			raw_bib=re.sub("/n"," ",raw_bib)
+			raw_bib=re.sub("\\n"," ",raw_bib)
 		text_refs=[t for t in instance.page_ranges if t is not None]
 		if len(text_refs)>0:
 			return f"{raw_bib}: {', '.join(text_refs)}"

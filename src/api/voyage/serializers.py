@@ -212,6 +212,11 @@ class VoyageSourceSerializer(serializers.ModelSerializer):
 		fields=['short_ref','title','bib','has_published_manifest','zotero_group_id','zotero_item_id']
 	def get_bib(self,instance) -> CharField():
 		raw_bib=instance.bib
+		#strip out paragraph tags injected by zotero
+		if raw_bib is not None:
+			raw_bib=re.sub("</*p.*?>","",raw_bib)
+			raw_bib=re.sub("</*div.*?>","",raw_bib)
+			raw_bib=re.sub("\\n"," ",raw_bib)
 		text_refs=[t for t in instance.page_ranges if t is not None]
 		if len(text_refs)>0:
 			return f"{raw_bib}: {', '.join(text_refs)}"
@@ -780,6 +785,7 @@ class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	limit=serializers.IntegerField()
 	order_by=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
 	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
 	
 class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()

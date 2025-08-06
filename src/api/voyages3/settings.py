@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'blog',
     'geo',
     'document',
-# 	'contribute',
     'tinymce',
     'rest_framework',
     'rest_framework.authtoken',
@@ -86,7 +85,8 @@ SPECTACULAR_SETTINGS = {
         "persistAuthorization": True,
         "displayOperationId": False
     },
-	 'POSTPROCESSING_HOOKS': []
+	 'POSTPROCESSING_HOOKS': [],
+	 "DISABLE_ERRORS_AND_WARNINGS":True
 }
 
 MIDDLEWARE = [

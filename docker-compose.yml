@@ -1,6 +1,4 @@
 ---
-version: "3.7"
-
 services:
   voyages-mysql:
     image: "mysql:8.0.33-oracle"
@@ -68,6 +66,7 @@ services:
     build:
       context: "./src/api"
       dockerfile: "../../docker/api/Dockerfile"
+    command: ${API_CMD:-}
 
   voyages-stats:
     image: "voyages-stats"
@@ -85,6 +84,7 @@ services:
     build:
       context: "./src/stats"
       dockerfile: "../../docker/stats/Dockerfile"
+    command: ${STATS_CMD:-}
 
   voyages-people-networks:
     image: "voyages-people-networks"
@@ -102,6 +102,7 @@ services:
     build:
       context: "./src/people-networks"
       dockerfile: "../../docker/people-networks/Dockerfile"
+    command: ${PEOPLE_NETWORKS_CMD:-}
 
   voyages-geo-networks:
     image: "voyages-geo-networks"
@@ -119,6 +120,7 @@ services:
     build:
       context: "./src/geo-networks"
       dockerfile: "../../docker/geo-networks/Dockerfile"
+    command: ${GEO_NETWORKS_CMD:-}
 
   voyages-adminer:
     image: "adminer:latest"

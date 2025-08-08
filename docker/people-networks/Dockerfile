@@ -22,10 +22,6 @@ COPY --from=build /root/.local /root/.local
 
 COPY . .
 
-ARG FLASK_PORT=5006
+EXPOSE 5006
 
-ENV FLASK_PORT=$FLASK_PORT
-
-EXPOSE $FLASK_PORT
-
-CMD flask run --host=0.0.0.0 --port=$FLASK_PORT
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5006"]

@@ -51,12 +51,6 @@ ENV PATH=/root/.local/bin:$PATH
 COPY --from=build /root/.local /root/.local
 COPY . .
 
-ARG GUNICORN_PORT="8000"
-ARG GUNICORN_OPTS="--reload --workers 3 --threads 2 --worker-class gthread"
+EXPOSE 8000
 
-ENV GUNICORN_PORT=${GUNICORN_PORT}
-ENV GUNICORN_OPTS=${GUNICORN_OPTS}
-
-EXPOSE $GUNICORN_PORT
-
-CMD gunicorn --bind 0.0.0.0:$GUNICORN_PORT $GUNICORN_OPTS voyages3.wsgi
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--reload", "--workers", "3", "--threads", "2", "--worker-class", "gthread", "voyages3.wsgi"]

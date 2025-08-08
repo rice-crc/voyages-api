@@ -2,7 +2,7 @@ certifi
 charset-normalizer
 click
 Flask
-gunicorn
+gunicorn==20.1.0
 idna
 itsdangerous
 Jinja2

@@ -271,8 +271,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		for item in filter_obj:
 			if ids is not None:
 				filtered_queryset=filtered_queryset.filter(id__in=ids)
-				
-			print("--->",item)
+			
 			#construct the django-style search on any related field
 			op=item['op']
 			searchTerm=item["searchTerm"]

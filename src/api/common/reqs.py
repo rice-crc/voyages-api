@@ -173,7 +173,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	if DEBUG:
 		print(f'--prefetch: {len(prefetch_vars)} vars--')
 	for p in prefetch_vars:
-		
 		orig_queryset=orig_queryset.prefetch_related(p)
 	
 	# GLOBAL SEARCH
@@ -181,13 +180,26 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	## hits solr with a search string (which currently is applied across all text fields on a model)
 	## and then creates its filtered queryset on the basis of the pk's returned by solr
 	qsetclassstr=str(orig_queryset[0].__class__)
+	
+	#patch for enslaver fields, aug 14, 2025
+	bad_field_map={
+		"aliases__enslaver_relations__roles__name":"roles__name",
+		"aliases__enslaver_relations__relation__voyage__dataset":"voyages__dataset",
+		"aliases__enslaver_relations__relation__voyage__voyage_ship__ship_name":"voyages__voyage_ship__ship_name",
+		"aliases__enslaver_relations__relation__voyage__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year":"voyages__voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year",
+		"aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__value":"voyages__voyage_itinerary__imp_port_voyage_begin__value",
+		"aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__value":"voyages__voyage_itinerary__imp_principal_region_of_slave_purchase__value",
+		"aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__value":"voyages__voyage_itinerary__imp_principal_port_slave_dis__value"
+		
+	}
+	
 	if 'global_search' in params:
 		filtered_queryset,results_count=global_search(orig_queryset,params['global_search'])
 	# SPECIAL CASE SEARCH/FILTER
 	else:
 		st=time.time()
 		kwargs={}
-		ids=None
+		ids=[]
 		filtered_queryset=orig_queryset
 		c=0
 		
@@ -269,20 +281,19 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				filter_obj.remove(item)
 		# TYPICAL ORM-BASED SEARCH/FILTER
 		for item in filter_obj:
-			if ids is not None:
-				filtered_queryset=filtered_queryset.filter(id__in=ids)
-				
-			print("--->",item)
 			#construct the django-style search on any related field
 			op=item['op']
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]
+			
+			#swap out bad fields (aug 14, 2025)
+			if varName in bad_field_map:
+				varName=bad_field_map[varName]
+				varNamestub='__'.join(varName.split('__')[:-1])
+				filtered_queryset=filtered_queryset.prefetch_related(varNamestub)
 			if op in ['lte','gte','exact','in','icontains']:
 				django_filter_term='__'.join([varName,op])
 				kwargs[django_filter_term]=searchTerm
-			elif op in ['exact']:
-				django_filter_term='__'.join([varName,op])
-				kwargs[op]=searchTerm
 			elif op == ['andlist']:
 				for st in searchTerm:
 					filtered_queryset=eval(f'filtered_queryset.filter({searchTerm}={varName})')
@@ -297,17 +308,21 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			else:
 				error_messages.append(f"Invalid Filter Item Operation: {item}")
 			
+			if DEBUG:
+				print("Filter:",kwargs)
+			
 			try:
 				filtered_queryset=filtered_queryset.filter(**kwargs)
 			except Exception as e:
 				badfielderrormessage=f"Invalid Filter Item: {item} -> {e}"
 				error_messages.append(badfielderrormessage)
-				
-			if c<len(filter_obj):
-				ids=[i[0] for i in filtered_queryset.values_list('id')]
-			c+=1
+		
+		# redundant
+# 		ids=list(set([i[0] for i in filtered_queryset.values_list('id')]))
+# 		filtered_queryset=filtered_queryset.filter(id__in=ids)
 		if DEBUG:
 			print(f"REQ FILTER TIME: {time.time()-st}")
+		
 	
 	# ORDER RESULTS
 	st=time.time()

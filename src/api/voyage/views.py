@@ -288,7 +288,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 			stats_req_data['ids']=ids
 			stats_req_data['cachename']='voyage_pivot_tables'
 			r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
-			
+			print(r)
 			#VALIDATE THE RESPONSE
 			if r.ok:
 				j=json.loads(r.text)

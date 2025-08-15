@@ -17,7 +17,7 @@ from django.db.models.sql import RawQuery
 import re
 import uuid
 from common.models import NamedModelAbstractBase,SparseDateAbstractBase
-from voyage.models import Voyage
+from voyage.models import Voyage,VoyageShip,VoyageSparseDate,VoyageItinerary
 from geo.models import Location
 
 class PASTSparseDate(SparseDateAbstractBase):
@@ -25,6 +25,9 @@ class PASTSparseDate(SparseDateAbstractBase):
 
 class EnslaverInfoAbstractBase(models.Model):
 	principal_alias = models.CharField(db_index=True,max_length=255)
+	#cached nested field for searching
+	voyages=models.ManyToManyField(Voyage)
+	roles=models.ManyToManyField('EnslaverRole')
 	# Personal info.
 	birth_year = models.IntegerField(null=True,blank=True)
 	birth_month = models.IntegerField(null=True,blank=True)
@@ -313,16 +316,19 @@ class EnslaverInRelation(models.Model):
 		EnslavementRelation,
 		related_name="relation_enslavers",
 		null=False,
-		on_delete=models.CASCADE)
+		on_delete=models.CASCADE,
+		db_index=True)
 	enslaver_alias = models.ForeignKey(
 		EnslaverAlias,
 		related_name="enslaver_relations",
 		null=False,
 		on_delete=models.CASCADE
 	)
+	
 	roles = models.ManyToManyField(
 		EnslaverRole,
-		help_text="The role(s) of the enslaver in this relation"
+		help_text="The role(s) of the enslaver in this relation",
+		db_index=True
 	)
 	class Meta:
 # 		unique_together = ('relation', 'enslaver_alias','role')

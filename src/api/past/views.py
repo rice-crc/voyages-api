@@ -14,7 +14,6 @@ import json
 import requests
 import time
 from .models import *
-
 from .serializers import *
 import redis
 import hashlib
@@ -31,6 +30,8 @@ from common.static.Enslaved_options import Enslaved_options
 from common.static.EnslavementRelation_options import EnslavementRelation_options
 from common.serializers import autocompleterequestserializer, autocompleteresponseserializer
 from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
+from django.core.management import call_command
+
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
@@ -208,6 +209,16 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 					}
 		resp=[elgt[v] for v in elgt]
 		return JsonResponse(resp,safe=False,status=200)
+
+@extend_schema(
+		exclude=True
+	)
+def IndexEnslaverData(request):
+	if request.user.is_authenticated:
+		call_command('index_enslaver_data')
+		return("didn't crash")
+	else:
+		return HttpResponseForbidden("Forbidden")
 
 class EnslaverList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]

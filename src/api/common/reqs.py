@@ -311,8 +311,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			else:
 				error_messages.append(f"Invalid Filter Item Operation: {item}")
 			
-			print("KWARGS",kwargs)
-			
 			try:
 				filtered_queryset=filtered_queryset.filter(**kwargs)
 			except Exception as e:

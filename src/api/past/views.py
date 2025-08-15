@@ -236,10 +236,9 @@ class EnslaverList(generics.GenericAPIView):
 		print("ENSLAVER LIST+++++++\nusername:",request.auth.user)
 
 		#VALIDATE THE REQUEST
-# 		serialized_req = EnslaverListRequestSerializer(data=request.data)
-# 		if not serialized_req.is_valid():
-# 			return JsonResponse(serialized_req.errors,status=400)
-		serialized_req=request
+		serialized_req = EnslaverListRequestSerializer(data=request.data)
+		if not serialized_req.is_valid():
+			return JsonResponse(serialized_req.errors,status=400)
 
 		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
 		if USE_REDIS_CACHE:

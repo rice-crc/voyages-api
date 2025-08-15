@@ -294,9 +294,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			if op in ['lte','gte','exact','in','icontains']:
 				django_filter_term='__'.join([varName,op])
 				kwargs[django_filter_term]=searchTerm
-			elif op in ['exact']:
-				django_filter_term='__'.join([varName,op])
-				kwargs[op]=searchTerm
 			elif op == ['andlist']:
 				for st in searchTerm:
 					filtered_queryset=eval(f'filtered_queryset.filter({searchTerm}={varName})')
@@ -311,15 +308,21 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			else:
 				error_messages.append(f"Invalid Filter Item Operation: {item}")
 			
+			if DEBUG:
+				print("Filter:",kwargs)
+			
 			try:
 				filtered_queryset=filtered_queryset.filter(**kwargs)
 			except Exception as e:
 				badfielderrormessage=f"Invalid Filter Item: {item} -> {e}"
 				error_messages.append(badfielderrormessage)
-			ids=list(set([i[0] for i in filtered_queryset.values_list('id')]))
-			filtered_queryset=filtered_queryset.filter(id__in=ids)
+		
+		# redundant
+# 		ids=list(set([i[0] for i in filtered_queryset.values_list('id')]))
+# 		filtered_queryset=filtered_queryset.filter(id__in=ids)
 		if DEBUG:
 			print(f"REQ FILTER TIME: {time.time()-st}")
+		
 	
 	# ORDER RESULTS
 	st=time.time()

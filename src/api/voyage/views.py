@@ -225,7 +225,6 @@ class VoyageAggregations(generics.GenericAPIView):
 			aggregation_field=request.data.get('varName')
 			output_dict,errormessages=get_fieldstats(results,aggregation_field,Voyage_options)
 			#VALIDATE THE RESPONSE
-			print("output",output_dict)
 			serialized_resp=VoyageFieldAggregationResponseSerializer(data=output_dict)
 			if not serialized_resp.is_valid():
 				return JsonResponse(serialized_resp.errors,status=400)

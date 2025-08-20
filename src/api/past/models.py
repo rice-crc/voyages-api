@@ -26,8 +26,8 @@ class PASTSparseDate(SparseDateAbstractBase):
 class EnslaverInfoAbstractBase(models.Model):
 	principal_alias = models.CharField(db_index=True,max_length=255)
 	#cached nested field for searching
-	voyages=models.ManyToManyField(Voyage)
-	roles=models.ManyToManyField('EnslaverRole')
+	voyages=models.ManyToManyField(Voyage,db_index=True)
+	roles=models.ManyToManyField('EnslaverRole',db_index=True)
 	# Personal info.
 	birth_year = models.IntegerField(null=True,blank=True)
 	birth_month = models.IntegerField(null=True,blank=True)

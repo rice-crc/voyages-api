@@ -18,6 +18,7 @@ from past.models import *
 from voyage.models import *
 from blog.models import *
 import pickle
+import math
 
 
 from document.models import Source
@@ -84,8 +85,8 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 				queryset=queryset.prefetch_related(prefetch_name)
 				if DEBUG:
 					print("prefetching:",prefetch_name)
-			min=queryset.aggregate(Min(aggregation_field)).popitem()[1]
-			max=queryset.aggregate(Max(aggregation_field)).popitem()[1]
+			min=math.floor(queryset.aggregate(Min(aggregation_field)).popitem()[1])
+			max=math.ceil(queryset.aggregate(Max(aggregation_field)).popitem()[1])
 			res={
 				'varName':aggregation_field,
 				'min':min,
@@ -308,8 +309,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			else:
 				error_messages.append(f"Invalid Filter Item Operation: {item}")
 			
-			if DEBUG:
-				print("Filter:",kwargs)
+# 			if DEBUG:
+# 				print("Filter:",kwargs)
 			
 			try:
 				filtered_queryset=filtered_queryset.filter(**kwargs)

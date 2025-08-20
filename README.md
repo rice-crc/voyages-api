@@ -114,6 +114,7 @@ local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c so
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c voyagesources -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c enslaversources -d /srv/voyages/solr
 local:~/Projects/voyages-api$ docker exec -i voyages-solr solr create_core -c enslavedsources -d /srv/voyages/solr
+local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py index_enslaver_data'
 local:~/Projects/voyages-api$ docker exec -i voyages-api bash -c 'python3 manage.py rebuild_indices'
 ```
 

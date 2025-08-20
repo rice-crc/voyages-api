@@ -695,17 +695,12 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	
 	print(f"ALL RESULTS: {len(results[pk_var])}")
 	
-# 	print(nodelabels,linklabels,itinerary_vars)
-	
-# 	range(len(results[pk_var]))
-	
 	results_pivoted=[[{k:results[k][i] for k in results},pk_var,itinerary_vars,weight_var,graph,linklabels,nodelabels] for i in range(len(results[pk_var]))]
 		
 	print(f"REBUILDING WITH {rebuilder_number_of_workers} WORKERS")
 	
 	with multiprocessing.Pool(rebuilder_number_of_workers) as p:
 		proc_results=p.map(get_map_data, results_pivoted)
-# 		print(all_procs_gathered)
 	
 	nodesdfrows=[]
 	edgesdfrows=[]
@@ -723,10 +718,6 @@ def build_index(endpoint,graph,oceanic_subgraph_view,pk_var,itinerary_vars,weigh
 	
 	nodesdf=pd.DataFrame.from_records(nodesdfrows)
 	edgesdf=pd.DataFrame.from_records(edgesdfrows)
-# 	nodesdf=pd.DataFrame.from_records([])
-# 	edgesdf=pd.DataFrame.from_records([])
-# 	nodesdatadict={}
-# 	edgesdatadict={}
 	
 	print('NODES',nodesdf)
 	print('EDGES',edgesdf)

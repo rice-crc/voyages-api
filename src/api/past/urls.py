@@ -20,5 +20,6 @@ urlpatterns = [
 	path('enslaver/EnslaverRoleList/',views.EnslaverRoleList.as_view()),
 	path('GenderList/',views.GenderList.as_view()),
 	path('CaptiveFateList/',views.CaptiveFateList.as_view()),
-	path('EnslavedVoyageOutcome/',views.EnslavedVoyageOutcome.as_view())
+	path('EnslavedVoyageOutcome/',views.EnslavedVoyageOutcome.as_view()),
+	path('IndexEnslaverData/',views.IndexEnslaverData)
 ]

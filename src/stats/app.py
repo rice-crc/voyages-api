@@ -652,6 +652,17 @@ def crosstabs():
 	if dfname in replaced_dfs:
 		dfname='big_df'
 	ids=rdata['ids']
+	
+	if len(ids)==0:
+		return json.dumps({
+			'tablestructure': {},
+			'data': {},
+			'metadata':{
+				'total_results_count': 0,
+				'offset':0,
+				'limit':0
+			}
+		})
 
 	#a 2ple for groupby_fields to give us rows & columns (maybe expand this later)
 	columns=rdata.get('columns')

@@ -9,13 +9,6 @@ import requests
 import json
 import os
 
-# the current past organization is just awful to deal with. we need to
-## 1) put aliases behind identities
-## 2) attach voyages, relations, and sources directly to identities instead of aliases
-## 3) route voyages through relations as a transportation relation w/ captain or shipowner role
-
-## down the line we need to allow for multiple roles in a single relation
-#### and then merge the duplicates (where the same enslaver & enslaved are connected but under different roles)
 
 class Command(BaseCommand):
 	help = 'puts aliases behind identities'

@@ -978,21 +978,20 @@ def csv_download():
 	dfname='big_df'
 	df=eval(dfname)['df']
 	ids=rdata['ids']
-	df2=df[df['id'].isin(ids)]
-	df3=df2.set_index('id')
-	df3=df3.reindex(ids)
-	df3=df3.fillna(0)
+	df=df[df['id'].isin(ids)]
+	df=df.set_index('id')
+	df=df.reindex(ids)
+	df=df.fillna(0)
+	colswitchdict={
+		k:big_df['variables'][k]['label'] for k in big_df['variables']
+		if 'label' in big_df['variables'][k]
+	}
 	
-	# so excel does not properly interpret the unicode characters in a csv, ugh
-	# but the excel option takes 15 seconds!!! shit!!!
-	#csv it is.
-# 	output = BytesIO()
-# 	writer = pd.ExcelWriter(output)
-# 	df3.to_excel(writer)  # plus any **kwargs
-# 	writer.close()
-# 	excel_resp = output.getvalue()
+	df=df.rename(
+		columns=colswitchdict
+	)
 
-	return df3.to_csv(encoding='utf-8')
+	return df.to_csv(encoding='utf-8',index=False)
 
 	
 

@@ -71,9 +71,8 @@ def load_long_df(endpoint,variables):
 							cleanup['find'],
 							cleanup['replace'],
 							val,
-							flags=eval(cleanup['flags'])
+							flags=cleanup['flags']
 						)
-					
 					itemvals.append(val)
 			if itemvals:
 				item=': '.join(itemvals)
@@ -93,10 +92,6 @@ def load_long_df(endpoint,variables):
 	return(df)
 
 registered_caches=[
-# 	voyage_bar_and_donut_charts,
-# 	voyage_summary_statistics,
-# 	voyage_pivot_tables,
-# 	voyage_xyscatter,
 	big_df,
 	estimate_pivot_tables,
 	timelapse
@@ -179,7 +174,7 @@ def timelapse_animation():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
-	df=eval('timelapse')['df']
+	df=timelapse['df']
 	df=df[df['id'].isin(ids)]
 	
 	colname_map={'id': 'voyage_id', 'voyage_ship__imputed_nationality__id':'nat_id','voyage_itinerary__imp_principal_place_of_slave_purchase__id': 'src', 'voyage_itinerary__imp_principal_port_slave_dis__id': 'dst', 'voyage_itinerary__imp_principal_region_of_slave_purchase__id': 'regsrc', 'voyage_itinerary__imp_broad_region_of_slave_purchase__id': 'bregsrc', 'voyage_itinerary__imp_principal_region_slave_dis__id': 'regdst', 'voyage_itinerary__imp_broad_region_slave_dis__id': 'bregdst', 'voyage_slaves_numbers__imp_total_num_slaves_embarked': 'embarked', 'voyage_slaves_numbers__imp_total_num_slaves_disembarked': 'disembarked', 'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year': 'year', 'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__month': 'month', 'voyage_ship__tonnage_mod': 'ship_ton', 'voyage_ship__imputed_nationality__value': 'nat_id', 'voyage_ship__ship_name': 'ship_name'}
@@ -204,7 +199,7 @@ def groupby():
 	if re.match("[a-z|_]+__bins__[0-9]+",by):
 		binsize=int(re.search("[0-9]+",by).group(0))
 		by=re.search("[a-z|_]+(?=__bins__)",by).group(0)
-	df=eval('big_df')['df']
+	df=big_df['df']
 	df2=df[df['id'].isin(ids)]
 	
 	##TBD --> NEED TO VALIDATE THAT THE ROWS VARIABLE IS
@@ -290,8 +285,7 @@ def voyage_summary_stats():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
-# 	df=eval('voyage_summary_statistics')['df']
-	df=eval('big_df')['df']
+	df=big_df['df']
 	
 	imputed_rows={
 		'voyage_slaves_numbers__imp_total_num_slaves_embarked':'Captives embarked (Imputed)',
@@ -454,7 +448,7 @@ def estimates_pivot():
 	vals=rdata['vals']
 	binsize=rdata.get('binsize')
 	mode=rdata['mode']
-	df=eval('estimate_pivot_tables')['df']
+	df=estimate_pivot_tables['df']
 	
 	#filter down on the pk's
 	pv=df[df['id'].isin(ids)]
@@ -478,6 +472,7 @@ def estimates_pivot():
 		c=1
 		for duplicate_index in duplicate_indices:
 			duplicate_position=cols.index(duplicate_index)
+			##I can't find a different way to do this
 			pv=eval(f'pv.assign(duplicate_col_{c}=pv[duplicate_index])')
 			cols[duplicate_position]=f'duplicate_col_{c}'
 			c+=1
@@ -619,7 +614,7 @@ def estimates_timeline():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
-	df=eval('estimate_pivot_tables')['df']
+	df=estimate_pivot_tables['df']
 	cols=['disembarked_slaves','embarked_slaves']
 	df2=df[df['id'].isin(ids)]
 	ct=df2.groupby('year',group_keys=True)[cols].agg('sum')
@@ -648,9 +643,6 @@ def crosstabs():
 	
 	st=time.time()
 	rdata=request.json
-	dfname=rdata.get('cachename')
-	if dfname in replaced_dfs:
-		dfname='big_df'
 	ids=rdata['ids']
 	
 	if len(ids)==0:
@@ -701,8 +693,8 @@ def crosstabs():
 	if normalize not in ["columns","index"]:
 		normalize=False
 	
-	df=eval(dfname)['df']
-	options=eval(dfname)['options']
+	df=big_df['df']
+	options=big_df['options']
 	df=df[df['id'].isin(ids)]
 	
 	yeargroupmode=False
@@ -976,7 +968,7 @@ def csv_download():
 	st=time.time()
 	rdata=request.json
 	dfname='big_df'
-	df=eval(dfname)['df']
+	df=big_df['df']
 	ids=rdata['ids']
 	df=df[df['id'].isin(ids)]
 	df=df.set_index('id')
@@ -1008,7 +1000,7 @@ def dataframes():
 		rdata=request.json
 		if dfname in replaced_dfs:
 			dfname='big_df'
-		df=eval(dfname)['df']
+		df=big_df['df']
 		ids=rdata['ids']
 		df2=df[df['id'].isin(ids)]
 		columns=list(set(rdata['selected_fields']+['id']))

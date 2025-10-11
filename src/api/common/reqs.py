@@ -19,13 +19,36 @@ from voyage.models import *
 from blog.models import *
 import pickle
 import math
-
-
 from document.models import Source
 from common.autocomplete_indices import get_inverted_autocomplete_indices,autocomplete_indices,get_inverted_autocomplete_basic_index_field_endings
 import hashlib
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
+
+#these need to present out, in all cases, as multiplied by 100
+percentage_fields=[
+	'voyage_slaves_numbers__child_ratio_among_embarked_slaves',
+	'voyage_slaves_numbers__child_ratio_among_landed_slaves',
+	'voyage_slaves_numbers__imp_mortality_ratio',
+	'voyage_slaves_numbers__male_ratio_among_embarked_slaves',
+	'voyage_slaves_numbers__male_ratio_among_landed_slaves',
+	'voyage_slaves_numbers__percentage_adult',
+	'voyage_slaves_numbers__percentage_boy',
+	'voyage_slaves_numbers__percentage_boys_among_embarked_slaves',
+	'voyage_slaves_numbers__percentage_boys_among_landed_slaves',
+	'voyage_slaves_numbers__percentage_child',
+	'voyage_slaves_numbers__percentage_female',
+	'voyage_slaves_numbers__percentage_girl',
+	'voyage_slaves_numbers__percentage_girls_among_embarked_slaves',
+	'voyage_slaves_numbers__percentage_girls_among_landed_slaves',
+	'voyage_slaves_numbers__percentage_male',
+	'voyage_slaves_numbers__percentage_men',
+	'voyage_slaves_numbers__percentage_men_among_embarked_slaves',
+	'voyage_slaves_numbers__percentage_men_among_landed_slaves',
+	'voyage_slaves_numbers__percentage_women',
+	'voyage_slaves_numbers__percentage_women_among_embarked_slaves',
+	'voyage_slaves_numbers__percentage_women_among_landed_slaves'
+]
 
 def clean_long_df(rows,selected_fields):
 	'''
@@ -73,6 +96,7 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 	'''
 	res=None
 	errormessages=[]
+	
 	if aggregation_field is None:
 		errormessages.append("you must supply a field to aggregate on")
 	else:
@@ -87,6 +111,13 @@ def get_fieldstats(queryset,aggregation_field,options_dict):
 					print("prefetching:",prefetch_name)
 			min=math.floor(queryset.aggregate(Min(aggregation_field)).popitem()[1])
 			max=math.ceil(queryset.aggregate(Max(aggregation_field)).popitem()[1])
+			
+			if aggregation_field in percentage_fields:
+				if min<=1:
+					min=min*100
+				if max<=1:
+					max=max*100
+			
 			res={
 				'varName':aggregation_field,
 				'min':min,
@@ -183,6 +214,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	qsetclassstr=str(orig_queryset[0].__class__)
 	
 	#patch for enslaver fields, aug 14, 2025
+	#performance hits on the below fields. we redirect to new names when these come in
+	#can probably retire this once saved queries using these vars are patched
 	bad_field_map={
 		"aliases__enslaver_relations__roles__name":"roles__name",
 		"aliases__enslaver_relations__relation__voyage__dataset":"voyages__dataset",
@@ -191,7 +224,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		"aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_port_voyage_begin__value":"voyages__voyage_itinerary__imp_port_voyage_begin__value",
 		"aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_region_of_slave_purchase__value":"voyages__voyage_itinerary__imp_principal_region_of_slave_purchase__value",
 		"aliases__enslaver_relations__relation__voyage__voyage_itinerary__imp_principal_port_slave_dis__value":"voyages__voyage_itinerary__imp_principal_port_slave_dis__value"
-		
 	}
 	
 	if 'global_search' in params:
@@ -284,8 +316,15 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		for item in filter_obj:
 			#construct the django-style search on any related field
 			op=item['op']
-			searchTerm=item["searchTerm"]
 			varName=item["varName"]
+			searchTerm=item["searchTerm"]
+			print(varName,varName in percentage_fields)
+			if varName in percentage_fields:
+				if type(searchTerm)==list:
+					searchTerm=[i/100 for i in searchTerm]
+				else:
+					searchTerm=searchTerm/100
+				print(searchTerm)
 			
 			#swap out bad fields (aug 14, 2025)
 			if varName in bad_field_map:
@@ -297,7 +336,9 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				kwargs[django_filter_term]=searchTerm
 			elif op == ['andlist']:
 				for st in searchTerm:
-					filtered_queryset=eval(f'filtered_queryset.filter({searchTerm}={varName})')
+					filterQ=f'filtered_queryset.filter({varName}={searchTerm})'
+					print(filterQ)
+					filtered_queryset=eval(filterQ)
 			elif op =='btw':
 				if type(searchTerm)==list and len(searchTerm)==2:
 					searchTerm.sort()
@@ -309,18 +350,13 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			else:
 				error_messages.append(f"Invalid Filter Item Operation: {item}")
 			
-# 			if DEBUG:
-# 				print("Filter:",kwargs)
-			
 			try:
+				print("kwargs-->",kwargs)
 				filtered_queryset=filtered_queryset.filter(**kwargs)
 			except Exception as e:
 				badfielderrormessage=f"Invalid Filter Item: {item} -> {e}"
 				error_messages.append(badfielderrormessage)
 		
-		# redundant
-# 		ids=list(set([i[0] for i in filtered_queryset.values_list('id')]))
-# 		filtered_queryset=filtered_queryset.filter(id__in=ids)
 		if DEBUG:
 			print(f"REQ FILTER TIME: {time.time()-st}")
 		

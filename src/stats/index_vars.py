@@ -1,3 +1,5 @@
+import re
+
 big_df={
   "endpoint": "voyage/dataframes/",
   "schema_name": "Voyage",
@@ -187,7 +189,7 @@ big_df={
         "type": "sub",
         "find": "<.*?>|\t|\n",
         "replace": "",
-        "flags": "re.DOTALL"
+        "flags": re.DOTALL
       },
       "label": "Sources"
     },

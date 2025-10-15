@@ -51,12 +51,15 @@ class VoyageShipSerializer(serializers.ModelSerializer):
 
 ##### ENSLAVED NUMBERS ##### 
 
+
+
 class VoyageSlavesNumbersSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=VoyageSlavesNumbers
 		fields='__all__'
 
-	sort_by='value'
+
+
 
 ##### SPECIAL VARS ##### 
 
@@ -384,7 +387,7 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 ########### PAGINATED VOYAGE LISTS 
 @extend_schema_serializer(
 	examples = [
-         OpenApiExample(
+		 OpenApiExample(
 			'Paginated request for filtered voyages.',
 			summary='Paginated request for filtered voyages.',
 			description='Here, we request page 2 (with 5 items per page) of voyages for which enslaved people were purchased in Cuba or Florida between 1820-1822.',
@@ -414,7 +417,7 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 			},
 			request_only=True
 		)
-    ]
+	]
 )
 class VoyageListRequestSerializer(serializers.Serializer):
 	page=serializers.IntegerField(required=False,allow_null=True)
@@ -681,7 +684,7 @@ class VoyageAggRoutesResponseSerializer(serializers.Serializer):
 ############ AGGREGATION FIELD
 @extend_schema_serializer(
 	examples = [
-         OpenApiExample(
+		 OpenApiExample(
 			'Filtered request for min/max',
 			summary='Filtered request for min/max',
 			description='Here, we request the min and max number of people who were embarked on individual voyages before the year 1620.',
@@ -697,7 +700,7 @@ class VoyageAggRoutesResponseSerializer(serializers.Serializer):
 			},
 			request_only=True
 		)
-    ]
+	]
 )
 class VoyageFieldAggregationRequestSerializer(serializers.Serializer):
 	varName=serializers.ChoiceField(choices=[

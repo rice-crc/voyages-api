@@ -20,6 +20,9 @@ from voyage.models import Voyage
 from geo.common import GeoTreeFilter
 import json
 import logging
+import redis
+import pickle
+from voyages3.localsettings import REDIS_HOST, REDIS_PORT
 
 # Type definitions to match the TypeScript interface
 NonNullFieldValue = Union[str, int, float, bool]
@@ -201,6 +204,30 @@ if _missing:
 else:
     logger.info("All models mapped successfully")
 
+
+class PublicationStatus:
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+@dataclass
+class PublicationTask:
+    """Represents a changeset publication task."""
+    publication_key: str
+    status: PublicationStatus
+    contribution_ids: List[str]
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    changeset: Dict = field(default_factory=dict)
+    result: Optional[Dict] = None
+    error: Optional[str] = None
+    id_mappings: Dict[str, Any] = field(default_factory=dict)
+    processed: int = 0
+
+
 class ChangeSetProcessor:
     """Processes CombinedChangeSet and applies changes to Django ORM."""
     
@@ -208,14 +235,23 @@ class ChangeSetProcessor:
         self.temp_id_to_db_id: Dict[str, Any] = {}
         self.new_entity_ids: Set[str] = set()
         
-    def process_changeset(self, changeset: Dict) -> Dict[str, Any]:
+    def process_changeset(self, task: PublicationTask) -> Dict[str, Any]:
         """
         Process the entire changeset in a transaction.
         Returns a mapping of temporary IDs to actual database IDs.
         """
+        changeset = task.changeset
         deletions = changeset.get('deletions', [])
         updates = changeset.get('updates', [])
-        
+        processed = 0
+
+        def increment_processed():
+            nonlocal processed
+            processed += 1
+            if (processed % 100 == 0):
+                logger.info(f"Processed {processed} operations...")
+                task_store.update_status(task.publication_key, status=PublicationStatus.PROCESSING, processed=processed)
+
         # Validate no duplicate entity updates and no updates to deleted entities
         self._validate_no_duplicates(deletions, updates)
         
@@ -236,15 +272,18 @@ class ChangeSetProcessor:
         with transaction.atomic():
             # Process deletions first
             for deletion in deletions:
+                increment_processed()
                 self._process_deletion(deletion)
             
             # Process new entities in dependency order
             for update in sorted_new_updates:
                 logger.debug(json.dumps(update))
+                increment_processed()
                 self._process_new_entity(update)
             
             # Process existing entity updates
             for update in existing_updates:
+                increment_processed()
                 self._process_existing_entity(update)
         
         return self.temp_id_to_db_id
@@ -332,7 +371,7 @@ class ChangeSetProcessor:
         try:
             obj = model_class.objects.get(pk=entity_ref['id'])
             obj.delete()
-            logger.info(f"Deleted {entity_ref['schema']} with id {entity_ref['id']}")
+            logger.debug(f"Deleted {entity_ref['schema']} with id {entity_ref['id']}")
         except model_class.DoesNotExist:
             logger.warning(f"Entity {entity_ref['schema']} with id {entity_ref['id']} not found for deletion")
     
@@ -367,7 +406,7 @@ class ChangeSetProcessor:
         # Store the mapping from temporary ID to actual database ID
         self.temp_id_to_db_id[entity_ref['id']] = obj.pk
         
-        logger.info(f"Created {entity_ref['schema']} with temp id {entity_ref['id']} -> db id {obj.pk}")
+        logger.debug(f"Created {entity_ref['schema']} with temp id {entity_ref['id']} -> db id {obj.pk}")
     
     def _process_existing_entity(self, update: Dict):
         """Process update of an existing entity."""
@@ -391,7 +430,7 @@ class ChangeSetProcessor:
                 setattr(obj, field_name, value)
             
             obj.save()
-            logger.info(f"Updated {entity_ref['schema']} with id {entity_ref['id']}")
+            logger.debug(f"Updated {entity_ref['schema']} with id {entity_ref['id']}")
             
         except model_class.DoesNotExist:
             raise ValueError(f"Entity {entity_ref['schema']} with id {entity_ref['id']} not found for update")
@@ -404,87 +443,168 @@ class ChangeSetProcessor:
         return _schemaToModel[schema_name]
 
 
-class PublicationStatus:
-    PENDING = "pending"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    FAILED = "failed"
-
-
-@dataclass
-class PublicationTask:
-    """Represents a changeset publication task."""
-    publication_key: str
-    status: PublicationStatus
-    created_at: datetime
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    changeset: Dict = field(default_factory=dict)
-    result: Optional[Dict] = None
-    error: Optional[str] = None
-    id_mappings: Dict[str, Any] = field(default_factory=dict)
-
-
-# TODO: move the TaskStore to the database so that it can be shared across
-# workers.
-
 class TaskStore:
-    """In-memory storage for publication tasks."""
+    """Redis-backed storage for publication tasks."""
     
-    def __init__(self, max_age_hours: int = 24):
-        self._tasks: Dict[str, PublicationTask] = {}
-        self._lock = threading.Lock()
+    def __init__(self, max_age_hours: int = 1):
+        self.redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=False)
         self.max_age_hours = max_age_hours
+        self.key_prefix = "taskstore:publication:"
+        self.cleanup_interval = timedelta(hours=1)
+        self._last_cleanup = datetime.now()
+    
+    def _get_redis_key(self, publication_key: str) -> str:
+        """Generate Redis key for a publication task."""
+        return f"{self.key_prefix}{publication_key}"
+    
+    def _serialize_task(self, task: PublicationTask) -> bytes:
+        """Serialize task to bytes for Redis storage."""
+        # Convert dataclass to dict
+        task_dict = {
+            'publication_key': task.publication_key,
+            'status': task.status,
+            'contribution_ids': task.contribution_ids,
+            'created_at': task.created_at.isoformat() if task.created_at else None,
+            'updated_at': task.updated_at.isoformat() if task.updated_at else None,
+            'completed_at': task.completed_at.isoformat() if task.completed_at else None,
+            'changeset': task.changeset,
+            'result': task.result,
+            'error': task.error,
+            'id_mappings': task.id_mappings,
+            'processed': task.processed
+        }
+        return pickle.dumps(task_dict)
+    
+    def _deserialize_task(self, data: bytes) -> PublicationTask:
+        """Deserialize task from Redis bytes."""
+        task_dict = pickle.loads(data)
+        return PublicationTask(
+            publication_key=task_dict['publication_key'],
+            status=task_dict['status'],
+            contribution_ids=task_dict['contribution_ids'],
+            created_at=datetime.fromisoformat(task_dict['created_at']) if task_dict['created_at'] else None,
+            updated_at=datetime.fromisoformat(task_dict['updated_at']) if task_dict['updated_at'] else None,
+            completed_at=datetime.fromisoformat(task_dict['completed_at']) if task_dict['completed_at'] else None,
+            changeset=task_dict['changeset'],
+            result=task_dict['result'],
+            error=task_dict['error'],
+            id_mappings=task_dict['id_mappings'],
+            processed=task_dict['processed']
+        )
     
     def get(self, publication_key: str) -> Optional[PublicationTask]:
         """Get a task by publication key."""
-        with self._lock:
-            self._cleanup_old_tasks()
-            return self._tasks.get(publication_key)
+        try:
+            # Periodic cleanup
+            self._cleanup_old_tasks_if_needed()
+            
+            redis_key = self._get_redis_key(publication_key)
+            data = self.redis_client.get(redis_key)
+            if data:
+                return self._deserialize_task(data)
+            return None
+        except Exception as e:
+            logger.error(f"Error getting task from Redis: {e}")
+            return None
     
-    def create(self, publication_key: str, changeset: Dict) -> PublicationTask:
+    def create(self, publication_key: str, changeset: Dict, contribution_ids: List[str]) -> PublicationTask:
         """Create or return existing task."""
-        with self._lock:
+        try:
+            redis_key = self._get_redis_key(publication_key)
+            
             # Check if task already exists (idempotency)
-            if publication_key in self._tasks:
-                return self._tasks[publication_key]
+            existing_data = self.redis_client.get(redis_key)
+            if existing_data:
+                return self._deserialize_task(existing_data)
             
             # Create new task
             task = PublicationTask(
                 publication_key=publication_key,
                 status=PublicationStatus.PENDING,
                 created_at=datetime.now(),
-                changeset=changeset
+                changeset=changeset,
+                contribution_ids=contribution_ids
             )
-            self._tasks[publication_key] = task
+            
+            # Store in Redis with expiration
+            serialized_task = self._serialize_task(task)
+            expiration_seconds = self.max_age_hours * 3600
+            self.redis_client.setex(redis_key, expiration_seconds, serialized_task)
+            
             return task
+        except Exception as e:
+            logger.error(f"Error creating task in Redis: {e}")
+            raise
     
     def update_status(self, publication_key: str, status: PublicationStatus, 
-                     result: Optional[Dict] = None, error: Optional[str] = None):
+                     result: Optional[Dict] = None, error: Optional[str] = None,
+                     processed: Optional[int] = None):
         """Update task status."""
-        with self._lock:
-            task = self._tasks.get(publication_key)
-            if task:
-                task.status = status
-                if status == PublicationStatus.PROCESSING:
-                    task.started_at = datetime.now()
-                elif status in (PublicationStatus.COMPLETED, PublicationStatus.FAILED):
-                    task.completed_at = datetime.now()
-                if result:
-                    task.result = result
-                if error:
-                    task.error = error
+        try:
+            redis_key = self._get_redis_key(publication_key)
+            data = self.redis_client.get(redis_key)
+            
+            if not data:
+                logger.warning(f"Task not found for update: {publication_key}")
+                return
+            
+            task = self._deserialize_task(data)
+            
+            # Update task fields
+            task.status = status
+            if status == PublicationStatus.PROCESSING:
+                task.updated_at = datetime.now()
+            elif status in (PublicationStatus.COMPLETED, PublicationStatus.FAILED):
+                task.completed_at = datetime.now()
+            if result:
+                task.result = result
+            if error:
+                task.error = error
+            if processed is not None:
+                task.processed = processed
+
+            # Save back to Redis
+            serialized_task = self._serialize_task(task)
+            expiration_seconds = self.max_age_hours * 3600
+            self.redis_client.setex(redis_key, expiration_seconds, serialized_task)
+            
+        except Exception as e:
+            logger.error(f"Error updating task in Redis: {e}")
+    
+    def _cleanup_old_tasks_if_needed(self):
+        """Remove expired tasks if cleanup interval has passed."""
+        now = datetime.now()
+        if now - self._last_cleanup > self.cleanup_interval:
+            self._cleanup_old_tasks()
+            self._last_cleanup = now
     
     def _cleanup_old_tasks(self):
         """Remove tasks older than max_age_hours."""
-        cutoff = datetime.now() - timedelta(hours=self.max_age_hours)
-        expired_keys = [
-            key for key, task in self._tasks.items()
-            if task.created_at < cutoff
-        ]
-        for key in expired_keys:
-            del self._tasks[key]
-            logger.info(f"Cleaned up expired task: {key}")
+        try:
+            pattern = f"{self.key_prefix}*"
+            keys = self.redis_client.keys(pattern)
+            
+            cutoff = datetime.now() - timedelta(hours=self.max_age_hours)
+            expired_count = 0
+            
+            for key in keys:
+                try:
+                    data = self.redis_client.get(key)
+                    if data:
+                        task = self._deserialize_task(data)
+                        if task.created_at and task.created_at < cutoff:
+                            self.redis_client.delete(key)
+                            expired_count += 1
+                except Exception as e:
+                    logger.warning(f"Error checking task age for cleanup: {e}")
+                    # Delete corrupted entries
+                    self.redis_client.delete(key)
+                    expired_count += 1
+            
+            if expired_count > 0:
+                logger.info(f"Cleaned up {expired_count} expired publication tasks")
+        except Exception as e:
+            logger.error(f"Error during task cleanup: {e}")
 
 
 # Global task store (singleton for the application instance)
@@ -499,16 +619,12 @@ def process_changeset_background(publication_key: str):
     
     try:
         # Update status to processing
+        processor = ChangeSetProcessor()
         task_store.update_status(publication_key, PublicationStatus.PROCESSING)
         logger.info(f"Starting processing for publication: {publication_key}")
         
         # Process the changeset
-        processor = ChangeSetProcessor()
-        
-        # Close any existing DB connections to ensure thread safety
-        connection.close()
-        
-        id_mappings = processor.process_changeset(task.changeset)
+        id_mappings = processor.process_changeset(task)
         
         # Update task with success
         task_store.update_status(
@@ -536,9 +652,6 @@ def process_changeset_background(publication_key: str):
             PublicationStatus.FAILED,
             error=f"Internal error: {traceback.format_exc()}"
         )
-    finally:
-        # Ensure DB connection is closed
-        connection.close()
 
 @csrf_exempt
 @require_POST
@@ -562,10 +675,14 @@ def publish_batch(request):
         changeset = data.get('changeset')
         if not changeset:
             return JsonResponse({'error': 'Missing changeset'}, status=400)
-        
+
+        contribution_ids = data.get('contribution_ids', [])
+        if not isinstance(contribution_ids, list):
+            return JsonResponse({'error': 'Invalid contribution_ids format'}, status=400)
+
         # Create or get existing task (idempotency)
-        task = task_store.create(publication_key, changeset)
-        
+        task = task_store.create(publication_key, changeset, contribution_ids)
+
         # If task is already completed or failed, return immediately
         if task.status == PublicationStatus.COMPLETED:
             return JsonResponse(task.result)
@@ -617,15 +734,17 @@ def publication_status(request, publication_key):
         response = {
             'publication_key': publication_key,
             'status': task.status,
-            'created_at': task.created_at.isoformat(),
+            'contribution_ids': task.contribution_ids,
+            'processed_operations': task.processed,
+            'created_at': task.created_at.isoformat() if task.created_at else None,
         }
         
-        if task.started_at:
-            response['started_at'] = task.started_at.isoformat()
+        if task.updated_at:
+            response['updated_at'] = task.updated_at.isoformat()
         
         if task.completed_at:
             response['completed_at'] = task.completed_at.isoformat()
-            duration = (task.completed_at - task.started_at).total_seconds()
+            duration = (task.completed_at - task.updated_at).total_seconds()
             response['duration_seconds'] = duration
         
         if task.status == PublicationStatus.COMPLETED:

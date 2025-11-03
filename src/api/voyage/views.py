@@ -120,49 +120,34 @@ class VoyageDownload(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Voyage.objects.all()
+		results,results_count,page,page_size,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=True,
+			paginate=False
+		)
 		
-		hashed,cached_response=use_redis(serialized_req,self)
-				
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Voyage.objects.all()
-			results,results_count,page,page_size,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=True,
-				paginate=False
-			)
-			
-			if error_messages:
-				return(JsonResponse(error_messages,safe=False,status=400))
-			
-			ids=[i[0] for i in results.values_list('id')]
-			
-			u2=STATS_BASE_URL+'csv_download/'
-			params=dict(request.data)
-			stats_req_data=params
-			stats_req_data['ids']=ids
-			stats_req_data['cachename']='big_df'
-			r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
-			
-			#VALIDATE THE RESPONSE
-			if r.ok:
-				resp=r.content
-			else:
-				return JsonResponse({"message":"unknown error"},status=400)
-			
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,resp)
-
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
+		
+		ids=[i[0] for i in results.values_list('id')]
+		
+		u2=STATS_BASE_URL+'csv_download/'
+		params=dict(request.data)
+		stats_req_data=params
+		stats_req_data['ids']=ids
+		stats_req_data['cachename']='big_df'
+		r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
+		
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			resp=r.content
 		else:
-			if DEBUG:
-				print("cached:",hashed)
-			resp=cached_response
+			return JsonResponse({"message":"unknown error"},status=400)
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -261,57 +246,42 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		hashed,cached_response=use_redis(serialized_req,self)
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Voyage.objects.all()
+		results,results_count,page,page_size,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=True
+		)
 		
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Voyage.objects.all()
-			results,results_count,page,page_size,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=True
-			)
-			
-			if error_messages:
-				return(JsonResponse(error_messages,safe=False,status=400))
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
 
-		
-			#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
-			ids=[i[0] for i in results.values_list('id')]
-			u2=STATS_BASE_URL+'crosstabs/'
-			params=dict(request.data)
-			stats_req_data=params
-			stats_req_data['ids']=ids
-			stats_req_data['cachename']='voyage_pivot_tables'
-			r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
-			print(r)
-			#VALIDATE THE RESPONSE
-			if r.ok:
-				j=json.loads(r.text)
-				serialized_resp=VoyageCrossTabResponseSerializer(data=j)
-			if not serialized_resp.is_valid():
-				return JsonResponse(serialized_resp.errors,status=400)
-			else:
-				resp=serialized_resp.data
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))			
+	
+		#MAKE THE CROSSTABS REQUEST TO VOYAGES-STATS
+		ids=[i[0] for i in results.values_list('id')]
+		u2=STATS_BASE_URL+'crosstabs/'
+		params=dict(request.data)
+		stats_req_data=params
+		stats_req_data['ids']=ids
+		stats_req_data['cachename']='voyage_pivot_tables'
+		r=requests.post(url=u2,data=json.dumps(stats_req_data),headers={"Content-type":"application/json"})
+		print(r)
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			j=json.loads(r.text)
+			serialized_resp=VoyageCrossTabResponseSerializer(data=j)
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
 		else:
-			if DEBUG:
-				print("cached:",hashed)
-			resp=json.loads(cached_response)
+			resp=serialized_resp.data
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
 		return JsonResponse(resp,safe=False,status=200)
-
-
-
 
 class VoyageLineAndBarCharts(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
@@ -336,54 +306,41 @@ class VoyageLineAndBarCharts(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		hashed,cached_response=use_redis(serialized_req,self)
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Voyage.objects.all()
+		results,results_count,page,page_size,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=False
+		)
+
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
+
+		#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
+		ids=[i[0] for i in results.values_list('id')]
+		u2=STATS_BASE_URL+'groupby/'
+		rdata=dict(request.data)
+		groupby=rdata.get('groupby')
+		by=groupby['by']
 		
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Voyage.objects.all()
-			results,results_count,page,page_size,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=False
-			)
-
-			if error_messages:
-				return(JsonResponse(error_messages,safe=False,status=400))
-
-			#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
-			ids=[i[0] for i in results.values_list('id')]
-			u2=STATS_BASE_URL+'groupby/'
-			rdata=dict(request.data)
-			groupby=rdata.get('groupby')
-			by=groupby['by']
-			
-			resp={}
-			for a_s in groupby['agg_series']:
-				agg_fn=a_s['agg_fn']
-				vals=a_s['vals']
-				d2={
-					'by':groupby['by'],
-					'vals':vals, #the stats engine needs this string to be an array
-					'ids':ids,
-					'agg_fn':a_s['agg_fn']
-				}
-				by=re.sub("__bins__[0-9]+","",by)
-				json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-				pandas_resp=json.loads(json_resp.text)
-				resp[by]=pandas_resp[by]
-				resp[f'{vals}__{agg_fn}']=pandas_resp[vals]
-			
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))
-		else:
-			if DEBUG:
-				print("cached:",hashed)
-			resp=json.loads(cached_response)
+		resp={}
+		for a_s in groupby['agg_series']:
+			agg_fn=a_s['agg_fn']
+			vals=a_s['vals']
+			d2={
+				'by':groupby['by'],
+				'vals':vals, #the stats engine needs this string to be an array
+				'ids':ids,
+				'agg_fn':a_s['agg_fn']
+			}
+			by=re.sub("__bins__[0-9]+","",by)
+			json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+			pandas_resp=json.loads(json_resp.text)
+			resp[by]=pandas_resp[by]
+			resp[f'{vals}__{agg_fn}']=pandas_resp[vals]
 
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -413,42 +370,30 @@ class VoyagePieCharts(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		hashed,cached_response=use_redis(serialized_req,self)
-		
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Voyage.objects.all()
-			results,results_count,page,page_size,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=False
-			)
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Voyage.objects.all()
+		results,results_count,page,page_size,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=False
+		)
 
-			if error_messages:
-				return(JsonResponse(error_messages,safe=False,status=400))
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
 
-			#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
-			ids=[i[0] for i in results.values_list('id')]
-			u2=STATS_BASE_URL+'groupby/'
-			rdata=dict(request.data)
-			groupby=rdata.get('groupby')
-			d2=dict(groupby)
-			d2['ids']=ids
-		
-			#NOT QUITE SURE HOW TO VALIDATE THE RESPONSE OF THIS VIA A SERIALIZER
-			json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
-			resp=json.loads(json_resp.text)
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))
-		else:
-			if DEBUG:
-				print("cached:",hashed)
-			resp=json.loads(cached_response)
+		#EXTRACT THE VOYAGE IDS AND HAND OFF TO THE STATS FLASK CONTAINER
+		ids=[i[0] for i in results.values_list('id')]
+		u2=STATS_BASE_URL+'groupby/'
+		rdata=dict(request.data)
+		groupby=rdata.get('groupby')
+		d2=dict(groupby)
+		d2['ids']=ids
+	
+		#NOT QUITE SURE HOW TO VALIDATE THE RESPONSE OF THIS VIA A SERIALIZER
+		json_resp=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		resp=json.loads(json_resp.text)
 
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -523,39 +468,26 @@ class VoyageDataFrames(generics.GenericAPIView):
 		serialized_req = VoyageDataframesRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
-
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		hashed,cached_response=use_redis(serialized_req,self)
-
-		
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Voyage.objects.all()
-			results,results_count,page,page_size,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=True,
-				paginate=False
-			)
 			
-			if error_messages:
-				return(JsonResponse(error_messages,safe=False,status=400))
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Voyage.objects.all()
+		results,results_count,page,page_size,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=True,
+			paginate=False
+		)
 		
-			results=results.order_by('id')
-			sf=request.data.get('selected_fields')
-			vals=list(eval('results.values_list("'+'","'.join(sf)+'")'))
-			resp=clean_long_df(vals,sf)		
-			## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))
-		else:
-			if DEBUG:
-				print("cached:",hashed)
-			resp=json.loads(cached_response)
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
+	
+		results=results.order_by('id')
+		sf=request.data.get('selected_fields')
+		vals=list(eval('results.values_list("'+'","'.join(sf)+'")'))
+		resp=clean_long_df(vals,sf)		
+		## DIFFICULT TO VALIDATE THIS WITH A SERIALIZER -- NUMBER OF KEYS AND DATATYPES WITHIN THEM CHANGES DYNAMICALLY ACCORDING TO REQ
 		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
@@ -655,56 +587,44 @@ class VoyageAggRoutes(generics.GenericAPIView):
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
 		
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		hashed,cached_response=use_redis(serialized_req,self)
-
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		params=dict(request.data)
+		queryset=Voyage.objects.all()
+		results,results_count,page,page_size,error_messages=post_req(
+			queryset,
+			self,
+			request,
+			Voyage_options,
+			auto_prefetch=True
+		)
 		
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			params=dict(request.data)
-			queryset=Voyage.objects.all()
-			results,results_count,page,page_size,error_messages=post_req(
-				queryset,
-				self,
-				request,
-				Voyage_options,
-				auto_prefetch=True
-			)
-			
-			if error_messages:
-				return(JsonResponse(error_messages,safe=False,status=400))
-		
-			#HAND OFF TO THE FLASK CONTAINER
-			results=results.order_by('id')
-			zoomlevel=params.get('zoomlevel','region')
-			values_list=results.values_list('id')
-			pks=[v[0] for v in values_list]
-			django_query_time=time.time()
-			print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
-			u2=GEO_NETWORKS_BASE_URL+'network_maps/'
-			d2={
-				'graphname':zoomlevel,
-				'cachename':'voyage_maps',
-				'pks':pks
-			}
-			r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
+		if error_messages:
+			return(JsonResponse(error_messages,safe=False,status=400))
+	
+		#HAND OFF TO THE FLASK CONTAINER
+		results=results.order_by('id')
+		zoomlevel=params.get('zoomlevel','region')
+		values_list=results.values_list('id')
+		pks=[v[0] for v in values_list]
+		django_query_time=time.time()
+		print("Internal Django Response Time:",django_query_time-st,"\n+++++++")
+		u2=GEO_NETWORKS_BASE_URL+'network_maps/'
+		d2={
+			'graphname':zoomlevel,
+			'cachename':'voyage_maps',
+			'pks':pks
+		}
+		r=requests.post(url=u2,data=json.dumps(d2),headers={"Content-type":"application/json"})
 
-			#VALIDATE THE RESPONSE
-			if r.ok:
-				j=json.loads(r.text)
-				serialized_resp=VoyageAggRoutesResponseSerializer(data=j)
-			if not serialized_resp.is_valid():
-				return JsonResponse(serialized_resp.errors,status=400)
-			else:
-				resp=serialized_resp.data
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))			
+		#VALIDATE THE RESPONSE
+		if r.ok:
+			j=json.loads(r.text)
+			serialized_resp=VoyageAggRoutesResponseSerializer(data=j)
+		if not serialized_resp.is_valid():
+			return JsonResponse(serialized_resp.errors,status=400)
 		else:
-			if DEBUG:
-				print("cached:",hashed)
-			resp=json.loads(cached_response)
+			resp=serialized_resp.data
+		
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		

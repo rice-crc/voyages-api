@@ -363,7 +363,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	
 	# ORDER RESULTS
 	st=time.time()
-	pre_order_by_count=filtered_queryset.count()
 	order_by=params.get('order_by')
 	if order_by is not None:
 		if DEBUG:
@@ -391,8 +390,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	
 	if DEBUG:
 		print(f"ORDER BY TIME: {time.time()-st}")
-	
-	post_order_by_count=filtered_queryset.count()
 	
 	st=time.time()
 	# n.b. ordering on a many related field can create duplicates. we handle this later.

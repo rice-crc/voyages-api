@@ -59,6 +59,8 @@ class SparseDateAbstractBase(models.Model):
 				return monthindex[m-1]
 		elif y is not None:
 			return str(y)
+		else:
+			return ""
 		
 	class Meta:
 		abstract = True

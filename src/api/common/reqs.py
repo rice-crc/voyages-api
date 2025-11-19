@@ -271,7 +271,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 						qobjstrs.append(qobjstr)
 					qobjstr=' , '.join(qobjstrs)
 					execobjstr=f'filtered_queryset.filter({qobjstr})'
-					print("EXECOBJSTR",execobjstr)
+# 					print("EXECOBJSTR",execobjstr)
 					enslavernamehits=eval(execobjstr)
 					ids=[]
 					enslaverinrelationnamehits=[]
@@ -318,13 +318,13 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			op=item['op']
 			varName=item["varName"]
 			searchTerm=item["searchTerm"]
-			print(varName,varName in percentage_fields)
+# 			print(varName,varName in percentage_fields)
 			if varName in percentage_fields:
 				if type(searchTerm)==list:
 					searchTerm=[i/100 for i in searchTerm]
 				else:
 					searchTerm=searchTerm/100
-				print(searchTerm)
+# 				print(searchTerm)
 			
 			#swap out bad fields (aug 14, 2025)
 			if varName in bad_field_map:
@@ -337,7 +337,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 			elif op == ['andlist']:
 				for st in searchTerm:
 					filterQ=f'filtered_queryset.filter({varName}={searchTerm})'
-					print(filterQ)
+# 					print(filterQ)
 					filtered_queryset=eval(filterQ)
 			elif op =='btw':
 				if type(searchTerm)==list and len(searchTerm)==2:
@@ -351,7 +351,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 				error_messages.append(f"Invalid Filter Item Operation: {item}")
 			
 			try:
-				print("kwargs-->",kwargs)
+# 				print("kwargs-->",kwargs)
 				filtered_queryset=filtered_queryset.filter(**kwargs)
 			except Exception as e:
 				badfielderrormessage=f"Invalid Filter Item: {item} -> {e}"
@@ -363,7 +363,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	
 	# ORDER RESULTS
 	st=time.time()
-	pre_order_by_count=filtered_queryset.count()
 	order_by=params.get('order_by')
 	if order_by is not None:
 		if DEBUG:
@@ -391,8 +390,6 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	
 	if DEBUG:
 		print(f"ORDER BY TIME: {time.time()-st}")
-	
-	post_order_by_count=filtered_queryset.count()
 	
 	st=time.time()
 	# n.b. ordering on a many related field can create duplicates. we handle this later.

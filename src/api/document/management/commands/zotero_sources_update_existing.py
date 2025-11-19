@@ -32,16 +32,16 @@ class Command(BaseCommand):
 		parser.add_argument("--shortref", default=None)
 
 	def handle(self, *args, **options):
-		library_id=zotero_credentials['import_from_library_ids']
+		zotero_group_id=4799675
 		library_type=zotero_credentials['library_type']
 		api_key=zotero_credentials['api_key']
-		zot = zotero.Zotero(library_id, library_type, api_key)
 		
-		shortref=options['shortref']
-		
-		sources=Source.objects.all()
-		if shortref is not None:
-			sources=sources.filter(short_ref__name__icontains=shortref)
+# 		shortref=options['shortref']
+# 		
+# 		sources=Source.objects.all()
+# 		if shortref is not None:
+# 			sources=sources.filter(short_ref__name__icontains=shortref)
+		sources=Source.objects.all().filter(zotero_group_id=zotero_group_id)
 			
 		print(sources)
 		
@@ -51,28 +51,40 @@ class Command(BaseCommand):
 		for source in sources:
 			print(source)
 			zotero_item_id=source.zotero_item_id
-			print(zotero_item_id)
-# 			while True:
-# 				res = requests.get( \
-# 				f"https://api.zotero.org/groups/{library_id}/items/{zotero_item_id}?format=json&include=bib&style=chicago-fullnote-bibliography", \
-# 				headers={ 'Authorization': f"Bearer {api_key}" }, \
-# 				timeout=60)
+			zot = zotero.Zotero(zotero_group_id, library_type, api_key)
+			
+			
+			
+			failure=False
+			if zotero_item_id is None:
+				failure=True
+			
+			if not failure:
+			
+				while True:
+					uri=f"https://api.zotero.org/groups/{library_id}/items/{zotero_item_id}?format=json&include=bib&style=chicago-fullnote-bibliography"
+					res = requests.get(
+						uri,
+						headers={ 'Authorization': f"Bearer {api_key}" },
+						timeout=60
+					)
+					print(res)
+					
 				
-			item=zot.item(zotero_item_id)
-				
-# 				if res.status_code==200:
-# 					break
-# 				else:
-# 					print("Error",res)
-# 					errors+=1
-# 					if errors>cutoff:
-# 						failure=True
-# 						print("SKIPPING",source.title)
+					
+					if res.status_code==200:
+						break
+					else:
+						print("Error",res.__dict__)
+						sleep(5)
+						errors+=1
+						if errors>cutoff:
+							failure=True
+							print("SKIPPING",source.title)
 		
 			if not failure:
+				item=zot.item(zotero_item_id)
 				print(item)
-				
-				exit()
 				
 				bib=item['bib']
 				

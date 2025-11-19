@@ -697,7 +697,6 @@ def crosstabs():
 	options=big_df['options']
 	df=df[df['id'].isin(ids)]
 	
-	yeargroupmode=False
 	
 	def interval_to_str(s):
 		s=str(s)
@@ -727,9 +726,13 @@ def crosstabs():
 		binrows=rows
 # 		print(binrows)
 # 		print(df)
+
 		binsize=int(binsize)
-		df=df.dropna(subset=[rows,val])
+# 		print(df)
+		df=df.fillna(0)
+# 		df=df.dropna(subset=[rows,val])
 		df[binrows]=df[binrows].astype('int')
+		df=df[~df[binrows].isin([0])]
 		binvar_min=df[binrows].min()
 		binvar_max=df[binrows].max()
 		binvar_ints=list(range(int(binvar_min),int(binvar_max)+1))
@@ -804,8 +807,10 @@ def crosstabs():
 					key='All'
 				else:
 # 					key=re.sub('\.','','__'.join(key))
-					key='__'.join(key)
-			
+					key='__'.join([
+						i if type(i)!=int else "Undefined" for i in key
+					])
+					
 			
 			
 			child={
@@ -837,6 +842,12 @@ def crosstabs():
 	def makecolgroups(colgroups,mlct,fullpath):
 		k=mlct.pop()
 		if k is not None:
+			if type(k)==int:
+				#this becomes an issue when we're doing year bins
+				#because we have to fill in zeroes to avoid a null data issue
+				#and so 0 becomes a column
+				k="Undefined"
+
 			if len(mlct)>0 and k!= 'All':
 				headernames=[cg['headerName'] for cg in colgroups]
 				if k not in headernames:
@@ -867,17 +878,26 @@ def crosstabs():
 	colgroups.append(indexcolcg)
 	
 	for mlct in mlctuples:
+	
 # 		print("MLCT",mlct)
-# 		print("dtype-->",ct.dtypes[mlct])
 		l=list(mlct)
 		l.reverse()
 		colgroups=makecolgroups(colgroups,l,mlct)
+
+	#place undefined col (if it exists) last
+	for idx in range(len(colgroups)):
+		colgroup=colgroups[idx]
+		if colgroup['headerName']=="Undefined":
+			del(colgroups[idx])
+			colgroups.append(colgroup)
+	
+		
 	
 	output_records=[]
 	##N.B. "All" is a reserved column name here, for the margins/totals
 	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
 # 	allcolumns=[re.sub('\.','',"__".join(c)) if c[0]!='All' else 'All' for c in mlctuples]
-	allcolumns=["__".join(c) if c[0]!='All' else 'All' for c in mlctuples]
+	allcolumns=["__".join([i if type(i)!=int else "Undefined" for i in c]) if c[0]!='All' else 'All' for c in mlctuples]
 	allcolumns.insert(0,indexcol_name)
 	ct=ct.fillna(0)
 # 	print(ct)

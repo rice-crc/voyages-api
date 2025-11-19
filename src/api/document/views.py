@@ -55,18 +55,6 @@ class DocumentSearch(generics.GenericAPIView):
 			return JsonResponse(serialized_req.errors,status=400)
 
 		srd=serialized_req.data
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		if USE_REDIS_CACHE:
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed)
-		else:
-			cached_response=None
-			
-		
 
 		def solrfilter(queryset,core_name,search_string):
 			
@@ -91,89 +79,82 @@ class DocumentSearch(generics.GenericAPIView):
 				
 			return queryset
 		
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Source.objects.all()
-			queryset=queryset.filter(has_published_manifest=True)
+		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
+		queryset=Source.objects.all()
+		queryset=queryset.filter(has_published_manifest=True)
+		
+		voyage_ids=srd.get('voyageIds')
+		if voyage_ids is not None:
+			voyage_ids_clean=[int(i) for i in re.findall("[0-9]+",str(voyage_ids))]
+			if voyage_ids_clean:
+				for voyage_id in voyage_ids_clean:
+					queryset=queryset.filter(source_voyage_connections__voyage_id=voyage_id)
+		
+		source_title=srd.get('title')
+		if source_title is not None:
+			queryset=queryset.filter(title__icontains=source_title)
+			print("TITLE",source_title,queryset.count())
+		
+		bib=srd.get('bib')
+		if bib is not None:
+			queryset=queryset.filter(bib__icontains=bib)
+			print("BIB",bib,queryset.count())
+		
+		enslavers=srd.get('enslavers')
+		if enslavers is not None:
+			print("ENSLAVERS",enslavers,queryset.count())
+			queryset=solrfilter(queryset,'enslavers',enslavers)
+		
+		fulltext=srd.get("fullText")
+		if fulltext is not None:
+			print("FULLTEXT",fulltext,queryset.count())
+			queryset=solrfilter(queryset,'sources',fulltext)
+		
+		if queryset.count()>0:
+		
+			ids=[i[0] for i in queryset.values_list('id')]
 			
-			voyage_ids=srd.get('voyageIds')
-			if voyage_ids is not None:
-				voyage_ids_clean=[int(i) for i in re.findall("[0-9]+",str(voyage_ids))]
-				if voyage_ids_clean:
-					for voyage_id in voyage_ids_clean:
-						queryset=queryset.filter(source_voyage_connections__voyage_id=voyage_id)
+			request=dict(request.data)
+			request['filter']=[
+				{
+					'varName':'id',
+					'op':'in',
+					'searchTerm':ids,
+				}
+			]
 			
-			source_title=srd.get('title')
-			if source_title is not None:
-				queryset=queryset.filter(title__icontains=source_title)
-				print("TITLE",source_title,queryset.count())
+			results,results_count,page,page_size,error_messages=post_req(	
+				queryset,
+				self,
+				request,
+				Source_options,
+				auto_prefetch=True,
+				paginate=True
+			)
 			
-			bib=srd.get('bib')
-			if bib is not None:
-				queryset=queryset.filter(bib__icontains=bib)
-				print("BIB",bib,queryset.count())
-			
-			enslavers=srd.get('enslavers')
-			if enslavers is not None:
-				print("ENSLAVERS",enslavers,queryset.count())
-				queryset=solrfilter(queryset,'enslavers',enslavers)
-			
-			fulltext=srd.get("fullText")
-			if fulltext is not None:
-				print("FULLTEXT",fulltext,queryset.count())
-				queryset=solrfilter(queryset,'sources',fulltext)
-			
-			if queryset.count()>0:
-			
-				ids=[i[0] for i in queryset.values_list('id')]
-				
-				request=dict(request.data)
-				request['filter']=[
-					{
-						'varName':'id',
-						'op':'in',
-						'searchTerm':ids,
-					}
-				]
-				
-				results,results_count,page,page_size,error_messages=post_req(	
-					queryset,
-					self,
-					request,
-					Source_options,
-					auto_prefetch=True,
-					paginate=True
-				)
-				
-				if error_messages:
-					return(JsonResponse(error_messages,safe=False,status=400))
+			if error_messages:
+				return(JsonResponse(error_messages,safe=False,status=400))
 
-				
-			else:
-				results=[]
-				results_count=0
-				page=1
-				page_size=0
-							
 			
-			resp=SourceListResponseSerializer({
-				'count':results_count,
-				'page':page,
-				'page_size':page_size,
-				'results':results
-			}).data
-			
+		else:
+			results=[]
+			results_count=0
+			page=1
+			page_size=0
+						
+		
+		resp=SourceListResponseSerializer({
+			'count':results_count,
+			'page':page,
+			'page_size':page_size,
+			'results':results
+		}).data
+		
 # 			print(len(resp))
 # 			print(resp)
-			#I'm having the most difficult time in the world validating this nested paginated response
-			#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed,json.dumps(resp))
-		else:
-			resp=json.loads(cached_response)
-		
+		#I'm having the most difficult time in the world validating this nested paginated response
+		#And I cannot quite figure out how to just use the built-in paginator without moving to urlparams
+
 		if DEBUG:
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 
@@ -253,120 +234,6 @@ class SourceList(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 
 		return JsonResponse(resp,safe=False,status=200)
-
-####################### CLASSIC DJANGO TEMPLATED VIEWS -- KILL THESE AS SOON AS THE CONTRIBUTE FORM IS WORKING
-# default view will be a paginated gallery
-@extend_schema(
-		exclude=True
-	)
-def Gallery(request,collection_id=None,pagenumber=1):
-	
-	if request.user.is_authenticated:
-		
-		#let's only get the zotero objects that have pages
-		#otherwise, no need for the gallery -- and it lards the gallery up
-		sources=Source.objects.order_by().all().filter(~Q(page_connections=None))
-		
-		other_collections=[]
-		page_collection_id=None
-		page_collection_label="No Collection Selected"
-		for collection_tuple in sources.values_list(
-			"short_ref__id",
-			"short_ref__name"
-		).distinct():
-			this_collection_id,this_collection_label=collection_tuple
-			if this_collection_id==collection_id:
-				print(this_collection_id,this_collection_label)
-				page_collection_label=this_collection_label
-				page_collection_id=this_collection_id
-			else:
-				other_collections.append({
-					"id":this_collection_id,
-					"label":this_collection_label
-				})
-			
-		sources=sources.filter(short_ref__id=collection_id).distinct()
-		sources=sources.order_by('id')
-		sources_paginator=Paginator(sources, 12)
-		this_page=sources_paginator.get_page(pagenumber)
-		
-		return render(
-			request,
-			"gallery.html",
-			{
-				"page_collection_label":page_collection_label,
-				"page_obj": this_page,
-				"other_collections":other_collections,
-				"page_collection_id":page_collection_id
-			}
-		)
-	else:
-		return HttpResponseForbidden("Forbidden")
-
-class SourceCharFieldAutoComplete(generics.GenericAPIView):
-	authentication_classes=[TokenAuthentication]
-	permission_classes=[IsAuthenticated]
-	@extend_schema(
-		description="The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, documentary sources). It also accepts filters. This means that you can apply any filter you would to any other query, for instance, the sources list view, in the process of requesting your autocomplete suggestions, thereby rapidly narrowing your search.",
-		request=SourceAutoCompleteRequestSerializer,
-		responses=SourceAutoCompleteResponseSerializer,
-	)
-	def post(self,request):
-		st=time.time()
-		print("Source CHAR FIELD AUTOCOMPLETE+++++++\nusername:",request.auth.user)
-		#VALIDATE THE REQUEST
-		serialized_req = SourceAutoCompleteRequestSerializer(data=request.data)
-		if not serialized_req.is_valid():
-			return JsonResponse(serialized_req.errors,status=400)
-
-		#AND ATTEMPT TO RETRIEVE A REDIS-CACHED RESPONSE
-		
-		srd=serialized_req.data
-		if USE_REDIS_CACHE:
-			hashdict={
-				'req_name':str(self.request),
-				'req_data':srd
-			}
-			hashed_full_req=hashlib.sha256(json.dumps(hashdict,sort_keys=True,indent=1).encode('utf-8')).hexdigest()
-			cached_response = redis_cache.get(hashed_full_req)
-		else:
-			cached_response=None
-
-		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
-		if cached_response is None:
-			#But first let's see if this autocomplete request has been run before (other than the exact letters typed in...)
-						
-			unfiltered_queryset=Source.objects.all()
-			
-			final_vals=autocomplete_req(unfiltered_queryset,self,request,Source_options,'Source')
-			
-			#RUN THE AUTOCOMPLETE ALGORITHM
-			
-			resp=dict(request.data)
-			resp['suggested_values']=final_vals
-			#VALIDATE THE RESPONSE
-			serialized_resp=SourceAutoCompleteResponseSerializer(data=resp)
-			#SAVE THIS NEW RESPONSE TO THE REDIS CACHE
-			if USE_REDIS_CACHE:
-				redis_cache.set(hashed_full_req,json.dumps(resp))
-		else:
-			if DEBUG:
-				print("cached:",hashed_full_req)
-			resp=json.loads(cached_response)
-		if DEBUG:
-			print("Internal Response Time:",time.time()-st,"\n+++++++")
-		return JsonResponse(resp,safe=False,status=200)
-
-# then the individual page view
-@extend_schema(
-		exclude=True
-	)
-def source_page(request,source_id=1):
-	if request.user.is_authenticated:
-		source=Source.objects.get(id=source_id)
-		return render(request, "single_doc.html", {'source':source})
-	else:
-		return HttpResponseForbidden("Forbidden")
 
 #### CONTROLLED VOCABS
 	

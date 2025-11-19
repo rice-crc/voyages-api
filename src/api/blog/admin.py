@@ -45,7 +45,7 @@ from blog.models import *
 class PostAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'language', 'status','created_on')
     list_filter = ("status",)
-    search_fields = ['title', 'content']
+    search_fields = ['title', 'content','slug']
     prepopulated_fields = {'slug': ('title',)}
 #     change_list_template = 'blog/admin/post_change_list.html'
     

@@ -132,6 +132,8 @@ class VoyageItineraryInline(nested_admin.NestedStackedInline):
 		'third_landing_region',
 		'place_voyage_ended',
 		'imp_port_voyage_begin',
+		'imp_region_voyage_begin',
+		'imp_broad_region_voyage_begin',
 		'principal_place_of_slave_purchase',
 		'imp_principal_place_of_slave_purchase',
 		'imp_principal_region_of_slave_purchase',
@@ -141,15 +143,6 @@ class VoyageItineraryInline(nested_admin.NestedStackedInline):
 		'imp_broad_region_slave_dis'
 	]
 	verbose_name_plural="Itinerary"
-	exclude= [
-		'port_of_call_before_atl_crossing',
-		'number_of_ports_of_call',
-		'region_of_return',
-		'broad_region_of_return',
-		'imp_region_voyage_begin',
-		'imp_broad_region_voyage_begin'
-		
-	]
 	classes = ['collapse']
 	can_delete=False
 

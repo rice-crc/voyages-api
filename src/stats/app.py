@@ -55,7 +55,7 @@ def load_long_df(endpoint,variables):
 			cleanup=listval_vars[v]['re_cleanup']
 		else:
 			cleanup=None
-			
+		print("CLEANUP",v,cleanup)
 		jkeys=list(j.keys())
 		for i in range(len(j[jkeys[0]])):
 
@@ -139,6 +139,7 @@ while True:
 					thisdf[varName]=thisdf[varName].astype('int')
 				else:
 					thisdf[varName]=thisdf[varName].fillna('')
+		#periods cause problems
 		rc['df']=thisdf
 		print(rc['df'])
 # 		except:

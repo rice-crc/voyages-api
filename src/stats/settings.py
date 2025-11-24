@@ -1,0 +1,3 @@
+import os
+DJANGO_BASE_URL=os.getenv("DJANGO_BASE_URL")
+DJANGO_AUTH_KEY=os.getenv("DJANGO_AUTH_KEY")

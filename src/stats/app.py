@@ -55,7 +55,7 @@ def load_long_df(endpoint,variables):
 			cleanup=listval_vars[v]['re_cleanup']
 		else:
 			cleanup=None
-			
+		print("CLEANUP",v,cleanup)
 		jkeys=list(j.keys())
 		for i in range(len(j[jkeys[0]])):
 
@@ -139,6 +139,7 @@ while True:
 					thisdf[varName]=thisdf[varName].astype('int')
 				else:
 					thisdf[varName]=thisdf[varName].fillna('')
+		#periods cause problems
 		rc['df']=thisdf
 		print(rc['df'])
 # 		except:
@@ -841,8 +842,9 @@ def crosstabs():
 	### IN OTHER WORDS, NO VALUE FOR A COLUMN IN THE DF CAN BE "ALL"
 	def makecolgroups(colgroups,mlct,fullpath):
 		k=mlct.pop()
+# 		print("k---->",k)
 		if k is not None:
-			if type(k)==int:
+			if type(k)==int or k=="nan":
 				#this becomes an issue when we're doing year bins
 				#because we have to fill in zeroes to avoid a null data issue
 				#and so 0 becomes a column

@@ -39,6 +39,12 @@ zotero_credentials={
 	"library_type":"group"
 }
 
+FILEBROWSER_EXTENSIONS = {
+    'Image': ['.jpg', '.jpeg', '.gif', '.png'],
+    'Document': ['.pdf', '.doc','.docx' '.xls', '.csv'],
+    'Archive': ['.sav','.zip']
+}
+
 transkribus_credentials={
 	"user":"user@email.com",
 	"pw":"password!"

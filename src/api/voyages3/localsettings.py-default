@@ -45,6 +45,9 @@ FILEBROWSER_EXTENSIONS = {
     'Archive': ['.sav','.zip']
 }
 
+#100mb
+FILEBROWSER_MAX_UPLOAD_SIZE=104857600
+
 transkribus_credentials={
 	"user":"user@email.com",
 	"pw":"password!"

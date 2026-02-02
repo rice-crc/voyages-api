@@ -41,7 +41,9 @@ zotero_credentials={
 
 FILEBROWSER_EXTENSIONS = {
     'Image': ['.jpg', '.jpeg', '.gif', '.png'],
-    'Document': ['.pdf', '.doc','.docx' '.xls', '.csv'],
+    'Document': ['.pdf', '.doc','.docx' '.xls',.xlsx, '.csv'],
+    'Video': ['.mov','.mp4','.m4v','.webm','.wmv','.mpeg','.mpg','.avi','.rm']
+    'Audio': ['.mp3','.wav','.aiff','.midi','.m4p']
     'Archive': ['.sav','.zip']
 }
 

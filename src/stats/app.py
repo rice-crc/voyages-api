@@ -41,59 +41,59 @@ def load_long_df(endpoint,variables):
 	rolluptime=0
 	dftime=0
 	
-# 	for v in listval_vars:
-# 		print(v,listval_vars[v])
-# 		df[v]=np.nan
-# 		df[v]=df[v].astype(str)
-# 		fields=["id"]+listval_vars[v]['fields']
-# 		r=requests.post(
-# 			url=DJANGO_BASE_URL+endpoint,
-# 			headers=headers,
-# 			data=json.dumps({'selected_fields':[v for v in fields],'filter':[]})
-# 		)
-# 		j=json.loads(r.text)
-# 		# pull out m2m fields and join them (as strings)
-# 		rollup={}
-# 		if "re_cleanup" in listval_vars[v]:
-# 			cleanup=listval_vars[v]['re_cleanup']
-# 		else:
-# 			cleanup=None
-# 		print("CLEANUP",v,cleanup)
-# 		jkeys=list(j.keys())
-# 		st=time.time()
-# 		for i in range(len(j[jkeys[0]])):
-# 			
-# 
-# 			idnum=j[jkeys[0]][i]
-# 			itemvals=[]
-# 			for k in jkeys[1:]:
-# 				val=j[k][i]
-# 				if val is not None:
-# 					if cleanup:
-# 						val=re.sub(
-# 							cleanup['find'],
-# 							cleanup['replace'],
-# 							val,
-# 							flags=cleanup['flags']
-# 						)
-# 					itemvals.append(val)
-# 			if itemvals:
-# 				item=': '.join(itemvals)
-# 				if idnum in rollup:
-# 					rollup[idnum].append(item)
-# 				else:
-# 					rollup[idnum]=[item]
-# 		rolluptime+=time.time()-st
-# 		
-# 		st=time.time()
-# 		for i in rollup:
-# 			st=time.time()
-# 			row=df[df['id']==i]
-# 			idx=row.index[0]
-# 			obj='|'.join(rollup[i])
-# 		dftime+=time.time()-st
-# 		
-# 		print(df[v])
+	for v in listval_vars:
+		print(v,listval_vars[v])
+		df[v]=np.nan
+		df[v]=df[v].astype(str)
+		fields=["id"]+listval_vars[v]['fields']
+		r=requests.post(
+			url=DJANGO_BASE_URL+endpoint,
+			headers=headers,
+			data=json.dumps({'selected_fields':[v for v in fields],'filter':[]})
+		)
+		j=json.loads(r.text)
+		# pull out m2m fields and join them (as strings)
+		rollup={}
+		if "re_cleanup" in listval_vars[v]:
+			cleanup=listval_vars[v]['re_cleanup']
+		else:
+			cleanup=None
+		print("CLEANUP",v,cleanup)
+		jkeys=list(j.keys())
+		st=time.time()
+		for i in range(len(j[jkeys[0]])):
+			
+
+			idnum=j[jkeys[0]][i]
+			itemvals=[]
+			for k in jkeys[1:]:
+				val=j[k][i]
+				if val is not None:
+					if cleanup:
+						val=re.sub(
+							cleanup['find'],
+							cleanup['replace'],
+							val,
+							flags=cleanup['flags']
+						)
+					itemvals.append(val)
+			if itemvals:
+				item=': '.join(itemvals)
+				if idnum in rollup:
+					rollup[idnum].append(item)
+				else:
+					rollup[idnum]=[item]
+		rolluptime+=time.time()-st
+		
+		st=time.time()
+		for i in rollup:
+			st=time.time()
+			row=df[df['id']==i]
+			idx=row.index[0]
+			obj='|'.join(rollup[i])
+		dftime+=time.time()-st
+		
+		print(df[v])
 		
 	print("dftime:",dftime)
 	print("rolluptime",rolluptime)

@@ -38,6 +38,9 @@ def load_long_df(endpoint,variables):
 	##1. produce duplicates w a values_list call
 	##2. need to be stuffed into an object field in pandas
 	
+	rolluptime=0
+	dftime=0
+	
 	for v in listval_vars:
 		print(v,listval_vars[v])
 		df[v]=np.nan
@@ -57,15 +60,15 @@ def load_long_df(endpoint,variables):
 			cleanup=None
 		print("CLEANUP",v,cleanup)
 		jkeys=list(j.keys())
+		st=time.time()
 		for i in range(len(j[jkeys[0]])):
+			
 
 			idnum=j[jkeys[0]][i]
 			itemvals=[]
 			for k in jkeys[1:]:
 				val=j[k][i]
 				if val is not None:
-					
-					
 					if cleanup:
 						val=re.sub(
 							cleanup['find'],
@@ -80,14 +83,20 @@ def load_long_df(endpoint,variables):
 					rollup[idnum].append(item)
 				else:
 					rollup[idnum]=[item]
+		rolluptime+=time.time()-st
 		
+		st=time.time()
 		for i in rollup:
+			st=time.time()
 			row=df[df['id']==i]
 			idx=row.index[0]
 			obj='|'.join(rollup[i])
-			df.iloc[idx,df.columns.get_loc(v)]=obj
+		dftime+=time.time()-st
 		
 		print(df[v])
+		
+	print("dftime:",dftime)
+	print("rolluptime",rolluptime)
 	
 	return(df)
 
@@ -735,6 +744,13 @@ def crosstabs():
 		df[binrows]=df[binrows].astype('int')
 		df=df[~df[binrows].isin([0])]
 		binvar_min=df[binrows].min()
+		
+		#clean up binvar_min?
+		binvar_min=binvar_min-binvar_min%binsize
+		if binvar_min%10==0:
+			binvar_min+=1
+		
+		
 		binvar_max=df[binrows].max()
 		binvar_ints=list(range(int(binvar_min),int(binvar_max)+1))
 		if binvar_max-binvar_min <=binsize:

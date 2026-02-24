@@ -60,10 +60,7 @@ def load_long_df(endpoint,variables):
 			cleanup=None
 		print("CLEANUP",v,cleanup)
 		jkeys=list(j.keys())
-		st=time.time()
 		for i in range(len(j[jkeys[0]])):
-			
-
 			idnum=j[jkeys[0]][i]
 			itemvals=[]
 			for k in jkeys[1:]:
@@ -83,20 +80,14 @@ def load_long_df(endpoint,variables):
 					rollup[idnum].append(item)
 				else:
 					rollup[idnum]=[item]
-		rolluptime+=time.time()-st
 		
-		st=time.time()
 		for i in rollup:
-			st=time.time()
 			row=df[df['id']==i]
 			idx=row.index[0]
 			obj='|'.join(rollup[i])
-		dftime+=time.time()-st
+			df.iloc[idx,df.columns.get_loc(v)]=obj
 		
 		print(df[v])
-		
-	print("dftime:",dftime)
-	print("rolluptime",rolluptime)
 	
 	return(df)
 

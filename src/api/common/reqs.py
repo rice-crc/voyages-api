@@ -550,6 +550,7 @@ def autocomplete_req(queryset,self,request,options,sourcemodelname):
 	
 	##USE SOLR
 	if (sourcemodelname,varName) in inverted_autocomplete_indices:
+		print("USING SOLR")
 		inverted_autocomplete_index=inverted_autocomplete_indices[(sourcemodelname,varName)]
 		core_name=inverted_autocomplete_index['core_name']
 		ac_field_model=inverted_autocomplete_index['model']
@@ -608,24 +609,10 @@ def autocomplete_req(queryset,self,request,options,sourcemodelname):
 		
 		response=[{"value":v} for v in paginated_ac_suggestions]
 	else:
-		targetmodelname=inverted_autocomplete_basic_index_field_endings[sourcemodelname][varName]
 		fieldtail=re.sub('.*?__','',varName)
-		queryset=eval(f'{targetmodelname}.objects.all()')
 		
-		filtered_queryset,results_count,page,page_size,error_messages=post_req(
-			queryset,
-			self,
-			request,
-			options,
-			auto_prefetch=False
-		)
+		listacvals=[l[0] for l in list(set(queryset.values_list(varName)))]
 		
-		if error_messages:
-			# return({"errors":error_messages})
-			filtered_queryset=queryset
-		evalstr=f'filtered_queryset.values_list("{fieldtail}")'
-		acvals=eval(evalstr)
-		listacvals=[v[0] for v in list(acvals)]
 		listacvals.sort()
 		response=[{"value":str(v)} for v in listacvals]
 	return response

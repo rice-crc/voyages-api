@@ -61,6 +61,7 @@ class Command(BaseCommand):
 			},
 			{
 				"model":Post,
+				"filter":"status=1",
 				"core_name":"blog",
 				"fields":[
 					'id',
@@ -135,6 +136,11 @@ class Command(BaseCommand):
 			)
 			
 			queryset=model.objects.all()
+			
+			if "filter" in idx:
+				idx_filter=idx['filter']
+				queryset=eval(f"queryset.filter({idx_filter})")
+			
 			if core_name=="sources":
 				queryset=queryset.filter(has_published_manifest=True)
 			

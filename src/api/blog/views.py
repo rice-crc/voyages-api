@@ -69,7 +69,7 @@ class PostList(generics.GenericAPIView):
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 # 		if cached_response is None:
 			#FILTER THE POSTS BASED ON THE REQUEST'S FILTER OBJECT
-		queryset=Post.objects.all()
+		queryset=Post.objects.all().filter(status=1)
 		results,results_count,page,page_size,error_messages=post_req(
 			queryset,
 			self,
@@ -137,7 +137,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 			cached_response=None
 		
 		if cached_response is None:
-			unfiltered_queryset=Post.objects.all()
+			unfiltered_queryset=Post.objects.all().filter(status=1)
 			#RUN THE AUTOCOMPLETE ALGORITHM (WHICH ITSELF RUNS THE DJANGO FILTER)
 			final_vals=autocomplete_req(unfiltered_queryset,self,request,Post_options,'Post')
 			
@@ -202,7 +202,8 @@ class AuthorList(generics.GenericAPIView):
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
 			#FILTER THE AUTHORS BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Author.objects.all()
+			pks=[i[0] for i in Author.objects.all().filter(post__status=1).values_list('id')]
+			queryset=Author.objects.all().filter(id__in=pks)
 			queryset,results_count=post_req(
 				queryset,
 				self,
@@ -267,7 +268,8 @@ class InstitutionList(generics.GenericAPIView):
 		#RUN THE QUERY IF NOVEL, RETRIEVE IT IF CACHED
 		if cached_response is None:
 			#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
-			queryset=Institution.objects.all()
+			pks=[i[0] for i in Institution.objects.all().filter(institution_authors__posts__status=1).values_list('id')]
+			queryset=Institution.objects.all().filter(id__in=pks)
 			results,results_count,page,page_size,error_messages=post_req(
 				queryset,
 				self,

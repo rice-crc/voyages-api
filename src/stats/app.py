@@ -975,7 +975,6 @@ def csv_download():
 	colsdict={}
 	
 	for k in df.columns:
-		print(k)
 		if 'label' in big_df['variables'][k]:
 			label=big_df['variables'][k]['label']
 			colsdict[k]=label

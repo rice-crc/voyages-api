@@ -12,6 +12,10 @@ big_df={
       "type": "int",
       "label": "Voyage ID"
     },
+	"voyage_ship__ship_name": {
+		"type": "str",
+		"label": "Name of vessel"
+	},
     "voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year": {
       "type": "int",
       "label": "Year arrived with captives"
@@ -66,7 +70,7 @@ big_df={
     },
     "voyage_itinerary__imp_region_voyage_begin__name": {
       "type": "obj",
-      "label": "Region where vessel's voyage ended (IMP)",
+      "label": "Imputed region where voyage began",
       "re_cleanup": {
         "type": "sub",
         "find": "\.",
@@ -83,17 +87,29 @@ big_df={
       "type": "str",
       "label": "Place where vessel's voyage ended"
     },
-    "voyage_dates__slave_purchase_began_sparsedate__month": {
-      "type": "int",
-      "label": "Month purchase of captives began"
+    "voyage_dates__slave_purchase_began_sparsedate": {
+      "type": "obj",
+      "label": "Date purchase of captives began",
+      "join": ",",
+      "fields":[
+      	"voyage_dates__slave_purchase_began_sparsedate__year",
+      	"voyage_dates__slave_purchase_began_sparsedate__month",
+      	"voyage_dates__slave_purchase_began_sparsedate__day"
+      	]
     },
     "voyage_slaves_numbers__percentage_men": {
       "type": "pct",
-      "label": "percent men"
+      "label": "Percent men"
     },
-    "voyage_dates__voyage_completed_sparsedate__month": {
-      "type": "int",
-      "label": "Month voyage completed"
+    "voyage_dates__voyage_completed_sparsedate": {
+      "type": "obj",
+      "label": "Date voyage completed",
+      "join": ",",
+      "fields":[
+      	"voyage_dates__voyage_completed_sparsedate__year",
+      	"voyage_dates__voyage_completed_sparsedate__month",
+      	"voyage_dates__voyage_completed_sparsedate__day"
+      	]
     },
     "voyage_itinerary__region_of_return__name": {
       "type": "obj",
@@ -112,7 +128,7 @@ big_df={
     },
     "voyage_itinerary__imp_principal_region_slave_dis__name": {
       "type": "obj",
-      "label": "Principal region of captive disembarkation (IMP)",
+      "label": "Imputed principal region of captive disembarkation",
       "re_cleanup": {
         "type": "sub",
         "find": "\.",
@@ -123,7 +139,7 @@ big_df={
     },
     "voyage_itinerary__imp_principal_region_of_slave_purchase__name": {
       "type": "obj",
-      "label": "Principal region of captive purchase",
+      "label": "Imputed Principal region of captive purchase",
       "re_cleanup": {
         "type": "sub",
         "find": "\.",
@@ -132,17 +148,29 @@ big_df={
       },
       "fields":["voyage_itinerary__imp_principal_region_of_slave_purchase__name"]
     },
-    "voyage_dates__date_departed_africa_sparsedate__month": {
-      "type": "int",
-      "label": "Month vessel departed Africa"
+    "voyage_dates__date_departed_africa_sparsedate": {
+      "type": "obj",
+      "label": "Date vessel departed Africa",
+      "join": ",",
+      "fields":[
+        "voyage_dates__date_departed_africa_sparsedate__year",
+      	"voyage_dates__date_departed_africa_sparsedate__month",
+      	"voyage_dates__date_departed_africa_sparsedate__day"
+      	]
     },
-    "voyage_dates__voyage_began_sparsedate__month": {
-      "type": "int",
-      "label": "Month voyage began"
+    "voyage_dates__voyage_began_sparsedate": {
+      "type": "obj",
+      "label": "Date voyage began",
+      "join": ",",
+      "fields":[
+        "voyage_dates__voyage_began_sparsedate__year",
+      	"voyage_dates__voyage_began_sparsedate__month",
+      	"voyage_dates__voyage_began_sparsedate__day"
+      	]
     },
     "voyage_itinerary__imp_port_voyage_begin__name": {
       "type": "obj",
-      "label": "Place where vessel's voyage began (IMP)",
+      "label": "Imputed Place where vessel's voyage began",
       "re_cleanup": {
         "type": "sub",
         "find": "\.",
@@ -151,9 +179,15 @@ big_df={
       },
       "fields":["voyage_itinerary__imp_port_voyage_begin__name"]
     },
-    "voyage_dates__first_dis_of_slaves_sparsedate__month": {
-      "type": "int",
-      "label": "Month first disembarkation of captives"
+    "voyage_dates__first_dis_of_slaves_sparsedate": {
+      "type": "obj",
+      "label": "Date first disembarkation of captives",
+      "join": ",",
+      "fields":[
+        "voyage_dates__first_dis_of_slaves_sparsedate__year",
+      	"voyage_dates__first_dis_of_slaves_sparsedate__month",
+      	"voyage_dates__first_dis_of_slaves_sparsedate__day"
+      	]
     },
     "voyage_itinerary__imp_broad_region_slave_dis__name": {
       "type": "str",
@@ -169,7 +203,7 @@ big_df={
     },
     "voyage_itinerary__imp_principal_port_slave_dis__name": {
       "type": "obj",
-      "label": "Principal place where captives were landed (IMP)",
+      "label": "Imputed principal port of captive disembarkation",
       "re_cleanup": {
         "type": "sub",
         "find": "\.",
@@ -186,9 +220,15 @@ big_df={
       "type": "pct",
       "label": "Percent women"
     },
-    "voyage_dates__departure_last_place_of_landing_sparsedate__month": {
-      "type": "int",
-      "label": "Month departed last place of landing"
+    "voyage_dates__departure_last_place_of_landing_sparsedate": {
+      "type": "obj",
+      "label": "Date departed last place of landing",
+      "join": ",",
+      "fields":[
+        "voyage_dates__departure_last_place_of_landing_sparsedate__year",
+      	"voyage_dates__departure_last_place_of_landing_sparsedate__month",
+      	"voyage_dates__departure_last_place_of_landing_sparsedate__day"
+      	]
     },
     "voyage_outcome__outcome_owner__name": {
       "type": "str",
@@ -200,7 +240,7 @@ big_df={
     },
     "voyage_itinerary__imp_principal_place_of_slave_purchase__name": {
       "type": "obj",
-      "label": "Principal place where captives were purchased (IMP)",
+      "label": "Imputed principal place of captive purchase",
       "re_cleanup": {
         "type": "sub",
         "find": "\.",

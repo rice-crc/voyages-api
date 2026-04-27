@@ -13,6 +13,25 @@ from common.autocomplete_indices import get_all_model_autocomplete_fields
 from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
 from django.core.exceptions import ObjectDoesNotExist
 
+
+	
+def pretty_date(month,day,year):
+	month_string_dict={
+		1:"Jan",2:"Feb",3:"Mar",4:"Apr",5:"May",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Oct",11:"Nov",12:"Dec"
+	}
+	if year is not None:
+		if month is not None:
+			month=month_string_dict[month]
+			if day is not None:
+				date=f'{month} {day}, {year}'
+			else:
+				date=f'{month} {year}'
+		else:
+			date=f'{year}'
+	else:
+		date=None
+	return date
+
 #################################### THE BELOW SERIALIZERS ARE USED FOR API REQUEST VALIDATION. SOME ARE JUST THIN WRAPPERS ON THE ABOVE, LIKE THAT FOR PAGINATED LISTS. OTHERS ARE ALMOST ENTIRELY HAND-WRITTEN/HARD-CODED FOR OUR CUSTOMIZED ENDPOINTS LIKE GEOTREEFILTER AND AUTOCOMPLETE, AND WILL HAVE TO BE KEPT IN ALIGNMENT WITH THE MODELS, VIEWS, AND CUSTOM FUNCTIONS THEY INTERACT WITH.
 
 class AnyField(Field):
@@ -339,16 +358,22 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 			voyagestrings.append(voyagestring)
 					
 		return voyagestrings
-
+	
 	def get_birth(self,instance) -> serializers.CharField():
 		birth_place=instance.birth_place
-		birth_year=instance.birth_year
-		return ", ".join([str(i) for i in [birth_place,birth_year] if i is not None])
+		year=instance.birth_year
+		month=instance.birth_month
+		day=instance.birth_day
+		birth_date=pretty_date(month,day,year)
+		return ", ".join([str(i) for i in [birth_place,birth_date] if i is not None])
 	
 	def get_death(self,instance) -> serializers.CharField():
 		death_place=instance.death_place
-		death_year=instance.death_year
-		return ", ".join([str(i) for i in [death_place,death_year] if i is not None])
+		year=instance.death_year
+		month=instance.death_month
+		day=instance.death_day
+		death_date=pretty_date(month,day,year)
+		return ", ".join([str(i) for i in [death_place,death_date] if i is not None])
 
 	class Meta:
 		model=EnslaverIdentity

@@ -158,7 +158,35 @@ def global_search(orig_queryset,search_string,core_name=None):
 	results_count=len(ids)
 	return filtered_queryset,results_count
 
+def sort_queryset(filtered_queryset,params,all_fields):
+	st=time.time()
+	order_by=params.get('order_by')
+	if order_by is not None:
+		if DEBUG:
+			print(f"------>ORDER BY: {order_by}")
+		obl=[]
+		for ob in order_by:
+			if ob.startswith('-'):
+				k=ob[1:]
+				ascdesc='asc'
+			else:
+				ascdesc='desc'
+				k=ob
+			if k in all_fields:
+				obl.append(k)
+			else:
+				print(f"key is invalid to sort on: {k}")
+			
+			oblstr=','.join([f"F('{k}').{ascdesc}(nulls_last=True)" for k in obl])
+			
+			qfilterstr=f"filtered_queryset.order_by({oblstr})"
+			filtered_queryset=eval(qfilterstr)			
+	else:
+		filtered_queryset=filtered_queryset.order_by('id')
+	if DEBUG:
+		print(f"ORDER BY TIME: {time.time()-st}")
 
+	return filtered_queryset
 
 def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 	'''
@@ -362,55 +390,19 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		
 	
 	# ORDER RESULTS
-	st=time.time()
-	order_by=params.get('order_by')
-	if order_by is not None:
-		if DEBUG:
-			print(f"------>ORDER BY: {order_by}")
-		obl=[]
-		for ob in order_by:
-			if ob.startswith('-'):
-				k=ob[1:]
-				ascdesc='asc'
-			else:
-				ascdesc='desc'
-				k=ob
-			if k in all_fields:
-				obl.append(k)
-			else:
-				print(f"key is invalid to sort on: {k}")
-			
-			oblstr=','.join([f"F('{k}').{ascdesc}(nulls_last=True)" for k in obl])
-			
-			qfilterstr=f"filtered_queryset.order_by({oblstr})"
-			filtered_queryset=eval(qfilterstr)
-			
-	else:
-		filtered_queryset=filtered_queryset.order_by('id')
-	
-	if DEBUG:
-		print(f"ORDER BY TIME: {time.time()-st}")
+	filtered_queryset=sort_queryset(filtered_queryset,params,all_fields)
 	
 	st=time.time()
 	# n.b. ordering on a many related field can create duplicates. we handle this later.
 	## dedupe ordered results (while retaining the order)
 	## https://stackoverflow.com/questions/480214/how-do-i-remove-duplicates-from-a-list-while-preserving-order
 	
-# 	if post_order_by_count>pre_order_by_count:
-	dedupe=True
-# 	else:
-# 		dedupe=False
-		
-	if dedupe:
-		ids=[v[0] for v in filtered_queryset.values_list('id')]
-		ids=list(dict.fromkeys(ids))
-		if DEBUG:
-			print(f"DEDUPE TIME: {time.time()-st}")
+	ids=[v[0] for v in filtered_queryset.values_list('id')]
+	ids=list(dict.fromkeys(ids))
+	if DEBUG:
+		print(f"DEDUPE TIME: {time.time()-st}")
 	
-	if dedupe:
-		results_count=len(ids)
-	else:
-		results_count=filtered_queryset.count()
+	results_count=len(ids)
 		
 	if DEBUG:
 		print("COUNT W/O DUPLICATES:",results_count)
@@ -420,34 +412,34 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		page_size=params.get('page_size',10)
 		page=params.get('page',1)
 		print("PAGINATION:",paginate, page_size,page)
+
+		
 		if page<0:
 			page=1
 		page=page-1
 		offset=page*page_size
+		if offset>results_count:
+			offset=0
 		
 		end_idx=offset+page_size
 		if end_idx>=results_count:
 			end_idx=results_count
-		if offset>results_count:
-			results=[]
-		else:
-			if dedupe:
-				page_ids=ids[offset:end_idx]
-				results=orig_queryset.filter(id__in=page_ids)
-			else:
-				results=filtered_queryset[offset:end_idx]
+
+		page_ids=ids[offset:end_idx]
+		results=orig_queryset.filter(id__in=page_ids)
 	else:
-		if dedupe:
-			results=orig_queryset.filter(id__in=ids)
-		else:
-			results=filtered_queryset
+		results=orig_queryset.filter(id__in=ids)
 		page=None
 		page_size=None
 	
 	if DEBUG:
 		print(f"FILTER ON IDS TIME: {time.time()-st}")
 		print(f"FINAL RESULTS COUNT: {results_count}")
-
+	
+	#one last sort -- the dedupe step (id__in=page_ids) breaks the ordering
+	#so you get the right page of results but not necessarily in the right order
+	results=sort_queryset(results,params,all_fields)
+	
 	return results,results_count,page,page_size,error_messages
 
 def getJSONschema(base_obj_name,hierarchical=False,rebuild=False):

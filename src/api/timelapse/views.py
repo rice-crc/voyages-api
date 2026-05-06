@@ -187,7 +187,6 @@ class VoyageAnimation(generics.GenericAPIView):
 			#VALIDATE THE RESPONSE
 			if r.ok:
 				j=json.loads(r.text)
-				print(j[0])
 				serialized_resp=TimeLapseResponseItemSerializer(data=j,many=True)
 			if not serialized_resp.is_valid():
 				return JsonResponse(serialized_resp.errors,status=500,safe=False)

@@ -56,9 +56,9 @@ big_df={
       "type": "pct",
       "label": "Percentage of captives who died during crossing (IMP)"
     },
-    "voyage_slaves_numbers__percentage_women_among_embarked_slaves": {
+    "voyage_slaves_numbers__percentage_women_among_landed_slaves": {
       "type": "pct",
-      "label": "Percent women"
+      "label": "Percentage of women among landed slaves"
     },
     "voyage_outcome__vessel_captured_outcome__name": {
       "type": "str",
@@ -218,7 +218,7 @@ big_df={
     },
     "voyage_slaves_numbers__percentage_women": {
       "type": "pct",
-      "label": "Percent women"
+      "label": "Percentage women on voyage"
     },
     "voyage_dates__departure_last_place_of_landing_sparsedate": {
       "type": "obj",

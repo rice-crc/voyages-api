@@ -241,6 +241,14 @@ def getclosestneighbor(G,thisnode_id,comp_nodes_ids):
 	closest_neighbor_distance,closest_neighbor_id=sorted_distances[0]
 	return closest_neighbor_id,closest_neighbor_distance
 
+def straightab(A,B,ab_id,result):
+	midx=(A[0]+B[0])/2
+	midy=(A[1]+B[1])/2
+	Control=(midx,midy)
+	result[ab_id]=[[[A, B], [Control, Control]]]
+	isstraight=True
+	return result,Control
+
 def curvedab(A,B,C,prev_controlXY,smoothing=0.15):
 # 	print("curving-->",A,B,C,prev_controlXY)
 	## this function takes 4 xy points (the first [prev] or last [C] being nullable)
@@ -248,6 +256,7 @@ def curvedab(A,B,C,prev_controlXY,smoothing=0.15):
 	## why this way? because splines that look forward and back not just to points
 	## but to control points are much, much smoother
 # 	print("curving",A,B,C,prev_controlXY)
+	overshoot_corrected=False
 	if prev_controlXY is None:
 		#first edge
 		ControlX = B[0] + smoothing*(A[0]-C[0])
@@ -256,8 +265,10 @@ def curvedab(A,B,C,prev_controlXY,smoothing=0.15):
 		nextControl=Control
 	else:
 		#last edge
+		lastedge=False
 		if C is None:
 			C=B
+			lastedge=True
 		#all tother edges
 		prev_ControlX,prev_ControlY=prev_controlXY
 		ControlX = A[0]*2 - prev_ControlX
@@ -266,7 +277,30 @@ def curvedab(A,B,C,prev_controlXY,smoothing=0.15):
 		next_ControlY = B[1] + smoothing*(A[1]-C[1])
 		Control=[ControlX,ControlY]
 		nextControl=[next_ControlX,next_ControlY]
-	return Control,nextControl
+		
+# 		if lastedge:
+		#we're getting gross overshoots on our end nodes in some cases (like Annapolis and Madeira)
+		#can't quite pin down why
+		#so we're going to flatten those down
+		dist_A_to_Control=geteuclideandistance(A[1],A[0],Control[1],Control[0])
+		dist_A_to_nextControl=geteuclideandistance(A[1],A[0],nextControl[1],nextControl[0])
+		dist_A_to_B=geteuclideandistance(A[1],A[0],B[1],B[0])
+		mid=[(A[0]+B[0])/2,(A[1]+B[1])/2]
+		dist_A_to_mid=geteuclideandistance(A[1],A[0],mid[1],mid[0])
+		
+		if dist_A_to_B < max([dist_A_to_Control,dist_A_to_nextControl]):
+			overshoot_corrected=True
+			if dist_A_to_nextControl < dist_A_to_B:
+				Control=nextControl
+			elif dist_A_to_Control < dist_A_to_B:
+				nextControl=Control
+			else:
+				Control=mid
+				nextControl=mid
+
+		
+	
+	return Control,nextControl,overshoot_corrected
 	
 def straightab(A,B,ab_id,result):
 	midx=(A[0]+B[0])/2
@@ -351,6 +385,8 @@ def weightedaverage_tuple(controlpoints):
 		finalYb=numeratorYb/denominator
 	return [[finalXa,finalYa],[finalXb,finalYb]]
 
+overshoots_corrected=[]
+
 def spline_curves(nodes,edges,paths,G):
 	for path in paths:
 		pathnodes=path['nodes']
@@ -367,7 +403,14 @@ def spline_curves(nodes,edges,paths,G):
 				Axy=retrieve_nodeXY(A)
 				Bxy=retrieve_nodeXY(B)
 				Cxy=retrieve_nodeXY(C)
-				this_control,next_control=curvedab(Axy,Bxy,Cxy,prev_controlXY)
+				this_control,next_control,overshoot_corrected=curvedab(Axy,Bxy,Cxy,prev_controlXY)
+				if overshoot_corrected:
+					Aname=A['data'].get('name')
+					Bname=B['data'].get('name')
+					if Aname not in overshoots_corrected and Bname not in overshoots_corrected:
+						print('OVERSHOOT CORRECTED ON',Aname,Bname)
+						overshoots_corrected.append(Aname)
+						overshoots_corrected.append(Bname)
 				edge_id=[A_id,B_id]
 				edges=add_edge_topathdict(edges,edge_id,this_control,next_control,pathweight)
 				prev_controlXY=next_control
@@ -379,8 +422,17 @@ def spline_curves(nodes,edges,paths,G):
 			Bxy=retrieve_nodeXY(B)
 			A_id=str(A['id'])
 			B_id=str(B['id'])
-			this_control,next_control=curvedab(Axy,Bxy,C,prev_controlXY)
+			this_control,next_control,overshoot_corrected=curvedab(Axy,Bxy,C,prev_controlXY)
+			if overshoot_corrected:
+				Aname=A['data'].get('name')
+				Bname=B['data'].get('name')
+				if Aname not in overshoots_corrected and Bname not in overshoots_corrected:
+					print('OVERSHOOT CORRECTED ON',Aname,Bname)
+					overshoots_corrected.append(Aname)
+					overshoots_corrected.append(Bname)
+
 			edge_id=[A_id,B_id]
+
 			edges=add_edge_topathdict(edges,edge_id,this_control,next_control,pathweight)
 			
 		elif len(pathnodes)==2:

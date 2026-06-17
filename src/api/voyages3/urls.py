@@ -25,7 +25,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+#     path('admin/', admin.site.urls),
     path('tinymce/', include('tinymce.urls')),
     path('voyage/',include('voyage.urls')),
     path('timelapse/',include('timelapse.urls')),
@@ -36,7 +36,7 @@ urlpatterns = [
     path('blog/',include('blog.urls')),
     path('common/',include('common.urls')),
     path('captcha/', include('captcha.urls')),
-    path('filebrowser/', site.urls),
+#     path('filebrowser/', site.urls),
     path('tinymce/', site.urls),
 	re_path(r'^_nested_admin/', include('nested_admin.urls')),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),

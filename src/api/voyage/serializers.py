@@ -9,6 +9,8 @@ from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Voyage_options import Voyage_options
 from common.autocomplete_indices import get_all_model_autocomplete_fields
 from voyage.cross_filter_fields import VoyageBasicFilterVarNames
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
 
 #### GEO
 
@@ -36,14 +38,14 @@ class TonTypeSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class VoyageShipSerializer(serializers.ModelSerializer):
-	rig_of_vessel=RigOfVesselSerializer(many=False,read_only=True)
-	imputed_nationality=NationalitySerializer(many=False,read_only=True)
-	nationality_ship=NationalitySerializer(many=False,read_only=True)
-	ton_type=TonTypeSerializer(many=False,read_only=True)
-	vessel_construction_place=VoyageLocationSerializer(many=False,read_only=True)
-	vessel_construction_region=VoyageLocationSerializer(many=False,read_only=True)
-	registered_place=VoyageLocationSerializer(many=False,read_only=True)
-	registered_region=VoyageLocationSerializer(many=False,read_only=True)
+	rig_of_vessel=RigOfVesselSerializer(many=False,read_only=True,required=False)
+	imputed_nationality=NationalitySerializer(many=False,read_only=True,required=False)
+	nationality_ship=NationalitySerializer(many=False,read_only=True,required=False)
+	ton_type=TonTypeSerializer(many=False,read_only=True,required=False)
+	vessel_construction_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	vessel_construction_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	registered_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	registered_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
 	class Meta:
 		model=VoyageShip
 		fields='__all__'
@@ -85,47 +87,47 @@ class VoyageCrewSerializer(serializers.ModelSerializer):
 ##### ITINERARY #####
 
 class VoyageItinerarySerializer(serializers.ModelSerializer):
-	port_of_departure=VoyageLocationSerializer(many=False,read_only=True)
-	int_first_port_emb=VoyageLocationSerializer(many=False,read_only=True)
-	int_second_port_emb=VoyageLocationSerializer(many=False,read_only=True)
-	int_first_region_purchase_slaves=VoyageLocationSerializer(many=False,read_only=True)
-	int_second_region_purchase_slaves=VoyageLocationSerializer(many=False,read_only=True)
-	int_first_port_dis=VoyageLocationSerializer(many=False,read_only=True)
-	int_second_port_dis=VoyageLocationSerializer(many=False,read_only=True)
-	int_first_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True)
-	imp_principal_region_slave_dis=VoyageLocationSerializer(many=False,read_only=True)
-	int_second_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True)
-	first_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True)
-	second_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True)
-	third_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True)
-	first_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True)
-	second_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True)
-	third_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True)
-	port_of_call_before_atl_crossing=VoyageLocationSerializer(many=False,read_only=True)
-	first_landing_place=VoyageLocationSerializer(many=False,read_only=True)
-	second_landing_place=VoyageLocationSerializer(many=False,read_only=True)
-	third_landing_place=VoyageLocationSerializer(many=False,read_only=True)
-	first_landing_region=VoyageLocationSerializer(many=False,read_only=True)
-	second_landing_region=VoyageLocationSerializer(many=False,read_only=True)
-	third_landing_region=VoyageLocationSerializer(many=False,read_only=True)
-	place_voyage_ended=VoyageLocationSerializer(many=False,read_only=True)
-	region_of_return=VoyageLocationSerializer(many=False,read_only=True)
-	broad_region_of_return=VoyageLocationSerializer(many=False,read_only=True)
-	imp_port_voyage_begin=VoyageLocationSerializer(many=False,read_only=True)
-	imp_region_voyage_begin=VoyageLocationSerializer(many=False,read_only=True)
-	imp_broad_region_voyage_begin=VoyageLocationSerializer(many=False,read_only=True)
-	principal_place_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True)
-	imp_principal_place_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True)
-	imp_principal_region_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True)
-	imp_broad_region_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True)
-	principal_port_of_slave_dis=VoyageLocationSerializer(many=False,read_only=True)
-	imp_principal_port_slave_dis=VoyageLocationSerializer(many=False,read_only=True)
-	imp_broad_region_slave_dis=VoyageLocationSerializer(many=False,read_only=True)
-	int_fourth_port_dis=VoyageLocationSerializer(many=False,read_only=True)
-	int_third_port_dis=VoyageLocationSerializer(many=False,read_only=True)
-	int_fourth_port_dis=VoyageLocationSerializer(many=False,read_only=True)
-	int_third_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True)
-	int_fourth_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True)
+	port_of_departure=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_first_port_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_second_port_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_first_region_purchase_slaves=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_second_region_purchase_slaves=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_first_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_second_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_first_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_principal_region_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_second_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	first_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	second_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	third_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	first_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	second_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	third_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	port_of_call_before_atl_crossing=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	first_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	second_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	third_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	first_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	second_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	third_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	place_voyage_ended=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	region_of_return=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	broad_region_of_return=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_port_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_region_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_broad_region_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	principal_place_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_principal_place_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_principal_region_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_broad_region_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	principal_port_of_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_principal_port_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	imp_broad_region_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_fourth_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_third_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_fourth_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_third_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	int_fourth_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False)
 	class Meta:
 		model=VoyageItinerary
 		fields='__all__'
@@ -158,11 +160,11 @@ class VesselCapturedOutcomeSerializer(serializers.ModelSerializer):
 		fields='__all__'
 		
 class VoyageOutcomeSerializer(serializers.ModelSerializer):
-	outcome_owner=OwnerOutcomeSerializer(many=False,read_only=True)
-	outcome_slaves=SlavesOutcomeSerializer(many=False,read_only=True)
-	particular_outcome=ParticularOutcomeSerializer(many=False,read_only=True)
-	resistance=ResistanceSerializer(many=False,read_only=True)
-	vessel_captured_outcome=VesselCapturedOutcomeSerializer(many=False,read_only=True)
+	outcome_owner=OwnerOutcomeSerializer(many=False,read_only=True,required=False)
+	outcome_slaves=SlavesOutcomeSerializer(many=False,read_only=True,required=False)
+	particular_outcome=ParticularOutcomeSerializer(many=False,read_only=True,required=False)
+	resistance=ResistanceSerializer(many=False,read_only=True,required=False)
+	vessel_captured_outcome=VesselCapturedOutcomeSerializer(many=False,read_only=True,required=False)
 	class Meta:
 		model=VoyageOutcome
 		fields='__all__'
@@ -183,20 +185,19 @@ class VoyageSparseDateSerializer(serializers.ModelSerializer):
 		return date_str
 		
 class VoyageDatesSerializer(serializers.ModelSerializer):
-	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	voyage_completed_sparsedate_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	
-	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
-	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True)
+	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
@@ -253,9 +254,9 @@ class CargoUnitSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
-	cargo=CargoTypeSerializer(many=False,read_only=True)
-	unit=CargoUnitSerializer(many=False,read_only=True)
-	amount=serializers.FloatField(read_only=True)
+	cargo=CargoTypeSerializer(many=False,read_only=True,required=False)
+	unit=CargoUnitSerializer(many=False,read_only=True,required=False)
+	amount=serializers.FloatField(read_only=True,required=False)
 	class Meta:
 		model=VoyageCargoConnection
 		fields='__all__'
@@ -270,17 +271,17 @@ class LinkedVoyageSerializer(serializers.Serializer):
 
 class VoyageSerializer(serializers.ModelSerializer):
 	sources=serializers.SerializerMethodField()
-	voyage_itinerary=VoyageItinerarySerializer(many=False,read_only=True)
-	voyage_dates=VoyageDatesSerializer(many=False,read_only=True)
+	voyage_itinerary=VoyageItinerarySerializer(many=False,read_only=True,required=False)
+	voyage_dates=VoyageDatesSerializer(many=False,read_only=True,required=False)
 	enslavers=serializers.SerializerMethodField()
 	named_enslaved_people=serializers.SerializerMethodField()
-	voyage_crew=VoyageCrewSerializer(many=False,read_only=True)
-	voyage_ship=VoyageShipSerializer(many=False,read_only=True)
-	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False,read_only=True)
-	voyage_outcome=VoyageOutcomeSerializer(many=False,read_only=True)
-	voyage_groupings=VoyageGroupingsSerializer(many=False,read_only=True)
+	voyage_crew=VoyageCrewSerializer(many=False,read_only=True,required=False)
+	voyage_ship=VoyageShipSerializer(many=False,read_only=True,required=False)
+	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False,read_only=True,required=False)
+	voyage_outcome=VoyageOutcomeSerializer(many=False,read_only=True,required=False)
+	voyage_groupings=VoyageGroupingsSerializer(many=False,required=False,allow_null=True)
 	cargo=serializers.SerializerMethodField()
-	african_info=AfricanInfoSerializer(many=True,read_only=True)
+	african_info=AfricanInfoSerializer(many=True,read_only=True,required=False)
 	linked_voyages=serializers.SerializerMethodField()
 	
 	def get_cargo(self,instance) -> ListField(child=serializers.CharField()):
@@ -299,7 +300,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 		incoming_ids=[i.first for i in incoming]
 		outgoing_ids=[o.second for o in outgoing]
 		linked_voyage_ids=list(set(incoming_ids+outgoing_ids))
-		return LinkedVoyageSerializer(linked_voyage_ids,many=True,read_only=True).data
+		return LinkedVoyageSerializer(linked_voyage_ids,many=True,read_only=True,required=False).data
 
 	##DIDN'T DO LINKED VOYAGES YET
 	def get_sources(self,instance) -> VoyageSourceSerializer(many=True):
@@ -316,7 +317,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 				sources_dict[s_id]=s
 			else:
 				sources_dict[s_id].page_ranges.append(page_range)
-		return VoyageSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True).data
+		return VoyageSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True,required=False).data
 
 	def get_named_enslaved_people(self,instance) -> VoyageEnslavedSerializer(many=True):
 		ers=instance.voyage_enslavement_relations.all()
@@ -326,7 +327,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 			for eir in eirs:
 				enslaved_person=eir.enslaved
 				enslaved_dict[enslaved_person.id]=enslaved_person
-		return VoyageEnslavedSerializer([enslaved_dict[i] for i in enslaved_dict],many=True,read_only=True).data
+		return VoyageEnslavedSerializer([enslaved_dict[i] for i in enslaved_dict],many=True,read_only=True,required=False).data
 	def get_enslavers(self,instance) -> ListField(child=serializers.CharField()):
 		ers=instance.voyage_enslavement_relations.all()
 		ers=ers.prefetch_related('relation_enslavers__roles','relation_enslavers__enslaver_alias__identity')
@@ -356,7 +357,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 				name_and_role=enslaver
 			enslaver_dict={"id":enslaver.id,"name_and_role":name_and_role}
 			enslavers_in_relation.append(enslaver_dict)	
-		return VoyageEnslaverSerializer(enslavers_in_relation,many=True,read_only=True).data
+		return VoyageEnslaverSerializer(enslavers_in_relation,many=True,read_only=True,required=False).data
 	class Meta:
 		model=Voyage
 		fields='__all__'
@@ -370,19 +371,39 @@ class AnyField(Field):
 
 ############ REQUEST FIILTER OBJECTS
 class VoyageBasicFilterItemSerializer(serializers.Serializer):
+	@extend_schema_field({
+		'oneOf': [
+			{'type': 'string'},
+			{'type': 'integer'},
+			{'type': 'array'}
+		]
+	})
+	def get_searchTerm(self, obj):
+		return obj.searchTerm
+		
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	##It's rather costly for our filter requests like autocomplete and geotree to themselves "cross-filter" on too many nested variables
 	##At the same time, some cross-filters are essential to build the menus properly
 	varName=serializers.ChoiceField(choices=VoyageBasicFilterVarNames)
-	searchTerm=AnyField()
+	searchTerm=serializers.SerializerMethodField(method_name='get_searchTerm',read_only=False)
 
 
 class VoyageFilterItemSerializer(serializers.Serializer):
+	@extend_schema_field({
+		'oneOf': [
+			{'type': 'string'},
+			{'type': 'integer'},
+			{'type': 'array'}
+		]
+	})
+	def get_searchTerm(self, obj):
+		return obj.searchTerm
+	
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[
 		k for k in Voyage_options
 	]+["EnslaverNameAndRole"])
-	searchTerm=AnyField()
+	searchTerm=serializers.SerializerMethodField(method_name='get_searchTerm',read_only=False)
 
 ########### PAGINATED VOYAGE LISTS 
 @extend_schema_serializer(
@@ -420,17 +441,17 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 	]
 )
 class VoyageListRequestSerializer(serializers.Serializer):
-	page=serializers.IntegerField(required=False,allow_null=True)
-	page_size=serializers.IntegerField(required=False,allow_null=True)
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
-	order_by=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	page=serializers.IntegerField(required=False)
+	page_size=serializers.IntegerField(required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(),required=False)
+	global_search=serializers.CharField(required=False)
 
 class VoyageListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()
 	page_size=serializers.IntegerField()
 	count=serializers.IntegerField()
-	results=VoyageSerializer(many=True,read_only=True)
+	results=VoyageSerializer(many=True,read_only=True,required=False)
 
 
 ############ LINE, BAR, AND PIE CHARTS
@@ -500,8 +521,8 @@ class VoyagePieChartParamsRequestSerializer(serializers.Serializer):
 )
 class VoyagePieChartRequestSerializer(serializers.Serializer):
 	groupby=VoyagePieChartParamsRequestSerializer(many=False,allow_null=False,required=True)
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 
 class VoyageAggSeriesSerializer(serializers.Serializer):
@@ -548,8 +569,8 @@ class VoyageLineAndBarChartParamsRequestSerializer(serializers.Serializer):
 )
 class VoyageLineAndBarChartsRequestSerializer(serializers.Serializer):
 	groupby=VoyageLineAndBarChartParamsRequestSerializer(many=False,allow_null=False,required=True)
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 ############ DATAFRAMES ENDPOINT
 @extend_schema_serializer(
@@ -581,8 +602,8 @@ class VoyageDataframesRequestSerializer(serializers.Serializer):
 			k for k in Voyage_options
 		])
 	)
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 ############ VOYAGE GEOTREE REQUESTS
 @extend_schema_serializer(
@@ -619,8 +640,8 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 			]
 		)
 	)
-	filter=VoyageBasicFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=VoyageBasicFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 ############ VOYAGE AGGREGATION ROUTE MAPS
 @extend_schema_serializer(
@@ -650,21 +671,21 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 )
 class VoyageAggRoutesRequestSerializer(serializers.Serializer):
 	zoomlevel=serializers.ChoiceField(choices=(('region','region'),('place','place')))
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 class VoyageAggRoutesEdgesSerializer(serializers.Serializer):
 	source=serializers.CharField()
 	target=serializers.CharField()
 	type=serializers.CharField()
 	weight=serializers.IntegerField()
-	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(allow_null=False)))
+	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(required=False)))
 
 class VoyageAggRoutesNodesDataSerializer(serializers.Serializer):
-	lat=serializers.FloatField(allow_null=False)
-	lon=serializers.FloatField(allow_null=False)
+	lat=serializers.FloatField(required=False)
+	lon=serializers.FloatField(required=False)
 	name=serializers.CharField(allow_null=True)
-	tags=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+	tags=serializers.ListField(child=serializers.CharField(),required=False)
 
 class VoyageAggRoutesNodesWeightsSerializer(serializers.Serializer):
 	disembarkation=serializers.IntegerField()
@@ -780,15 +801,15 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	columns=serializers.ListField(child=serializers.CharField())
 	rows=serializers.CharField()
-	binsize=serializers.IntegerField(allow_null=True,required=False)
+	binsize=serializers.IntegerField(required=False)
 	rows_label=serializers.CharField(allow_null=True)
 	agg_fn=serializers.CharField()
 	value_field=serializers.CharField()
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
-	order_by=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(),required=False)
+	global_search=serializers.CharField(required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False)
 	
 class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()
@@ -816,7 +837,7 @@ class VoyageCrossTabResponseSerializer(serializers.Serializer):
 )
 class VoyageSummaryStatsRequestSerializer(serializers.Serializer):
 	mode=serializers.ChoiceField(choices=["html","csv"])
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False)
 	
 class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
 	data=serializers.CharField()
@@ -842,4 +863,4 @@ class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
 )
 class VoyageDownloadRequestSerializer(serializers.Serializer):
 # 	mode=serializers.ChoiceField(choices=["csv","excel"])
-	filter=VoyageFilterItemSerializer(many=True,allow_null=True,required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False)

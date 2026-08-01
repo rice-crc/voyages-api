@@ -19,7 +19,7 @@ django-simple-captcha==0.5.18
 django-storages==1.13.2
 django-tinymce==3.6.1
 djangorestframework==3.14.0
-drf-spectacular==0.26.5
+drf-spectacular==0.27.2
 drf-yasg==1.21.7
 feedparser==6.0.10
 Flask==2.3.2

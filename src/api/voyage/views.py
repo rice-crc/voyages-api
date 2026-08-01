@@ -17,14 +17,13 @@ from .models import *
 import pprint
 import redis
 import hashlib
-from rest_framework import filters
+from rest_framework import filters,serializers
 from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df,use_redis
 from geo.common import GeoTreeFilter
 from geo.serializers import LocationSerializerDeep
 import collections
 import gc
 from .serializers import *
-from rest_framework import serializers
 from voyages3.localsettings import REDIS_HOST,REDIS_PORT,GEO_NETWORKS_BASE_URL,STATS_BASE_URL,DEBUG,USE_REDIS_CACHE
 import re
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
@@ -58,6 +57,8 @@ class VoyageList(generics.GenericAPIView):
 		st=time.time()
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		#VALIDATE THE REQUEST
+		print("REQUEST-->",request.data)
+		
 		serialized_req = VoyageListRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
@@ -288,9 +289,9 @@ class VoyageLineAndBarCharts(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="This endpoint is for building line and bar charts. It requires a few arguments, which it basically inherits from pandas.\n\
-		    1. A variable to group on: 'by'\n\
-		    2. A numeric variable to aggregate: 'vals'\n\
-		    3. An aggregation function: sum, mean, min, max, count\n\
+			1. A variable to group on: 'by'\n\
+			2. A numeric variable to aggregate: 'vals'\n\
+			3. An aggregation function: sum, mean, min, max, count\n\
 		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a long dataframe.\n\
 		",
 		request=VoyageLineAndBarChartsRequestSerializer,
@@ -352,9 +353,9 @@ class VoyagePieCharts(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="This endpoint is for building pie charts. It requires a few arguments, which it basically inherits from pandas.\n\
-		    1. A categorical variable to group on: 'by'\n\
-		    2. A numeric variable to aggregate: 'vals'\n\
-		    3. An aggregation function: sum, mean, min, max, count\n\
+			1. A categorical variable to group on: 'by'\n\
+			2. A numeric variable to aggregate: 'vals'\n\
+			3. An aggregation function: sum, mean, min, max, count\n\
 		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a long dataframe.\n\
 		",
 		request=VoyagePieChartRequestSerializer,
@@ -639,6 +640,8 @@ class VoyageGET(generics.RetrieveAPIView):
 	queryset=Voyage.objects.all()
 	serializer_class=VoyageSerializer
 	lookup_field='voyage_id'
+
+
 
 class CargoTypeList(generics.ListAPIView):
 	'''

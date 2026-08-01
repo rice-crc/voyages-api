@@ -1,7 +1,7 @@
 ---
 services:
   voyages-mysql:
-    image: "mysql:8.0.33-oracle"
+    image: "mariadb:10.11.18"
     cap_add:
       - "SYS_NICE"
     container_name: "voyages-mysql"
@@ -12,14 +12,18 @@ services:
     networks:
       - "voyages"
     volumes:
-      - "mysql_volume:/var/lib/mysql"
-      - "./data:/docker-entrypoint-initdb.d"
-    command: "--slow-query-log=ON --long-query-time=3 --slow-query-log-file=/tmp/slow.log"
+      - "mariadb_volume:/var/lib/mysql"
+      - "./data:/docker-entrypoint-initdb.d:ro"
+    command:
+      - "--slow-query-log=ON"
+      - "--long-query-time=3"
+      - "--slow-query-log-file=/tmp/slow.log"
     environment:
-      MYSQL_DATABASE: "voyages_api"
-      MYSQL_ROOT_PASSWORD: "voyages"
-      MYSQL_USER: "voyages"
-      MYSQL_PASSWORD: "voyages"
+      MARIADB_DATABASE: "voyages_api"
+      MARIADB_ROOT_PASSWORD: "voyages"
+      MARIADB_USER: "voyages"
+      MARIADB_PASSWORD: "voyages"
+
 
   voyages-solr:
     image: "solr:8.5.2"
@@ -145,6 +149,6 @@ networks:
             - subnet: "172.20.0.0/16"
 
 volumes:
-  mysql_volume: {}
+  mariadb_volume: {}
   solr_volume: {}
   redis_volume: {}

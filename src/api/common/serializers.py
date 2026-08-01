@@ -5,6 +5,7 @@ from .models import *
 import pprint
 import gc
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
+from voyages3.localsettings import VOYAGES_FRONTEND_BASE_URL
 
 class autocompleterequestserializer(serializers.Serializer):
 	varName=serializers.CharField(max_length=500)
@@ -109,9 +110,23 @@ class UseSavedSearchRequestSerializer(serializers.Serializer):
 
 class UseSavedSearchResponseSerializer(serializers.Serializer):
 	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
-	front_end_path=serializers.CharField(max_length=100,required=False)
+	front_end_path=serializers.CharField(required=False)
 	query=serializers.ListField(child=serializers.JSONField())
-	
+	full_front_end_url=serializers.SerializerMethodField(required=False)
+
+	def get_full_front_end_url(self,instance) -> serializers.CharField():
+		pathmap={
+			'past/enslaver':'enslaver/',
+			'past/enslaved/':'enslaved/',
+			'voyages/':'voyage/',			
+		}
+		path=instance.endpoint
+		
+		if path:
+			path=f"{VOYAGES_FRONTEND_BASE_URL}{pathmap[path]}{instance.id}"
+		
+		return path
+		
 
 ############ GLOBAL SEARCH SERIALIZERS
 @extend_schema_serializer(
@@ -133,4 +148,4 @@ class GlobalSearchRequestSerializer(serializers.Serializer):
 class GlobalSearchResponseItemSerializer(serializers.Serializer):
 	type=serializers.CharField(max_length=50)
 	results_count=serializers.IntegerField()
-	ids=serializers.ListField(child=serializers.IntegerField())
+	ids=serializers.ListField(child=serializers.IntegerField(),required=False)

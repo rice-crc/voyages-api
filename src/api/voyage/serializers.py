@@ -38,14 +38,14 @@ class TonTypeSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class VoyageShipSerializer(serializers.ModelSerializer):
-	rig_of_vessel=RigOfVesselSerializer(many=False,read_only=True,required=False)
-	imputed_nationality=NationalitySerializer(many=False,read_only=True,required=False)
-	nationality_ship=NationalitySerializer(many=False,read_only=True,required=False)
-	ton_type=TonTypeSerializer(many=False,read_only=True,required=False)
-	vessel_construction_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	vessel_construction_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	registered_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	registered_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	rig_of_vessel=RigOfVesselSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imputed_nationality=NationalitySerializer(many=False,read_only=True,required=False,allow_null=True)
+	nationality_ship=NationalitySerializer(many=False,read_only=True,required=False,allow_null=True)
+	ton_type=TonTypeSerializer(many=False,read_only=True,required=False,allow_null=True)
+	vessel_construction_place=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	vessel_construction_region=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	registered_place=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	registered_region=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
 	class Meta:
 		model=VoyageShip
 		fields='__all__'
@@ -87,47 +87,47 @@ class VoyageCrewSerializer(serializers.ModelSerializer):
 ##### ITINERARY #####
 
 class VoyageItinerarySerializer(serializers.ModelSerializer):
-	port_of_departure=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_first_port_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_second_port_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_first_region_purchase_slaves=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_second_region_purchase_slaves=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_first_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_second_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_first_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_principal_region_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_second_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	first_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	second_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	third_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	first_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	second_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	third_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	port_of_call_before_atl_crossing=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	first_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	second_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	third_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	first_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	second_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	third_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	place_voyage_ended=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	region_of_return=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	broad_region_of_return=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_port_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_region_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_broad_region_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	principal_place_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_principal_place_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_principal_region_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_broad_region_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	principal_port_of_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_principal_port_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	imp_broad_region_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_fourth_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_third_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_fourth_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_third_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False)
-	int_fourth_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False)
+	port_of_departure=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_first_port_emb=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_second_port_emb=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_first_region_purchase_slaves=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_second_region_purchase_slaves=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_first_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_second_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_first_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_principal_region_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_second_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	first_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	second_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	third_place_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	first_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	second_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	third_region_slave_emb=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	port_of_call_before_atl_crossing=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	first_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	second_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	third_landing_place=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	first_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	second_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	third_landing_region=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	place_voyage_ended=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	region_of_return=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	broad_region_of_return=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_port_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_region_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_broad_region_voyage_begin=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	principal_place_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_principal_place_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_principal_region_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_broad_region_of_slave_purchase=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	principal_port_of_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_principal_port_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_broad_region_slave_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_fourth_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_third_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_fourth_port_dis=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_third_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
+	int_fourth_place_region_slave_landing=VoyageLocationSerializer(many=False,read_only=True,required=False,allow_null=True)
 	class Meta:
 		model=VoyageItinerary
 		fields='__all__'
@@ -160,11 +160,11 @@ class VesselCapturedOutcomeSerializer(serializers.ModelSerializer):
 		fields='__all__'
 		
 class VoyageOutcomeSerializer(serializers.ModelSerializer):
-	outcome_owner=OwnerOutcomeSerializer(many=False,read_only=True,required=False)
-	outcome_slaves=SlavesOutcomeSerializer(many=False,read_only=True,required=False)
-	particular_outcome=ParticularOutcomeSerializer(many=False,read_only=True,required=False)
-	resistance=ResistanceSerializer(many=False,read_only=True,required=False)
-	vessel_captured_outcome=VesselCapturedOutcomeSerializer(many=False,read_only=True,required=False)
+	outcome_owner=OwnerOutcomeSerializer(many=False,read_only=True,required=False,allow_null=True)
+	outcome_slaves=SlavesOutcomeSerializer(many=False,read_only=True,required=False,allow_null=True)
+	particular_outcome=ParticularOutcomeSerializer(many=False,read_only=True,required=False,allow_null=True)
+	resistance=ResistanceSerializer(many=False,read_only=True,required=False,allow_null=True)
+	vessel_captured_outcome=VesselCapturedOutcomeSerializer(many=False,read_only=True,required=False,allow_null=True)
 	class Meta:
 		model=VoyageOutcome
 		fields='__all__'
@@ -185,19 +185,19 @@ class VoyageSparseDateSerializer(serializers.ModelSerializer):
 		return date_str
 		
 class VoyageDatesSerializer(serializers.ModelSerializer):
-	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
-	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False)
+	voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	slave_purchase_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	date_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_arrival_at_port_of_dis_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	departure_last_place_of_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	vessel_left_port_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	first_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	arrival_at_second_place_landing_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	third_dis_of_slaves_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	voyage_completed_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_voyage_began_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
+	imp_departed_africa_sparsedate=VoyageSparseDateSerializer(many=False,read_only=True,required=False,allow_null=True)
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
@@ -254,9 +254,9 @@ class CargoUnitSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class VoyageCargoConnectionSerializer(serializers.ModelSerializer):
-	cargo=CargoTypeSerializer(many=False,read_only=True,required=False)
-	unit=CargoUnitSerializer(many=False,read_only=True,required=False)
-	amount=serializers.FloatField(read_only=True,required=False)
+	cargo=CargoTypeSerializer(many=False,read_only=True,required=False,allow_null=True)
+	unit=CargoUnitSerializer(many=False,read_only=True,required=False,allow_null=True)
+	amount=serializers.FloatField(read_only=True,required=False,allow_null=True)
 	class Meta:
 		model=VoyageCargoConnection
 		fields='__all__'
@@ -270,18 +270,18 @@ class LinkedVoyageSerializer(serializers.Serializer):
 	voyage_id=serializers.IntegerField()
 
 class VoyageSerializer(serializers.ModelSerializer):
-	sources=serializers.SerializerMethodField()
-	voyage_itinerary=VoyageItinerarySerializer(many=False,read_only=True,required=False)
-	voyage_dates=VoyageDatesSerializer(many=False,read_only=True,required=False)
-	enslavers=serializers.SerializerMethodField()
+	sources=serializers.SerializerMethodField(required=False,allow_null=True)
+	voyage_itinerary=VoyageItinerarySerializer(many=False,read_only=True)
+	voyage_dates=VoyageDatesSerializer(many=False,read_only=True)
+	enslavers=serializers.SerializerMethodField(required=False,allow_null=True)
 	named_enslaved_people=serializers.SerializerMethodField()
-	voyage_crew=VoyageCrewSerializer(many=False,read_only=True,required=False)
-	voyage_ship=VoyageShipSerializer(many=False,read_only=True,required=False)
-	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False,read_only=True,required=False)
-	voyage_outcome=VoyageOutcomeSerializer(many=False,read_only=True,required=False)
+	voyage_crew=VoyageCrewSerializer(many=False,read_only=True)
+	voyage_ship=VoyageShipSerializer(many=False,read_only=True)
+	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(many=False,read_only=True)
+	voyage_outcome=VoyageOutcomeSerializer(many=False,read_only=True)
 	voyage_groupings=VoyageGroupingsSerializer(many=False,required=False,allow_null=True)
-	cargo=serializers.SerializerMethodField()
-	african_info=AfricanInfoSerializer(many=True,read_only=True,required=False)
+	cargo=serializers.SerializerMethodField(required=False,allow_null=True)
+	african_info=AfricanInfoSerializer(many=True,read_only=True,required=False,allow_null=True)
 	linked_voyages=serializers.SerializerMethodField()
 	
 	def get_cargo(self,instance) -> ListField(child=serializers.CharField()):
@@ -317,7 +317,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 				sources_dict[s_id]=s
 			else:
 				sources_dict[s_id].page_ranges.append(page_range)
-		return VoyageSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True,required=False).data
+		return VoyageSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True,required=False,allow_null=True).data
 
 	def get_named_enslaved_people(self,instance) -> VoyageEnslavedSerializer(many=True):
 		ers=instance.voyage_enslavement_relations.all()
@@ -327,8 +327,8 @@ class VoyageSerializer(serializers.ModelSerializer):
 			for eir in eirs:
 				enslaved_person=eir.enslaved
 				enslaved_dict[enslaved_person.id]=enslaved_person
-		return VoyageEnslavedSerializer([enslaved_dict[i] for i in enslaved_dict],many=True,read_only=True,required=False).data
-	def get_enslavers(self,instance) -> ListField(child=serializers.CharField()):
+		return VoyageEnslavedSerializer([enslaved_dict[i] for i in enslaved_dict],many=True,read_only=True,required=False,allow_null=True).data
+	def get_enslavers(self,instance) -> ListField(child=VoyageEnslaverSerializer(required=False,allow_null=True)):
 		ers=instance.voyage_enslavement_relations.all()
 		ers=ers.prefetch_related('relation_enslavers__roles','relation_enslavers__enslaver_alias__identity')
 		enslaver_roles_and_identity_pks=ers.values_list('relation_enslavers__roles__id','relation_enslavers__enslaver_alias__identity_id')
@@ -356,8 +356,8 @@ class VoyageSerializer(serializers.ModelSerializer):
 			else:
 				name_and_role=enslaver
 			enslaver_dict={"id":enslaver.id,"name_and_role":name_and_role}
-			enslavers_in_relation.append(enslaver_dict)	
-		return VoyageEnslaverSerializer(enslavers_in_relation,many=True,read_only=True,required=False).data
+			enslavers_in_relation.append(enslaver_dict)
+		return VoyageEnslaverSerializer(enslavers_in_relation,many=True,read_only=True,required=False,allow_null=True).data
 	class Meta:
 		model=Voyage
 		fields='__all__'

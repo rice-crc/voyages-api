@@ -25,7 +25,7 @@ class CRUDLocationSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class GeoTreeFilterRequestSerializer(serializers.Serializer):
-	filter=serializers.JSONField(allow_null=False,required=False)
+	filter=serializers.JSONField(required=False)
 
 class LocationTypeSerializer(serializers.ModelSerializer):
 	class Meta:

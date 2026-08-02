@@ -7,10 +7,14 @@ from geo.models import Location
 from past.models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from common.static.Voyage_options import Voyage_options
+from common.static.Stats_Options import *
 from common.autocomplete_indices import get_all_model_autocomplete_fields
 from voyage.cross_filter_fields import VoyageBasicFilterVarNames
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+import requests
+import time
+from voyages3.localsettings import STATS_BASE_URL
 
 #### GEO
 
@@ -535,8 +539,12 @@ class VoyageAggSeriesSerializer(serializers.Serializer):
 	)
 	agg_fn=serializers.ChoiceField(choices=["mean","sum","max","min","count"])
 
+
 class VoyageLineAndBarChartParamsRequestSerializer(serializers.Serializer):
-	by=serializers.ChoiceField(choices=[k for k in Voyage_options] + yearbinoptions)
+	by=serializers.ChoiceField(
+		choices=[k for k in big_df]
+		+ yearbinoptions
+	)
 	agg_series=VoyageAggSeriesSerializer(many=True)
 
 ############ BAR AND LINE CHARTS

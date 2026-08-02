@@ -8,6 +8,9 @@ big_df={
     "id": {
       "type": "int"
     },
+    "dataset": {
+      "type": "int"
+    },
     "voyage_id": {
       "type": "int",
       "label": "Voyage ID"

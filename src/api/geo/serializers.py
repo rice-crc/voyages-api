@@ -4,6 +4,8 @@ import re
 from .models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from django.core.exceptions import ObjectDoesNotExist
+from drf_spectacular.utils import extend_schema_field
+
 
 class CRUDLocationTypeSerializer(serializers.ModelSerializer):
 	class Meta:

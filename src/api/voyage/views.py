@@ -449,6 +449,7 @@ class VoyageSummaryStats(generics.GenericAPIView):
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

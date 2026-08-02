@@ -34,6 +34,7 @@ class AssessmentList(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(tags=['exclude_mcp'])
 class EstimateDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

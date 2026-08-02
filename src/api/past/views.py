@@ -389,6 +389,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslavedDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -438,6 +439,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslaverDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -483,6 +485,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslavementRelationDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

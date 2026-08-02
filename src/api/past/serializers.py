@@ -132,17 +132,16 @@ class EnslavedEnslaverSerializer(serializers.Serializer):
 
 class EnslavedSerializer(serializers.ModelSerializer):
 	enslaved_id=serializers.IntegerField(read_only=True)
-	post_disembark_location=PastLocationSerializer(many=False,allow_null=True)
+	post_disembark_location=PastLocationSerializer(many=False,required=False,allow_null=True)
 	captive_fate=CaptiveFateSerializer(many=False,allow_null=True)
-	#currently handling a single voyage per enslaved person
-	voyages=serializers.SerializerMethodField(required=False)
-	enslavers=serializers.SerializerMethodField(required=False)
-	captive_status=CaptiveStatusSerializer(many=False,allow_null=True)
-	language_group=LanguageGroupSerializer(many=False,allow_null=True)
-	sources=serializers.SerializerMethodField(required=False)
-	gender=serializers.SerializerMethodField(required=False)
+	voyages=serializers.SerializerMethodField(required=False,allow_null=True)
+	enslavers=serializers.SerializerMethodField(required=False,allow_null=True)
+	captive_status=CaptiveStatusSerializer(many=False,required=False,allow_null=True)
+	language_group=LanguageGroupSerializer(many=False,required=False,allow_null=True)
+	sources=serializers.SerializerMethodField(required=False,allow_null=True)
+	gender=serializers.SerializerMethodField(required=False,allow_null=True)
 	
-	def get_gender(self,instance) -> serializers.CharField(required=False):
+	def get_gender(self,instance) -> serializers.CharField():
 		gender=instance.gender
 		if gender:
 			gender=gender.name
@@ -250,8 +249,28 @@ class EnslavedSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model=Enslaved
-		fields='__all__'
-
+# 		fields='__all__'
+		exclude=[
+# 			"documented_name",
+# 			"name_first",
+# 			"name_second",
+# 			"name_third",
+# 			"modern_name",
+# 			"editor_modern_names_certainty",
+# 			"age",
+			"gender_int",
+# 			"height",
+# 			"skin_color",
+# 			"dataset",
+# 			"notes",
+# 			"last_updated",
+# 			"human_reviewed",
+# 			"register_country",
+# 			"last_known_date",
+# 			'captive_fate',
+# 			'captive_status',
+# 			'language_group',
+		]
 #######################
 
 #### FROM ENSLAVERS TO ENSLAVED

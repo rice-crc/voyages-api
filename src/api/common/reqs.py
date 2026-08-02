@@ -266,6 +266,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		
 		# SPECIAL CASE 1: ENSLAVERS AND ASSOCIATED ROLES
 		for item in filter_obj:
+			print("FILTER ITEM",item)
 			op=item['op']
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]

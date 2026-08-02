@@ -48,19 +48,19 @@ class LocationChildSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class LocationSerializerDeep(serializers.ModelSerializer):
-	parent=LocationParentSerializer(many=False)
-	children=LocationChildSerializer(many=True)
-	spatial_extent=PolygonSerializer(many=False)
-	location_type=LocationTypeSerializer(many=False)
+	parent=LocationParentSerializer(many=False,allow_null=True,required=False)
+	children=LocationChildSerializer(many=True,allow_null=True,required=False)
+	spatial_extent=PolygonSerializer(many=False,allow_null=True,required=False)
+	location_type=LocationTypeSerializer(many=False,allow_null=True,required=False)
 	class Meta:
 		model=Location
 		fields='__all__'
 
 class LocationSerializer(serializers.ModelSerializer):
-	spatial_extent=PolygonSerializer(many=False,allow_null=True)
-	location_type=LocationTypeSerializer(many=False)
-	latitude=serializers.FloatField(allow_null=True)
-	longitude=serializers.FloatField(allow_null=True)
+	spatial_extent=PolygonSerializer(many=False,allow_null=True,required=False)
+	location_type=LocationTypeSerializer(many=False,allow_null=True,required=False)
+	latitude=serializers.FloatField(allow_null=True,required=False)
+	longitude=serializers.FloatField(allow_null=True,required=False)
 	class Meta:
 		model=Location
 		fields='__all__'

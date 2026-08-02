@@ -133,7 +133,7 @@ class EnslavedEnslaverSerializer(serializers.Serializer):
 class EnslavedSerializer(serializers.ModelSerializer):
 	enslaved_id=serializers.IntegerField(read_only=True)
 	post_disembark_location=PastLocationSerializer(many=False,required=False,allow_null=True)
-	captive_fate=CaptiveFateSerializer(many=False,allow_null=True)
+	captive_fate=CaptiveFateSerializer(many=False,required=False,allow_null=True)
 	voyages=serializers.SerializerMethodField(required=False,allow_null=True)
 	enslavers=serializers.SerializerMethodField(required=False,allow_null=True)
 	captive_status=CaptiveStatusSerializer(many=False,required=False,allow_null=True)
@@ -216,7 +216,7 @@ class EnslavedSerializer(serializers.ModelSerializer):
 					
 		return PastEnslavedVoyageSerializer(voyagedict,many=False).data
 
-	def get_enslavers(self,instance) -> ListField(child=serializers.CharField(required=False)):
+	def get_enslavers(self,instance) -> ListField(child=EnslavedEnslaverSerializer()):
 		edrs=instance.enslaved_relations.all()
 		edrs=edrs.prefetch_related('relation__relation_enslavers__roles','relation__relation_enslavers__enslaver_alias__identity')
 		enslaver_roles_and_identity_pks=edrs.values_list('relation__relation_enslavers__roles__id','relation__relation_enslavers__enslaver_alias__identity_id')
@@ -267,7 +267,7 @@ class EnslavedSerializer(serializers.ModelSerializer):
 # 			"human_reviewed",
 # 			"register_country",
 # 			"last_known_date",
-# 			'captive_fate',
+# 			'post_disembark_location',
 # 			'captive_status',
 # 			'language_group',
 		]
@@ -281,8 +281,8 @@ class EnslavedSerializer(serializers.ModelSerializer):
 #### FROM ENSLAVERS OUTWARDS
 	
 class EnslaverEnslavedSerializer(serializers.Serializer):
-	id=serializers.IntegerField(required=False)
-	documented_name=serializers.CharField(required=False)
+	id=serializers.IntegerField(required=True)
+	documented_name=serializers.CharField(required=False,allow_null=True)
 	class Meta:
 		fields=('id','documented_name')
 

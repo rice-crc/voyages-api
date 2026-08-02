@@ -98,11 +98,28 @@ savedsearchendpointchoices=[
 )
 class MakeSavedSearchRequestSerializer(serializers.Serializer):
 	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
-	front_end_path=serializers.CharField(max_length=100,required=False)
+	front_end_path=serializers.CharField(max_length=100,required=True)
 	query=serializers.ListField(child=serializers.JSONField())
 
 class MakeSavedSearchResponseSerializer(serializers.Serializer):
 	id=serializers.CharField(max_length=8)
+	full_front_end_url=serializers.SerializerMethodField(required=False)
+
+	def get_full_front_end_url(self,instance) -> serializers.CharField():
+		
+		pathmap={
+			'past/enslaver':'enslaver/',
+			'past/enslaved':'enslaved/',
+			'voyages':'voyages/',
+			'voyage':'voyages/'		
+		}
+		path=instance['endpoint']
+		
+		if path:
+			path=f"{VOYAGES_FRONTEND_BASE_URL}{pathmap[path]}{instance['id']}"
+		
+		return path
+
 
 
 class UseSavedSearchRequestSerializer(serializers.Serializer):
@@ -117,8 +134,9 @@ class UseSavedSearchResponseSerializer(serializers.Serializer):
 	def get_full_front_end_url(self,instance) -> serializers.CharField():
 		pathmap={
 			'past/enslaver':'enslaver/',
-			'past/enslaved/':'enslaved/',
-			'voyages/':'voyage/',			
+			'past/enslaved':'enslaved/',
+			'voyages':'voyages/',
+			'voyage':'voyages/'		
 		}
 		path=instance.endpoint
 		

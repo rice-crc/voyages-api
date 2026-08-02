@@ -1,4 +1,4 @@
-from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden, JsonResponse,HttpResponseBadRequest
 from django.shortcuts import render,get_object_or_404
 from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
@@ -142,7 +142,10 @@ class MakeSavedSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="This endpoint takes a filter object and specified endpoint, and returns a saved search url",
+		description="This endpoint takes a filter object and specified endpoint, \
+		and returns a saved search hash. Only successful (200) queries should be piped \
+		into this endpoint. The full_front_end_url field can be provided to an end-user \
+		to allow them to recreate and audit any search results.",
 		request=MakeSavedSearchRequestSerializer,
 		responses=MakeSavedSearchResponseSerializer
 	)
@@ -176,6 +179,25 @@ class MakeSavedSearch(generics.GenericAPIView):
 			query=serialized_req.data['query']
 			endpoint=serialized_req.data['endpoint']
 			front_end_path=serialized_req.data.get('front_end_path')
+			
+			if not front_end_path or front_end_path not in [
+				'past/enslaved/african-origins',
+				'/past/enslaved/texasEnslaved',
+				'past/enslaver/trans-atlantic-trades',
+				'past/enslaver/intra-american-trades',
+				'/voyage/trans-atlantic',
+				'/voyage/intra-american',
+				'/voyage/indian-ocean'
+			]:
+				if 'enslaver' in endpoint:
+					front_end_path='/past/enslaver/enslaver'
+				elif 'enslaved' in endpoint:
+					front_end_path='/past/enslaved/all-enslaved'
+				elif 'voyage' in endpoint:
+					front_end_path='voyage/all-voyages'
+				else:
+					return HttpResponseBadRequest
+			
 			SQ=SavedQuery.objects.create(
 				id=id,
 				hash_id=hash_id,
@@ -187,7 +209,14 @@ class MakeSavedSearch(generics.GenericAPIView):
 			print("retrieving existing saved search")
 			id=sq.id
 		
-		return JsonResponse({'id':id})
+		data={
+			'endpoint':srd['endpoint'],
+			'id':id
+		}
+		
+		serialized_response=MakeSavedSearchResponseSerializer(data)
+		
+		return JsonResponse(serialized_response.data)
 
 
 class UseSavedSearch(generics.RetrieveAPIView):	

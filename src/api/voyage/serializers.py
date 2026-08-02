@@ -807,17 +807,17 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 	]
 )
 class VoyageCrossTabRequestSerializer(serializers.Serializer):
-	columns=serializers.ListField(child=serializers.CharField())
-	rows=serializers.CharField()
+	columns=serializers.ListField(child=serializers.ChoiceField(choices=[k for k in big_df]))
+	rows=serializers.ListField(child=serializers.ChoiceField(choices=[k for k in big_df]))
 	binsize=serializers.IntegerField(required=False)
 	rows_label=serializers.CharField(allow_null=True)
-	agg_fn=serializers.CharField()
-	value_field=serializers.CharField()
+	agg_fn=serializers.ChoiceField(choices=["mean","sum","max","min","count"])
+	agg_fn=serializers.ChoiceField(choices=[k for k in big_df])
 	offset=serializers.IntegerField()
 	limit=serializers.IntegerField()
-	order_by=serializers.ListField(child=serializers.CharField(),required=False)
+	order_by=serializers.ListField(child=serializers.ChoiceField(choices=[k for k in big_df]),required=False)
 	global_search=serializers.CharField(required=False)
-	filter=VoyageFilterItemSerializer(many=True,required=False)
+	filter=VoyageFilterItemSerializer(many=True,required=False,allow_null=True)
 	
 class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()

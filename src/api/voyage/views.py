@@ -233,7 +233,10 @@ class VoyageCrossTabs(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="Cross-tab endpoint for aggregations across the dataset. The 'columns' field has hard cardinality restrictions — read its description before selecting a value. Select csv_output=True to reduce response size by 87%.",
+		description="Cross-tab endpoint for aggregations across the dataset. The \
+		'columns' field has cardinality guidance — read its description \
+		before selecting a value. \
+		LLM's should use csv_output=True to reduce response size by 87%.",
 		request=VoyageCrossTabRequestSerializer,
 		responses=VoyageCrossTabResponseSerializer
 	)

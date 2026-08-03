@@ -903,7 +903,6 @@ def crosstabs():
 			return int(cellval)
 	
 	ctshape=ct.shape
-# 	print(ctshape)
 	rowcount=ctshape[0]	
 	start=offset
 	end=min((offset+limit),rowcount-1)
@@ -913,15 +912,26 @@ def crosstabs():
 	if csv_output:
 			
 		chunk = ct.iloc[start:start+end]
-		data=chunk.to_csv(encoding='utf-8')
-		lastrow=ct.iloc[-1]
-		print("lastrow",lastrow)
 		
-		#try to fetch the margin
-# 		indexkey=allcolumns[0]
-# 		lastrow=ct.iloc[-1]
-# 		if lastrow[indexkey]=="All":
-# 			data = pd.concat([ct,lastrow.to_frame().T], ignore_index=True)
+		
+		print(chunk)
+		
+		margin=None
+		#slap the margin row onto paginated results (except the last page)
+		if end!=rowcount-1:
+			try:
+				margin=ct.loc['All']
+			except:
+				pass
+		
+		if margin is not None:
+			chunk = pd.concat([chunk,margin.to_frame().T], ignore_index=True)
+		
+		data=chunk.to_csv(encoding='utf-8')
+		
+		print(data)
+		
+		print('-------------')
 		
 		output={
 			'tablestructure': colgroups,

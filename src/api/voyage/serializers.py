@@ -693,7 +693,7 @@ class VoyageAggRoutesNodesDataSerializer(serializers.Serializer):
 	lat=serializers.FloatField(required=False)
 	lon=serializers.FloatField(required=False)
 	name=serializers.CharField(allow_null=True)
-	tags=serializers.ListField(child=serializers.CharField(),required=False)
+	tags=serializers.ListField(child=serializers.CharField(),required=False,allow_null=True)
 
 class VoyageAggRoutesNodesWeightsSerializer(serializers.Serializer):
 	disembarkation=serializers.IntegerField()
@@ -756,6 +756,25 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 	limit=serializers.IntegerField(required=False)
 	total_results_count=serializers.IntegerField(required=False)
 
+
+
+
+
+# these fields are not appropriate for pivoting
+crosstab_exclude_categoricals=[
+	'enslavers',
+	'voyage_dates__first_dis_of_slaves_sparsedate',
+	'voyage_dates__voyage_began_sparsedate',
+	'voyage_ship__ship_name',
+	'voyage_sources',
+	'voyage_dates__date_departed_africa_sparsedate',
+	'voyage_dates__voyage_completed_sparsedate',
+	'voyage_dates__slave_purchase_began_sparsedate',
+	'voyage_dates__departure_last_place_of_landing_sparsedate'
+]
+
+
+
 ############ CROSSTAB SERIALIZERS
 @extend_schema_serializer(
 	examples=[	
@@ -809,19 +828,24 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	columns=serializers.ListField(
 		child=serializers.ChoiceField(
-			choices=[k for k in big_df if not big_df[k]['type'] in ['int','pct']],
+			choices=[
+				k for k in big_df if not big_df[k]['type'] in ['int','pct'] and
+				k not in crosstab_exclude_categoricals
+			],
 			required=True
 		),
 		help_text=" \
 			columns: categorical fields only. \
-			\nMCP's should avoid using the following fields as column selectors because they have high cardinality (thousands of values): [enslavers,voyage_dates__first_dis_of_slaves_sparsedate,voyage_dates__voyage_began_sparsedate,voyage_ship__ship_name,voyage_sources,voyage_dates__date_departed_africa_sparsedate,voyage_dates__voyage_completed_sparsedate,voyage_dates__slave_purchase_began_sparsedate,voyage_dates__departure_last_place_of_landing_sparsedate]\
-			\nMCP's should be wary of these fields as column selectors because they have hundreds of values: [voyage_itinerary__imp_principal_place_of_slave_purchase__name,voyage_itinerary__imp_principal_port_slave_dis__name,voyage_itinerary__imp_port_voyage_begin__name,voyage_outcome__particular_outcome__name,voyage_itinerary__place_voyage_ended__name,voyage_ship__rig_of_vessel__name] \
+			\n MCP's should be wary of these fields as column selectors because they have hundreds of values: 'voyage_itinerary__imp_principal_place_of_slave_purchase__name,voyage_itinerary__imp_principal_port_slave_dis__name,voyage_itinerary__imp_port_voyage_begin__name,voyage_outcome__particular_outcome__name,voyage_itinerary__place_voyage_ended__name,voyage_ship__rig_of_vessel__name' \
+			\n When using these, MCP's should 1) limit results to 10 rows at a time, or 2) use filters to reduce rows/columns.\
 		"
 	)
 	rows=serializers.ChoiceField(
-		choices=[k for k in big_df],
+		choices=[k for k in big_df if k not in crosstab_exclude_categoricals],
 		required=True,
-		help_text="rows: categorical or quantitative fields, quantitative fields support binsize"
+		help_text="rows: categorical or quantitative fields, quantitative fields support binsize \
+		MCP's should always use binning when row selectors are year variables in order to limit output size.\
+		"
 	)
 	value_field=serializers.ChoiceField(
 		choices=[k for k in big_df if big_df[k]['type'] in ['int','pct']],

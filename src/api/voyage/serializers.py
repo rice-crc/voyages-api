@@ -752,9 +752,9 @@ class VoyageFieldAggregationResponseSerializer(serializers.Serializer):
 
 ############ OFFSET PAGINATION SERIALIZERS
 class VoyageOffsetPaginationSerializer(serializers.Serializer):
-	offset=serializers.IntegerField()
-	limit=serializers.IntegerField()
-	total_results_count=serializers.IntegerField()
+	offset=serializers.IntegerField(required=False)
+	limit=serializers.IntegerField(required=False)
+	total_results_count=serializers.IntegerField(required=False)
 
 ############ CROSSTAB SERIALIZERS
 @extend_schema_serializer(
@@ -807,17 +807,39 @@ class VoyageOffsetPaginationSerializer(serializers.Serializer):
 	]
 )
 class VoyageCrossTabRequestSerializer(serializers.Serializer):
-	columns=serializers.ListField(child=serializers.ChoiceField(choices=[k for k in big_df]))
-	rows=serializers.ListField(child=serializers.ChoiceField(choices=[k for k in big_df]))
+	columns=serializers.ListField(
+		child=serializers.ChoiceField(
+			choices=[k for k in big_df if not big_df[k]['type'] in ['int','pct']],
+			required=True
+		),
+		help_text=" \
+			columns: categorical fields only. \
+			\nMCP's should avoid using the following fields as column selectors because they have high cardinality (thousands of values): [enslavers,voyage_dates__first_dis_of_slaves_sparsedate,voyage_dates__voyage_began_sparsedate,voyage_ship__ship_name,voyage_sources,voyage_dates__date_departed_africa_sparsedate,voyage_dates__voyage_completed_sparsedate,voyage_dates__slave_purchase_began_sparsedate,voyage_dates__departure_last_place_of_landing_sparsedate]\
+			\nMCP's should be wary of these fields as column selectors because they have hundreds of values: [voyage_itinerary__imp_principal_place_of_slave_purchase__name,voyage_itinerary__imp_principal_port_slave_dis__name,voyage_itinerary__imp_port_voyage_begin__name,voyage_outcome__particular_outcome__name,voyage_itinerary__place_voyage_ended__name,voyage_ship__rig_of_vessel__name] \
+		"
+	)
+	rows=serializers.ChoiceField(
+		choices=[k for k in big_df],
+		required=True,
+		help_text="rows: categorical or quantitative fields, quantitative fields support binsize"
+	)
+	value_field=serializers.ChoiceField(
+		choices=[k for k in big_df if big_df[k]['type'] in ['int','pct']],
+		help_text="value_field: quantitative fields only"
+	)
 	binsize=serializers.IntegerField(required=False)
-	rows_label=serializers.CharField(allow_null=True)
+	rows_label=serializers.CharField(required=False)
 	agg_fn=serializers.ChoiceField(choices=["mean","sum","max","min","count"])
-	agg_fn=serializers.ChoiceField(choices=[k for k in big_df])
-	offset=serializers.IntegerField()
-	limit=serializers.IntegerField()
+	offset=serializers.IntegerField(required=False)
+	limit=serializers.IntegerField(required=False)
 	order_by=serializers.ListField(child=serializers.ChoiceField(choices=[k for k in big_df]),required=False)
 	global_search=serializers.CharField(required=False)
-	filter=VoyageFilterItemSerializer(many=True,required=False,allow_null=True)
+	filter=VoyageFilterItemSerializer(many=True,required=False)
+	csv_output=serializers.ChoiceField(
+		choices=[True,False],
+		help_text="MCP's should request csv format -- reduces output size by 87%",
+		required=False
+	)
 	
 class VoyageCrossTabResponseSerializer(serializers.Serializer):
 	tablestructure=serializers.JSONField()

@@ -641,6 +641,7 @@ def crosstabs():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
+	csv_output=rdata.get('csv_output')
 	
 	if len(ids)==0:
 		return json.dumps({
@@ -907,6 +908,33 @@ def crosstabs():
 	start=offset
 	end=min((offset+limit),rowcount-1)
 	
+	
+	
+	if csv_output:
+			
+		chunk = ct.iloc[start:start+end]
+		data=chunk.to_csv(encoding='utf-8')
+		lastrow=ct.iloc[-1]
+		print("lastrow",lastrow)
+		
+		#try to fetch the margin
+# 		indexkey=allcolumns[0]
+# 		lastrow=ct.iloc[-1]
+# 		if lastrow[indexkey]=="All":
+# 			data = pd.concat([ct,lastrow.to_frame().T], ignore_index=True)
+		
+		output={
+			'tablestructure': colgroups,
+			'data': data,
+			'metadata':{
+				'total_results_count': rowcount,
+				'offset':offset,
+				'limit':limit
+			}
+		}
+		
+		return output
+	
 	ct_records=ct.to_records()
 	
 	indexkey=allcolumns[0]
@@ -936,8 +964,10 @@ def crosstabs():
 		elif thisrecord[indexkey]=="All":
 			marginrow=thisrecord
 	
-	
-	output_records.append(marginrow)
+	try:
+		output_records.append(marginrow)
+	except:
+		pass
 	
 	output={
 		'tablestructure': colgroups,

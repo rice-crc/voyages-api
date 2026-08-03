@@ -233,7 +233,7 @@ class VoyageCrossTabs(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
+		description="Cross-tab endpoint for aggregations across the dataset. The 'columns' field has hard cardinality restrictions — read its description before selecting a value. Select csv_output=True to reduce response size by 87%.",
 		request=VoyageCrossTabRequestSerializer,
 		responses=VoyageCrossTabResponseSerializer
 	)
@@ -241,10 +241,12 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		st=time.time()
 		if DEBUG:
 			print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
+			
 		
 		#VALIDATE THE REQUEST
 		serialized_req = VoyageCrossTabRequestSerializer(data=request.data)
-		if not serialized_req.is_valid():
+		if not serialized_req.is_valid():	
+			print("malformed crosstabs request:\n",json.dumps(request.data,indent=1))
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
@@ -274,6 +276,9 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		if r.ok:
 			j=json.loads(r.text)
 			serialized_resp=VoyageCrossTabResponseSerializer(data=j)
+		else:
+			return JsonResponse({'message':r.text},status=400)
+			
 		if not serialized_resp.is_valid():
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:

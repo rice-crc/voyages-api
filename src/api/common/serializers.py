@@ -98,7 +98,7 @@ savedsearchendpointchoices=[
 )
 class MakeSavedSearchRequestSerializer(serializers.Serializer):
 	endpoint=serializers.ChoiceField(choices=savedsearchendpointchoices)
-	front_end_path=serializers.CharField(max_length=100,required=True)
+	front_end_path=serializers.CharField(max_length=100,required=False)
 	query=serializers.ListField(child=serializers.JSONField())
 
 class MakeSavedSearchResponseSerializer(serializers.Serializer):

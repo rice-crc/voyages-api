@@ -913,9 +913,6 @@ def crosstabs():
 			
 		chunk = ct.iloc[start:start+end]
 		
-		
-		print(chunk)
-		
 		margin=None
 		#slap the margin row onto paginated results (except the last page)
 		if end!=rowcount-1:
@@ -934,7 +931,6 @@ def crosstabs():
 		print('-------------')
 		
 		output={
-			'tablestructure': colgroups,
 			'data': data,
 			'metadata':{
 				'total_results_count': rowcount,

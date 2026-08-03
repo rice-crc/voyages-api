@@ -54,6 +54,8 @@ class LocationSerializerDeep(serializers.ModelSerializer):
 	children=LocationChildSerializer(many=True,allow_null=True,required=False)
 	spatial_extent=PolygonSerializer(many=False,allow_null=True,required=False)
 	location_type=LocationTypeSerializer(many=False,allow_null=True,required=False)
+	name=serializers.CharField(required=False,allow_null=True)
+	value=serializers.IntegerField(required=False,allow_null=True)
 	class Meta:
 		model=Location
 		fields='__all__'

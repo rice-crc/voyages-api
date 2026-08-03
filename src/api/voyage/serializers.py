@@ -16,6 +16,13 @@ import requests
 import time
 from voyages3.localsettings import STATS_BASE_URL
 
+dataset_map={
+	0:'Trans-Atlantic',
+	1:'Intra-American',
+	2:'Intra-African',
+	3:'Indian Ocean'
+}
+
 #### GEO
 
 class VoyageLocationSerializer(serializers.ModelSerializer):
@@ -287,6 +294,16 @@ class VoyageSerializer(serializers.ModelSerializer):
 	cargo=serializers.SerializerMethodField(required=False,allow_null=True)
 	african_info=AfricanInfoSerializer(many=True,read_only=True,required=False,allow_null=True)
 	linked_voyages=serializers.SerializerMethodField()
+	dataset=serializers.IntegerField(
+		help_text="consult dataset_label for meaning of integer values"
+	)
+	dataset_label=serializers.SerializerMethodField(
+		help_text="this field provides text values to explain the meaning of the `dataset` variable"
+	)
+	
+	def get_dataset_label(self,instance) -> IntegerField():
+		dataset_int=instance.dataset
+		return dataset_map[dataset_int]
 	
 	def get_cargo(self,instance) -> ListField(child=serializers.CharField()):
 		cargoconnections=instance.cargo.all()
@@ -384,11 +401,13 @@ class VoyageBasicFilterItemSerializer(serializers.Serializer):
 	})
 	def get_searchTerm(self, obj):
 		return obj.searchTerm
-		
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	##It's rather costly for our filter requests like autocomplete and geotree to themselves "cross-filter" on too many nested variables
 	##At the same time, some cross-filters are essential to build the menus properly
-	varName=serializers.ChoiceField(choices=VoyageBasicFilterVarNames)
+	varName=serializers.ChoiceField(
+		choices=VoyageBasicFilterVarNames,
+		help_text="The dataset field is an integer. Refer to `dataset_map` to understand their meanings."
+	)
 	searchTerm=serializers.SerializerMethodField(method_name='get_searchTerm',read_only=False)
 
 
@@ -404,9 +423,12 @@ class VoyageFilterItemSerializer(serializers.Serializer):
 		return obj.searchTerm
 	
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
-	varName=serializers.ChoiceField(choices=[
-		k for k in Voyage_options
-	]+["EnslaverNameAndRole"])
+	varName=serializers.ChoiceField(
+		choices=[
+			k for k in Voyage_options
+		]+["EnslaverNameAndRole"],
+		help_text="dataset 0 is trans-atlantic. dataset 1 is intra-american."
+	)
 	searchTerm=serializers.SerializerMethodField(method_name='get_searchTerm',read_only=False)
 
 ########### PAGINATED VOYAGE LISTS 
@@ -648,8 +670,14 @@ class VoyageGeoTreeFilterRequestSerializer(serializers.Serializer):
 			]
 		)
 	)
-	filter=VoyageBasicFilterItemSerializer(many=True,required=False)
-	global_search=serializers.CharField(required=False)
+	filter=VoyageBasicFilterItemSerializer(
+		many=True,required=False,
+		help_text="filter and global_search are mutually exclusive. one will always override the other."
+	)
+	global_search=serializers.CharField(
+		required=False,
+		help_text="global_search and filter are mutually exclusive. one will always override the other."
+	)
 
 ############ VOYAGE AGGREGATION ROUTE MAPS
 @extend_schema_serializer(
@@ -851,7 +879,10 @@ class VoyageCrossTabRequestSerializer(serializers.Serializer):
 		choices=[k for k in big_df if big_df[k]['type'] in ['int','pct']],
 		help_text="value_field: quantitative fields only"
 	)
-	binsize=serializers.IntegerField(required=False)
+	binsize=serializers.IntegerField(
+		required=False,
+		help_text="this field should only be used when the row selector is a year variable"
+	)
 	rows_label=serializers.CharField(required=False)
 	agg_fn=serializers.ChoiceField(choices=["mean","sum","max","min","count"])
 	offset=serializers.IntegerField(required=False)
@@ -866,7 +897,7 @@ class VoyageCrossTabRequestSerializer(serializers.Serializer):
 	)
 	
 class VoyageCrossTabResponseSerializer(serializers.Serializer):
-	tablestructure=serializers.JSONField()
+	tablestructure=serializers.JSONField(required=False,allow_null=True)
 	data=serializers.JSONField()
 	metadata=VoyageOffsetPaginationSerializer()
 

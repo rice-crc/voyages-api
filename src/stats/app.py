@@ -926,10 +926,6 @@ def crosstabs():
 		
 		data=chunk.to_csv(encoding='utf-8')
 		
-		print(data)
-		
-		print('-------------')
-		
 		output={
 			'data': data,
 			'metadata':{

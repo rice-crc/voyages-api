@@ -866,7 +866,9 @@ class VoyageCrossTabRequestSerializer(serializers.Serializer):
 			columns: categorical fields only. \
 			\n MCP's should be wary of these fields as column selectors because they have hundreds of values: 'voyage_itinerary__imp_principal_place_of_slave_purchase__name,voyage_itinerary__imp_principal_port_slave_dis__name,voyage_itinerary__imp_port_voyage_begin__name,voyage_outcome__particular_outcome__name,voyage_itinerary__place_voyage_ended__name,voyage_ship__rig_of_vessel__name' \
 			\n When using these, MCP's should 1) limit results to 10 rows at a time, or 2) use filters to reduce rows/columns.\
-		"
+		",
+		required=True,
+		allow_empty=False
 	)
 	rows=serializers.ChoiceField(
 		choices=[k for k in big_df if k not in crosstab_exclude_categoricals],

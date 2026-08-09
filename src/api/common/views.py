@@ -137,7 +137,6 @@ class GlobalSearch(generics.GenericAPIView):
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
 
-
 class MakeSavedSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -217,7 +216,6 @@ class MakeSavedSearch(generics.GenericAPIView):
 		serialized_response=MakeSavedSearchResponseSerializer(data)
 		
 		return JsonResponse(serialized_response.data)
-
 
 class UseSavedSearch(generics.RetrieveAPIView):	
 	'''

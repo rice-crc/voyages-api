@@ -488,11 +488,14 @@ yearbinoptions=[f'voyage_dates__imp_arrival_at_port_of_dis_sparsedate__year__bin
 ]
 
 class VoyagePieChartParamsRequestSerializer(serializers.Serializer):
+
+	
 	by=serializers.ChoiceField(choices=[
 		k for k in Voyage_options if Voyage_options[k]['type'] in [
 			'string'
 		]
 	] + yearbinoptions)
+	
 	vals=serializers.ChoiceField(choices=[
 		k for k in Voyage_options if Voyage_options[k]['type'] in [
 			'integer',

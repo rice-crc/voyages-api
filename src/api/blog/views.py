@@ -99,6 +99,7 @@ class PostList(generics.GenericAPIView):
 			
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class PostTextFieldAutoComplete(generics.GenericAPIView):
 	'''
 	The autocomplete endpoints provide paginated lists of values on fields related to the endpoints primary entity (here, the blog post). It also accepts filters.
@@ -160,6 +161,7 @@ class PostTextFieldAutoComplete(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class AuthorList(generics.GenericAPIView):
 	'''
 		Blog authors are allowed to add a user profile image, affiliate themselves with a university, and give a brief bio of themselves (under the "description") field.
@@ -232,6 +234,7 @@ class AuthorList(generics.GenericAPIView):
 			
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class InstitutionList(generics.GenericAPIView):
 	'''
 		The institutions that the blog authors are affiliated with can be searched in their own right.

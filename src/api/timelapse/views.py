@@ -27,6 +27,7 @@ from voyage.models import Nationality
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageAnimationGetNations(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
@@ -71,6 +72,7 @@ class VoyageAnimationGetNations(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp, content_type='application/json')
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
@@ -129,6 +131,7 @@ class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 		
 		return JsonResponse(resp, content_type='application/json')
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageAnimation(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]

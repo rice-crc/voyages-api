@@ -35,6 +35,7 @@ from rest_framework import filters
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
+@extend_schema(tags=['exclude_mcp'])
 class DocumentSearch(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -160,6 +161,7 @@ class DocumentSearch(generics.GenericAPIView):
 
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class SourceList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -236,7 +238,8 @@ class SourceList(generics.GenericAPIView):
 		return JsonResponse(resp,safe=False,status=200)
 
 #### CONTROLLED VOCABS
-	
+
+@extend_schema(tags=['exclude_mcp'])	
 class SourceTypeList(generics.ListAPIView):
 	'''
 	Controlled vocabulary, read-only.

@@ -27,6 +27,7 @@ from voyage.models import Nationality
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageAnimationGetNations(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
@@ -71,6 +72,7 @@ class VoyageAnimationGetNations(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		return JsonResponse(resp, content_type='application/json')
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
@@ -129,14 +131,18 @@ class VoyageAnimationGetCompiledRoutes(generics.GenericAPIView):
 		
 		return JsonResponse(resp, content_type='application/json')
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageAnimation(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
 	@extend_schema(
-		description="Port-over for the legacy timelapse feature. To be replaced in 2024.",
+		description="This endpoint fetches individual voyage records for the purposes of the timelapse animation. Like most other endpoints in voyages, it operates with a POST request to facilitate complex filtering queries-- but it is READ-ONLY. IT DOES NOT CREATE RECORDS.",
 		request=TimeLapaseRequestSerializer,
-		responses=TimeLapseResponseItemSerializer
+		responses={
+			200: TimeLapseResponseItemSerializer
+		}
 	)
+
 	def post(self,request):	
 		st=time.time()
 		print("TIMELAPSE+++++++\nusername:",request.auth.user)

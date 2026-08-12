@@ -12,6 +12,8 @@ from common.static.EnslavementRelation_options import EnslavementRelation_option
 from common.autocomplete_indices import get_all_model_autocomplete_fields
 from past.cross_filter_fields import EnslaverBasicFilterVarNames,EnslavedBasicFilterVarNames
 from django.core.exceptions import ObjectDoesNotExist
+from drf_spectacular.utils import extend_schema_field
+
 
 
 	
@@ -69,8 +71,8 @@ class PastSourceShortRefSerializer(serializers.ModelSerializer):
 		fields=['id','name']
 
 class PastSourceSerializer(serializers.ModelSerializer):
-	page_ranges=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
-	short_ref=PastSourceShortRefSerializer(many=False)
+	page_ranges=serializers.ListField(child=serializers.CharField(required=False),required=False)
+	short_ref=PastSourceShortRefSerializer(many=False,allow_null=True,required=False)
 	class Meta:
 		model=Source
 		fields='__all__'
@@ -79,19 +81,19 @@ class PastSourceSerializer(serializers.ModelSerializer):
 
 
 class PastVoyageOutcomesSerializer(serializers.Serializer):
-	particular_outcome=serializers.CharField()
+	particular_outcome=serializers.CharField(required=False)
 	class Meta:
 		fields=['particular_outcome']
 
 class PastEnslavedVoyageSerializer(serializers.Serializer):
-	id=serializers.IntegerField()
-	embarkation=serializers.CharField()
-	disembarkation=serializers.CharField()
-	year=AnyField()
-	month=serializers.IntegerField()
-	day=serializers.IntegerField()
-	ship_name=serializers.CharField()
-	outcomes=PastVoyageOutcomesSerializer(many=False)
+	id=serializers.IntegerField(required=False)
+	embarkation=serializers.CharField(required=False)
+	disembarkation=serializers.CharField(required=False)
+	year=serializers.IntegerField(required=False)
+	month=serializers.IntegerField(required=False)
+	day=serializers.IntegerField(required=False)
+	ship_name=serializers.CharField(required=False)
+	outcomes=PastVoyageOutcomesSerializer(many=False,required=False,allow_null=True)
 	class Meta:
 		fields=[
 			'id',
@@ -125,20 +127,19 @@ class LanguageGroupSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class EnslavedEnslaverSerializer(serializers.Serializer):
-	id=serializers.IntegerField()
-	name_and_role=serializers.CharField()
+	id=serializers.IntegerField(required=False)
+	name_and_role=serializers.CharField(required=False)
 
 class EnslavedSerializer(serializers.ModelSerializer):
 	enslaved_id=serializers.IntegerField(read_only=True)
-	post_disembark_location=PastLocationSerializer(many=False,read_only=True)
-	captive_fate=CaptiveFateSerializer(many=False,read_only=True)
-	#currently handling a single voyage per enslaved person
-	voyages=serializers.SerializerMethodField()
-	enslavers=serializers.SerializerMethodField()
-	captive_status=CaptiveStatusSerializer(many=False,read_only=True)
-	language_group=LanguageGroupSerializer(many=False,read_only=True)
-	sources=serializers.SerializerMethodField()
-	gender=serializers.SerializerMethodField()
+	post_disembark_location=PastLocationSerializer(many=False,required=False,allow_null=True)
+	captive_fate=CaptiveFateSerializer(many=False,required=False,allow_null=True)
+	voyages=serializers.SerializerMethodField(required=False,allow_null=True)
+	enslavers=serializers.SerializerMethodField(required=False,allow_null=True)
+	captive_status=CaptiveStatusSerializer(many=False,required=False,allow_null=True)
+	language_group=LanguageGroupSerializer(many=False,required=False,allow_null=True)
+	sources=serializers.SerializerMethodField(required=False,allow_null=True)
+	gender=serializers.SerializerMethodField(required=False,allow_null=True)
 	
 	def get_gender(self,instance) -> serializers.CharField():
 		gender=instance.gender
@@ -151,7 +152,7 @@ class EnslavedSerializer(serializers.ModelSerializer):
 	def get_sources(self,instance) -> PastSourceSerializer(many=True):
 		source_ids=list(set([i[0] for i in Enslaved.objects.all().filter(id=instance.id).values_list('enslaved_relations__relation__voyage__voyage_source_connections__source')]))
 		sources=Source.objects.all().filter(id__in=source_ids)
-		return PastSourceSerializer(sources,many=True,read_only=True).data
+		return PastSourceSerializer(sources,many=True).data
 
 	def get_voyages(self,instance) -> PastEnslavedVoyageSerializer(many=False):
 		#right now, the table layouts, basically everything assume a single voyage per enslaved person
@@ -213,9 +214,9 @@ class EnslavedSerializer(serializers.ModelSerializer):
 			}
 		}
 					
-		return PastEnslavedVoyageSerializer(voyagedict,many=False,read_only=True).data
+		return PastEnslavedVoyageSerializer(voyagedict,many=False).data
 
-	def get_enslavers(self,instance) -> ListField(child=serializers.CharField()):
+	def get_enslavers(self,instance) -> ListField(child=EnslavedEnslaverSerializer()):
 		edrs=instance.enslaved_relations.all()
 		edrs=edrs.prefetch_related('relation__relation_enslavers__roles','relation__relation_enslavers__enslaver_alias__identity')
 		enslaver_roles_and_identity_pks=edrs.values_list('relation__relation_enslavers__roles__id','relation__relation_enslavers__enslaver_alias__identity_id')
@@ -244,12 +245,32 @@ class EnslavedSerializer(serializers.ModelSerializer):
 				name_and_role=enslaver
 			enslaver_dict={"id":enslaver.id,"name_and_role":name_and_role}
 			enslavers_in_relation.append(enslaver_dict)	
-		return EnslavedEnslaverSerializer(enslavers_in_relation,many=True,read_only=True).data
+		return EnslavedEnslaverSerializer(enslavers_in_relation,many=True).data
 
 	class Meta:
 		model=Enslaved
-		fields='__all__'
-
+# 		fields='__all__'
+		exclude=[
+# 			"documented_name",
+# 			"name_first",
+# 			"name_second",
+# 			"name_third",
+# 			"modern_name",
+# 			"editor_modern_names_certainty",
+# 			"age",
+			"gender_int",
+# 			"height",
+# 			"skin_color",
+# 			"dataset",
+# 			"notes",
+# 			"last_updated",
+# 			"human_reviewed",
+# 			"register_country",
+# 			"last_known_date",
+# 			'post_disembark_location',
+# 			'captive_status',
+# 			'language_group',
+		]
 #######################
 
 #### FROM ENSLAVERS TO ENSLAVED
@@ -260,8 +281,8 @@ class EnslavedSerializer(serializers.ModelSerializer):
 #### FROM ENSLAVERS OUTWARDS
 	
 class EnslaverEnslavedSerializer(serializers.Serializer):
-	id=serializers.IntegerField()
-	documented_name=serializers.CharField()
+	id=serializers.IntegerField(required=True)
+	documented_name=serializers.CharField(required=False,allow_null=True)
 	class Meta:
 		fields=('id','documented_name')
 
@@ -270,14 +291,14 @@ def fuzzyplacenamestrip(name):
 	return name
 
 class EnslaverIdentitySerializer(serializers.ModelSerializer):
-	names=serializers.SerializerMethodField()
-	birth=serializers.SerializerMethodField()
-	death=serializers.SerializerMethodField()
-	principal_location=PastLocationSerializer(many=False)
-	named_enslaved_people=serializers.SerializerMethodField()
-	voyages=serializers.SerializerMethodField()
-	sources=serializers.SerializerMethodField()
-	def get_names(self,instance) -> ListField(child=serializers.CharField()):
+	names=serializers.SerializerMethodField(required=False)
+	birth=serializers.SerializerMethodField(required=False)
+	death=serializers.SerializerMethodField(required=False)
+	principal_location=PastLocationSerializer(many=False,required=False,allow_null=True)
+	named_enslaved_people=serializers.SerializerMethodField(required=False)
+	voyages=serializers.SerializerMethodField(required=False)
+	sources=serializers.SerializerMethodField(required=False)
+	def get_names(self,instance) -> ListField(child=serializers.CharField(required=False)):
 		aliases=instance.aliases.all()
 		principal_alias=instance.principal_alias
 		if aliases.count()>1:
@@ -290,7 +311,7 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 	def get_sources(self,instance) -> PastSourceSerializer(many=True):
 		source_ids=list(set([i[0] for i in EnslaverIdentity.objects.all().filter(id=instance.id).values_list('aliases__enslaver_relations__relation__voyage__voyage_source_connections__source__id')]))
 		sources=Source.objects.all().filter(id__in=source_ids)
-		return PastSourceSerializer(sources,many=True,read_only=True).data
+		return PastSourceSerializer(sources,many=True).data
 
 
 
@@ -305,7 +326,7 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 				sources_dict[s_id]=s
 			else:
 				sources_dict[s_id].page_ranges.append(page_range)
-		return PastSourceSerializer([sources_dict[i] for i in sources_dict],many=True,read_only=True).data
+		return PastSourceSerializer([sources_dict[i] for i in sources_dict],many=True).data
 
 	def get_named_enslaved_people(self,instance) -> EnslaverEnslavedSerializer(many=True):
 		aliases=instance.aliases.all()
@@ -322,9 +343,9 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 			if id not in enslaved_people_in_relation_dict and id is not None:
 				enslaved_people_in_relation_dict[id]=name
 		enslaved_people_in_relation=[{"id":k,"documented_name":enslaved_people_in_relation_dict[k]} for k in enslaved_people_in_relation_dict]
-		return EnslaverEnslavedSerializer(enslaved_people_in_relation,many=True,read_only=True).data
+		return EnslaverEnslavedSerializer(enslaved_people_in_relation,many=True).data
 
-	def get_voyages(self,instance) -> ListField(child=serializers.CharField()):
+	def get_voyages(self,instance) -> ListField(child=serializers.CharField(required=False)):
 		voyages=Voyage.objects.filter(voyage_enslavement_relations__relation_enslavers__enslaver_alias__identity__id=instance.id)
 		#dedupe
 		voyage_ids=list(set([v.id for v in voyages]))
@@ -359,7 +380,7 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 					
 		return voyagestrings
 	
-	def get_birth(self,instance) -> serializers.CharField():
+	def get_birth(self,instance) -> serializers.CharField(required=False):
 		birth_place=instance.birth_place
 		year=instance.birth_year
 		month=instance.birth_month
@@ -367,7 +388,7 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 		birth_date=pretty_date(month,day,year)
 		return ", ".join([str(i) for i in [birth_place,birth_date] if i is not None])
 	
-	def get_death(self,instance) -> serializers.CharField():
+	def get_death(self,instance) -> serializers.CharField(required=False):
 		death_place=instance.death_place
 		year=instance.death_year
 		month=instance.death_month
@@ -377,35 +398,70 @@ class EnslaverIdentitySerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model=EnslaverIdentity
-		fields=['id','birth','death','principal_location','named_enslaved_people','voyages','sources','names']
+		fields=[
+			'id',
+			'birth',
+			'death',
+			'principal_location',
+			'named_enslaved_people',
+			'voyages',
+			'sources',
+			'names'
+		]
 
 ############ REQUEST FIILTER OBJECTS
-class EnslaverBasicFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
-	##It's rather costly for our filter requests like autocomplete and geotree to themselves "cross-filter" on too many nested variables
-	##At the same time, some cross-filters are essential to build the menus properly
-	varName=serializers.CharField(required=False,allow_null=True)
-	searchTerm=AnyField()
-
 class EnslaverFilterItemSerializer(serializers.Serializer):
+	@extend_schema_field({
+		'oneOf': [
+			{'type': 'string'},
+			{'type': 'integer'},
+			{'type': 'array'}
+		]
+	})
+	def get_searchTerm(self, obj):
+		return obj.searchTerm
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
-	varName=serializers.CharField(required=False,allow_null=True)
-	searchTerm=AnyField()
-
-class EnslavedBasicFilterItemSerializer(serializers.Serializer):
-	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
-	varName=serializers.CharField(required=False,allow_null=True)
-	searchTerm=AnyField()
+	varName=serializers.ChoiceField(choices=[
+		k for k in EnslaverIdentity_options
+	])
+	searchTerm=serializers.SerializerMethodField(method_name='get_searchTerm')
 
 class EnslavedFilterItemSerializer(serializers.Serializer):
+	@extend_schema_field({
+		'oneOf': [
+			{'type': 'string'},
+			{'type': 'integer'},
+			{'type': 'array'}
+		]
+	})
+	def get_searchTerm(self, obj):
+		return obj.searchTerm
+		
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
-	varName=serializers.CharField(required=False,allow_null=True)
-	searchTerm=AnyField()
+	varName=serializers.ChoiceField(choices=[
+		k for k in Enslaved_options
+	])
+	searchTerm=serializers.SerializerMethodField(method_name='get_searchTerm')
 
 class EnslavementRelationFilterItemSerializer(serializers.Serializer):
+	@extend_schema_field({
+		'oneOf': [
+			{'type': 'string'},
+			{'type': 'integer'},
+			{'type': 'array'}
+		]
+	})
+	def get_searchTerm(self, obj):
+		return obj.searchTerm
+
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
-	varName=serializers.CharField(required=False,allow_null=True)
-	searchTerm=AnyField()
+	varName=serializers.ChoiceField(choices=[
+		k for k in EnslavementRelation_options
+	])
+	searchTerm=serializers.SerializerMethodField(method_name='get_searchTerm')
+
+
+
 
 ########### PAGINATED ENSLAVED LISTS 
 @extend_schema_serializer(
@@ -430,17 +486,17 @@ class EnslavementRelationFilterItemSerializer(serializers.Serializer):
     ]
 )
 class EnslavedListRequestSerializer(serializers.Serializer):
-	page=serializers.IntegerField()
-	page_size=serializers.IntegerField()
-	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
-	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	page=serializers.IntegerField(required=False)
+	page_size=serializers.IntegerField(required=False)
+	filter=EnslavedFilterItemSerializer(many=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(required=False),required=False)
+	global_search=serializers.CharField(required=False)
 
 class EnslavedListResponseSerializer(serializers.Serializer):
-	page=serializers.IntegerField()
-	page_size=serializers.IntegerField()
-	count=serializers.IntegerField()
-	results=EnslavedSerializer(many=True,read_only=True)
+	page=serializers.IntegerField(required=False)
+	page_size=serializers.IntegerField(required=False)
+	count=serializers.IntegerField(required=False)
+	results=EnslavedSerializer(many=True,allow_null=True)
 
 ########### PAGINATED ENSLAVER LISTS 
 @extend_schema_serializer(
@@ -470,17 +526,17 @@ class EnslavedListResponseSerializer(serializers.Serializer):
     ]
 )
 class EnslaverListRequestSerializer(serializers.Serializer):
-	page=serializers.IntegerField(required=False,allow_null=True)
-	page_size=serializers.IntegerField(required=False,allow_null=True)
-	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
-	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	page=serializers.IntegerField(required=False)
+	page_size=serializers.IntegerField(required=False)
+	filter=EnslaverFilterItemSerializer(many=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(required=False),required=False)
+	global_search=serializers.CharField(required=False)
 	
 class EnslaverListResponseSerializer(serializers.Serializer):
-	page=serializers.IntegerField()
-	page_size=serializers.IntegerField()
-	count=serializers.IntegerField()
-	results=EnslaverIdentitySerializer(many=True,read_only=True)
+	page=serializers.IntegerField(required=False)
+	page_size=serializers.IntegerField(required=False)
+	count=serializers.IntegerField(required=False)
+	results=EnslaverIdentitySerializer(many=True,allow_null=True)
 
 ############ AUTOCOMPLETE SERIALIZERS
 @extend_schema_serializer(
@@ -507,18 +563,18 @@ class EnslaverListResponseSerializer(serializers.Serializer):
     ]
 )
 class EnslaverAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.CharField(required=False,allow_null=True)
-	querystr=serializers.CharField(allow_null=True,allow_blank=True)
-	offset=serializers.IntegerField()
-	limit=serializers.IntegerField()
-	filter=EnslaverBasicFilterItemSerializer(many=True,required=False,allow_null=True)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	varName=serializers.CharField(required=False)
+	querystr=serializers.CharField(required=False)
+	offset=serializers.IntegerField(required=False)
+	limit=serializers.IntegerField(required=False)
+	filter=EnslaverFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 class EnslaverAutoCompletekvSerializer(serializers.Serializer):
-	value=serializers.CharField()
+	value=serializers.CharField(required=False)
 
 class EnslaverAutoCompleteResponseSerializer(serializers.Serializer):
-	suggested_values=EnslaverAutoCompletekvSerializer(many=True)
+	suggested_values=EnslaverAutoCompletekvSerializer(many=True,allow_null=True)
 	
 @extend_schema_serializer(
 	examples = [
@@ -544,18 +600,18 @@ class EnslaverAutoCompleteResponseSerializer(serializers.Serializer):
     ]
 )
 class EnslavedAutoCompleteRequestSerializer(serializers.Serializer):
-	varName=serializers.CharField(required=False,allow_null=True)
-	querystr=serializers.CharField(allow_null=True,allow_blank=True)
-	offset=serializers.IntegerField()
-	limit=serializers.IntegerField()
-	filter=EnslavedBasicFilterItemSerializer(many=True,required=False,allow_null=True)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	varName=serializers.CharField(required=False)
+	querystr=serializers.CharField(required=False)
+	offset=serializers.IntegerField(required=False)
+	limit=serializers.IntegerField(required=False)
+	filter=EnslavedFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 class EnslavedAutoCompletekvSerializer(serializers.Serializer):
-	value=serializers.CharField()
+	value=serializers.CharField(required=False)
 
 class EnslavedAutoCompleteResponseSerializer(serializers.Serializer):
-	suggested_values=EnslavedAutoCompletekvSerializer(many=True)
+	suggested_values=EnslavedAutoCompletekvSerializer(many=True,allow_null=True)
 
 ############ AGGREGATION ON FIELDS
 @extend_schema_serializer(
@@ -574,13 +630,13 @@ class EnslavedAutoCompleteResponseSerializer(serializers.Serializer):
     ]
 )
 class EnslavedFieldAggregationRequestSerializer(serializers.Serializer):
-	varName=serializers.CharField(required=False,allow_null=True)
+	varName=serializers.CharField(required=False)
 
 class EnslavedFieldAggregationResponseSerializer(serializers.Serializer):
-	varName=serializers.CharField(required=False,allow_null=True)
+	varName=serializers.CharField(required=False)
 
-	min=serializers.IntegerField(allow_null=True)
-	max=serializers.IntegerField(allow_null=True)
+	min=serializers.IntegerField(required=False)
+	max=serializers.IntegerField(required=False)
 
 @extend_schema_serializer(
 	examples = [
@@ -598,12 +654,12 @@ class EnslavedFieldAggregationResponseSerializer(serializers.Serializer):
     ]
 )
 class EnslaverFieldAggregationRequestSerializer(serializers.Serializer):
-	varName=serializers.CharField(required=False,allow_null=True)
+	varName=serializers.CharField(required=False)
 	
 class EnslaverFieldAggregationResponseSerializer(serializers.Serializer):
-	varName=serializers.CharField(required=False,allow_null=True)
-	min=serializers.IntegerField(allow_null=True)
-	max=serializers.IntegerField(allow_null=True)
+	varName=serializers.CharField(required=False)
+	min=serializers.IntegerField(required=False)
+	max=serializers.IntegerField(required=False)
 
 ############ DATAFRAMES ENDPOINTS
 @extend_schema_serializer(
@@ -634,8 +690,8 @@ class EnslavedDataframesRequestSerializer(serializers.Serializer):
 			k for k in Enslaved_options
 		])
 	)
-	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(required=False)
 
 @extend_schema_serializer(
 	examples=[
@@ -665,8 +721,8 @@ class EnslaverDataframesRequestSerializer(serializers.Serializer):
 			k for k in EnslaverIdentity_options
 		])
 	)
-	filter=EnslaverFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=EnslaverFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 
 @extend_schema_serializer(
@@ -698,8 +754,8 @@ class EnslavementRelationDataframesRequestSerializer(serializers.Serializer):
 			k for k in EnslavementRelation_options
 		])
 	)
-	filter=EnslavementRelationFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=EnslavementRelationFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)
 
 ############ GEOTREE REQUESTS
 @extend_schema_serializer(
@@ -730,8 +786,8 @@ class EnslavedGeoTreeFilterRequestSerializer(serializers.Serializer):
 			]
 		)
 	)
-	filter=EnslavedBasicFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(required=False)
 	
 
 ############ GEOTREE REQUESTS
@@ -763,8 +819,8 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 			]
 		)
 	)
-	filter=EnslaverBasicFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=EnslaverFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(required=False)
 	
 	
 ############ PAST AGGREGATION ROUTE MAPS
@@ -790,30 +846,30 @@ class EnslaverGeoTreeFilterRequestSerializer(serializers.Serializer):
 )
 class EnslavedAggRoutesRequestSerializer(serializers.Serializer):
 	zoomlevel=serializers.ChoiceField(choices=(('region','region'),('place','place')))
-	filter=EnslavedFilterItemSerializer(many=True,allow_null=True,required=False)
-	global_search=serializers.CharField(allow_null=True,required=False)
+	filter=EnslavedFilterItemSerializer(many=True,required=False,allow_null=True)
+	global_search=serializers.CharField(required=False)
 
 class EnslavedAggRoutesEdgesSerializer(serializers.Serializer):
-	source=serializers.CharField()
-	target=serializers.CharField()
-	type=serializers.CharField()
-	weight=serializers.IntegerField()
+	source=serializers.CharField(required=False)
+	target=serializers.CharField(required=False)
+	type=serializers.CharField(required=False)
+	weight=serializers.IntegerField(required=False)
 	controls=serializers.ListField(child=serializers.ListField(child=serializers.FloatField(allow_null=False)))
 
 class EnslavedAggRoutesNodesDataSerializer(serializers.Serializer):
-	lat=serializers.FloatField(allow_null=False)
-	lon=serializers.FloatField(allow_null=False)
-	name=serializers.CharField(allow_null=True)
-	tags=serializers.ListField(child=serializers.CharField(),allow_null=True,required=False)
+	lat=serializers.FloatField(allow_null=False,required=False)
+	lon=serializers.FloatField(allow_null=False,required=False)
+	name=serializers.CharField(required=False)
+	tags=serializers.ListField(child=serializers.CharField(required=False),required=False)
 
 class EnslavedAggRoutesNodesWeightsSerializer(serializers.Serializer):
-	disembarkation=serializers.IntegerField()
-	embarkation=serializers.IntegerField()
-	origin=serializers.IntegerField()
-	post_disembarkation=serializers.IntegerField()
+	disembarkation=serializers.IntegerField(required=False)
+	embarkation=serializers.IntegerField(required=False)
+	origin=serializers.IntegerField(required=False)
+	post_disembarkation=serializers.IntegerField(required=False)
 
 class EnslavedAggRoutesNodesSerializer(serializers.Serializer):
-	id=serializers.CharField()
+	id=serializers.CharField(required=False)
 	weights=EnslavedAggRoutesNodesWeightsSerializer()
 	data=EnslavedAggRoutesNodesDataSerializer()
 	
@@ -837,29 +893,29 @@ class EnslavedAggRoutesResponseSerializer(serializers.Serializer):
 )
 class PASTNetworksRequestSerializer(serializers.Serializer):
 	enslaved=serializers.ListField(
-		child=serializers.IntegerField(), required=False
+		child=serializers.IntegerField(required=False), required=False
 	)
 	enslavers=serializers.ListField(
-		child=serializers.IntegerField(), required=False
+		child=serializers.IntegerField(required=False), required=False
 	)
 	voyages=serializers.ListField(
-		child=serializers.IntegerField(), required=False
+		child=serializers.IntegerField(required=False), required=False
 	)
 	enslavement_relations=serializers.ListField(
-		child=serializers.IntegerField(), required=False
+		child=serializers.IntegerField(required=False), required=False
 	)
 
 class PASTNetworksResponseNodeSerializer(serializers.Serializer):
-	id=serializers.IntegerField()
-	node_class=serializers.CharField()
-	uuid=serializers.CharField()
-	data=serializers.JSONField()
+	id=serializers.IntegerField(required=False)
+	node_class=serializers.CharField(required=False)
+	uuid=serializers.CharField(required=False)
+	data=serializers.JSONField(required=False)
 
 class PASTNetworksResponseEdgeSerializer(serializers.Serializer):
-	source=serializers.CharField()
-	target=serializers.CharField()
-	data=serializers.JSONField()
+	source=serializers.CharField(required=False)
+	target=serializers.CharField(required=False)
+	data=serializers.JSONField(required=False)
 	
 class PASTNetworksResponseSerializer(serializers.Serializer):
-	nodes=PASTNetworksResponseNodeSerializer(many=True)
-	edges=PASTNetworksResponseEdgeSerializer(many=True)
+	nodes=PASTNetworksResponseNodeSerializer(many=True,allow_null=True)
+	edges=PASTNetworksResponseEdgeSerializer(many=True,allow_null=True)

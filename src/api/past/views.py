@@ -35,6 +35,7 @@ from django.core.management import call_command
 
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
+
 class EnslavedList(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -154,8 +155,9 @@ class EnslavedLanguageGroupTree(generics.GenericAPIView):
 		return JsonResponse(resp,safe=False,status=200)
 
 @extend_schema(
-		exclude=True
-	)
+	exclude=True,
+	tags=['exclude_mcp']
+)
 def IndexEnslaverData(request):
 	if request.user.is_authenticated:
 		call_command('index_enslaver_data')
@@ -232,6 +234,7 @@ class EnslaverList(generics.GenericAPIView):
 			
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslavedAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -303,6 +306,7 @@ class EnslavedAggregations(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslaverAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -389,6 +393,7 @@ class EnslaverAggregations(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslavedDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -438,6 +443,7 @@ class EnslavedDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslaverDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -483,6 +489,7 @@ class EnslaverDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslavementRelationDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -527,7 +534,8 @@ class EnslavementRelationDataFrames(generics.GenericAPIView):
 			print("Internal Response Time:",time.time()-st,"\n+++++++")
 		
 		return JsonResponse(resp,safe=False,status=200)
-		
+
+@extend_schema(tags=['exclude_mcp'])		
 class EnslaverGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -616,6 +624,7 @@ class EnslaverGeoTreeFilter(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslavedGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -698,6 +707,7 @@ class EnslavedGeoTreeFilter(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class EnslavedAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

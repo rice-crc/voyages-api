@@ -641,6 +641,7 @@ def crosstabs():
 	st=time.time()
 	rdata=request.json
 	ids=rdata['ids']
+	csv_output=rdata.get('csv_output')
 	
 	if len(ids)==0:
 		return json.dumps({
@@ -902,10 +903,39 @@ def crosstabs():
 			return int(cellval)
 	
 	ctshape=ct.shape
-# 	print(ctshape)
 	rowcount=ctshape[0]	
 	start=offset
 	end=min((offset+limit),rowcount-1)
+	
+	
+	
+	if csv_output:
+			
+		chunk = ct.iloc[start:start+end]
+		
+		margin=None
+		#slap the margin row onto paginated results (except the last page)
+		if end!=rowcount-1:
+			try:
+				margin=ct.loc['All']
+			except:
+				pass
+		
+		if margin is not None:
+			chunk = pd.concat([chunk,margin.to_frame().T], ignore_index=True)
+		
+		data=chunk.to_csv(encoding='utf-8')
+		
+		output={
+			'data': data,
+			'metadata':{
+				'total_results_count': rowcount,
+				'offset':offset,
+				'limit':limit
+			}
+		}
+		
+		return output
 	
 	ct_records=ct.to_records()
 	
@@ -936,8 +966,10 @@ def crosstabs():
 		elif thisrecord[indexkey]=="All":
 			marginrow=thisrecord
 	
-	
-	output_records.append(marginrow)
+	try:
+		output_records.append(marginrow)
+	except:
+		pass
 	
 	output={
 		'tablestructure': colgroups,

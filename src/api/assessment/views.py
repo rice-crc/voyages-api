@@ -27,6 +27,7 @@ import hashlib
 redis_cache = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 #list view. Only keeping it around for swagger to have access to the model
+@extend_schema(tags=['exclude_mcp'])
 class AssessmentList(generics.RetrieveAPIView):	
 	queryset=Estimate.objects.all()
 	lookup_field='id'
@@ -34,6 +35,7 @@ class AssessmentList(generics.RetrieveAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 
+@extend_schema(tags=['exclude_mcp'])
 class EstimateDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -76,6 +78,7 @@ class EstimateDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(output_dicts,safe=False)
 
+@extend_schema(tags=['exclude_mcp'])
 class EstimateTimeline(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -145,6 +148,7 @@ class EstimateTimeline(generics.GenericAPIView):
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
 
+@extend_schema(tags=['exclude_mcp'])
 class EstimateCrossTabs(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -198,6 +202,7 @@ class EstimateCrossTabs(generics.GenericAPIView):
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
 
+@extend_schema(tags=['exclude_mcp'])
 class EstimateAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]

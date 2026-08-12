@@ -17,14 +17,13 @@ from .models import *
 import pprint
 import redis
 import hashlib
-from rest_framework import filters
+from rest_framework import filters,serializers
 from common.reqs import autocomplete_req,post_req,get_fieldstats,paginate_queryset,clean_long_df,use_redis
 from geo.common import GeoTreeFilter
 from geo.serializers import LocationSerializerDeep
 import collections
 import gc
 from .serializers import *
-from rest_framework import serializers
 from voyages3.localsettings import REDIS_HOST,REDIS_PORT,GEO_NETWORKS_BASE_URL,STATS_BASE_URL,DEBUG,USE_REDIS_CACHE
 import re
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
@@ -39,18 +38,12 @@ class VoyageList(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	authentication_classes=[TokenAuthentication]
 	@extend_schema(
-		description="This endpoint returns a list of nested objects, each of which contains all the available information on individual voyages.\n\
-		\Voyages are the legacy natural unit of the project. They are useful because they gather together:\n\
-		\n\
-			1. Numbers of people and demographic data\n\
-			2. Geographic itinerary data\n\
-			3. Important dates\n\
-			4. Named individuals\n\
-			5. Documentary sources\n\
-			6. Data on the vessel\
-		\n\
-		\nYou can filter on any field by 1) using double-underscore notation to concatenate nested field names and 2) conforming your filter to request parser rules for numeric, short text, global search, and geographic types.\
-		",
+		description="""
+		This endpoint returns a list of nested objects, each of which contains all the available information on individual voyages.
+		It is excellent for deep inspection or tabular display of a small number of voyages (>=100).
+		It should NOT be used to answer aggregate questions, like 'how many people were transported in the 1840s'.
+		Statistical questions like that should be referred to the Crosstabs and SummaryStats endpoints.
+		""",
 		request=VoyageListRequestSerializer,
 		responses=VoyageListResponseSerializer
 	)
@@ -58,6 +51,8 @@ class VoyageList(generics.GenericAPIView):
 		st=time.time()
 		print("VOYAGE LIST+++++++\nusername:",request.auth.user)
 		#VALIDATE THE REQUEST
+		print("REQUEST-->",request.data)
+		
 		serialized_req = VoyageListRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
@@ -103,7 +98,7 @@ class VoyageList(generics.GenericAPIView):
 		return JsonResponse(resp,safe=False,status=200)
 
 #You don't want to see this thing on swagger -- it'll crash the browser.
-# @extend_schema(exclude=True)
+@extend_schema(tags=['exclude_mcp'])
 class VoyageDownload(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -119,7 +114,7 @@ class VoyageDownload(generics.GenericAPIView):
 		serialized_req = VoyageDownloadRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
-
+		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
 		results,results_count,page,page_size,error_messages=post_req(
@@ -154,14 +149,14 @@ class VoyageDownload(generics.GenericAPIView):
 		
 		return HttpResponse(resp, content_type='application/octet-stream',status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageAggregations(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="The aggregations endpoints helps us to peek at numerical fields in the same way that autcomplete endpoints help us to get a sense of what the available text values are on a field.\
-		So if we want to, for instance, allow a user to search on voyages by year, we might want to give them a rangeslider component. In order to make that rangeslider component, you'd have to know the minimum and maximum years during which voyages sailed -- you would also need to know, of course, whether you were searching for the minimum and maximum of years of departure, embarkation, disembarkation, return, etc.\
-		Also, as with the other new endpoints we are rolling out in January 2024, you can run a filter before you query for min/max on variables. So if you've already searched for voyages arriving in Cuba, for instance, you can ask for the min and max years of disembarkation in order to make a rangeslider dynamically tailored to that search.\
-		Note to maintainer(s): This endpoint was made with rangesliders in mind, so we are only exposing min & max for now. In the future, it could be very useful to have median, mean, or plug into the stats engine for a line or bar chart to create some highly interactive filtering.\
+		description="The aggregations endpoints helps us to peek at numerical fields. \
+		It simply gives the min & max on a numeric field, like 'what is the earliest and latest year of disembarkation in the trans-atlantic dataset?'. \
+		It should NOT be used for complex aggregations like 'how many people embarked from Cuba in the 1820s'\
 		",
 		request=VoyageFieldAggregationRequestSerializer,
 		responses=VoyageFieldAggregationResponseSerializer
@@ -232,7 +227,10 @@ class VoyageCrossTabs(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
-		description="Paginated crosstabs endpoint, with Pandas as the back-end.",
+		description="Cross-tab endpoint for aggregations across the dataset. The \
+		'columns' field has cardinality guidance — read its description \
+		before selecting a value. \
+		LLM's should use csv_output=True to reduce response size by 87%.",
 		request=VoyageCrossTabRequestSerializer,
 		responses=VoyageCrossTabResponseSerializer
 	)
@@ -240,10 +238,12 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		st=time.time()
 		if DEBUG:
 			print("VOYAGE CROSSTABS+++++++\nusername:",request.auth.user)
+			
 		
 		#VALIDATE THE REQUEST
 		serialized_req = VoyageCrossTabRequestSerializer(data=request.data)
-		if not serialized_req.is_valid():
+		if not serialized_req.is_valid():	
+			print("malformed crosstabs request:\n",json.dumps(request.data,indent=1))
 			return JsonResponse(serialized_req.errors,status=400)
 
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
@@ -273,6 +273,9 @@ class VoyageCrossTabs(generics.GenericAPIView):
 		if r.ok:
 			j=json.loads(r.text)
 			serialized_resp=VoyageCrossTabResponseSerializer(data=j)
+		else:
+			return JsonResponse({'message':r.text},status=400)
+			
 		if not serialized_resp.is_valid():
 			return JsonResponse(serialized_resp.errors,status=400)
 		else:
@@ -288,9 +291,9 @@ class VoyageLineAndBarCharts(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="This endpoint is for building line and bar charts. It requires a few arguments, which it basically inherits from pandas.\n\
-		    1. A variable to group on: 'by'\n\
-		    2. A numeric variable to aggregate: 'vals'\n\
-		    3. An aggregation function: sum, mean, min, max, count\n\
+			1. A variable to group on: 'by'\n\
+			2. A numeric variable to aggregate: 'vals'\n\
+			3. An aggregation function: sum, mean, min, max, count\n\
 		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a long dataframe.\n\
 		",
 		request=VoyageLineAndBarChartsRequestSerializer,
@@ -352,9 +355,9 @@ class VoyagePieCharts(generics.GenericAPIView):
 	permission_classes=[IsAuthenticated]
 	@extend_schema(
 		description="This endpoint is for building pie charts. It requires a few arguments, which it basically inherits from pandas.\n\
-		    1. A categorical variable to group on: 'by'\n\
-		    2. A numeric variable to aggregate: 'vals'\n\
-		    3. An aggregation function: sum, mean, min, max, count\n\
+			1. A categorical variable to group on: 'by'\n\
+			2. A numeric variable to aggregate: 'vals'\n\
+			3. An aggregation function: sum, mean, min, max, count\n\
 		It returns a dictionary whose keys are the supplied variable names, and whose values are equal-length arrays -- in essence, a long dataframe.\n\
 		",
 		request=VoyagePieChartRequestSerializer,
@@ -448,6 +451,7 @@ class VoyageSummaryStats(generics.GenericAPIView):
 		else:
 			return JsonResponse(serialized_resp.data,safe=False)
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageDataFrames(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -494,6 +498,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageGeoTreeFilter(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -569,6 +574,7 @@ class VoyageGeoTreeFilter(generics.GenericAPIView):
 		
 		return JsonResponse(resp,safe=False,status=200)
 
+@extend_schema(tags=['exclude_mcp'])
 class VoyageAggRoutes(generics.GenericAPIView):
 	authentication_classes=[TokenAuthentication]
 	permission_classes=[IsAuthenticated]
@@ -642,10 +648,8 @@ class VoyageGET(generics.RetrieveAPIView):
 
 class CargoTypeList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	Controlled vocabulary, read-only. Not paginated.
 	
-	+++ Need a write-up from the team on the meaning of this variable.
 	'''
 	model=CargoType
 	queryset=CargoType.objects.all()
@@ -655,10 +659,8 @@ class CargoTypeList(generics.ListAPIView):
 
 class AfricanInfoList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	Controlled vocabulary, read-only. Not paginated.
 	
-	+++ Need a write-up from the team on the meaning of this variable.
 	'''
 	model=AfricanInfo
 	queryset=AfricanInfo.objects.all()
@@ -668,10 +670,7 @@ class AfricanInfoList(generics.ListAPIView):
 
 class RigOfVesselList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
-	
-	+++ Need a write-up from the team on the meaning of this variable.
+	Controlled vocabulary, read-only. Not paginated.
 	'''
 	model=RigOfVessel
 	queryset=RigOfVessel.objects.all()
@@ -681,10 +680,7 @@ class RigOfVesselList(generics.ListAPIView):
 
 class NationalityList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
-	
-	+++ Need a write-up from the team on the meaning of this variable.
+	Controlled vocabulary, read-only. Not paginated.
 	'''
 	model=NationalitySerializer
 	queryset=Nationality.objects.all()
@@ -694,10 +690,8 @@ class NationalityList(generics.ListAPIView):
 
 class TonTypeList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	Controlled vocabulary, read-only. Not paginated.
 	
-	+++ Need a write-up from the team on the meaning of this variable.
 	'''
 	model=TonTypeSerializer
 	queryset=TonType.objects.all()
@@ -707,10 +701,8 @@ class TonTypeList(generics.ListAPIView):
 	
 class ParticularOutcomeList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	Controlled vocabulary, read-only. Not paginated.
 	
-	+++ Need a write-up from the team on the meaning of this variable.
 	'''
 	model=ParticularOutcomeSerializer
 	queryset=ParticularOutcome.objects.all()
@@ -720,10 +712,8 @@ class ParticularOutcomeList(generics.ListAPIView):
 
 class SlavesOutcomeList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	Controlled vocabulary, read-only. Not paginated.
 	
-	+++ Need a write-up from the team on the meaning of this variable.
 	'''
 	model=SlavesOutcomeSerializer
 	queryset=SlavesOutcome.objects.all()
@@ -733,10 +723,7 @@ class SlavesOutcomeList(generics.ListAPIView):
 
 class ResistanceList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
-	
-	+++ Need a write-up from the team on the meaning of this variable.
+	Controlled vocabulary, read-only. Not paginated.
 	'''
 	model=Resistance
 	queryset=Resistance.objects.all()
@@ -746,10 +733,8 @@ class ResistanceList(generics.ListAPIView):
 	
 class OwnerOutcomeList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	Controlled vocabulary, read-only. Not paginated.
 	
-	+++ Need a write-up from the team on the meaning of this variable.
 	'''
 	model=OwnerOutcomeSerializer
 	queryset=OwnerOutcome.objects.all()
@@ -759,10 +744,8 @@ class OwnerOutcomeList(generics.ListAPIView):
 
 class VesselCapturedOutcomeList(generics.ListAPIView):
 	'''
-	Controlled vocabulary, read-only.
-	Not paginated; rather, we dump all the values out. Intended for use in a contribute form.
+	Controlled vocabulary, read-only. Not paginated.
 	
-	+++ Need a write-up from the team on the meaning of this variable.
 	'''
 	model=VesselCapturedOutcomeSerializer
 	queryset=VesselCapturedOutcome.objects.all()

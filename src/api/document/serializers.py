@@ -8,6 +8,7 @@ from voyages3.localsettings import STATIC_URL,OPEN_API_BASE_URL
 from common.static.Source_options import Source_options
 from voyage.models import VoyageShip
 from common.autocomplete_indices import get_all_model_autocomplete_fields
+from drf_spectacular.utils import extend_schema_field
 
 
 class SourceTypeSerializer(serializers.ModelSerializer):
@@ -139,17 +140,19 @@ class SourceResponseSerializer(serializers.ModelSerializer):
 
 
 ############ REQUEST FIILTER OBJECTS
-class AnyField(Field):
-	def to_representation(self, value):
-		return value
-	def to_internal_value(self, data):
-		return data
-
 class SourceFilterItemSerializer(serializers.Serializer):
+	@extend_schema_field({
+		'oneOf': [
+			{'type': 'string'},
+			{'type': 'integer'},
+			{'type': 'array'}
+		]
+	})
+	def get_searchTerm(self, obj):
+		return obj.searchTerm
 	op=serializers.ChoiceField(choices=["in","gte","lte","exact","icontains","btw","andlist"])
 	varName=serializers.ChoiceField(choices=[k for k in Source_options])
-	searchTerm=AnyField()
-
+	searchTerm=serializers.SerializerMethodField(method_name='get_searchTerm',read_only=False)
 
 @extend_schema_serializer(
 	examples = [
@@ -209,10 +212,10 @@ class SourceFilterItemSerializer(serializers.Serializer):
     ]
 )
 class SourceRequestSerializer(serializers.Serializer):
-	filter=SourceFilterItemSerializer(many=True,allow_null=True,required=False)
-	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False,allow_null=True)
-	page=serializers.IntegerField(required=False,allow_null=True)
-	page_size=serializers.IntegerField(required=False,allow_null=True)
+	filter=SourceFilterItemSerializer(many=True,required=False)
+	order_by=serializers.ListField(child=serializers.CharField(allow_null=True),required=False)
+	page=serializers.IntegerField(required=False)
+	page_size=serializers.IntegerField(required=False)
 	
 class SourceListResponseSerializer(serializers.Serializer):
 	page=serializers.IntegerField()

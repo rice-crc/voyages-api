@@ -266,6 +266,7 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		
 		# SPECIAL CASE 1: ENSLAVERS AND ASSOCIATED ROLES
 		for item in filter_obj:
+			print("FILTER ITEM",item)
 			op=item['op']
 			searchTerm=item["searchTerm"]
 			varName=item["varName"]
@@ -409,8 +410,8 @@ def post_req(orig_queryset,s,r,options_dict,auto_prefetch=True,paginate=False):
 		
 	st=time.time()
 	if paginate:
-		page_size=params.get('page_size',10)
-		page=params.get('page',1)
+		page_size=int(params.get('page_size',10))
+		page=int(params.get('page',1))
 		print("PAGINATION:",paginate, page_size,page)
 
 		

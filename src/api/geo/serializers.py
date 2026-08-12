@@ -4,6 +4,8 @@ import re
 from .models import *
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from django.core.exceptions import ObjectDoesNotExist
+from drf_spectacular.utils import extend_schema_field
+
 
 class CRUDLocationTypeSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -25,7 +27,7 @@ class CRUDLocationSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class GeoTreeFilterRequestSerializer(serializers.Serializer):
-	filter=serializers.JSONField(allow_null=False,required=False)
+	filter=serializers.JSONField(required=False)
 
 class LocationTypeSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -48,19 +50,21 @@ class LocationChildSerializer(serializers.ModelSerializer):
 		fields='__all__'
 
 class LocationSerializerDeep(serializers.ModelSerializer):
-	parent=LocationParentSerializer(many=False)
-	children=LocationChildSerializer(many=True)
-	spatial_extent=PolygonSerializer(many=False)
-	location_type=LocationTypeSerializer(many=False)
+	parent=LocationParentSerializer(many=False,allow_null=True,required=False)
+	children=LocationChildSerializer(many=True,allow_null=True,required=False)
+	spatial_extent=PolygonSerializer(many=False,allow_null=True,required=False)
+	location_type=LocationTypeSerializer(many=False,allow_null=True,required=False)
+	name=serializers.CharField(required=False,allow_null=True)
+	value=serializers.IntegerField(required=False,allow_null=True)
 	class Meta:
 		model=Location
 		fields='__all__'
 
 class LocationSerializer(serializers.ModelSerializer):
-	spatial_extent=PolygonSerializer(many=False,allow_null=True)
-	location_type=LocationTypeSerializer(many=False)
-	latitude=serializers.FloatField(allow_null=True)
-	longitude=serializers.FloatField(allow_null=True)
+	spatial_extent=PolygonSerializer(many=False,allow_null=True,required=False)
+	location_type=LocationTypeSerializer(many=False,allow_null=True,required=False)
+	latitude=serializers.FloatField(allow_null=True,required=False)
+	longitude=serializers.FloatField(allow_null=True,required=False)
 	class Meta:
 		model=Location
 		fields='__all__'

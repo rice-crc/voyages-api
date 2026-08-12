@@ -954,3 +954,4 @@ class VoyageSummaryStatsResponseSerializer(serializers.Serializer):
 class VoyageDownloadRequestSerializer(serializers.Serializer):
 # 	mode=serializers.ChoiceField(choices=["csv","excel"])
 	filter=VoyageFilterItemSerializer(many=True,required=False)
+	global_search=serializers.CharField(required=False)

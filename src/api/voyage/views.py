@@ -114,7 +114,7 @@ class VoyageDownload(generics.GenericAPIView):
 		serialized_req = VoyageDownloadRequestSerializer(data=request.data)
 		if not serialized_req.is_valid():
 			return JsonResponse(serialized_req.errors,status=400)
-
+		
 		#FILTER THE VOYAGES BASED ON THE REQUEST'S FILTER OBJECT
 		queryset=Voyage.objects.all()
 		results,results_count,page,page_size,error_messages=post_req(
